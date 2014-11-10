@@ -1,4 +1,12 @@
+.project
+.classpath
+.settings
+target
+*.patch
 *.class
+*.pyc
+nb-configuration.xml
+*.*~
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -23,7 +31,8 @@ hs_err_pid*
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*

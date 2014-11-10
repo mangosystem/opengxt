@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.locationtech.udig.processingtoolbox.feature"
+      label="ProcessingToolbox-feature"
+      version="2.0.0.qualifier"
+      provider-name="Mango System">
+
+   <description url="http://www.mangosystem.com:8080/gxt/docs/gxt_for_desktop/udig/index.html">
+      Processing Toolbox for uDig
+   </description>
+
+   <copyright url="http://www.mangosystem.com:8080/gxt/udig/copyright">
+      Processing Toolbox for uDig
+   </copyright>
+
+   <license url="http://www.mangosystem.com:8080/gxt/udig/license">
+      This Processing Toolbox plug-in is free for anyone who use uDig GIS
+   </license>
+
+   <requires>
+      <import plugin="org.locationtech.udig.ui"/>
+      <import plugin="org.locationtech.udig.project"/>
+      <import plugin="org.locationtech.udig.project.ui"/>
+      <import plugin="org.locationtech.udig.catalog.ui"/>
+      <import plugin="org.locationtech.udig.catalog.shp"/>
+      <import plugin="org.locationtech.udig.style"/>
+      <import plugin="org.locationtech.udig.style.sld"/>
+      <import plugin="org.eclipse.ui.console" version="3.4.0" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin
+         id="org.locationtech.udig.processingtoolbox"
+         download-size="737"
+         install-size="737"
+         version="2.0.0"
+         unpack="false"/>
+
+</feature>

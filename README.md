@@ -34,3 +34,10 @@ uDig licensed under the [EPL](http://www.eclipse.org/legal/epl-v10.html) + [BSD]
 
 ## More Information
 ...
+
+## Gallery
+
+![screenshot](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/images/udig_processing_toolbox.png?width=800)
+
+
+![screenshot](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/images/geoserver_wps_request.png?width=800)

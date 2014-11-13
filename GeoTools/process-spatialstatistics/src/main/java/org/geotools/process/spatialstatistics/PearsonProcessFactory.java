@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -87,7 +88,7 @@ public class PearsonProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     /** result */
-    protected static final Parameter<String> RESULT = new Parameter<String>("result", String.class,
+    protected static final Parameter<PearsonResult> RESULT = new Parameter<PearsonResult>("result", PearsonResult.class,
             getResource("Pearson.result.title"), getResource("Pearson.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();

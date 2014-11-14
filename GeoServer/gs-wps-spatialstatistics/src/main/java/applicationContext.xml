@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+  <!-- The PPIO that need to be registered into SPI because of their dependencies -->
+
+  <bean id="PearsonPPIO" class="org.geoserver.wps.spatialstatistics.ppio.PearsonPPIO" />
+  <bean id="FeatureCollectionGML311PPIO" class="org.geoserver.wps.spatialstatistics.ppio.FeatureCollectionGML311PPIO" />
+  
+</beans>

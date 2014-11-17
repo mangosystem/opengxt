@@ -21,6 +21,10 @@ public class Messages extends NLS {
     public static String SettingsDialog_general;
     public static String SettingsDialog_UseLog;
     public static String SettingsDialog_advanced;
+
+    public static String General_Cancelled;
+    public static String General_Error;
+    public static String General_ErrorOccurred;
     
     public static String ExpressionBuilderDialog_title;
     public static String ExpressionBuilderDialog_Clear;

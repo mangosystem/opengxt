@@ -26,13 +26,14 @@ import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.filter.expression.Expression;
 
 /**
  * FieldCalculation SimpleFeatureCollection Implementation
  * 
- * @author Minpa Lee, MangoSystem  
- *
+ * @author Minpa Lee, MangoSystem
+ * 
  * @source $URL$
  */
 public class FieldCalculationFeatureCollection extends GXTSimpleFeatureCollection {
@@ -43,19 +44,59 @@ public class FieldCalculationFeatureCollection extends GXTSimpleFeatureCollectio
 
     private Expression expression;
 
+    private Class<?> fieldBinding = Double.class; // default
+
     private SimpleFeatureType schema;
 
     public FieldCalculationFeatureCollection(SimpleFeatureCollection delegate, String fieldName,
             Expression expression) {
         super(delegate);
 
-        this.fieldName = fieldName;
+        this.schema = FeatureTypes.build(delegate, delegate.getSchema().getTypeName());
+        this.fieldName = FeatureTypes.validateProperty(schema, fieldName);
         this.expression = expression;
 
-        schema = FeatureTypes.build(delegate, delegate.getSchema().getTypeName());
-        
-        // Field type: String, Integer, Double
-        schema = FeatureTypes.add(schema, fieldName, Double.class, 38);
+        if (FeatureTypes.existProeprty(schema, this.fieldName)) {
+            AttributeDescriptor attributeType = schema.getDescriptor(this.fieldName);
+            fieldBinding = attributeType.getType().getBinding();
+        } else {
+            // test value type
+            SimpleFeatureIterator featureIter = null;
+            fieldBinding = null;
+            try {
+                featureIter = delegate.features();
+                while (featureIter.hasNext()) {
+                    SimpleFeature feature = featureIter.next();
+                    Object value = this.expression.evaluate(feature);
+                    if (value != null) {
+                        fieldBinding = value.getClass();
+                        break;
+                    }
+                }
+            } finally {
+                featureIter.close();
+            }
+
+            if (fieldBinding == null) {
+                fieldBinding = String.class;
+            }
+
+            if (fieldBinding.isAssignableFrom(String.class)) {
+                schema = FeatureTypes.add(schema, fieldName, String.class, 150);
+            } else if (fieldBinding.isAssignableFrom(Integer.class)) {
+                schema = FeatureTypes.add(schema, fieldName, Integer.class, 38);
+            } else if (fieldBinding.isAssignableFrom(Long.class)) {
+                schema = FeatureTypes.add(schema, fieldName, Integer.class, 38);
+            } else if (fieldBinding.isAssignableFrom(Float.class)) {
+                schema = FeatureTypes.add(schema, fieldName, Double.class, 38);
+            } else if (fieldBinding.isAssignableFrom(Double.class)) {
+                schema = FeatureTypes.add(schema, fieldName, Double.class, 38);
+            } else if (fieldBinding.isAssignableFrom(Number.class)) {
+                schema = FeatureTypes.add(schema, fieldName, Double.class, 38);
+            } else {
+                schema = FeatureTypes.add(schema, fieldName, String.class, 150);
+            }
+        }
     }
 
     @Override
@@ -84,7 +125,7 @@ public class FieldCalculationFeatureCollection extends GXTSimpleFeatureCollectio
 
             this.fieldName = fieldName;
             this.expression = expression;
-            builder = new SimpleFeatureBuilder(schema);
+            this.builder = new SimpleFeatureBuilder(schema);
         }
 
         public void close() {

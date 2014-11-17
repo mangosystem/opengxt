@@ -10,22 +10,16 @@
 package org.locationtech.udig.processingtoolbox.internal.ui;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.FilenameUtils;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.CLabel;
@@ -51,45 +45,28 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.Parameter;
-import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.geometry.jts.JTS;
-import org.geotools.process.ProcessExecutor;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.ProcessFactory;
-import org.geotools.process.Processors;
-import org.geotools.process.Progress;
 import org.geotools.util.Converters;
 import org.geotools.util.logging.Logging;
-import org.locationtech.udig.catalog.util.GeoToolsAdapters;
-import org.locationtech.udig.processingtoolbox.MapUtils;
-import org.locationtech.udig.processingtoolbox.MapUtils.FieldType;
-import org.locationtech.udig.processingtoolbox.MapUtils.VectorLayerType;
-import org.locationtech.udig.processingtoolbox.ProcessUtils;
-import org.locationtech.udig.processingtoolbox.ProcessUtils.OutputType;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
-import org.locationtech.udig.processingtoolbox.ToolboxView;
-import org.locationtech.udig.processingtoolbox.common.DataStoreFactory;
-import org.locationtech.udig.processingtoolbox.common.FeatureTypes;
 import org.locationtech.udig.processingtoolbox.common.ForceCRSFeatureCollection;
-import org.locationtech.udig.processingtoolbox.common.FormatUtils;
-import org.locationtech.udig.processingtoolbox.common.RasterSaveAsOp;
-import org.locationtech.udig.processingtoolbox.common.ShapeExportOp;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
-import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataViewer.FielDataType;
+import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget.FileDataType;
+import org.locationtech.udig.processingtoolbox.styler.MapUtils;
+import org.locationtech.udig.processingtoolbox.styler.ProcessExecutorOperation;
+import org.locationtech.udig.processingtoolbox.styler.MapUtils.FieldType;
+import org.locationtech.udig.processingtoolbox.styler.MapUtils.VectorLayerType;
 import org.locationtech.udig.project.IMap;
 import org.opengis.coverage.grid.GridCoverageReader;
-import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.geometry.BoundingBox;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.util.ProgressListener;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -98,7 +75,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * 
  * @author MapPlus
  */
-public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnableWithProgress {
+public class ProcessExecutionDialog extends TitleAreaDialog {
     protected static final Logger LOGGER = Logging.getLogger(ProcessExecutionDialog.class);
 
     private IMap map;
@@ -109,21 +86,19 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
 
     private String windowTitle;
 
-    private Map<String, Object> processParams = new HashMap<String, Object>();
+    private Map<String, Object> inputParams = new HashMap<String, Object>();
+
+    private Map<String, Object> outputParams = new HashMap<String, Object>();
 
     private Map<Widget, String> uiParams = new HashMap<Widget, String>();
 
-    private boolean outputLocationRequired = false;
+    private boolean outputTabRequired = false;
 
     private int height = 100;
-
-    private OutputDataViewer locationView;
 
     private Text txtOutput;
 
     private CTabItem inputTab, outputTab;
-
-    private File outputFile = null;
 
     private final Color warningColor = new Color(Display.getCurrent(), 255, 255, 200);
 
@@ -136,15 +111,14 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
         this.map = map;
         this.factory = factory;
         this.processName = processName;
-
-        windowTitle = factory.getTitle(processName).toString();
+        this.windowTitle = factory.getTitle(processName).toString();
     }
 
     @Override
     public void create() {
         super.create();
 
-        setTitle(windowTitle);
+        setTitle(getShell().getText());
         setMessage(factory.getDescription(processName).toString());
     }
 
@@ -164,8 +138,6 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
     protected Control createDialogArea(final Composite parent) {
         Composite area = (Composite) super.createDialogArea(parent);
 
-        outputLocationRequired = ProcessUtils.outputLocationRequired(factory, processName);
-
         // 0. Tab Folder
         final CTabFolder parentTabFolder = new CTabFolder(area, SWT.BOTTOM);
         parentTabFolder.setUnselectedCloseVisible(false);
@@ -176,7 +148,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
         inputTab = createInputTab(parentTabFolder);
 
         // 2. Simple output
-        if (!outputLocationRequired) {
+        if (outputTabRequired) {
             outputTab = createOutputTab(parentTabFolder);
         }
 
@@ -189,8 +161,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
         area.pack();
         parentTabFolder.pack();
 
-        //height = parentTabFolder.computeSize(SWT.DEFAULT, SWT.DEFAULT).y + 162;
-        height = parentTabFolder.computeSize(SWT.DEFAULT, SWT.DEFAULT).y + 140;
+        height = parentTabFolder.computeSize(SWT.DEFAULT, SWT.DEFAULT).y + 145;
         height = height > 650 ? 650 : height;
 
         return area;
@@ -243,32 +214,41 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
 
         // input parameters
         Map<String, Parameter<?>> paramInfo = factory.getParameterInfo(processName);
-
-        // build ui
         for (Entry<String, Parameter<?>> entrySet : paramInfo.entrySet()) {
-            processParams.put(entrySet.getValue().key, entrySet.getValue().sample);
+            inputParams.put(entrySet.getValue().key, entrySet.getValue().sample);
             insertControl(container, entrySet.getValue());
         }
 
         // output location
-        OutputType outputType = ProcessUtils.getOutputType(factory, processName);
-        String layerName = ProcessUtils.getLayerName(processName);
+        Map<String, Parameter<?>> resultInfo = factory.getResultInfo(processName, null);
+        for (Entry<String, Parameter<?>> entrySet : resultInfo.entrySet()) {
+            Class<?> binding = entrySet.getValue().type;
+            boolean outputWidgetRequired = false;
+            FileDataType fileDataType = FileDataType.SHAPEFILE;
+            if (binding.isAssignableFrom(SimpleFeatureCollection.class)) {
+                outputWidgetRequired = true;
+                fileDataType = FileDataType.SHAPEFILE;
+            } else if (binding.isAssignableFrom(Geometry.class)) {
+                outputWidgetRequired = true;
+                fileDataType = FileDataType.SHAPEFILE;
+            } else if (binding.isAssignableFrom(ReferencedEnvelope.class)) {
+                outputWidgetRequired = true;
+                fileDataType = FileDataType.SHAPEFILE;
+            } else if (binding.isAssignableFrom(BoundingBox.class)) {
+                outputWidgetRequired = true;
+                fileDataType = FileDataType.SHAPEFILE;
+            } else if (binding.isAssignableFrom(GridCoverage2D.class)) {
+                outputWidgetRequired = true;
+                fileDataType = FileDataType.RASTER;
+            } else {
+                outputTabRequired = true;
+            }
 
-        switch (outputType) {
-        case FEATURES:
-        case GEOMETRY:
-        case ENVELOPE:
-            locationView = new OutputDataViewer(FielDataType.SHAPEFILE, SWT.SAVE);
-            locationView.create(container, SWT.BORDER, 1);
-            locationView.setFile(new File(ToolboxView.getWorkspace(), layerName + ".shp")); //$NON-NLS-1$
-            break;
-        case RASTER:
-            locationView = new OutputDataViewer(FielDataType.RASTER, SWT.SAVE);
-            locationView.create(container, SWT.BORDER, 1);
-            locationView.setFile(new File(ToolboxView.getWorkspace(), layerName + ".tif")); //$NON-NLS-1$
-            break;
-        default:
-            break;
+            if (outputWidgetRequired) {
+                outputParams.put(entrySet.getValue().key, entrySet.getValue().sample);
+                OutputLocationWidget view = new OutputLocationWidget(fileDataType, SWT.SAVE);
+                view.create(container, SWT.BORDER, outputParams, entrySet.getValue());
+            }
         }
 
         scroller.setContent(container);
@@ -278,7 +258,6 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
         container.pack();
 
         scroller.setMinSize(450, container.getSize().y - 2);
-        //height = container.getSize().y + 162;
         scroller.setExpandVertical(true);
         scroller.setExpandHorizontal(true);
 
@@ -291,30 +270,27 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
             postfix = "(WKT)"; //$NON-NLS-1$
         }
 
-        String title = param.title.toString();
         // capitalize title
+        String title = param.title.toString();
         title = Character.toUpperCase(title.charAt(0)) + title.substring(1);
+
+        CLabel lblName = new CLabel(container, SWT.NONE);
+        lblName.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
+
+        FontData[] fontData = lblName.getFont().getFontData();
+        for (int i = 0; i < fontData.length; ++i) {
+            fontData[i].setStyle(SWT.NORMAL);
+        }
+        lblName.setFont(new Font(container.getDisplay(), fontData));
 
         if (param.required) {
             Image image = ToolboxPlugin.getImageDescriptor("icons/public_co.gif").createImage(); //$NON-NLS-1$
-            CLabel lblName = new CLabel(container, SWT.NONE);
             lblName.setImage(image);
-            lblName.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
-
-            FontData[] fontData = lblName.getFont().getFontData();
-            for (int i = 0; i < fontData.length; ++i) {
-                fontData[i].setStyle(SWT.NORMAL);
-            }
-            lblName.setFont(new Font(container.getDisplay(), fontData));
             lblName.setText(title + postfix);
-            lblName.setToolTipText(param.description.toString());
         } else {
-            Text txtName = new Text(container, SWT.NONE);
-            txtName.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
-            txtName.setBackground(container.getBackground());
-            txtName.setText(title + Messages.ProcessExecutionDialog_optional + postfix);
-            txtName.setToolTipText(param.description.toString());
+            lblName.setText(title + Messages.ProcessExecutionDialog_optional + postfix);
         }
+        lblName.setToolTipText(param.description.toString());
     }
 
     private void insertControl(Composite container, final Parameter<?> param) {
@@ -359,7 +335,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
                     // TODO: Important!!!!!!!!!!!!!!!
                     // if this layer's crs is different from map's crs
 
-                    processParams.put(param.key, sfc);
+                    inputParams.put(param.key, sfc);
 
                     // related field selection "파라미터명.필드유형"
                     SimpleFeatureType schema = sfc.getSchema();
@@ -397,25 +373,25 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
                 @Override
                 public void modifyText(ModifyEvent e) {
                     GridCoverage2D sfc = MapUtils.getGridCoverage(map, cboGcLayer.getText());
-                    processParams.put(param.key, sfc);
+                    inputParams.put(param.key, sfc);
                 }
             });
         } else if (param.type.isAssignableFrom(Geometry.class)) {
             // wkt geometry parameters
-            GeometryViewer geometryView = new GeometryViewer(map);
-            geometryView.create(container, SWT.NONE, processParams, param);
+            GeometryWidget geometryView = new GeometryWidget(map);
+            geometryView.create(container, SWT.NONE, inputParams, param);
         } else if (Filter.class.isAssignableFrom(param.type)) {
             // filter parameters
-            FilterViewer filterView = new FilterViewer(map);
-            filterView.create(container, SWT.NONE, processParams, param);
+            FilterWidget filterView = new FilterWidget(map);
+            filterView.create(container, SWT.NONE, inputParams, param);
         } else if (param.type.isAssignableFrom(CoordinateReferenceSystem.class)) {
             // coordinate reference system parameters
-            CrsViewer crsView = new CrsViewer(map);
-            crsView.create(container, SWT.NONE, processParams, param);
+            CrsWidget crsView = new CrsWidget(map);
+            crsView.create(container, SWT.NONE, inputParams, param);
         } else if (BoundingBox.class.isAssignableFrom(param.type)) {
             // bounding box parameters
-            BoundingBoxViewer boundingBoxView = new BoundingBoxViewer(map);
-            boundingBoxView.create(container, SWT.NONE, processParams, param);
+            BoundingBoxWidget boundingBoxView = new BoundingBoxWidget(map);
+            boundingBoxView.create(container, SWT.NONE, inputParams, param);
         } else if (param.type.isEnum()) {
             // enumeration parameters
             final Combo cboEnum = new Combo(container, SWT.NONE | SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -434,7 +410,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
                 public void modifyText(ModifyEvent e) {
                     for (Object enumVal : param.type.getEnumConstants()) {
                         if (enumVal.toString().equalsIgnoreCase(cboEnum.getText())) {
-                            processParams.put(param.key, enumVal);
+                            inputParams.put(param.key, enumVal);
                             break;
                         }
                     }
@@ -444,8 +420,8 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
             // number parameters = Byte, Double, Float, Integer, Long, Short
             if (Double.class.isAssignableFrom(param.type)
                     || Float.class.isAssignableFrom(param.type)) {
-                NumberDataViewer numberView = new NumberDataViewer(map);
-                numberView.create(container, SWT.NONE, processParams, param);
+                NumberDataWidget numberView = new NumberDataWidget(map);
+                numberView.create(container, SWT.NONE, inputParams, param);
             } else {
                 final Spinner spinner = new Spinner(container, SWT.LEFT_TO_RIGHT | SWT.BORDER);
                 spinner.setLayoutData(layoutData);
@@ -463,7 +439,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
                         if (obj == null) {
                             spinner.setBackground(warningColor);
                         } else {
-                            processParams.put(param.key, obj);
+                            inputParams.put(param.key, obj);
                             spinner.setBackground(oldBackColor);
                         }
                     }
@@ -487,15 +463,15 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
                 public void modifyText(ModifyEvent e) {
                     Boolean value = cboBoolean.getSelectionIndex() == 0 ? Boolean.TRUE
                             : Boolean.FALSE;
-                    processParams.put(param.key, value);
+                    inputParams.put(param.key, value);
                 }
             });
         } else {
             Map<String, Object> metadata = param.metadata;
             if (metadata == null || metadata.size() == 0) {
                 // other literal parameters
-                LiteralDataViewer literalView = new LiteralDataViewer(map);
-                literalView.create(container, SWT.NONE, processParams, param);
+                LiteralDataWidget literalView = new LiteralDataWidget(map);
+                literalView.create(container, SWT.NONE, inputParams, param);
             } else {
                 if (metadata.containsKey(Parameter.OPTIONS)) {
                     // layer's field ...
@@ -514,253 +490,102 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
                     cboField.addModifyListener(new ModifyListener() {
                         @Override
                         public void modifyText(ModifyEvent e) {
-                            processParams.put(param.key, cboField.getText());
+                            inputParams.put(param.key, cboField.getText());
                         }
                     });
 
                 } else {
                     // other literal parameters
-                    LiteralDataViewer filterView = new LiteralDataViewer(map);
-                    filterView.create(container, SWT.NONE, processParams, param);
+                    LiteralDataWidget filterView = new LiteralDataWidget(map);
+                    filterView.create(container, SWT.NONE, inputParams, param);
                 }
             }
         }
     }
 
     @SuppressWarnings("nls")
-    private boolean invalidOutput(File outputFile) {
-        if (!outputFile.exists()) {
-            return false;
-        }
+    private boolean invalidOutput() {
+        for (Entry<String, Object> entrySet : outputParams.entrySet()) {
+            File outputFile = new File(outputParams.get(entrySet.getKey()).toString());
+            if (!outputFile.exists()) {
+                continue;
+            }
 
-        String msg = Messages.ProcessExecutionDialog_overwriteconfirm;
-        if (MessageDialog.openConfirm(getParentShell(), windowTitle, msg)) {
-            OutputType outputType = ProcessUtils.getOutputType(factory, processName);
-            if (outputType == OutputType.RASTER) {
-                if (!outputFile.delete()) {
-                    msg = Messages.ProcessExecutionDialog_deletefailed;
-                    MessageDialog.openInformation(getParentShell(), windowTitle, msg);
+            String msg = Messages.ProcessExecutionDialog_overwriteconfirm;
+            if (MessageDialog.openConfirm(getParentShell(), getShell().getText(), msg)) {
+                if (outputFile.getName().toLowerCase().endsWith(".tif")) {
+                    if (!outputFile.delete()) {
+                        msg = Messages.ProcessExecutionDialog_deletefailed;
+                        MessageDialog.openInformation(getParentShell(), getShell().getText(), msg);
+                        return true;
+                    }
+                } else {
+                    String[] extensions = new String[] { "shp", "shx", "dbf", "prj", "sbn", "sbx",
+                            "qix", "fix", "lyr" };
+                    String fileName = outputFile.getName();
+                    int pos = outputFile.getName().lastIndexOf(".");
+                    if (pos > 0) {
+                        fileName = outputFile.getName().substring(0, pos);
+                    }
+
+                    for (String ext : extensions) {
+                        File file = new File(outputFile.getParent(), fileName + "." + ext);
+                        if (file.exists()) {
+                            file.delete();
+                        }
+                    }
                     return true;
                 }
-            } else {
-                String[] extensions = new String[] { "shp", "shx", "dbf", "prj", "sbn", "sbx",
-                        "qix", "fix", "lyr" };
-                String fileName = outputFile.getName();
-                int pos = outputFile.getName().lastIndexOf(".");
-                if (pos > 0) {
-                    fileName = outputFile.getName().substring(0, pos);
-                }
-
-                for (String ext : extensions) {
-                    File file = new File(outputFile.getParent(), fileName + "." + ext);
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                }
             }
-        } else {
-            return true;
         }
-
         return false;
     }
 
+    @SuppressWarnings("nls")
     @Override
     protected void okPressed() {
         // check required parameters
         Map<String, Parameter<?>> paramInfo = factory.getParameterInfo(processName);
         for (Entry<String, Parameter<?>> entrySet : paramInfo.entrySet()) {
             String key = entrySet.getValue().key;
-            if (entrySet.getValue().required && processParams.get(key) == null) {
-                String msg = Messages.ProcessExecutionDialog_requiredparam
-                        + System.getProperty("line.separator") + " - " //$NON-NLS-1$ //$NON-NLS-2$
-                        + entrySet.getValue().getTitle();
-                MessageDialog.openInformation(getParentShell(), windowTitle, msg);
+            if (entrySet.getValue().required && inputParams.get(key) == null) {
+                StringBuffer sb = new StringBuffer(Messages.ProcessExecutionDialog_requiredparam);
+                sb.append(System.getProperty("line.separator")).append(" - ");
+                sb.append(entrySet.getValue().getTitle());
+                MessageDialog.openInformation(getParentShell(), windowTitle, sb.toString());
                 return;
             }
         }
 
-        if (outputLocationRequired) {
-            outputFile = new File(locationView.getFile());
+        // check output files
+        if (!invalidOutput()) {
+            return;
+        }
 
-            if (invalidOutput(outputFile)) {
-                return;
-            }
+        ProcessExecutorOperation runnable = new ProcessExecutorOperation(map, factory, processName,
+                inputParams, outputParams);
+        try {
+            new ProgressMonitorDialog(getParentShell()).run(true, true, runnable);
+        } catch (InvocationTargetException e) {
+            ToolboxPlugin.log(e.getMessage());
+            MessageDialog.openError(getParentShell(), Messages.General_Error, e.getMessage());
+        } catch (InterruptedException e) {
+            ToolboxPlugin.log(e.getMessage());
+            MessageDialog.openInformation(getParentShell(), Messages.General_Cancelled,
+                    e.getMessage());
+        }
 
-            try {
-                new ProgressMonitorDialog(getParentShell()).run(true, true, this);
-            } catch (InvocationTargetException e) {
-                ToolboxPlugin.log("Error occured " + e.getMessage()); //$NON-NLS-1$
-                MessageDialog.openError(getParentShell(), "Error", e.getMessage()); //$NON-NLS-1$
-            } catch (InterruptedException e) {
-                ToolboxPlugin.log("Cancelled " + e.getMessage()); //$NON-NLS-1$
-                MessageDialog.openInformation(getParentShell(), "Cancelled", e.getMessage()); //$NON-NLS-1$
-            } finally {
-                if (outputLocationRequired) {
-                    super.okPressed();
-                }
+        if (outputTabRequired) {
+            String outputText = runnable.getOutputText();
+            if (outputText.length() > 0) {
+                outputTab.getParent().setSelection(outputTab);
+                String pattern = "[,()]"; //$NON-NLS-1$
+                String message = outputText.replaceAll(pattern,
+                        System.getProperty("line.separator")); //$NON-NLS-1$
+                txtOutput.setText(message);
             }
         } else {
-            ToolboxPlugin.log("Executing " + windowTitle + "..."); //$NON-NLS-1$ //$NON-NLS-2$
-            org.geotools.process.Process process = factory.create(processName);
-            // Map<String, Object> result = process.execute(processParams, null);
-
-            /*************************************************************/
-            // This is a great way to use todays multi-core processors in your application.
-            // A good idea is the number of cores you have plus 1.:
-            int cores = Runtime.getRuntime().availableProcessors();
-            ProcessExecutor executor = Processors.newProcessExecutor(cores, null);
-            Progress workTicket = executor.submit(process, processParams);
-            while (!workTicket.isDone()) {
-                try {
-                    Thread.sleep(250);
-                    // System.out.println("Progress:" + workTicket.getProgress() +
-                    // "percent complete");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            try {
-                Map<String, Object> result = workTicket.get(); // get is BLOCKING
-                ToolboxPlugin.log("Completed " + windowTitle + "..."); //$NON-NLS-1$ //$NON-NLS-2$
-                if (result != null) {
-                    for (Entry<String, Object> entrySet : result.entrySet()) {
-                        final Object val = entrySet.getValue();
-                        if (val == null) {
-                            continue;
-                        }
-
-                        if (Number.class.isAssignableFrom(val.getClass())) {
-                            displayWindow(FormatUtils.format(Double.parseDouble(val.toString())));
-                        } else {
-                            displayWindow(val);
-                            break;
-                        }
-                    }
-                }
-            } catch (InterruptedException e) {
-                ToolboxPlugin.log(e.getMessage());
-            } catch (ExecutionException e) {
-                ToolboxPlugin.log(e.getMessage());
-            }
-            /**************************************************************/
+            super.okPressed();
         }
-    }
-
-    @Override
-    public void run(IProgressMonitor monitor) throws InvocationTargetException,
-            InterruptedException {
-        int increment = 10;
-        monitor.beginTask("Running operation...", 100); //$NON-NLS-1$
-        monitor.worked(increment);
-
-        try {
-            monitor.setTaskName("Running operation..."); //$NON-NLS-1$
-            ToolboxPlugin.log("Executing " + windowTitle + "..."); //$NON-NLS-1$ //$NON-NLS-2$
-
-            org.geotools.process.Process process = factory.create(processName);
-            ProgressListener progessListener = GeoToolsAdapters.progress(SubMonitor.convert(
-                    monitor, "processing ", 60)); //$NON-NLS-1$
-            final Map<String, Object> result = process.execute(processParams, progessListener);
-            monitor.worked(increment);
-
-            monitor.setTaskName("Adding layer..."); //$NON-NLS-1$
-            if (result != null) {
-                for (Entry<String, Object> entrySet : result.entrySet()) {
-                    final Object val = entrySet.getValue();
-                    if (val == null) {
-                        continue;
-                    }
-
-                    ToolboxPlugin.log("Writing result..."); //$NON-NLS-1$
-                    if (val instanceof SimpleFeatureCollection) {
-                        SimpleFeatureCollection sfc = (SimpleFeatureCollection) val;
-                        if (sfc.getSchema().getGeometryDescriptor() == null) {
-                            displayWindow(ProcessUtils.getFeatureInformation(sfc));
-                        } else {
-                            if (exportToShapefile(sfc, outputFile)) {
-                                ToolboxPlugin.log("Adding layer..."); //$NON-NLS-1$
-                                MapUtils.addFeaturesToMap(map, outputFile);
-                            }
-                        }
-                    } else if (val instanceof GridCoverage2D) {
-                        RasterSaveAsOp saveAs = new RasterSaveAsOp();
-                        GridCoverage2D output = saveAs.saveAsGeoTiff((GridCoverage2D) val,
-                                outputFile.getAbsolutePath());
-                        ToolboxPlugin.log("Adding layer..."); //$NON-NLS-1$
-                        MapUtils.addGridCoverageToMap(map, output, outputFile, null);
-                    } else if (val instanceof Geometry) {
-                        if (exportToShapefile(
-                                geometryToFeatures((Geometry) val, processName.toString()),
-                                outputFile)) {
-                            ToolboxPlugin.log("Adding layer..."); //$NON-NLS-1$
-                            MapUtils.addFeaturesToMap(map, outputFile);
-                        }
-                    } else if (val instanceof BoundingBox) {
-                        Geometry boundingBox = JTS.toGeometry((BoundingBox) val);
-                        boundingBox.setUserData(((BoundingBox) val).getCoordinateReferenceSystem());
-
-                        if (exportToShapefile(
-                                geometryToFeatures(boundingBox, processName.toString()), outputFile)) {
-                            ToolboxPlugin.log("Adding layer..."); //$NON-NLS-1$
-                            MapUtils.addFeaturesToMap(map, outputFile);
-                        }
-                    }
-                    monitor.worked(increment);
-                }
-            }
-            monitor.worked(increment);
-        } catch (Exception e) {
-            ToolboxPlugin.log(e.getMessage());
-        } finally {
-            ToolboxPlugin.log("Completed " + windowTitle + "..."); //$NON-NLS-1$ //$NON-NLS-2$
-            monitor.done();
-        }
-    }
-
-    private SimpleFeatureCollection geometryToFeatures(Geometry source, String layerName) {
-        CoordinateReferenceSystem crs = map.getViewportModel().getCRS();
-        if (source.getUserData() != null
-                && CoordinateReferenceSystem.class
-                        .isAssignableFrom(source.getUserData().getClass())) {
-            crs = (CoordinateReferenceSystem) source.getUserData();
-        }
-
-        SimpleFeatureType schema = FeatureTypes.getDefaultType(layerName, source.getClass(), crs);
-
-        ListFeatureCollection features = new ListFeatureCollection(schema);
-        SimpleFeatureBuilder builder = new SimpleFeatureBuilder(schema);
-
-        SimpleFeature feature = builder.buildFeature(null);
-        feature.setDefaultGeometry(source);
-        features.add(feature);
-
-        return features;
-    }
-
-    private boolean exportToShapefile(SimpleFeatureCollection features, File filePath) {
-        String typeName = FilenameUtils.removeExtension(FilenameUtils.getName(filePath.getPath()));
-        DataStore dataStore = DataStoreFactory.getShapefileDataStore(filePath.getParent(), false);
-
-        ShapeExportOp exportOp = ShapeExportOp.getDefault();
-        exportOp.setOutputDataStore(dataStore);
-        exportOp.setOutputTypeName(typeName);
-        try {
-            SimpleFeatureSource output = exportOp.execute(features);
-            return output != null;
-        } catch (IOException e) {
-            ToolboxPlugin.log(e.getMessage());
-        }
-        return false;
-    }
-
-    private void displayWindow(final Object source) {
-        outputTab.getParent().setSelection(outputTab);
-
-        String pattern = "[,()]"; //$NON-NLS-1$
-        String message = source.toString()
-                .replaceAll(pattern, System.getProperty("line.separator")); //$NON-NLS-1$
-        txtOutput.setText(message);
     }
 }

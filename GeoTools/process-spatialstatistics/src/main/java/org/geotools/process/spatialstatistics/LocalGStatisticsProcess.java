@@ -26,6 +26,8 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.impl.AbstractProcess;
+import org.geotools.process.spatialstatistics.autocorrelation.LocalGStatisticOperation;
+import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
@@ -38,7 +40,7 @@ import org.opengis.util.ProgressListener;
 /**
  * Given a set of weighted features, identifies statistically significant hot spots and cold spots using the Getis-Ord Gi* statistic.
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -55,8 +57,8 @@ public class LocalGStatisticsProcess extends AbstractProcess {
         return factory;
     }
 
-    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures, String inputField,
-            SpatialConcept spatialConcept, DistanceMethod distanceMethod,
+    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+            String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
             StandardizationMethod standardization, Double searchDistance, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(LocalGStatisticsProcessFactory.inputFeatures.key, inputFeatures);
@@ -70,7 +72,8 @@ public class LocalGStatisticsProcess extends AbstractProcess {
         Map<String, Object> resultMap;
         try {
             resultMap = process.execute(map, monitor);
-            return (SimpleFeatureCollection) resultMap.get(LocalGStatisticsProcessFactory.RESULT.key);
+            return (SimpleFeatureCollection) resultMap
+                    .get(LocalGStatisticsProcessFactory.RESULT.key);
         } catch (ProcessException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
@@ -100,6 +103,11 @@ public class LocalGStatisticsProcess extends AbstractProcess {
                 throw new NullPointerException("inputFeatures and inputField parameters required");
             }
 
+            inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
+            if (inputFeatures.getSchema().indexOf(inputField) == -1) {
+                throw new NullPointerException(inputField + " field does not exist!");
+            }
+
             SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
                     LocalGStatisticsProcessFactory.spatialConcept,
                     LocalGStatisticsProcessFactory.spatialConcept.sample);
@@ -124,16 +132,29 @@ public class LocalGStatisticsProcess extends AbstractProcess {
             }
 
             // start process
-            // TODO : impelement
-            SimpleFeatureCollection result = inputFeatures;
-            
+            SimpleFeatureCollection resultFc = null;
+            try {
+                LocalGStatisticOperation process = new LocalGStatisticOperation();
+                process.setSpatialConceptType(spatialConcept);
+                process.setDistanceType(distanceMethod);
+                process.setStandardizationType(standardization);
+
+                // searchDistance
+                if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
+                    process.setDistanceBand(searchDistance);
+                }
+
+                resultFc = process.execute(inputFeatures, inputField);
+            } catch (Exception ee) {
+                monitor.exceptionOccurred(ee);
+            }
             // end process
 
             monitor.setTask(Text.text("Encoding result"));
             monitor.progress(90.0f);
 
             Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(LocalGStatisticsProcessFactory.RESULT.key, result);
+            resultMap.put(LocalGStatisticsProcessFactory.RESULT.key, resultFc);
             monitor.complete(); // same as 100.0f
 
             return resultMap;

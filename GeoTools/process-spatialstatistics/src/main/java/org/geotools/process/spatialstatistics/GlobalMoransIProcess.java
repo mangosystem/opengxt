@@ -26,6 +26,10 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.impl.AbstractProcess;
+import org.geotools.process.spatialstatistics.autocorrelation.GlobalMoranIStatisticOperation;
+import org.geotools.process.spatialstatistics.autocorrelation.GlobalMoranIStatisticOperation.MoransI;
+import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
@@ -38,7 +42,7 @@ import org.opengis.util.ProgressListener;
 /**
  * Measures spatial autocorrelation based on feature locations and attribute values using the Global Moran's I statistic.
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -55,8 +59,8 @@ public class GlobalMoransIProcess extends AbstractProcess {
         return factory;
     }
 
-    public static String process(SimpleFeatureCollection inputFeatures, String inputField,
-            SpatialConcept spatialConcept, DistanceMethod distanceMethod,
+    public static MoransIProcessResult process(SimpleFeatureCollection inputFeatures,
+            String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
             StandardizationMethod standardization, Double searchDistance, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(GlobalMoransIProcessFactory.inputFeatures.key, inputFeatures);
@@ -70,7 +74,7 @@ public class GlobalMoransIProcess extends AbstractProcess {
         Map<String, Object> resultMap;
         try {
             resultMap = process.execute(map, monitor);
-            return (String) resultMap.get(GlobalMoransIProcessFactory.RESULT.key);
+            return (MoransIProcessResult) resultMap.get(GlobalMoransIProcessFactory.RESULT.key);
         } catch (ProcessException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
@@ -100,6 +104,11 @@ public class GlobalMoransIProcess extends AbstractProcess {
                 throw new NullPointerException("inputFeatures and inputField parameters required");
             }
 
+            inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
+            if (inputFeatures.getSchema().indexOf(inputField) == -1) {
+                throw new NullPointerException(inputField + " field does not exist!");
+            }
+
             SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
                     GlobalMoransIProcessFactory.spatialConcept,
                     GlobalMoransIProcessFactory.spatialConcept.sample);
@@ -124,16 +133,40 @@ public class GlobalMoransIProcess extends AbstractProcess {
             }
 
             // start process
-            // TODO : impelement
-            Object result = inputFeatures.toString();
-            
+            String typeName = inputFeatures.getSchema().getTypeName();
+            MoransIProcessResult processResult = null;
+            try {
+                GlobalMoranIStatisticOperation process = new GlobalMoranIStatisticOperation();
+                process.setSpatialConceptType(spatialConcept);
+                process.setDistanceType(distanceMethod);
+                process.setStandardizationType(standardization);
+
+                // searchDistance
+                if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
+                    process.setDistanceBand(searchDistance);
+                }
+
+                MoransI ret = process.execute(inputFeatures, inputField);
+
+                processResult = new MoransIProcessResult(typeName, inputField,
+                        ret.getObservedIndex(), ret.getExpectedIndex(), ret.getZVariance(),
+                        ret.getZScore(), ret.getPValue());
+
+                processResult.setConceptualization(ret.getConceptualization().toString());
+                processResult.setDistanceMethod(ret.getDistanceMethod().toString());
+                processResult.setDistanceThreshold(String.valueOf(ret.getDistanceThreshold()));
+                processResult.setRowStandardization(ret.getRowStandardization().toString());
+
+            } catch (Exception e) {
+                processResult = new MoransIProcessResult(typeName, inputField, 0, 0, 0, 0, 0);
+            }
             // end process
 
             monitor.setTask(Text.text("Encoding result"));
             monitor.progress(90.0f);
 
             Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(GlobalMoransIProcessFactory.RESULT.key, result);
+            resultMap.put(GlobalMoransIProcessFactory.RESULT.key, processResult);
             monitor.complete(); // same as 100.0f
 
             return resultMap;
@@ -145,4 +178,148 @@ public class GlobalMoransIProcess extends AbstractProcess {
         }
     }
 
+    public static class MoransIProcessResult {
+
+        String typeName;
+
+        String propertyName;
+
+        String moran_Index;
+
+        String expected_Index;
+
+        String variance;
+
+        String z_Score;
+
+        String p_Value;
+
+        String conceptualization;
+
+        String distanceMethod;
+
+        String rowStandardization;
+
+        String distanceThreshold;
+
+        public String getTypeName() {
+            return typeName;
+        }
+
+        public void setTypeName(String typeName) {
+            this.typeName = typeName;
+        }
+
+        public String getPropertyName() {
+            return propertyName;
+        }
+
+        public void setPropertyName(String propertyName) {
+            this.propertyName = propertyName;
+        }
+
+        public String getMoran_Index() {
+            return moran_Index;
+        }
+
+        public void setMoran_Index(String moran_Index) {
+            this.moran_Index = moran_Index;
+        }
+
+        public String getExpected_Index() {
+            return expected_Index;
+        }
+
+        public void setExpected_Index(String expected_Index) {
+            this.expected_Index = expected_Index;
+        }
+
+        public String getVariance() {
+            return variance;
+        }
+
+        public void setVariance(String variance) {
+            this.variance = variance;
+        }
+
+        public String getZ_Score() {
+            return z_Score;
+        }
+
+        public void setZ_Score(String z_Score) {
+            this.z_Score = z_Score;
+        }
+
+        public String getP_Value() {
+            return p_Value;
+        }
+
+        public void setP_Value(String p_Value) {
+            this.p_Value = p_Value;
+        }
+
+        public String getConceptualization() {
+            return conceptualization;
+        }
+
+        public void setConceptualization(String conceptualization) {
+            this.conceptualization = conceptualization;
+        }
+
+        public String getDistanceMethod() {
+            return distanceMethod;
+        }
+
+        public void setDistanceMethod(String distanceMethod) {
+            this.distanceMethod = distanceMethod;
+        }
+
+        public String getRowStandardization() {
+            return rowStandardization;
+        }
+
+        public void setRowStandardization(String rowStandardization) {
+            this.rowStandardization = rowStandardization;
+        }
+
+        public String getDistanceThreshold() {
+            return distanceThreshold;
+        }
+
+        public void setDistanceThreshold(String distanceThreshold) {
+            this.distanceThreshold = distanceThreshold;
+        }
+
+        public MoransIProcessResult(String typeName, String propertyName, double moran_index,
+                double expected_index, double variance, double z_score, double pValue) {
+            this.typeName = typeName;
+            this.propertyName = propertyName;
+
+            this.moran_Index = FormatUtils.format(moran_index);
+            this.expected_Index = FormatUtils.format(expected_index);
+            this.variance = FormatUtils.format(variance);
+            this.z_Score = FormatUtils.format(z_score);
+            this.p_Value = FormatUtils.format(pValue);
+        }
+
+        @Override
+        public String toString() {
+            final String separator = System.getProperty("line.separator");
+
+            StringBuffer sb = new StringBuffer();
+            sb.append("TypeName: ").append(typeName).append(separator);
+            sb.append("PropertyName: ").append(propertyName).append(separator);
+            sb.append("Moran Index: ").append(moran_Index).append(separator);
+            sb.append("Expected Index: ").append(expected_Index).append(separator);
+            sb.append("Variance: ").append(variance).append(separator);
+            sb.append("z Score: ").append(z_Score).append(separator);
+            sb.append("p Value: ").append(p_Value).append(separator);
+            sb.append("Conceptualization: ").append(conceptualization).append(separator);
+            sb.append("DistanceMethod: ").append(distanceMethod).append(separator);
+            sb.append("RowStandardization: ").append(rowStandardization).append(separator);
+            sb.append("DistanceThreshold: ").append(distanceThreshold).append(separator);
+
+            return sb.toString();
+        }
+    }
 }

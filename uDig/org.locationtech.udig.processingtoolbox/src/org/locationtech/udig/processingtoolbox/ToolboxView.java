@@ -243,12 +243,12 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
             Iterator<ProcessFactory> iterator = processFactories.iterator();
             while (iterator.hasNext()) {
                 ProcessFactory factory = iterator.next();
-                String category = ProcessUtils.getWindowTitle(factory.getTitle().toString());
+                String category = getWindowTitle(factory.getTitle().toString());
                 TreeParent to1 = new TreeParent(category, factory, null);
                 Iterator<Name> nameIter = factory.getNames().iterator();
                 while (nameIter.hasNext()) {
                     Name processName = nameIter.next();
-                    String name = ProcessUtils.getWindowTitle(processName.getLocalPart());
+                    String name = getWindowTitle(processName.getLocalPart());
                     TreeObject to2 = new TreeObject(name, factory, processName);
                     to1.addChild(to2);
                 }
@@ -257,6 +257,29 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
             root.addChild(parent);
         }
         return root;
+    }
+    
+    @SuppressWarnings("nls")
+    private String getWindowTitle(String processName) {
+        String windowTitle = Character.toUpperCase(processName.charAt(0)) + processName.substring(1);
+        if (!processName.contains("ST_")) { 
+            if (windowTitle.substring(2, 3).equalsIgnoreCase("_")) {
+                windowTitle = windowTitle.substring(3);
+            }
+
+            StringBuffer sb = new StringBuffer();
+            for (int index = 0; index < windowTitle.length(); index++) {
+                char cat = windowTitle.charAt(index);
+                if (index > 0 && Character.isUpperCase(cat)) {
+                    sb.append(" ").append(cat);
+                } else {
+                    sb.append(cat);
+                }
+            }
+            return sb.toString();
+        } else {
+            return windowTitle;
+        }
     }
 
     @Override

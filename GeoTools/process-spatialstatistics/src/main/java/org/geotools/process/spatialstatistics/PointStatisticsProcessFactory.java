@@ -105,7 +105,8 @@ public class PointStatisticsProcessFactory extends SpatialStatisticsProcessFacto
     /** result */
     protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("PointStatistics.result.title"),
-            getResource("PointStatistics.result.description"));
+            getResource("PointStatistics.result.description"), true, 1, 1, null, new KVP(
+                    Parameter.OPTIONS, "EqualInterval.countField"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

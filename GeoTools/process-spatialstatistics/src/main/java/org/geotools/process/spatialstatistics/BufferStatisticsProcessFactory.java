@@ -113,7 +113,8 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
     protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class,
             getResource("BufferPointStatistics.result.title"),
-            getResource("BufferPointStatistics.result.description"));
+            getResource("BufferPointStatistics.result.description"), true, 1, 1, null, new KVP(
+                    Parameter.OPTIONS, "EqualInterval.countField"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

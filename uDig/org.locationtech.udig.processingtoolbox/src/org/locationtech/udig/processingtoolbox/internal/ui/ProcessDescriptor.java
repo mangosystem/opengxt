@@ -102,9 +102,9 @@ public class ProcessDescriptor {
 
         // write to file
         sb.append("</body></html>");
+        
         File htmlDocs = new File(htmlDocsFolder, processName.getLocalPart() + ".html");
         FileUtils.writeStringToFile(htmlDocs, sb.toString());
-
         return htmlDocs;
     }
 

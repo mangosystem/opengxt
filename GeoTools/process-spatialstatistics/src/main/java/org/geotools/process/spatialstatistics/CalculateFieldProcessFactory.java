@@ -69,21 +69,20 @@ public class CalculateFieldProcessFactory extends SpatialStatisticsProcessFactor
     /** inputFeatures */
     protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
-            getResource("CalculateField.inputFeatures.title"), getResource("CalculateField.inputFeatures.description"),
-            true, 1, 1, null, new KVP(Parameter.FEATURE_TYPE, "All"));
+            getResource("CalculateField.inputFeatures.title"),
+            getResource("CalculateField.inputFeatures.description"), true, 1, 1, null, new KVP(
+                    Parameter.FEATURE_TYPE, "All"));
 
     /** fieldName */
     public static final Parameter<String> fieldName = new Parameter<String>("fieldName",
-            String.class, 
-            getResource("CalculateField.fieldName.title"), getResource("CalculateField.fieldName.description"),
-            true, 1, 1, null, new KVP(Parameter.OPTIONS, "inputFeatures.All"));
+            String.class, getResource("CalculateField.fieldName.title"),
+            getResource("CalculateField.fieldName.description"), true, 1, 1, null, new KVP(
+                    Parameter.OPTIONS, "inputFeatures.All"));
 
     /** expression */
-    public static final Parameter<String> expression = new Parameter<String>(
-            "expression",
-            String.class,
-            getResource("CalculateField.expression.title"), getResource("CalculateField.expression.description"),
-            true, 1, 1, null, null);
+    public static final Parameter<String> expression = new Parameter<String>("expression",
+            String.class, getResource("CalculateField.expression.title"),
+            getResource("CalculateField.expression.description"), true, 1, 1, null, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -97,7 +96,8 @@ public class CalculateFieldProcessFactory extends SpatialStatisticsProcessFactor
     /** result */
     protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("CalculateField.result.title"),
-            getResource("CalculateField.result.description"));
+            getResource("CalculateField.result.description"), true, 1, 1, null, new KVP(
+                    Parameter.OPTIONS, "NaturalBreaks.fieldName"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

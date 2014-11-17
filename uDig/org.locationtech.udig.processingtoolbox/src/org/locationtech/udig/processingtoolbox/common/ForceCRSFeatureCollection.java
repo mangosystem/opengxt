@@ -88,10 +88,7 @@ public class ForceCRSFeatureCollection extends DecoratingSimpleFeatureCollection
             for (Object attribute : feature.getAttributes()) {
                 if (attribute instanceof Geometry) {
                     Geometry geometry = (Geometry) attribute;
-                    if (geometry.getUserData() == null
-                            || geometry.getUserData() instanceof CoordinateReferenceSystem) {
-                        geometry.setUserData(forcedCRS);
-                    }
+                    geometry.setUserData(forcedCRS);
                 }
                 builder.add(attribute);
             }

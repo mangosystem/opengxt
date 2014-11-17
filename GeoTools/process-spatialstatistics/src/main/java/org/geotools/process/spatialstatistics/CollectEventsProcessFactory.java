@@ -68,8 +68,8 @@ public class CollectEventsProcessFactory extends SpatialStatisticsProcessFactory
     protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("CollectEvents.inputFeatures.title"),
-            getResource("CollectEvents.inputFeatures.description"),
-            true, 1, 1, null, new KVP(Parameter.FEATURE_TYPE, "Point"));
+            getResource("CollectEvents.inputFeatures.description"), true, 1, 1, null, new KVP(
+                    Parameter.FEATURE_TYPE, "Point"));
 
     /** countField */
     protected static final Parameter<String> countField = new Parameter<String>("countField",
@@ -86,7 +86,8 @@ public class CollectEventsProcessFactory extends SpatialStatisticsProcessFactory
 
     protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("CollectEvents.result.title"),
-            getResource("CollectEvents.result.description"));
+            getResource("CollectEvents.result.description"), true, 1, 1, null, new KVP(
+                    Parameter.OPTIONS, "EqualInterval.countField"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

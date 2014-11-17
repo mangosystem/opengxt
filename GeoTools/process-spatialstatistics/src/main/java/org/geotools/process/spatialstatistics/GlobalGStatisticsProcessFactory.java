@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.GlobalGStatisticsProcess.GStatisticsProcessResult;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -84,13 +85,15 @@ public class GlobalGStatisticsProcessFactory extends SpatialStatisticsProcessFac
 
     /** spatialConcept */
     protected static final Parameter<SpatialConcept> spatialConcept = new Parameter<SpatialConcept>(
-            "spatialConcept", SpatialConcept.class, getResource("GlobalGStatistics.spatialConcept.title"),
+            "spatialConcept", SpatialConcept.class,
+            getResource("GlobalGStatistics.spatialConcept.title"),
             getResource("GlobalGStatistics.spatialConcept.description"), false, 0, 1,
             SpatialConcept.INVERSEDISTANCE, null);
 
     /** distanceMethod */
     protected static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
-            "distanceMethod", DistanceMethod.class, getResource("GlobalGStatistics.distanceMethod.title"),
+            "distanceMethod", DistanceMethod.class,
+            getResource("GlobalGStatistics.distanceMethod.title"),
             getResource("GlobalGStatistics.distanceMethod.description"), false, 0, 1,
             DistanceMethod.Euclidean, null);
 
@@ -104,7 +107,8 @@ public class GlobalGStatisticsProcessFactory extends SpatialStatisticsProcessFac
     /** searchDistance */
     protected static final Parameter<Double> searchDistance = new Parameter<Double>(
             "searchDistance", Double.class, getResource("GlobalGStatistics.searchDistance.title"),
-            getResource("GlobalGStatistics.searchDistance.description"), false, 0, 1, Double.valueOf(0.0), null);
+            getResource("GlobalGStatistics.searchDistance.description"), false, 0, 1,
+            Double.valueOf(0.0), null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -119,7 +123,8 @@ public class GlobalGStatisticsProcessFactory extends SpatialStatisticsProcessFac
     }
 
     /** result */
-    protected static final Parameter<String> RESULT = new Parameter<String>("result", String.class,
+    protected static final Parameter<GStatisticsProcessResult> RESULT = new Parameter<GStatisticsProcessResult>(
+            "result", GStatisticsProcessResult.class,
             getResource("GlobalGStatistics.result.title"),
             getResource("GlobalGStatistics.result.description"));
 

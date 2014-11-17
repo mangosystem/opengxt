@@ -32,8 +32,8 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.locationtech.udig.processingtoolbox.MapUtils;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
+import org.locationtech.udig.processingtoolbox.styler.MapUtils;
 
 /**
  * Extent Selection Dialog

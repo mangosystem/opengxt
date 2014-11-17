@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.GlobalMoransIProcess.MoransIProcessResult;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -84,13 +85,15 @@ public class GlobalMoransIProcessFactory extends SpatialStatisticsProcessFactory
 
     /** spatialConcept */
     protected static final Parameter<SpatialConcept> spatialConcept = new Parameter<SpatialConcept>(
-            "spatialConcept", SpatialConcept.class, getResource("GlobalMoransI.spatialConcept.title"),
+            "spatialConcept", SpatialConcept.class,
+            getResource("GlobalMoransI.spatialConcept.title"),
             getResource("GlobalMoransI.spatialConcept.description"), false, 0, 1,
             SpatialConcept.INVERSEDISTANCE, null);
 
     /** distanceMethod */
     protected static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
-            "distanceMethod", DistanceMethod.class, getResource("GlobalMoransI.distanceMethod.title"),
+            "distanceMethod", DistanceMethod.class,
+            getResource("GlobalMoransI.distanceMethod.title"),
             getResource("GlobalMoransI.distanceMethod.description"), false, 0, 1,
             DistanceMethod.Euclidean, null);
 
@@ -104,7 +107,8 @@ public class GlobalMoransIProcessFactory extends SpatialStatisticsProcessFactory
     /** searchDistance */
     protected static final Parameter<Double> searchDistance = new Parameter<Double>(
             "searchDistance", Double.class, getResource("GlobalMoransI.searchDistance.title"),
-            getResource("GlobalMoransI.searchDistance.description"), false, 0, 1, Double.valueOf(0.0), null);
+            getResource("GlobalMoransI.searchDistance.description"), false, 0, 1,
+            Double.valueOf(0.0), null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -119,8 +123,8 @@ public class GlobalMoransIProcessFactory extends SpatialStatisticsProcessFactory
     }
 
     /** result */
-    protected static final Parameter<String> RESULT = new Parameter<String>("result", String.class,
-            getResource("GlobalMoransI.result.title"),
+    protected static final Parameter<MoransIProcessResult> RESULT = new Parameter<MoransIProcessResult>(
+            "result", MoransIProcessResult.class, getResource("GlobalMoransI.result.title"),
             getResource("GlobalMoransI.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();

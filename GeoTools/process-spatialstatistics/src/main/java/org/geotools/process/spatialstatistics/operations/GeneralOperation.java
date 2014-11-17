@@ -16,6 +16,9 @@
  */
 package org.geotools.process.spatialstatistics.operations;
 
+import org.geotools.data.DataStore;
+import org.geotools.data.directory.DirectoryDataStore;
+import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.opengis.filter.FilterFactory2;
@@ -39,4 +42,12 @@ public abstract class GeneralOperation {
         // TODO Auto-generated constructor stub
     }
 
+    public boolean isShapefileDataStore(DataStore dataStore) {
+        if (dataStore instanceof DirectoryDataStore) {
+            return true;
+        } else if (dataStore instanceof ShapefileDataStore) {
+            return true;
+        }
+        return false;
+    }
 }

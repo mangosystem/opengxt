@@ -1,3 +1,19 @@
+/*
+ *    GeoTools - The Open Source Java GIS Toolkit
+ *    http://geotools.org
+ *
+ *    (C) 2014, Open Source Geospatial Foundation (OSGeo)
+ *
+ *    This library is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation;
+ *    version 2.1 of the License.
+ *
+ *    This library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ */
 package org.geotools.process.spatialstatistics.core;
 
 import java.lang.Character.UnicodeBlock;
@@ -10,9 +26,9 @@ import org.geotools.util.logging.Logging;
 /**
  * String Helper
  * 
- * @author Minpa Lee
- * @since 1.0
- * @version $Id: StringHelper.java 1 2011-09-01 11:22:29Z minpa.lee $
+ * @author Minpa Lee, MangoSystem
+ * 
+ * @source $URL$
  */
 public class StringHelper {
     protected static final Logger LOGGER = Logging.getLogger(StringHelper.class);

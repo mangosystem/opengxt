@@ -45,7 +45,6 @@ public class PearsonOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(PearsonOperation.class);
 
     public PearsonOperation() {
-        // TODO Auto-generated constructor stub
     }
 
     public PearsonResult execute(SimpleFeatureCollection inputFeatures, String inputFields) {
@@ -149,7 +148,7 @@ public class PearsonOperation extends GeneralOperation {
         if (den == 0) {
             return 0;
         }
-        
+
         double num = pSum - ((sumX * sumY) / rowCount);
 
         return num / den;
@@ -171,10 +170,9 @@ public class PearsonOperation extends GeneralOperation {
     }
 
     public static final class PearsonResult {
-        static final String separator = System.getProperty("line.separator");
 
         @XStreamImplicit
-        private List<PropertyName> proeprtyNames = new ArrayList<PropertyName>();
+        List<PropertyName> proeprtyNames = new ArrayList<PropertyName>();
 
         public List<PropertyName> getProeprtyNames() {
             return proeprtyNames;
@@ -186,6 +184,8 @@ public class PearsonOperation extends GeneralOperation {
 
         @Override
         public String toString() {
+            final String separator = System.getProperty("line.separator");
+
             StringBuffer sb = new StringBuffer();
             for (PropertyName proeprtyName : proeprtyNames) {
                 sb.append(proeprtyName.toString()).append(separator);
@@ -196,10 +196,10 @@ public class PearsonOperation extends GeneralOperation {
 
         public static class PropertyName {
             @XStreamAsAttribute
-            private String name;
+            String name;
 
             @XStreamImplicit
-            private List<PearsonItem> items = new ArrayList<PearsonItem>();
+            List<PearsonItem> items = new ArrayList<PearsonItem>();
 
             public String getName() {
                 return name;
@@ -223,6 +223,8 @@ public class PearsonOperation extends GeneralOperation {
 
             @Override
             public String toString() {
+                final String separator = System.getProperty("line.separator");
+
                 StringBuffer sb = new StringBuffer();
                 sb.append("Name: ").append(name).append(separator);
                 for (PearsonItem pearsonItem : items) {
@@ -232,13 +234,13 @@ public class PearsonOperation extends GeneralOperation {
                 return sb.toString();
             }
 
-            // version 1.4.2
-            // @XStreamConverter(value=ToAttributedValueConverter.class, strings={"value"})
+            // version 1.4.2 @XStreamConverter(value=ToAttributedValueConverter.class,
+            // strings={"value"})
             public static class PearsonItem {
                 @XStreamAsAttribute
                 String name;
 
-                Double value = Double.valueOf(1d); // 1 is total positive correlation
+                Double value = Double.valueOf(1d);
 
                 public String getName() {
                     return name;
@@ -262,6 +264,8 @@ public class PearsonOperation extends GeneralOperation {
 
                 @Override
                 public String toString() {
+                    final String separator = System.getProperty("line.separator");
+
                     StringBuffer sb = new StringBuffer();
                     sb.append("    Name: ").append(name).append(separator);
                     sb.append("      Value: ").append(value).append(separator);
@@ -270,6 +274,6 @@ public class PearsonOperation extends GeneralOperation {
                 }
             }
         }
-
     }
+
 }

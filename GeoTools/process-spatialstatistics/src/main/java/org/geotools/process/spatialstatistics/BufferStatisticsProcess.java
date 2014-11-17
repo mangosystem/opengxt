@@ -27,29 +27,28 @@ import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.operations.PearsonOperation;
-import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
+import org.geotools.process.spatialstatistics.operations.PointStatisticsOperation;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
+
 /**
- * Pearson product-moment correlation coefficient (sometimes referred to as the PPMCC or PCC or Pearson's r) is a measure of the linear correlation
- * (dependence) between two variables X and Y, giving a value between +1 and −1 inclusive, where 1 is total positive correlation, 0 is no correlation,
- * and −1 is total negative correlation.
+ * Perform point in polygon analysis
  * 
- * @reference : http://en.wikipedia.org/wiki/Pearson_product-moment_correlation_coefficient
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class PearsonProcess extends AbstractProcess {
-    protected static final Logger LOGGER = Logging.getLogger(PearsonProcess.class);
+public class BufferStatisticsProcess extends AbstractProcess {
+    protected static final Logger LOGGER = Logging.getLogger(BufferStatisticsProcess.class);
 
     private boolean started = false;
 
-    public PearsonProcess(ProcessFactory factory) {
+    public BufferStatisticsProcess(ProcessFactory factory) {
         super(factory);
     }
 
@@ -57,17 +56,21 @@ public class PearsonProcess extends AbstractProcess {
         return factory;
     }
 
-    public static PearsonResult process(SimpleFeatureCollection inputFeatures, String fieldName,
+    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+            SimpleFeatureCollection pointFeatures, String countField, String statisticsFields,
             ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(PearsonProcessFactory.inputFeatures.key, inputFeatures);
-        map.put(PearsonProcessFactory.inputFields.key, fieldName);
+        map.put(BufferStatisticsProcessFactory.inputFeatures.key, inputFeatures);
+        map.put(BufferStatisticsProcessFactory.pointFeatures.key, pointFeatures);
+        map.put(BufferStatisticsProcessFactory.countField.key, countField);
+        map.put(BufferStatisticsProcessFactory.statisticsFields.key, statisticsFields);
 
-        Process process = new PearsonProcess(null);
+        Process process = new BufferStatisticsProcess(null);
         Map<String, Object> resultMap;
         try {
             resultMap = process.execute(map, monitor);
-            return (PearsonResult) resultMap.get(PearsonProcessFactory.RESULT.key);
+            return (SimpleFeatureCollection) resultMap
+                    .get(BufferStatisticsProcessFactory.RESULT.key);
         } catch (ProcessException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
@@ -90,11 +93,30 @@ public class PearsonProcess extends AbstractProcess {
             monitor.progress(10.0f);
 
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, PearsonProcessFactory.inputFeatures, null);
-            String inputFields = (String) Params.getValue(input, PearsonProcessFactory.inputFields,
-                    null);
-            if (inputFeatures == null || inputFields == null) {
-                throw new NullPointerException("All parameters required");
+                    input, BufferStatisticsProcessFactory.inputFeatures, null);
+            SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(
+                    input, BufferStatisticsProcessFactory.pointFeatures, null);
+            Double distance = (Double) Params.getValue(input,
+                    BufferStatisticsProcessFactory.distance,
+                    BufferStatisticsProcessFactory.distance.sample);
+            String countField = (String) Params.getValue(input,
+                    BufferStatisticsProcessFactory.countField,
+                    BufferStatisticsProcessFactory.countField.sample);
+            String statisticsFields = (String) Params.getValue(input,
+                    BufferStatisticsProcessFactory.statisticsFields,
+                    BufferStatisticsProcessFactory.statisticsFields.sample);
+            if (inputFeatures == null || pointFeatures == null) {
+                throw new NullPointerException(
+                        "inputFeatures and pointFeatures parameters required");
+            }
+
+            if (distance == 0) {
+                Class<?> geomBinding = inputFeatures.getSchema().getGeometryDescriptor().getType()
+                        .getBinding();
+                if (!geomBinding.isAssignableFrom(Polygon.class)
+                        && !geomBinding.isAssignableFrom(MultiPolygon.class)) {
+                    throw new NullPointerException("distance parameter required");
+                }
             }
 
             monitor.setTask(Text.text("Processing ..."));
@@ -105,15 +127,18 @@ public class PearsonProcess extends AbstractProcess {
             }
 
             // start process
-            PearsonOperation operation = new PearsonOperation();
-            PearsonResult ret = operation.execute(inputFeatures, inputFields);
+            PointStatisticsOperation operation = new PointStatisticsOperation();
+            operation.setBufferDistance(distance);
+            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, countField,
+                    statisticsFields, pointFeatures);
+            ;
             // end process
 
             monitor.setTask(Text.text("Encoding result"));
             monitor.progress(90.0f);
 
             Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(PearsonProcessFactory.RESULT.key, ret);
+            resultMap.put(BufferStatisticsProcessFactory.RESULT.key, resultFc);
             monitor.complete(); // same as 100.0f
 
             return resultMap;
@@ -124,4 +149,5 @@ public class PearsonProcess extends AbstractProcess {
             monitor.dispose();
         }
     }
+
 }

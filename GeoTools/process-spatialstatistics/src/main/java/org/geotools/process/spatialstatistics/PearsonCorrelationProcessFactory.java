@@ -33,14 +33,15 @@ import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
 
 /**
- * PearsonProcessFactory
+ * PearsonCorrelationProcessFactory
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class PearsonProcessFactory extends SpatialStatisticsProcessFactory {
-    protected static final Logger LOGGER = Logging.getLogger(PearsonProcessFactory.class);
+public class PearsonCorrelationProcessFactory extends SpatialStatisticsProcessFactory {
+    protected static final Logger LOGGER = Logging
+            .getLogger(PearsonCorrelationProcessFactory.class);
 
     private static final String PROCESS_NAME = "Pearson";
 
@@ -48,13 +49,13 @@ public class PearsonProcessFactory extends SpatialStatisticsProcessFactory {
      * Pearson(SimpleFeatureCollection inputFeatures, String inputFields) : XML
      */
 
-    public PearsonProcessFactory() {
+    public PearsonCorrelationProcessFactory() {
         super(new NameImpl(NAMESPACE, PROCESS_NAME));
     }
 
     @Override
     protected Process create() {
-        return new PearsonProcess(this);
+        return new PearsonCorrelationProcess(this);
     }
 
     @Override
@@ -88,8 +89,9 @@ public class PearsonProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     /** result */
-    protected static final Parameter<PearsonResult> RESULT = new Parameter<PearsonResult>("result", PearsonResult.class,
-            getResource("Pearson.result.title"), getResource("Pearson.result.description"));
+    protected static final Parameter<PearsonResult> RESULT = new Parameter<PearsonResult>("result",
+            PearsonResult.class, getResource("Pearson.result.title"),
+            getResource("Pearson.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

@@ -27,71 +27,83 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
-import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
-import org.geotools.util.KVP;
+import org.geotools.process.spatialstatistics.enumeration.SpatialJoinType;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
 
 /**
- * StatisticsFeaturesProcessFactory
+ * SpatialJoinProcessFactory
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class StatisticsFeaturesProcessFactory extends SpatialStatisticsProcessFactory {
-    protected static final Logger LOGGER = Logging
-            .getLogger(StatisticsFeaturesProcessFactory.class);
+public class SpatialJoinProcessFactory extends SpatialStatisticsProcessFactory {
+    protected static final Logger LOGGER = Logging.getLogger(SpatialJoinProcessFactory.class);
 
-    private static final String PROCESS_NAME = "StatisticsFeatures";
+    private static final String PROCESS_NAME = "SpatialJoin";
 
     /*
-     * StatisticsFeatures(SimpleFeatureCollection inputFeatures, String inputFields) : XML
+     * SpatialJoin(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection joinFeatures, SpatialJoinType joinType) : SimpleFeatureCollection
      */
 
-    public StatisticsFeaturesProcessFactory() {
+    public SpatialJoinProcessFactory() {
         super(new NameImpl(NAMESPACE, PROCESS_NAME));
     }
 
     @Override
     protected Process create() {
-        return new StatisticsFeaturesProcess(this);
+        return new SpatialJoinProcess(this);
     }
 
     @Override
     public InternationalString getTitle() {
-        return getResource("StatisticsFeatures.title");
+        return getResource("SpatialJoin.title");
     }
 
     @Override
     protected InternationalString getDescription() {
-        return getResource("StatisticsFeatures.description");
+        return getResource("SpatialJoin.description");
     }
 
     /** inputFeatures */
     protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
-            getResource("StatisticsFeatures.inputFeatures.title"),
-            getResource("StatisticsFeatures.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "All"));
+            getResource("SpatialJoin.inputFeatures.title"),
+            getResource("SpatialJoin.inputFeatures.description"), true, 1, 1, null, null);
 
-    /** inputFields */
-    public static final Parameter<String> inputFields = new Parameter<String>("inputFields",
-            String.class, getResource("StatisticsFeatures.inputFields.title"),
-            getResource("StatisticsFeatures.inputFields.description"), true, 1, 1, null, null);
+    /** joinFeatures */
+    protected static final Parameter<SimpleFeatureCollection> joinFeatures = new Parameter<SimpleFeatureCollection>(
+            "joinFeatures", SimpleFeatureCollection.class,
+            getResource("SpatialJoin.joinFeatures.title"),
+            getResource("SpatialJoin.joinFeatures.description"), true, 1, 1, null, null);
+
+    /** joinType */
+    protected static final Parameter<SpatialJoinType> joinType = new Parameter<SpatialJoinType>(
+            "joinType", SpatialJoinType.class, getResource("SpatialJoin.joinType.title"),
+            getResource("SpatialJoin.joinType.description"), false, 0, 1,
+            SpatialJoinType.KeepAllRecord, null);
+
+    /** searchRadius */
+    protected static final Parameter<Double> searchRadius = new Parameter<Double>("searchRadius",
+            Double.class, getResource("SpatialJoin.searchRadius.title"),
+            getResource("SpatialJoin.searchRadius.description"), false, 0, 1, Double.valueOf(0.0d),
+            null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
-        parameterInfo.put(inputFields.key, inputFields);
+        parameterInfo.put(joinFeatures.key, joinFeatures);
+        parameterInfo.put(joinType.key, joinType);
+        parameterInfo.put(searchRadius.key, searchRadius);
         return parameterInfo;
     }
 
     /** result */
-    protected static final Parameter<DataStatisticsResult> RESULT = new Parameter<DataStatisticsResult>(
-            "result", DataStatisticsResult.class, getResource("StatisticsFeatures.result.title"),
-            getResource("StatisticsFeatures.result.description"));
+    protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
+            "result", SimpleFeatureCollection.class, getResource("SpatialJoin.result.title"),
+            getResource("SpatialJoin.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

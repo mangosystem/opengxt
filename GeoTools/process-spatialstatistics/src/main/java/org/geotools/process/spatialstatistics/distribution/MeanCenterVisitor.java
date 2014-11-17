@@ -14,17 +14,29 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *    Lesser General Public License for more details.
  */
-package org.geotools.process.spatialstatistics.enumeration;
+package org.geotools.process.spatialstatistics.distribution;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 /**
- * FishnetType
+ * MeanCenter Visitor
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public enum FishnetType {
-    Rectangle,
-    
-    Circle
+public class MeanCenterVisitor extends AbstractDistributionVisitor {
+
+    @SuppressWarnings("unchecked")
+    public void visit(Coordinate coordinate, Object caseVal, double weightVal, double dimVal) {
+        caseVal = caseVal == null ? CASE_ALL : caseVal;
+        MeanCenter meanCenter = (MeanCenter) resuleMap.get(caseVal);
+
+        if (meanCenter == null) {
+            meanCenter = new MeanCenter();
+            resuleMap.put(caseVal, meanCenter);
+        }
+
+        meanCenter.addValue(coordinate, weightVal, dimVal);
+    }
 }

@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
+import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
 
@@ -41,10 +42,10 @@ import org.opengis.util.InternationalString;
 public class NearestNeighborProcessFactory extends SpatialStatisticsProcessFactory {
     protected static final Logger LOGGER = Logging.getLogger(NearestNeighborProcessFactory.class);
 
-    private static final String PROCESS_NAME = "NearestNeighbor";
+    private static final String PROCESS_NAME = "NearestNeighborIndex";
 
     /*
-     * NearestNeighbor(SimpleFeatureCollection inputFeatures, DistanceMethod distanceMethod, Double NearestNeighbor): XML
+     * NearestNeighborIndex(SimpleFeatureCollection inputFeatures, DistanceMethod distanceMethod, Double NearestNeighbor): XML
      */
 
     public NearestNeighborProcessFactory() {
@@ -69,21 +70,21 @@ public class NearestNeighborProcessFactory extends SpatialStatisticsProcessFacto
     /** inputFeatures */
     protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
-            getResource("NearestNeighbor.inputFeatures.title"), getResource("NearestNeighbor.inputFeatures.description"),
-            true, 1, 1, null, null);
+            getResource("NearestNeighbor.inputFeatures.title"),
+            getResource("NearestNeighbor.inputFeatures.description"), true, 1, 1, null, null);
 
     /** distanceMethod */
     protected static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
-            "distanceMethod",
-            DistanceMethod.class,
-            getResource("NearestNeighbor.distanceMethod.title"), getResource("NearestNeighbor.distanceMethod.description"),
-            false, 0, 1, DistanceMethod.Euclidean, null);
+            "distanceMethod", DistanceMethod.class,
+            getResource("NearestNeighbor.distanceMethod.title"),
+            getResource("NearestNeighbor.distanceMethod.description"), false, 0, 1,
+            DistanceMethod.Euclidean, null);
 
     /** area */
     protected static final Parameter<Double> area = new Parameter<Double>("area", Double.class,
-            getResource("NearestNeighbor.area.title"), getResource("NearestNeighbor.area.description"),
-            false, 0, 1, 0.0, null);
-    
+            getResource("NearestNeighbor.area.title"),
+            getResource("NearestNeighbor.area.description"), false, 0, 1, 0.0, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
@@ -94,8 +95,9 @@ public class NearestNeighborProcessFactory extends SpatialStatisticsProcessFacto
     }
 
     /** result */
-    protected static final Parameter<String> RESULT = new Parameter<String>("result", String.class,
-            getResource("NearestNeighbor.result.title"), getResource("NearestNeighbor.result.description"));
+    protected static final Parameter<NearestNeighborResult> RESULT = new Parameter<NearestNeighborResult>(
+            "result", NearestNeighborResult.class, getResource("NearestNeighbor.result.title"),
+            getResource("NearestNeighbor.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

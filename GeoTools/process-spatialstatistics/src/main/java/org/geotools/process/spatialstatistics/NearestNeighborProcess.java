@@ -28,6 +28,8 @@ import org.geotools.process.ProcessFactory;
 import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
+import org.geotools.process.spatialstatistics.pattern.NNIOperation;
+import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
@@ -36,7 +38,7 @@ import org.opengis.util.ProgressListener;
 /**
  * Calculates a nearest neighbor index based on the average distance from each feature to its nearest neighboring feature.
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -53,8 +55,8 @@ public class NearestNeighborProcess extends AbstractProcess {
         return factory;
     }
 
-    public static String process(SimpleFeatureCollection inputFeatures, DistanceMethod distanceMethod, 
-            Double area, ProgressListener monitor) {
+    public static NearestNeighborResult process(SimpleFeatureCollection inputFeatures,
+            DistanceMethod distanceMethod, Double area, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(NearestNeighborProcessFactory.inputFeatures.key, inputFeatures);
         map.put(NearestNeighborProcessFactory.distanceMethod.key, distanceMethod);
@@ -64,7 +66,7 @@ public class NearestNeighborProcess extends AbstractProcess {
         Map<String, Object> resultMap;
         try {
             resultMap = process.execute(map, monitor);
-            return (String) resultMap.get(NearestNeighborProcessFactory.RESULT.key);
+            return (NearestNeighborResult) resultMap.get(NearestNeighborProcessFactory.RESULT.key);
         } catch (ProcessException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
@@ -105,8 +107,11 @@ public class NearestNeighborProcess extends AbstractProcess {
             }
 
             // start process
-            Object nni = inputFeatures;
-            // TODO : Implement nni
+            NNIOperation operation = new NNIOperation();
+            if (area == null) {
+                area = Double.valueOf(0.0d);
+            }
+            NearestNeighborResult nni = operation.execute(inputFeatures, area);
             // end process
 
             monitor.setTask(Text.text("Encoding result"));

@@ -7,12 +7,11 @@
       <Process>org.geotools.process.spatialstatistics.CountFeaturesProcessFactory</Process>
       <Process>org.geotools.process.spatialstatistics.AreaProcessFactory</Process>
       <Process>org.geotools.process.spatialstatistics.StatisticsFeaturesProcessFactory</Process>
-      <Process>org.geotools.process.spatialstatistics.PearsonProcessFactory</Process>
+      <Process>org.geotools.process.spatialstatistics.PearsonCorrelationProcessFactory</Process>
     </SubCategory>
     <SubCategory>
       <Name>Point Pattern Analysis</Name>
       <Process>org.geotools.process.spatialstatistics.NearestNeighborProcessFactory</Process>
-      <Process>org.geotools.process.spatialstatistics.PointStatisticsProcessFactory</Process>
     </SubCategory>
     <SubCategory>
       <Name>Spatial Autocorrelation</Name>
@@ -23,6 +22,7 @@
       <Name>Spatial Cluster and Outlier</Name>
       <Process>org.geotools.process.spatialstatistics.LocalMoransIProcessFactory</Process>
       <Process>org.geotools.process.spatialstatistics.LocalGStatisticsProcessFactory</Process>
+      <Process>org.geotools.process.spatialstatistics.KMeansClusterProcessFactory</Process>
     </SubCategory>
     <SubCategory>
       <Name>Spatial Distribution</Name>
@@ -34,6 +34,9 @@
       <Process>org.geotools.process.spatialstatistics.CollectEventsProcessFactory</Process>
       <Process>org.geotools.process.spatialstatistics.UnionPolygonProcessFactory</Process>
       <Process>org.geotools.process.spatialstatistics.CalculateFieldProcessFactory</Process>
+      <Process>org.geotools.process.spatialstatistics.SpatialJoinProcessFactory</Process>
+      <Process>org.geotools.process.spatialstatistics.PointStatisticsProcessFactory</Process>
+      <Process>org.geotools.process.spatialstatistics.BufferStatisticsProcessFactory</Process>
       <Process>org.geotools.process.spatialstatistics.FishnetProcessFactory</Process>
       <Process>org.geotools.process.spatialstatistics.HexagonProcessFactory</Process>
     </SubCategory>

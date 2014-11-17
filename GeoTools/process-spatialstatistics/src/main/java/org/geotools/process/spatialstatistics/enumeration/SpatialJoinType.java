@@ -17,14 +17,14 @@
 package org.geotools.process.spatialstatistics.enumeration;
 
 /**
- * FishnetType
+ * SpatialJoinType
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public enum FishnetType {
-    Rectangle,
+public enum SpatialJoinType {
+    KeepAllRecord,
     
-    Circle
+    OnlyMatchingRecord
 }

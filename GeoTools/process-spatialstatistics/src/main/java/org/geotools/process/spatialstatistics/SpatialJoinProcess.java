@@ -27,25 +27,26 @@ import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.distribution.MeanCenterOperation;
+import org.geotools.process.spatialstatistics.enumeration.SpatialJoinType;
+import org.geotools.process.spatialstatistics.operations.SpatialJoinOperation;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
 /**
- * Identifies the geographic center (or the center of concentration) for a set of features.
+ * Perform spatial join
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class MeanCenterProcess extends AbstractProcess {
-    protected static final Logger LOGGER = Logging.getLogger(MeanCenterProcess.class);
+public class SpatialJoinProcess extends AbstractProcess {
+    protected static final Logger LOGGER = Logging.getLogger(SpatialJoinProcess.class);
 
     private boolean started = false;
 
-    public MeanCenterProcess(ProcessFactory factory) {
+    public SpatialJoinProcess(ProcessFactory factory) {
         super(factory);
     }
 
@@ -54,18 +55,19 @@ public class MeanCenterProcess extends AbstractProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            String weightField, String caseField, String dimensionField, ProgressListener monitor) {
+            SimpleFeatureCollection joinFeatures, SpatialJoinType joinType, Double searchRadius,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(MeanCenterProcessFactory.inputFeatures.key, inputFeatures);
-        map.put(MeanCenterProcessFactory.weightField.key, weightField);
-        map.put(MeanCenterProcessFactory.caseField.key, caseField);
-        map.put(MeanCenterProcessFactory.dimensionField.key, dimensionField);
+        map.put(SpatialJoinProcessFactory.inputFeatures.key, inputFeatures);
+        map.put(SpatialJoinProcessFactory.joinFeatures.key, joinFeatures);
+        map.put(SpatialJoinProcessFactory.joinType.key, joinType);
+        map.put(SpatialJoinProcessFactory.searchRadius.key, searchRadius);
 
-        Process process = new MeanCenterProcess(null);
+        Process process = new SpatialJoinProcess(null);
         Map<String, Object> resultMap;
         try {
             resultMap = process.execute(map, monitor);
-            return (SimpleFeatureCollection) resultMap.get(MeanCenterProcessFactory.RESULT.key);
+            return (SimpleFeatureCollection) resultMap.get(SpatialJoinProcessFactory.RESULT.key);
         } catch (ProcessException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
@@ -88,16 +90,17 @@ public class MeanCenterProcess extends AbstractProcess {
             monitor.progress(10.0f);
 
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, MeanCenterProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
+                    input, SpatialJoinProcessFactory.inputFeatures, null);
+            SimpleFeatureCollection joinFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                    SpatialJoinProcessFactory.joinFeatures, null);
+            if (inputFeatures == null || joinFeatures == null) {
+                throw new NullPointerException("inputFeatures and joinFeatures parameters required");
             }
-            String weightField = (String) Params.getValue(input,
-                    MeanCenterProcessFactory.weightField, null);
-            String caseField = (String) Params.getValue(input, MeanCenterProcessFactory.caseField,
-                    null);
-            String dimensionField = (String) Params.getValue(input,
-                    MeanCenterProcessFactory.dimensionField, null);
+            SpatialJoinType joinType = (SpatialJoinType) Params.getValue(input,
+                    SpatialJoinProcessFactory.joinType, SpatialJoinProcessFactory.joinType.sample);
+            Double searchRadius = (Double) Params.getValue(input,
+                    SpatialJoinProcessFactory.searchRadius,
+                    SpatialJoinProcessFactory.searchRadius.sample);
 
             monitor.setTask(Text.text("Processing ..."));
             monitor.progress(25.0f);
@@ -107,16 +110,17 @@ public class MeanCenterProcess extends AbstractProcess {
             }
 
             // start process
-            MeanCenterOperation operation = new MeanCenterOperation();
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, weightField,
-                    caseField, dimensionField);
+            SpatialJoinOperation operation = new SpatialJoinOperation();
+            operation.setSearchRadius(searchRadius);
+            
+            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, joinFeatures, joinType);
             // end process
 
             monitor.setTask(Text.text("Encoding result"));
             monitor.progress(90.0f);
 
             Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(MeanCenterProcessFactory.RESULT.key, resultFc);
+            resultMap.put(SpatialJoinProcessFactory.RESULT.key, resultFc);
             monitor.complete(); // same as 100.0f
 
             return resultMap;
@@ -127,4 +131,5 @@ public class MeanCenterProcess extends AbstractProcess {
             monitor.dispose();
         }
     }
+
 }

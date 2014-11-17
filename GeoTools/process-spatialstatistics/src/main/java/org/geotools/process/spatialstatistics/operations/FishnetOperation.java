@@ -1,4 +1,20 @@
-package org.geotools.process.spatialstatistics.core;
+/*
+ *    GeoTools - The Open Source Java GIS Toolkit
+ *    http://geotools.org
+ *
+ *    (C) 2014, Open Source Geospatial Foundation (OSGeo)
+ *
+ *    This library is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation;
+ *    version 2.1 of the License.
+ *
+ *    This library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ */
+package org.geotools.process.spatialstatistics.operations;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -6,8 +22,8 @@ import java.util.logging.Logger;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.enumeration.FishnetType;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
@@ -15,19 +31,22 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Creates a fishnet of rectangular cells.
  * 
- * @author Minpa Lee
+ * @author Minpa Lee, MangoSystem  
+ *
+ * @source $URL$
  * 
  */
-public class FishnetOperation {
+public class FishnetOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(FishnetOperation.class);
-
-    private GeometryFactory gf = JTSFactoryFinder.getGeometryFactory(null);
+    
+    private final String TYPE_NAME = "fishnet";
+    
+    private final String UID = "uid";
 
     private FishnetType fishnetType = FishnetType.Rectangle;
 
@@ -55,11 +74,11 @@ public class FishnetOperation {
         columns = columns * width < bbox.getWidth() ? columns + 1 : columns;
         rows = rows * height < bbox.getHeight() ? rows + 1 : rows;
 
-        // 컬럼 및 로 수에 맞게 Envelope을 재계산한다.
+        // recalculate envelope : origin = lower left
         final double x1 = bbox.getMinX();
         final double y1 = bbox.getMinY();
-        final double x2 = bbox.getMinX() + columns * width;
-        final double y2 = bbox.getMinY() + rows * height;
+        final double x2 = bbox.getMinX() + (columns * width);
+        final double y2 = bbox.getMinY() + (rows * height);
 
         CoordinateReferenceSystem crs = bbox.getCoordinateReferenceSystem();
         ReferencedEnvelope finalBBox = new ReferencedEnvelope(crs);
@@ -70,45 +89,45 @@ public class FishnetOperation {
 
     public SimpleFeatureCollection execute(ReferencedEnvelope bbox, Integer columns, Integer rows)
             throws IOException {
-        // prepare transactional feature store
         CoordinateReferenceSystem crs = bbox.getCoordinateReferenceSystem();
-        SimpleFeatureType featureType = FeatureTypes.getDefaultType("fishnet", Polygon.class, crs);
-        featureType = FeatureTypes.add(featureType, "uid", Integer.class, 38);
+        SimpleFeatureType schema = FeatureTypes.getDefaultType(TYPE_NAME, Polygon.class, crs);
+        schema = FeatureTypes.add(schema, UID, Integer.class, 19);
 
-        // insert features
         final double width = bbox.getWidth() / columns;
         final double height = bbox.getHeight() / rows;
 
         final double minX = bbox.getMinX();
         final double minY = bbox.getMinY();
         ReferencedEnvelope bounds = new ReferencedEnvelope(crs);
-        int featureID = 0;
 
-        ListFeatureCollection fishnet = new ListFeatureCollection(featureType);
-        SimpleFeatureBuilder builder = new SimpleFeatureBuilder(featureType);
+        // insert features
+        int featureID = 0;
+        ListFeatureCollection fishnet = new ListFeatureCollection(schema);
+        SimpleFeatureBuilder builder = new SimpleFeatureBuilder(schema);
         for (int row = 0; row < rows; row++) {
             final double ypos = minY + (height * row);
             for (int col = 0; col < columns; col++) {
                 final double xpos = minX + (width * col);
                 bounds.init(xpos, xpos + width, ypos, ypos + height);
-                Geometry polyGeom = null;
+                
+                Geometry cellGeom = null;
                 switch (fishnetType) {
                 case Rectangle:
-                    polyGeom = gf.toGeometry(bounds);
+                    cellGeom = gf.toGeometry(bounds);
                     break;
                 case Circle:
                     final double radius = bounds.getWidth() / 2.0;
-                    polyGeom = gf.createPoint(bounds.centre()).buffer(radius);
+                    cellGeom = gf.createPoint(bounds.centre()).buffer(radius);
                     break;
                 }
 
                 if (geometryBoundary != null) {
                     if (boundaryInside) {
-                        if (!geometryBoundary.contains(polyGeom)) {
+                        if (!geometryBoundary.contains(cellGeom)) {
                             continue;
                         }
                     } else {
-                        if (!geometryBoundary.intersects(polyGeom)) {
+                        if (!geometryBoundary.intersects(cellGeom)) {
                             continue;
                         }
                     }
@@ -116,9 +135,9 @@ public class FishnetOperation {
 
                 // create feature and set geometry
                 builder.reset();
-                builder.set("uid", ++featureID);
-                SimpleFeature newFeature = builder.buildFeature("fishnet." + featureID);
-                newFeature.setDefaultGeometry(polyGeom);
+                builder.set(UID, ++featureID);
+                SimpleFeature newFeature = builder.buildFeature(TYPE_NAME + "." + featureID);
+                newFeature.setDefaultGeometry(cellGeom);
                 fishnet.add(newFeature);
             }
         }

@@ -80,8 +80,7 @@ public class FeatureCollectionGML311PPIO extends XMLPPIO {
             CoordinateReferenceSystem crs = getCollectionCRS(fc);
             if (crs != null) {
                 // do we need to force the crs onto the collection?
-                CoordinateReferenceSystem nativeCrs = fc.getSchema().getGeometryDescriptor()
-                        .getCoordinateReferenceSystem();
+                CoordinateReferenceSystem nativeCrs = fc.getSchema().getCoordinateReferenceSystem();
                 if (nativeCrs == null) {
                     // we need crs forcing
                     fc = new ForceCoordinateSystemFeatureResults(fc, crs, false);

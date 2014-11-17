@@ -14,17 +14,27 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *    Lesser General Public License for more details.
  */
-package org.geotools.process.spatialstatistics.enumeration;
+package org.geotools.process.spatialstatistics.distribution;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
- * FishnetType
+ * Abstract Distribution Visitor
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public enum FishnetType {
-    Rectangle,
-    
-    Circle
+public abstract class AbstractDistributionVisitor {
+    protected static final String CASE_ALL = "ALL";
+
+    @SuppressWarnings("rawtypes")
+    protected HashMap resuleMap = new LinkedHashMap();
+
+    @SuppressWarnings("rawtypes")
+    public HashMap getResult() {
+        return resuleMap;
+    }
+
 }

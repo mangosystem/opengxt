@@ -16,25 +16,38 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.impl.AbstractProcess;
+import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.text.Text;
+import org.geotools.util.Converters;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.util.ProgressListener;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.index.kdtree.KdNode;
+import com.vividsolutions.jts.index.kdtree.KdTree;
+
 /**
- * Collect Event combines coincident points. 
- * It converts event data, such as crime or disease incidents, to weighted point data.
+ * Collect Event combines coincident points. It converts event data, such as crime or disease incidents, to weighted point data.
  * 
  * @author Minpa Lee, MangoSystem
  * 
@@ -104,18 +117,8 @@ public class CollectEventsProcess extends AbstractProcess {
             }
 
             // start process
-            SimpleFeatureCollection resultFc = inputFeatures;
-
-            // // build the feature type
-            // SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder();
-            // tb.setName(name);
-            // tb.add("geom", geometry.getClass(), inputFeatures.getSchema().getCoordinateReferenceSystem());
-            // SimpleFeatureType schema = tb.buildFeatureType();
-            //
-            // // build the feature
-            // SimpleFeature sf = SimpleFeatureBuilder.build(schema, new Object[] { geometry }, null);
-            // ListFeatureCollection result = new ListFeatureCollection(schema);
-
+            CollectEventsOperation operation = new CollectEventsOperation();
+            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, countField);
             // end process
 
             monitor.setTask(Text.text("Encoding result"));
@@ -132,6 +135,88 @@ public class CollectEventsProcess extends AbstractProcess {
         } finally {
             monitor.dispose();
         }
+    }
+
+    public class CollectEventsOperation {
+
+        public static final double XY_TOL = 0.1;
+
+        public SimpleFeatureCollection execute(SimpleFeatureCollection points, String countField) {
+            String typeName = points.getSchema().getTypeName();
+            SimpleFeatureType schema = FeatureTypes.build(points.getSchema(), typeName);
+            if (countField == null || countField.isEmpty()) {
+                countField = CollectEventsProcessFactory.countField.sample.toString();
+            }
+            schema = FeatureTypes.add(schema, countField, Integer.class);
+            Class<?> outputBinding = schema.getDescriptor(countField).getType().getBinding();
+
+            KdTree kdTree = buildIndex(points);
+            List<String> processedMap = new ArrayList<String>();
+
+            ListFeatureCollection featureCollection = new ListFeatureCollection(schema);
+            SimpleFeatureBuilder builder = new SimpleFeatureBuilder(schema);
+            SimpleFeatureIterator featureIter = points.features();
+            try {
+                while (featureIter.hasNext()) {
+                    SimpleFeature feature = featureIter.next();
+                    String featureID = feature.getID();
+                    if (processedMap.contains(featureID)) {
+                        continue;
+                    }
+
+                    Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                    Geometry buffered = geometry.buffer(XY_TOL);
+
+                    int featureCount = 1;
+                    @SuppressWarnings("unchecked")
+                    List<KdNode> nodes = kdTree.query(buffered.getEnvelopeInternal());
+                    if (nodes.size() > 0) {
+                        Coordinate coordinate = geometry.getCoordinate();
+                        for (KdNode node : nodes) {
+                            String fid = node.getData().toString();
+                            if (processedMap.contains(fid) || fid.equals(featureID)) {
+                                continue;
+                            }
+
+                            double dist = coordinate.distance(node.getCoordinate());
+                            if (dist > XY_TOL) {
+                                continue;
+                            }
+                            featureCount++;
+                            processedMap.add(fid);
+                        }
+                    }
+
+                    // create & insert feature
+                    builder.init(feature);
+                    SimpleFeature newFeature = builder.buildFeature(featureID);
+                    Object countVal = Converters.convert(featureCount, outputBinding);
+                    newFeature.setAttribute(countField, countVal);
+                    featureCollection.add(newFeature);
+                    processedMap.add(featureID);
+                }
+            } finally {
+                featureIter.close();
+            }
+
+            return featureCollection;
+        }
+
+        private KdTree buildIndex(SimpleFeatureCollection points) {
+            KdTree spatialIndex = new KdTree(0.0d);
+            SimpleFeatureIterator featureIter = points.features();
+            try {
+                while (featureIter.hasNext()) {
+                    SimpleFeature feature = featureIter.next();
+                    Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                    spatialIndex.insert(geometry.getCoordinate(), feature.getID());
+                }
+            } finally {
+                featureIter.close();
+            }
+            return spatialIndex;
+        }
+
     }
 
 }

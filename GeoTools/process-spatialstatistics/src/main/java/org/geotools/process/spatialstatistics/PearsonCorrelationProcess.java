@@ -27,25 +27,29 @@ import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.distribution.MeanCenterOperation;
+import org.geotools.process.spatialstatistics.operations.PearsonOperation;
+import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
 /**
- * Identifies the geographic center (or the center of concentration) for a set of features.
+ * Pearson product-moment correlation coefficient (sometimes referred to as the PPMCC or PCC or Pearson's r) is a measure of the linear correlation
+ * (dependence) between two variables X and Y, giving a value between +1 and −1 inclusive, where 1 is total positive correlation, 0 is no correlation,
+ * and −1 is total negative correlation.
  * 
+ * @reference : http://en.wikipedia.org/wiki/Pearson_product-moment_correlation_coefficient
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class MeanCenterProcess extends AbstractProcess {
-    protected static final Logger LOGGER = Logging.getLogger(MeanCenterProcess.class);
+public class PearsonCorrelationProcess extends AbstractProcess {
+    protected static final Logger LOGGER = Logging.getLogger(PearsonCorrelationProcess.class);
 
     private boolean started = false;
 
-    public MeanCenterProcess(ProcessFactory factory) {
+    public PearsonCorrelationProcess(ProcessFactory factory) {
         super(factory);
     }
 
@@ -53,19 +57,17 @@ public class MeanCenterProcess extends AbstractProcess {
         return factory;
     }
 
-    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            String weightField, String caseField, String dimensionField, ProgressListener monitor) {
+    public static PearsonResult process(SimpleFeatureCollection inputFeatures, String fieldName,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(MeanCenterProcessFactory.inputFeatures.key, inputFeatures);
-        map.put(MeanCenterProcessFactory.weightField.key, weightField);
-        map.put(MeanCenterProcessFactory.caseField.key, caseField);
-        map.put(MeanCenterProcessFactory.dimensionField.key, dimensionField);
+        map.put(PearsonCorrelationProcessFactory.inputFeatures.key, inputFeatures);
+        map.put(PearsonCorrelationProcessFactory.inputFields.key, fieldName);
 
-        Process process = new MeanCenterProcess(null);
+        Process process = new PearsonCorrelationProcess(null);
         Map<String, Object> resultMap;
         try {
             resultMap = process.execute(map, monitor);
-            return (SimpleFeatureCollection) resultMap.get(MeanCenterProcessFactory.RESULT.key);
+            return (PearsonResult) resultMap.get(PearsonCorrelationProcessFactory.RESULT.key);
         } catch (ProcessException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
@@ -88,16 +90,12 @@ public class MeanCenterProcess extends AbstractProcess {
             monitor.progress(10.0f);
 
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, MeanCenterProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
+                    input, PearsonCorrelationProcessFactory.inputFeatures, null);
+            String inputFields = (String) Params.getValue(input,
+                    PearsonCorrelationProcessFactory.inputFields, null);
+            if (inputFeatures == null || inputFields == null) {
+                throw new NullPointerException("All parameters required");
             }
-            String weightField = (String) Params.getValue(input,
-                    MeanCenterProcessFactory.weightField, null);
-            String caseField = (String) Params.getValue(input, MeanCenterProcessFactory.caseField,
-                    null);
-            String dimensionField = (String) Params.getValue(input,
-                    MeanCenterProcessFactory.dimensionField, null);
 
             monitor.setTask(Text.text("Processing ..."));
             monitor.progress(25.0f);
@@ -107,16 +105,15 @@ public class MeanCenterProcess extends AbstractProcess {
             }
 
             // start process
-            MeanCenterOperation operation = new MeanCenterOperation();
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, weightField,
-                    caseField, dimensionField);
+            PearsonOperation operation = new PearsonOperation();
+            PearsonResult ret = operation.execute(inputFeatures, inputFields);
             // end process
 
             monitor.setTask(Text.text("Encoding result"));
             monitor.progress(90.0f);
 
             Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(MeanCenterProcessFactory.RESULT.key, resultFc);
+            resultMap.put(PearsonCorrelationProcessFactory.RESULT.key, ret);
             monitor.complete(); // same as 100.0f
 
             return resultMap;

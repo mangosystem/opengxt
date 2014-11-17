@@ -1,3 +1,19 @@
+/*
+ *    GeoTools - The Open Source Java GIS Toolkit
+ *    http://geotools.org
+ *
+ *    (C) 2014, Open Source Geospatial Foundation (OSGeo)
+ *
+ *    This library is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation;
+ *    version 2.1 of the License.
+ *
+ *    This library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ */
 package org.geotools.process.spatialstatistics.core;
 
 import java.util.logging.Logger;
@@ -10,18 +26,17 @@ import com.vividsolutions.jts.geom.Point;
 /**
  * Utility class for spatial statistics
  * 
- * @author Minpa Lee
- * @since 1.0
- * @version $Id: SSUtils.java 1 2011-09-01 11:22:29Z minpa.lee $
+ * @author Minpa Lee, MangoSystem
+ * 
+ * @source $URL$
  */
 public class SSUtils {
     protected static final Logger LOGGER = Logging.getLogger(SSUtils.class);
 
     public enum StatEnum {
-        LEFT, // area under the curve to the left
-        RIGHT, // area under the curve to the right
-        BOTH
-        // two-tailed test
+        LEFT,   // area under the curve to the left
+        RIGHT,  // area under the curve to the right
+        BOTH   // two-tailed test
     }
 
     /** Default tolerance for double comparisons: 1.0e-8 = 0.00000001 */
@@ -163,15 +178,6 @@ public class SSUtils {
         return dx + dy;
     }
 
-    /**
-     * 두 값의 절대값 차(|a - b|)가 rTol 내에 있을 경우 같다(true) GridCoverage2D를 tiff로 저장하는 경우 NoData값이 미세하게 변경되는
-     * 경우가 있음
-     * 
-     * @param a
-     * @param b
-     * @param rTol
-     * @return
-     */
     public static boolean compareDouble(double a, double b, double rTol) {
         // a (float): float to be compared
         // b (float): float to be compared
@@ -189,27 +195,10 @@ public class SSUtils {
         return false;
     }
 
-    /**
-     * 두 값의 절대값 차(|a - b|)가 rTol(기본값: 0.000000001) 내에 있을 경우 같다(true) GridCoverage2D를 tiff로 저장하는 경우
-     * NoData값이 미세하게 변경되는 경우가 있음
-     * 
-     * @param a
-     * @param b
-     * @return
-     */
     public static boolean compareDouble(double a, double b) {
         return compareDouble(a, b, DOUBLE_COMPARE_TOLERANCE);
     }
 
-    /**
-     * 두 값의 절대값 차(|a - b|)가 rTol 내에 있을 경우 같다(true) GridCoverage2D를 tiff로 저장하는 경우 NoData값이 미세하게 변경되는
-     * 경우가 있음
-     * 
-     * @param a
-     * @param b
-     * @param rTol
-     * @return
-     */
     public static boolean compareFloat(float a, float b, float rTol) {
         // a (float): float to be compared
         // b (float): float to be compared
@@ -218,8 +207,6 @@ public class SSUtils {
 
         final float aTol = 0.0001f;
 
-        // return (boolean): true if |a - b| < aTol + (rTol * |b|)
-
         if (Math.abs(a - b) < aTol + (rTol * Math.abs(b))) {
             return true;
         }
@@ -227,14 +214,6 @@ public class SSUtils {
         return false;
     }
 
-    /**
-     * 두 값의 절대값 차(|a - b|)가 rTol(기본값: 0.0001) 내에 있을 경우 같다(true) GridCoverage2D를 tiff로 저장하는 경우
-     * NoData값이 미세하게 변경되는 경우가 있음
-     * 
-     * @param a
-     * @param b
-     * @return
-     */
     public static boolean compareFloat(float a, float b) {
         return compareDouble(a, b, FLOAT_COMPARE_TOLERANCE);
     }

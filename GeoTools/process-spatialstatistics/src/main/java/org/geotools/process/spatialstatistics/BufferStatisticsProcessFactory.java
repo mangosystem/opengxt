@@ -32,70 +32,77 @@ import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
 
 /**
- * PointStatisticsProcessFactory
+ * BufferStatisticsProcessFactory
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class PointStatisticsProcessFactory extends SpatialStatisticsProcessFactory {
-    protected static final Logger LOGGER = Logging.getLogger(PointStatisticsProcessFactory.class);
+public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFactory {
+    protected static final Logger LOGGER = Logging.getLogger(BufferStatisticsProcessFactory.class);
 
-    private static final String PROCESS_NAME = "PointStatistics";
+    private static final String PROCESS_NAME = "BufferPointStatistics";
 
     /*
-     * PointStatistics(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection pointFeatures, statisticsFields String) :
+     * BufferPointStatistics(SimpleFeatureCollection inputFeatures, Double distance, SimpleFeatureCollection pointFeatures, statisticsFields String) :
      * SimpleFeatureCollection
      */
 
-    public PointStatisticsProcessFactory() {
+    public BufferStatisticsProcessFactory() {
         super(new NameImpl(NAMESPACE, PROCESS_NAME));
     }
 
     @Override
     protected Process create() {
-        return new PointStatisticsProcess(this);
+        return new BufferStatisticsProcess(this);
     }
 
     @Override
     public InternationalString getTitle() {
-        return getResource("PointStatistics.title");
+        return getResource("BufferPointStatistics.title");
     }
 
     @Override
     protected InternationalString getDescription() {
-        return getResource("PointStatistics.description");
+        return getResource("BufferPointStatistics.description");
     }
 
-    /** polygonFeatures */
-    protected static final Parameter<SimpleFeatureCollection> polygonFeatures = new Parameter<SimpleFeatureCollection>(
-            "polygonFeatures", SimpleFeatureCollection.class,
-            getResource("PointStatistics.polygonFeatures.title"),
-            getResource("PointStatistics.polygonFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Polygon"));
+    /** inputFeatures */
+    protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+            "inputFeatures", SimpleFeatureCollection.class,
+            getResource("BufferPointStatistics.inputFeatures.title"),
+            getResource("BufferPointStatistics.inputFeatures.description"), true, 1, 1, null, null);
+
+    /** distance */
+    protected static final Parameter<Double> distance = new Parameter<Double>("distance",
+            Double.class, getResource("BufferPointStatistics.distance.title"),
+            getResource("BufferPointStatistics.distance.description"), true, 1, 1,
+            Double.valueOf(0.0d), null);
 
     /** pointFeatures */
     protected static final Parameter<SimpleFeatureCollection> pointFeatures = new Parameter<SimpleFeatureCollection>(
             "pointFeatures", SimpleFeatureCollection.class,
-            getResource("PointStatistics.pointFeatures.title"),
-            getResource("PointStatistics.pointFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Point"));
+            getResource("BufferPointStatistics.pointFeatures.title"),
+            getResource("BufferPointStatistics.pointFeatures.description"), true, 1, 1, null,
+            new KVP(Parameter.FEATURE_TYPE, "Point"));
 
     /** countField */
     protected static final Parameter<String> countField = new Parameter<String>("countField",
-            String.class, getResource("PointStatistics.countField.title"),
-            getResource("PointStatistics.countField.description"), false, 0, 1, "count", null);
+            String.class, getResource("BufferPointStatistics.countField.title"),
+            getResource("BufferPointStatistics.countField.description"), false, 0, 1, "count", null);
 
     /** statisticsFields */
     protected static final Parameter<String> statisticsFields = new Parameter<String>(
             "statisticsFields", String.class,
-            getResource("PointStatistics.statisticsFields.title"),
-            getResource("PointStatistics.statisticsFields.description"), false, 0, 1, null, null);
+            getResource("BufferPointStatistics.statisticsFields.title"),
+            getResource("BufferPointStatistics.statisticsFields.description"), false, 0, 1, null,
+            null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
-        parameterInfo.put(polygonFeatures.key, polygonFeatures);
+        parameterInfo.put(inputFeatures.key, inputFeatures);
+        parameterInfo.put(distance.key, distance);
         parameterInfo.put(pointFeatures.key, pointFeatures);
         parameterInfo.put(countField.key, countField);
         parameterInfo.put(statisticsFields.key, statisticsFields);
@@ -104,8 +111,9 @@ public class PointStatisticsProcessFactory extends SpatialStatisticsProcessFacto
 
     /** result */
     protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
-            "result", SimpleFeatureCollection.class, getResource("PointStatistics.result.title"),
-            getResource("PointStatistics.result.description"));
+            "result", SimpleFeatureCollection.class,
+            getResource("BufferPointStatistics.result.title"),
+            getResource("BufferPointStatistics.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

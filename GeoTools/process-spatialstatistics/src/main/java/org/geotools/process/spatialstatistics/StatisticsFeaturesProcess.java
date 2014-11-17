@@ -27,6 +27,8 @@ import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation;
+import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
@@ -52,17 +54,18 @@ public class StatisticsFeaturesProcess extends AbstractProcess {
         return factory;
     }
 
-    public static String process(SimpleFeatureCollection inputFeatures, String fieldName,
-            ProgressListener monitor) {
+    public static DataStatisticsResult process(SimpleFeatureCollection inputFeatures,
+            String inputFields, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(StatisticsFeaturesProcessFactory.inputFeatures.key, inputFeatures);
-        map.put(StatisticsFeaturesProcessFactory.inputFields.key, fieldName);
+        map.put(StatisticsFeaturesProcessFactory.inputFields.key, inputFields);
 
         Process process = new StatisticsFeaturesProcess(null);
         Map<String, Object> resultMap;
         try {
             resultMap = process.execute(map, monitor);
-            return (String) resultMap.get(StatisticsFeaturesProcessFactory.RESULT.key);
+            return (DataStatisticsResult) resultMap
+                    .get(StatisticsFeaturesProcessFactory.RESULT.key);
         } catch (ProcessException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
@@ -86,9 +89,9 @@ public class StatisticsFeaturesProcess extends AbstractProcess {
 
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, StatisticsFeaturesProcessFactory.inputFeatures, null);
-            String fieldName = (String) Params.getValue(input, StatisticsFeaturesProcessFactory.inputFields,
-                    null);
-            if (inputFeatures == null || fieldName == null) {
+            String inputFields = (String) Params.getValue(input,
+                    StatisticsFeaturesProcessFactory.inputFields, null);
+            if (inputFeatures == null || inputFields == null) {
                 throw new NullPointerException("All parameters required");
             }
 
@@ -100,14 +103,15 @@ public class StatisticsFeaturesProcess extends AbstractProcess {
             }
 
             // start process
-            String resultFc = null;
+            DataStatisticsOperation operator = new DataStatisticsOperation();
+            DataStatisticsResult result = operator.execute(inputFeatures, inputFields);
             // end process
 
             monitor.setTask(Text.text("Encoding result"));
             monitor.progress(90.0f);
 
             Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(StatisticsFeaturesProcessFactory.RESULT.key, resultFc);
+            resultMap.put(StatisticsFeaturesProcessFactory.RESULT.key, result);
             monitor.complete(); // same as 100.0f
 
             return resultMap;

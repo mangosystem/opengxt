@@ -173,15 +173,15 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
         parentTabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         // 1. Process execution
-        inputTab = makeInputTab(parentTabFolder);
+        inputTab = createInputTab(parentTabFolder);
 
         // 2. Simple output
         if (!outputLocationRequired) {
-            outputTab = makeOutputTab(parentTabFolder);
+            outputTab = createOutputTab(parentTabFolder);
         }
 
         // 3. Help
-        makeHelpTab(parentTabFolder);
+        createHelpTab(parentTabFolder);
 
         parentTabFolder.setSelection(inputTab);
 
@@ -189,13 +189,14 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
         area.pack();
         parentTabFolder.pack();
 
-        height = parentTabFolder.computeSize(SWT.DEFAULT, SWT.DEFAULT).y + 162;
+        //height = parentTabFolder.computeSize(SWT.DEFAULT, SWT.DEFAULT).y + 162;
+        height = parentTabFolder.computeSize(SWT.DEFAULT, SWT.DEFAULT).y + 140;
         height = height > 650 ? 650 : height;
 
         return area;
     }
 
-    private CTabItem makeOutputTab(final CTabFolder parentTabFolder) {
+    private CTabItem createOutputTab(final CTabFolder parentTabFolder) {
         CTabItem tab = new CTabItem(parentTabFolder, SWT.NONE);
         tab.setText(Messages.ProcessExecutionDialog_taboutput);
 
@@ -210,7 +211,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
         return tab;
     }
 
-    private CTabItem makeHelpTab(final CTabFolder parentTabFolder) {
+    private CTabItem createHelpTab(final CTabFolder parentTabFolder) {
         CTabItem tab = new CTabItem(parentTabFolder, SWT.NONE);
         tab.setText(Messages.ProcessExecutionDialog_tabhelp);
 
@@ -228,7 +229,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
         return tab;
     }
 
-    private CTabItem makeInputTab(final CTabFolder parentTabFolder) {
+    private CTabItem createInputTab(final CTabFolder parentTabFolder) {
         CTabItem tab = new CTabItem(parentTabFolder, SWT.NONE);
         tab.setText(Messages.ProcessExecutionDialog_tabparameters);
 
@@ -277,7 +278,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
         container.pack();
 
         scroller.setMinSize(450, container.getSize().y - 2);
-        height = container.getSize().y + 162;
+        //height = container.getSize().y + 162;
         scroller.setExpandVertical(true);
         scroller.setExpandHorizontal(true);
 
@@ -379,6 +380,8 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
                             } else if (fieldType.equalsIgnoreCase(FieldType.Double.toString())) {
                                 MapUtils.fillFields(cboField, schema, FieldType.Double);
                             }
+
+                            // default value
                         }
                     }
                 }
@@ -472,7 +475,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
             final Combo cboBoolean = new Combo(container, SWT.NONE | SWT.DROP_DOWN | SWT.READ_ONLY);
             cboBoolean.setLayoutData(layoutData);
             cboBoolean.setData(param.key);
-            
+
             cboBoolean.add(Messages.ProcessExecutionDialog_Yes);
             cboBoolean.add(Messages.ProcessExecutionDialog_No);
 
@@ -482,14 +485,15 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
             cboBoolean.addModifyListener(new ModifyListener() {
                 @Override
                 public void modifyText(ModifyEvent e) {
-                    Boolean value = cboBoolean.getSelectionIndex() == 0 ? Boolean.TRUE : Boolean.FALSE;
+                    Boolean value = cboBoolean.getSelectionIndex() == 0 ? Boolean.TRUE
+                            : Boolean.FALSE;
                     processParams.put(param.key, value);
                 }
             });
         } else {
             Map<String, Object> metadata = param.metadata;
             if (metadata == null || metadata.size() == 0) {
-                // other literal parameters 
+                // other literal parameters
                 LiteralDataViewer literalView = new LiteralDataViewer(map);
                 literalView.create(container, SWT.NONE, processParams, param);
             } else {
@@ -539,7 +543,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
                     return true;
                 }
             } else {
-                String[] extensions = new String[] { "shp", "shx", "dbf", "prj", "sbn", "sbx", 
+                String[] extensions = new String[] { "shp", "shx", "dbf", "prj", "sbn", "sbx",
                         "qix", "fix", "lyr" };
                 String fileName = outputFile.getName();
                 int pos = outputFile.getName().lastIndexOf(".");
@@ -610,15 +614,15 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
             while (!workTicket.isDone()) {
                 try {
                     Thread.sleep(250);
-                    //System.out.println("Progress:" + workTicket.getProgress() + "percent complete");
+                    // System.out.println("Progress:" + workTicket.getProgress() +
+                    // "percent complete");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
 
-            Map<String, Object> result = null;
             try {
-                result = workTicket.get(); // get is BLOCKING
+                Map<String, Object> result = workTicket.get(); // get is BLOCKING
                 ToolboxPlugin.log("Completed " + windowTitle + "..."); //$NON-NLS-1$ //$NON-NLS-2$
                 if (result != null) {
                     for (Entry<String, Object> entrySet : result.entrySet()) {
@@ -636,12 +640,11 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
                     }
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                ToolboxPlugin.log(e.getMessage());
             } catch (ExecutionException e) {
-                e.printStackTrace();
+                ToolboxPlugin.log(e.getMessage());
             }
             /**************************************************************/
-
         }
     }
 
@@ -657,7 +660,8 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
             ToolboxPlugin.log("Executing " + windowTitle + "..."); //$NON-NLS-1$ //$NON-NLS-2$
 
             org.geotools.process.Process process = factory.create(processName);
-            ProgressListener progessListener = GeoToolsAdapters.progress(SubMonitor.convert(monitor, "processing ", 60));  //$NON-NLS-1$
+            ProgressListener progessListener = GeoToolsAdapters.progress(SubMonitor.convert(
+                    monitor, "processing ", 60)); //$NON-NLS-1$
             final Map<String, Object> result = process.execute(processParams, progessListener);
             monitor.worked(increment);
 
@@ -694,9 +698,11 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
                             MapUtils.addFeaturesToMap(map, outputFile);
                         }
                     } else if (val instanceof BoundingBox) {
+                        Geometry boundingBox = JTS.toGeometry((BoundingBox) val);
+                        boundingBox.setUserData(((BoundingBox) val).getCoordinateReferenceSystem());
+
                         if (exportToShapefile(
-                                geometryToFeatures(JTS.toGeometry((BoundingBox) val),
-                                        processName.toString()), outputFile)) {
+                                geometryToFeatures(boundingBox, processName.toString()), outputFile)) {
                             ToolboxPlugin.log("Adding layer..."); //$NON-NLS-1$
                             MapUtils.addFeaturesToMap(map, outputFile);
                         }
@@ -715,6 +721,12 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
 
     private SimpleFeatureCollection geometryToFeatures(Geometry source, String layerName) {
         CoordinateReferenceSystem crs = map.getViewportModel().getCRS();
+        if (source.getUserData() != null
+                && CoordinateReferenceSystem.class
+                        .isAssignableFrom(source.getUserData().getClass())) {
+            crs = (CoordinateReferenceSystem) source.getUserData();
+        }
+
         SimpleFeatureType schema = FeatureTypes.getDefaultType(layerName, source.getClass(), crs);
 
         ListFeatureCollection features = new ListFeatureCollection(schema);
@@ -730,7 +742,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog implements IRunnable
     private boolean exportToShapefile(SimpleFeatureCollection features, File filePath) {
         String typeName = FilenameUtils.removeExtension(FilenameUtils.getName(filePath.getPath()));
         DataStore dataStore = DataStoreFactory.getShapefileDataStore(filePath.getParent(), false);
-        
+
         ShapeExportOp exportOp = ShapeExportOp.getDefault();
         exportOp.setOutputDataStore(dataStore);
         exportOp.setOutputTypeName(typeName);

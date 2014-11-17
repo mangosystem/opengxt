@@ -27,6 +27,7 @@ import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.operations.PointStatisticsOperation;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
@@ -35,7 +36,7 @@ import org.opengis.util.ProgressListener;
 /**
  * Perform point in polygon analysis
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -52,18 +53,21 @@ public class PointStatisticsProcess extends AbstractProcess {
         return factory;
     }
 
-    public static SimpleFeatureCollection process(SimpleFeatureCollection polygonFeatures, SimpleFeatureCollection pointFeatures, 
-            String statisticsFields, ProgressListener monitor) {
+    public static SimpleFeatureCollection process(SimpleFeatureCollection polygonFeatures,
+            SimpleFeatureCollection pointFeatures, String countField, String statisticsFields,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(PointStatisticsProcessFactory.polygonFeatures.key, polygonFeatures);
         map.put(PointStatisticsProcessFactory.pointFeatures.key, pointFeatures);
+        map.put(PointStatisticsProcessFactory.countField.key, countField);
         map.put(PointStatisticsProcessFactory.statisticsFields.key, statisticsFields);
 
         Process process = new PointStatisticsProcess(null);
         Map<String, Object> resultMap;
         try {
             resultMap = process.execute(map, monitor);
-            return (SimpleFeatureCollection) resultMap.get(PointStatisticsProcessFactory.RESULT.key);
+            return (SimpleFeatureCollection) resultMap
+                    .get(PointStatisticsProcessFactory.RESULT.key);
         } catch (ProcessException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
@@ -87,13 +91,17 @@ public class PointStatisticsProcess extends AbstractProcess {
 
             SimpleFeatureCollection polygonFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, PointStatisticsProcessFactory.polygonFeatures, null);
-            SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(input,
-                    PointStatisticsProcessFactory.pointFeatures,
-                    null);
-            String area = (String) Params.getValue(input, PointStatisticsProcessFactory.statisticsFields,
+            SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(
+                    input, PointStatisticsProcessFactory.pointFeatures, null);
+            String countField = (String) Params.getValue(input,
+                    PointStatisticsProcessFactory.countField,
+                    PointStatisticsProcessFactory.countField.sample);
+            String statisticsFields = (String) Params.getValue(input,
+                    PointStatisticsProcessFactory.statisticsFields,
                     PointStatisticsProcessFactory.statisticsFields.sample);
             if (polygonFeatures == null || pointFeatures == null) {
-                throw new NullPointerException("polygonFeatures and pointFeatures parameters required");
+                throw new NullPointerException(
+                        "polygonFeatures and pointFeatures parameters required");
             }
 
             monitor.setTask(Text.text("Processing ..."));
@@ -104,8 +112,12 @@ public class PointStatisticsProcess extends AbstractProcess {
             }
 
             // start process
-            SimpleFeatureCollection resultFc = polygonFeatures;
-            // TODO : Implement nni
+            PointStatisticsOperation operation = new PointStatisticsOperation();
+            operation.setBufferDistance(0.0);
+            SimpleFeatureCollection resultFc = operation.execute(polygonFeatures, countField,
+                    statisticsFields, pointFeatures);
+            ;
+
             // end process
 
             monitor.setTask(Text.text("Encoding result"));

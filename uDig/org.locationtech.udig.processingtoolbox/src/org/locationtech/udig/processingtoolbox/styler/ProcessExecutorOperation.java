@@ -49,6 +49,7 @@ import org.locationtech.udig.processingtoolbox.common.FeatureTypes.SimpleShapeTy
 import org.locationtech.udig.processingtoolbox.common.FormatUtils;
 import org.locationtech.udig.processingtoolbox.common.RasterSaveAsOp;
 import org.locationtech.udig.processingtoolbox.common.ShapeExportOp;
+import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.ui.ApplicationGIS;
@@ -70,6 +71,8 @@ import com.vividsolutions.jts.geom.Geometry;
 public class ProcessExecutorOperation implements IRunnableWithProgress {
     protected static final Logger LOGGER = Logging.getLogger(ProcessExecutorOperation.class);
 
+    final String lineSeparator = System.getProperty("line.separator"); //$NON-NLS-1$
+    
     private IMap map;
 
     private org.geotools.process.ProcessFactory factory;
@@ -103,21 +106,21 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
     public void run(IProgressMonitor monitor) throws InvocationTargetException,
             InterruptedException {
         int increment = 10;
-        monitor.beginTask("Running operation...", 100); //$NON-NLS-1$
+        monitor.beginTask(Messages.Task_Running, 100);
         monitor.worked(increment);
 
         try {
-            monitor.setTaskName("Running operation..."); //$NON-NLS-1$
-            ToolboxPlugin.log("Executing " + windowTitle + "..."); //$NON-NLS-1$ //$NON-NLS-2$
+            monitor.setTaskName(String.format(Messages.Task_Executing, windowTitle));
+            ToolboxPlugin.log(String.format(Messages.Task_Executing, windowTitle));
 
             ProgressListener subMonitor = GeoToolsAdapters.progress(SubMonitor.convert(monitor,
-                    "Internal Processing... ", 60)); //$NON-NLS-1$
+                    Messages.Task_Internal, 60));
 
             org.geotools.process.Process process = factory.create(processName);
             final Map<String, Object> result = process.execute(inputParams, subMonitor);
             monitor.worked(increment);
 
-            monitor.setTaskName("Adding layer..."); //$NON-NLS-1$
+            monitor.setTaskName(Messages.Task_AddingLayer);
             outputBuffer.setLength(0);
             if (result != null) {
                 Map<String, Parameter<?>> resultInfo = factory.getResultInfo(processName, null);
@@ -127,7 +130,6 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                         continue;
                     }
 
-                    ToolboxPlugin.log("Writing result..."); //$NON-NLS-1$
                     if (val instanceof SimpleFeatureCollection) {
                         postProcessing((SimpleFeatureCollection) val,
                                 outputParams.get(entrySet.getKey()),
@@ -147,14 +149,14 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                         RasterSaveAsOp saveAs = new RasterSaveAsOp();
                         GridCoverage2D output = saveAs.saveAsGeoTiff((GridCoverage2D) val,
                                 outputFile.getAbsolutePath());
-                        ToolboxPlugin.log("Adding layer..."); //$NON-NLS-1$
+                        ToolboxPlugin.log(Messages.Task_AddingLayer);
                         MapUtils.addGridCoverageToMap(map, output, outputFile, null);
                     } else if (Number.class.isAssignableFrom(val.getClass())) {
                         outputBuffer.append(FormatUtils.format(Double.parseDouble(val.toString())));
-                        outputBuffer.append(System.getProperty("line.separator")); //$NON-NLS-1$
+                        outputBuffer.append(lineSeparator);
                     } else {
                         outputBuffer.append(val.toString());
-                        outputBuffer.append(System.getProperty("line.separator")); //$NON-NLS-1$
+                        outputBuffer.append(lineSeparator);
                     }
                     monitor.worked(increment);
                 }
@@ -163,17 +165,16 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
         } catch (Exception e) {
             ToolboxPlugin.log(e.getMessage());
         } finally {
-            ToolboxPlugin.log("Completed " + windowTitle + "..."); //$NON-NLS-1$ //$NON-NLS-2$
+            ToolboxPlugin.log(String.format(Messages.Task_Completed, windowTitle));
             monitor.done();
         }
     }
 
-    @SuppressWarnings("nls")
     private void postProcessing(SimpleFeatureCollection source, Object outputPath,
             Map<String, Object> outputMeta, IProgressMonitor monitor) {
         File filePath = new File(outputPath.toString());
 
-        monitor.setTaskName("Writing result..."); //$NON-NLS-1$
+        monitor.setTaskName(Messages.Task_WritingResult);
         String typeName = FilenameUtils.removeExtension(FilenameUtils.getName(filePath.getPath()));
         SimpleFeatureSource featureSource = null;
         try {
@@ -190,8 +191,8 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
             return;
         }
 
-        monitor.setTaskName("Adding layer..."); //$NON-NLS-1$
-        ToolboxPlugin.log("Adding layer..."); //$NON-NLS-1$
+        monitor.setTaskName(Messages.Task_AddingLayer); 
+        ToolboxPlugin.log(Messages.Task_AddingLayer);
 
         SimpleFeatureType schema = source.getSchema();
         SSStyleBuilder ssBuilder = new SSStyleBuilder(schema);
@@ -210,17 +211,17 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                 String styleName = splits[0].toUpperCase();
 
                 String functionName = null;
-                if (styleName.startsWith("LISA")) {
-                    style = ssBuilder.getLISAStyle("COType");
-                } else if (styleName.startsWith("CL") || styleName.startsWith("JE")
-                        || styleName.startsWith("NA")) {
-                    functionName = "JenksNaturalBreaksFunction";
-                } else if (styleName.startsWith("E")) {
-                    functionName = "EqualIntervalFunction";
-                } else if (styleName.startsWith("S")) {
-                    functionName = "StandardDeviationFunction";
-                } else if (styleName.startsWith("Q")) {
-                    functionName = "QuantileFunction";
+                if (styleName.startsWith("LISA")) { //$NON-NLS-1$
+                    style = ssBuilder.getLISAStyle("COType"); //$NON-NLS-1$
+                } else if (styleName.startsWith("CL") || styleName.startsWith("JE") //$NON-NLS-1$ //$NON-NLS-2$
+                        || styleName.startsWith("NA")) { //$NON-NLS-1$
+                    functionName = "JenksNaturalBreaksFunction"; //$NON-NLS-1$
+                } else if (styleName.startsWith("E")) { //$NON-NLS-1$
+                    functionName = "EqualIntervalFunction"; //$NON-NLS-1$
+                } else if (styleName.startsWith("S")) { //$NON-NLS-1$
+                    functionName = "StandardDeviationFunction"; //$NON-NLS-1$
+                } else if (styleName.startsWith("Q")) { //$NON-NLS-1$
+                    functionName = "QuantileFunction"; //$NON-NLS-1$
                 }
 
                 if (functionName != null && splits.length == 2) {
@@ -240,7 +241,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                             } else {
                                 GraduatedColorStyleBuilder builder = new GraduatedColorStyleBuilder();
                                 style = builder.createStyle(source, fieldName, functionName, 5,
-                                        "OrRd");
+                                        "OrRd"); //$NON-NLS-1$
                             }
                         }
                     }
@@ -249,10 +250,10 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                 ToolboxPlugin.log(e.getMessage());
             }
         } else {
-            if (source.getSchema().indexOf("COType") != -1) {
-                style = ssBuilder.getLISAStyle("COType");
-            } else if (source.getSchema().indexOf("GiZScore") != -1) {
-                style = ssBuilder.getZScoreStdDevStyle("GiZScore");
+            if (source.getSchema().indexOf("COType") != -1) { //$NON-NLS-1$
+                style = ssBuilder.getLISAStyle("COType"); //$NON-NLS-1$
+            } else if (source.getSchema().indexOf("GiZScore") != -1) { //$NON-NLS-1$
+                style = ssBuilder.getZScoreStdDevStyle("GiZScore"); //$NON-NLS-1$
             }
         }
 

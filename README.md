@@ -32,8 +32,13 @@ uDig licensed under the [EPL](http://www.eclipse.org/legal/epl-v10.html) + [BSD]
 ## Building
 ...
 
-## More Information
-...
+## Localization
+[Transifex](https://www.transifex.com/projects/p/ss-rd/)
+
+## Contributor
+* MapPlus (mapplus@gmail.com)
+* mangowoong (socoooooool@gmail.com)
+* mangosystem (yhlim0129@gmail.com)
 
 ## Gallery
 

@@ -1,6 +1,7 @@
 .project
 .classpath
 .settings
+bin
 target
 *.patch
 *.class

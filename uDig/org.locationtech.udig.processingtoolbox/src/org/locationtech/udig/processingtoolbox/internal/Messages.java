@@ -20,7 +20,14 @@ public class Messages extends NLS {
     public static String SettingsDialog_title;
     public static String SettingsDialog_general;
     public static String SettingsDialog_UseLog;
-    public static String SettingsDialog_advanced;
+    public static String SettingsDialog_advanced; 
+
+    public static String Task_AddingLayer;
+    public static String Task_Completed;
+    public static String Task_Executing;
+    public static String Task_Internal;
+    public static String Task_Running;
+    public static String Task_WritingResult;
 
     public static String General_Cancelled;
     public static String General_Error;

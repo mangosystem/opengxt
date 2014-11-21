@@ -504,7 +504,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
     }
 
     @SuppressWarnings("nls")
-    private boolean invalidOutput() {
+    private boolean validOutput() {
         for (Entry<String, Object> entrySet : outputParams.entrySet()) {
             File outputFile = new File(outputParams.get(entrySet.getKey()).toString());
             if (!outputFile.exists()) {
@@ -517,7 +517,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
                     if (!outputFile.delete()) {
                         msg = Messages.ProcessExecutionDialog_deletefailed;
                         MessageDialog.openInformation(getParentShell(), getShell().getText(), msg);
-                        return true;
+                        return false;
                     }
                 } else {
                     String[] extensions = new String[] { "shp", "shx", "dbf", "prj", "sbn", "sbx",
@@ -538,7 +538,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
                 }
             }
         }
-        return false;
+        return true;
     }
 
     @SuppressWarnings("nls")
@@ -558,7 +558,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
         }
 
         // check output files
-        if (!invalidOutput()) {
+        if (!validOutput()) {
             return;
         }
 

@@ -11,8 +11,6 @@ package org.locationtech.udig.processingtoolbox.internal.ui;
 
 import java.util.logging.Logger;
 
-import org.locationtech.udig.project.ILayer;
-import org.locationtech.udig.project.IMap;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
@@ -31,9 +29,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
-import org.locationtech.udig.processingtoolbox.styler.MapUtils;
+import org.locationtech.udig.project.ILayer;
+import org.locationtech.udig.project.IMap;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Extent Selection Dialog
@@ -149,15 +148,15 @@ public class ExtentSelectionDialog extends TitleAreaDialog {
         widget.createLabel(layerContainer, Messages.ExtentSelection_layer, null, 1);
 
         final Combo cboSfLayer = widget.createCombo(layerContainer, 1);
-        MapUtils.fillLayers(map, cboSfLayer);
+        fillLayers(map, cboSfLayer);
         cboSfLayer.addModifyListener(new ModifyListener() {
             @Override
             public void modifyText(ModifyEvent e) {
-                ILayer layer = MapUtils.getLayer(map, cboSfLayer.getText());
+                ILayer layer = getLayer(map, cboSfLayer.getText());
                 if (layer != null) {
                     extent = layer.getBounds(new NullProgressMonitor(), null);
                     if (!CRS.equalsIgnoreMetadata(extent.getCoordinateReferenceSystem(), mapCrs)) {
-                        // 지도 범위로 변경 
+                        // 지도 범위로 변경
                     }
                 }
             }
@@ -170,4 +169,19 @@ public class ExtentSelectionDialog extends TitleAreaDialog {
         return area;
     }
 
+    private void fillLayers(IMap map, Combo combo) {
+        combo.removeAll();
+        for (ILayer layer : map.getMapLayers()) {
+            combo.add(layer.getName());
+        }
+    }
+
+    private ILayer getLayer(IMap map, String layerName) {
+        for (ILayer layer : map.getMapLayers()) {
+            if (layer.getName().equals(layerName)) {
+                return layer;
+            }
+        }
+        return null;
+    }
 }

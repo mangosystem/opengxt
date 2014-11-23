@@ -28,7 +28,6 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
@@ -39,9 +38,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -50,19 +47,12 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.ProcessFactory;
-import org.geotools.util.Converters;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
-import org.locationtech.udig.processingtoolbox.common.ForceCRSFeatureCollection;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget.FileDataType;
-import org.locationtech.udig.processingtoolbox.styler.MapUtils;
 import org.locationtech.udig.processingtoolbox.styler.ProcessExecutorOperation;
-import org.locationtech.udig.processingtoolbox.styler.MapUtils.FieldType;
-import org.locationtech.udig.processingtoolbox.styler.MapUtils.VectorLayerType;
 import org.locationtech.udig.project.IMap;
-import org.opengis.coverage.grid.GridCoverageReader;
-import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.geometry.BoundingBox;
@@ -99,8 +89,6 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
     private Text txtOutput;
 
     private CTabItem inputTab, outputTab;
-
-    private final Color warningColor = new Color(Display.getCurrent(), 255, 255, 200);
 
     public ProcessExecutionDialog(Shell parentShell, IMap map, ProcessFactory factory,
             Name processName) {
@@ -301,81 +289,12 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
         GridData layoutData = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
         if (param.type.isAssignableFrom(SimpleFeatureCollection.class)) {
             // vector layer parameters
-            final Combo cboSfLayer = new Combo(container, SWT.NONE | SWT.DROP_DOWN | SWT.READ_ONLY);
-            cboSfLayer.setLayoutData(layoutData);
-
-            Map<String, Object> metadata = param.metadata;
-            if (metadata == null || metadata.size() == 0) {
-                MapUtils.fillLayers(map, cboSfLayer, VectorLayerType.ALL);
-            } else {
-                if (metadata.containsKey(Parameter.FEATURE_TYPE)) {
-                    String val = metadata.get(Parameter.FEATURE_TYPE).toString();
-                    if (val.equalsIgnoreCase(VectorLayerType.ALL.toString())) {
-                        MapUtils.fillLayers(map, cboSfLayer, VectorLayerType.ALL);
-                    } else if (val.equalsIgnoreCase(VectorLayerType.POINT.toString())) {
-                        MapUtils.fillLayers(map, cboSfLayer, VectorLayerType.POINT);
-                    } else if (val.equalsIgnoreCase(VectorLayerType.LINESTRING.toString())) {
-                        MapUtils.fillLayers(map, cboSfLayer, VectorLayerType.LINESTRING);
-                    } else if (val.equalsIgnoreCase(VectorLayerType.POLYGON.toString())) {
-                        MapUtils.fillLayers(map, cboSfLayer, VectorLayerType.POLYGON);
-                    }
-                } else {
-                    MapUtils.fillLayers(map, cboSfLayer, VectorLayerType.ALL);
-                }
-            }
-            cboSfLayer.setData(param.key);
-
-            cboSfLayer.addModifyListener(new ModifyListener() {
-                @Override
-                public void modifyText(ModifyEvent e) {
-                    SimpleFeatureCollection sfc = MapUtils.getFeatures(map, cboSfLayer.getText());
-                    if (sfc.getSchema().getCoordinateReferenceSystem() == null) {
-                        sfc = new ForceCRSFeatureCollection(sfc, map.getViewportModel().getCRS());
-                    }
-                    // TODO: Important!!!!!!!!!!!!!!!
-                    // if this layer's crs is different from map's crs
-
-                    inputParams.put(param.key, sfc);
-
-                    // related field selection "파라미터명.필드유형"
-                    SimpleFeatureType schema = sfc.getSchema();
-                    for (Entry<Widget, String> entrySet : uiParams.entrySet()) {
-                        String paramValue = entrySet.getValue().split("\\.")[0]; //$NON-NLS-1$
-                        if (paramValue.equals(param.key)) {
-                            // FieldType = ALL, String, Number, Integer, Double
-                            String fieldType = entrySet.getValue().split("\\.")[1]; //$NON-NLS-1$
-                            Combo cboField = (Combo) entrySet.getKey();
-                            if (fieldType.equalsIgnoreCase(FieldType.ALL.toString())) {
-                                MapUtils.fillFields(cboField, schema, FieldType.ALL);
-                            } else if (fieldType.equalsIgnoreCase(FieldType.String.toString())) {
-                                MapUtils.fillFields(cboField, schema, FieldType.String);
-                            } else if (fieldType.equalsIgnoreCase(FieldType.Number.toString())) {
-                                MapUtils.fillFields(cboField, schema, FieldType.Number);
-                            } else if (fieldType.equalsIgnoreCase(FieldType.Integer.toString())) {
-                                MapUtils.fillFields(cboField, schema, FieldType.Integer);
-                            } else if (fieldType.equalsIgnoreCase(FieldType.Double.toString())) {
-                                MapUtils.fillFields(cboField, schema, FieldType.Double);
-                            }
-
-                            // default value
-                        }
-                    }
-                }
-            });
+            FeatureCollectionDataWidget featuresView = new FeatureCollectionDataWidget(map);
+            featuresView.create(container, SWT.NONE, inputParams, param, uiParams);
         } else if (param.type.isAssignableFrom(GridCoverage2D.class)) {
             // raster layer parameters
-            final Combo cboGcLayer = new Combo(container, SWT.NONE | SWT.DROP_DOWN | SWT.READ_ONLY);
-            cboGcLayer.setLayoutData(layoutData);
-            MapUtils.fillLayers(map, cboGcLayer, GridCoverageReader.class);
-            cboGcLayer.setData(param.key);
-
-            cboGcLayer.addModifyListener(new ModifyListener() {
-                @Override
-                public void modifyText(ModifyEvent e) {
-                    GridCoverage2D sfc = MapUtils.getGridCoverage(map, cboGcLayer.getText());
-                    inputParams.put(param.key, sfc);
-                }
-            });
+            GridCoverageDataWidget gridCoverageView = new GridCoverageDataWidget(map);
+            gridCoverageView.create(container, SWT.NONE, inputParams, param);
         } else if (param.type.isAssignableFrom(Geometry.class)) {
             // wkt geometry parameters
             GeometryWidget geometryView = new GeometryWidget(map);
@@ -394,28 +313,8 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
             boundingBoxView.create(container, SWT.NONE, inputParams, param);
         } else if (param.type.isEnum()) {
             // enumeration parameters
-            final Combo cboEnum = new Combo(container, SWT.NONE | SWT.DROP_DOWN | SWT.READ_ONLY);
-            cboEnum.setLayoutData(layoutData);
-            for (Object enumVal : param.type.getEnumConstants()) {
-                cboEnum.add(enumVal.toString());
-            }
-
-            cboEnum.setData(param.key);
-            if (param.sample != null) {
-                cboEnum.setText(param.sample.toString());
-            }
-
-            cboEnum.addModifyListener(new ModifyListener() {
-                @Override
-                public void modifyText(ModifyEvent e) {
-                    for (Object enumVal : param.type.getEnumConstants()) {
-                        if (enumVal.toString().equalsIgnoreCase(cboEnum.getText())) {
-                            inputParams.put(param.key, enumVal);
-                            break;
-                        }
-                    }
-                }
-            });
+            EnumDataWidget enumView = new EnumDataWidget();
+            enumView.create(container, SWT.NONE, inputParams, param);
         } else if (Number.class.isAssignableFrom(param.type)) {
             // number parameters = Byte, Double, Float, Integer, Long, Short
             if (Double.class.isAssignableFrom(param.type)
@@ -423,49 +322,14 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
                 NumberDataWidget numberView = new NumberDataWidget(map);
                 numberView.create(container, SWT.NONE, inputParams, param);
             } else {
-                final Spinner spinner = new Spinner(container, SWT.LEFT_TO_RIGHT | SWT.BORDER);
-                spinner.setLayoutData(layoutData);
-                spinner.setData(param.key);
-                spinner.setValues(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, 1, 10);
-                if (param.sample != null) {
-                    spinner.setSelection((Integer) param.sample);
-                }
-
-                final Color oldBackColor = spinner.getBackground();
-                spinner.addModifyListener(new ModifyListener() {
-                    @Override
-                    public void modifyText(ModifyEvent e) {
-                        Object obj = Converters.convert(spinner.getSelection(), param.type);
-                        if (obj == null) {
-                            spinner.setBackground(warningColor);
-                        } else {
-                            inputParams.put(param.key, obj);
-                            spinner.setBackground(oldBackColor);
-                        }
-                    }
-                });
+                IntegerDataWidget integerView = new IntegerDataWidget();
+                integerView.create(container, SWT.NONE, inputParams, param);
             }
         } else if (Boolean.class.isAssignableFrom(param.type)
                 || boolean.class.isAssignableFrom(param.type)) {
             // boolean parameters
-            final Combo cboBoolean = new Combo(container, SWT.NONE | SWT.DROP_DOWN | SWT.READ_ONLY);
-            cboBoolean.setLayoutData(layoutData);
-            cboBoolean.setData(param.key);
-
-            cboBoolean.add(Messages.ProcessExecutionDialog_Yes);
-            cboBoolean.add(Messages.ProcessExecutionDialog_No);
-
-            if (param.sample != null) {
-                cboBoolean.select((Boolean) param.sample == Boolean.TRUE ? 0 : 1);
-            }
-            cboBoolean.addModifyListener(new ModifyListener() {
-                @Override
-                public void modifyText(ModifyEvent e) {
-                    Boolean value = cboBoolean.getSelectionIndex() == 0 ? Boolean.TRUE
-                            : Boolean.FALSE;
-                    inputParams.put(param.key, value);
-                }
-            });
+            BooleanDataWidget booleanView = new BooleanDataWidget();
+            booleanView.create(container, SWT.NONE, inputParams, param);
         } else {
             Map<String, Object> metadata = param.metadata;
             if (metadata == null || metadata.size() == 0) {

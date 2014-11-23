@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.swt.widgets.Combo;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureSource;
@@ -50,18 +49,10 @@ import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.coverage.grid.GridCoverageReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.Filter;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * uDig Map Utilities class
@@ -133,93 +124,6 @@ public class MapUtils {
             }
         }
         return null;
-    }
-
-    public static void fillLayers(IMap map, Combo combo, VectorLayerType layerType) {
-        combo.removeAll();
-        for (ILayer layer : map.getMapLayers()) {
-            if (layer.hasResource(FeatureSource.class)) {
-                GeometryDescriptor descriptor = layer.getSchema().getGeometryDescriptor();
-                Class<?> geometryBinding = descriptor.getType().getBinding();
-                switch (layerType) {
-                case ALL:
-                    combo.add(layer.getName());
-                    break;
-                case LINESTRING:
-                    if (geometryBinding.isAssignableFrom(LineString.class)
-                            || geometryBinding.isAssignableFrom(MultiLineString.class)) {
-                        combo.add(layer.getName());
-                    }
-                    break;
-                case POINT:
-                    if (geometryBinding.isAssignableFrom(Point.class)
-                            || geometryBinding.isAssignableFrom(MultiPoint.class)) {
-                        combo.add(layer.getName());
-                    }
-                    break;
-                case POLYGON:
-                    if (geometryBinding.isAssignableFrom(Polygon.class)
-                            || geometryBinding.isAssignableFrom(MultiPolygon.class)) {
-                        combo.add(layer.getName());
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-    public static void fillLayers(IMap map, Combo combo, Class<?> resourceType) {
-        combo.removeAll();
-        for (ILayer layer : map.getMapLayers()) {
-            if (layer.hasResource(resourceType)) {
-                combo.add(layer.getName());
-            }
-        }
-    }
-
-    public static void fillLayers(IMap map, Combo combo) {
-        combo.removeAll();
-        for (ILayer layer : map.getMapLayers()) {
-            combo.add(layer.getName());
-        }
-    }
-
-    public static void fillFields(Combo combo, SimpleFeatureType schema, FieldType fieldType) {
-        combo.removeAll();
-        for (AttributeDescriptor descriptor : schema.getAttributeDescriptors()) {
-            if (descriptor instanceof GeometryDescriptor) {
-                continue;
-            }
-
-            Class<?> binding = descriptor.getType().getBinding();
-            switch (fieldType) {
-            case ALL:
-                combo.add(descriptor.getLocalName());
-                break;
-            case Double:
-                if (Double.class.isAssignableFrom(binding) || Float.class.isAssignableFrom(binding)) {
-                    combo.add(descriptor.getLocalName());
-                }
-                break;
-            case Integer:
-                if (Short.class.isAssignableFrom(binding)
-                        || Integer.class.isAssignableFrom(binding)
-                        || Long.class.isAssignableFrom(binding)) {
-                    combo.add(descriptor.getLocalName());
-                }
-                break;
-            case Number:
-                if (Number.class.isAssignableFrom(binding)) {
-                    combo.add(descriptor.getLocalName());
-                }
-                break;
-            case String:
-                if (String.class.isAssignableFrom(binding)) {
-                    combo.add(descriptor.getLocalName());
-                }
-                break;
-            }
-        }
     }
 
     public static void addGeometryToMap(IMap map, Geometry source, String layerName) {

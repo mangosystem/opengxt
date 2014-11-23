@@ -241,7 +241,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                             } else {
                                 GraduatedColorStyleBuilder builder = new GraduatedColorStyleBuilder();
                                 style = builder.createStyle(source, fieldName, functionName, 5,
-                                        "OrRd"); //$NON-NLS-1$
+                                        "Blues"); //$NON-NLS-1$
                             }
                         }
                     }

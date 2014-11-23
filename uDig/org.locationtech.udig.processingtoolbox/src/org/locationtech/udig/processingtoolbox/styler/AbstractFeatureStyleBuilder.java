@@ -138,15 +138,15 @@ public abstract class AbstractFeatureStyleBuilder {
         methodName = methodName.toUpperCase();
 
         String functionName = "Jenks";
-        if (methodName.contains("NA") || methodName.contains("JENK")) {
+        if (methodName.startsWith("NA") || methodName.startsWith("JENK")) {
             functionName = "Jenks";
-        } else if (methodName.contains("QU")) {
+        } else if (methodName.startsWith("QU")) {
             functionName = "Quantile";
-        } else if (methodName.contains("EQ")) {
+        } else if (methodName.startsWith("EQ")) {
             functionName = "EqualInterval";
-        } else if (methodName.contains("ST")) {
+        } else if (methodName.startsWith("ST")) {
             functionName = "StandardDeviation";
-        } else if (methodName.contains("UN")) {
+        } else if (methodName.startsWith("UN")) {
             functionName = "UniqueInterval";
         } else {
             functionName = "Jenks"; // default

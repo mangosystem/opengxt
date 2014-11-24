@@ -16,37 +16,24 @@
  */
 package org.geotools.process.spatialstatistics;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.grid.GridElement;
-import org.geotools.grid.GridFeatureBuilder;
 import org.geotools.grid.hexagon.HexagonOrientation;
-import org.geotools.grid.hexagon.Hexagons;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.impl.AbstractProcess;
-import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.operations.HexagonOperation;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.ProgressListener;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Creates hexagon grids from extent or bounds source features
@@ -151,118 +138,4 @@ public class HexagonProcess extends AbstractProcess {
             monitor.dispose();
         }
     }
-
-    public class HexagonOperation {
-        static final String UID = "UID";
-
-        final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
-
-        private HexagonOrientation orientation = HexagonOrientation.FLAT;
-
-        private SimpleFeatureCollection boundsSource = null;
-
-        private Geometry geometryBoundary = null;
-
-        public void setOrientation(HexagonOrientation orientation) {
-            this.orientation = orientation;
-        }
-
-        public void setGeometryBoundary(Geometry geometryBoundary) {
-            this.geometryBoundary = geometryBoundary;
-        }
-
-        public void setBoundsSource(SimpleFeatureCollection boundsSource) {
-            this.boundsSource = boundsSource;
-        }
-
-        public SimpleFeatureCollection execute(ReferencedEnvelope gridBounds, double sideLen)
-                throws IOException {
-            CoordinateReferenceSystem crs = gridBounds.getCoordinateReferenceSystem();
-            SimpleFeatureType featureType = FeatureTypes.getDefaultType("hexagon", Polygon.class,
-                    crs);
-            featureType = FeatureTypes.add(featureType, UID, Long.class, 38);
-
-            GridFeatureBuilder gridBuilder = null;
-            if (boundsSource != null) {
-                gridBuilder = new IntersectionFsBuilder(featureType, boundsSource);
-            } else if (geometryBoundary != null) {
-                gridBuilder = new IntersectionGeometryBuilder(featureType, geometryBoundary);
-            } else {
-                gridBuilder = new DefaultGridBuilder(featureType);
-            }
-
-            if (boundsSource != null || geometryBoundary != null) {
-                gridBounds.expandBy(sideLen); // for intersection hexagon
-                if (orientation == HexagonOrientation.ANGLED) {
-                    gridBounds.expandBy(sideLen); // for intersection hexagon
-                }
-            }
-
-            SimpleFeatureSource gridFeatures = Hexagons.createGrid(gridBounds, sideLen,
-                    orientation, gridBuilder);
-            return gridFeatures.getFeatures();
-        }
-
-        final class DefaultGridBuilder extends GridFeatureBuilder {
-            private int fID = 0;
-
-            public DefaultGridBuilder(SimpleFeatureType type) {
-                super(type);
-            }
-
-            @Override
-            public void setAttributes(GridElement gridElement, Map<String, Object> attributes) {
-                attributes.put(UID, ++fID);
-            }
-        }
-
-        final class IntersectionGeometryBuilder extends GridFeatureBuilder {
-            Geometry boundary = null;
-
-            int fID = 0;
-
-            public IntersectionGeometryBuilder(SimpleFeatureType type, Geometry boundary) {
-                super(type);
-                this.boundary = boundary;
-            }
-
-            @Override
-            public void setAttributes(GridElement gridElement, Map<String, Object> attributes) {
-                attributes.put(UID, ++fID);
-            }
-
-            @Override
-            public boolean getCreateFeature(GridElement gridElement) {
-                return boundary.intersects(gridElement.toGeometry());
-            }
-        };
-
-        final class IntersectionFsBuilder extends GridFeatureBuilder {
-            SimpleFeatureCollection featureSource = null;
-
-            String the_geom = null;
-
-            int fID = 0;
-
-            public IntersectionFsBuilder(SimpleFeatureType type, SimpleFeatureCollection source) {
-                super(type);
-                this.featureSource = source;
-                this.the_geom = featureSource.getSchema().getGeometryDescriptor().getLocalName();
-            }
-
-            @Override
-            public void setAttributes(GridElement gridElement, Map<String, Object> attributes) {
-                attributes.put(UID, ++fID);
-            }
-
-            @Override
-            public boolean getCreateFeature(GridElement gridElement) {
-                Filter filter = ff.intersects(ff.property(the_geom),
-                        ff.literal(gridElement.toGeometry()));
-                return !featureSource.subCollection(filter).isEmpty();
-            }
-        };
-
-    }
-
 }

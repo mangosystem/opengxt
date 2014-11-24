@@ -112,7 +112,6 @@ public class SpatialJoinProcess extends AbstractProcess {
             // start process
             SpatialJoinOperation operation = new SpatialJoinOperation();
             operation.setSearchRadius(searchRadius);
-            
             SimpleFeatureCollection resultFc = operation.execute(inputFeatures, joinFeatures, joinType);
             // end process
 

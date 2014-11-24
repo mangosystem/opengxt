@@ -16,39 +16,23 @@
  */
 package org.geotools.process.spatialstatistics;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.factory.GeoTools;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.operations.RandomPointsOperation;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.ProgressListener;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.operation.union.CascadedPolygonUnion;
-import com.vividsolutions.jts.shape.random.RandomPointsBuilder;
 
 /**
  * Calculates area values for each feature in a polygon features.
@@ -143,8 +127,13 @@ public class RandomPointsProcess extends AbstractProcess {
             }
 
             // start process
-            RandomPoints operator = new RandomPoints(extent, polygonFeatures);
-            SimpleFeatureCollection randomPoints = operator.getRandomFeatures(pointCount);
+            RandomPointsOperation operator = null;
+            if (polygonFeatures == null) {
+                operator = new RandomPointsOperation(extent);
+            } else {
+                operator = new RandomPointsOperation(polygonFeatures);
+            }
+            SimpleFeatureCollection randomPoints = operator.execute(pointCount);
             // end process
 
             monitor.setTask(Text.text("Encoding result"));
@@ -160,84 +149,6 @@ public class RandomPointsProcess extends AbstractProcess {
             return null;
         } finally {
             monitor.dispose();
-        }
-    }
-
-    static class RandomPoints {
-        final GeometryFactory gf = JTSFactoryFinder.getGeometryFactory(GeoTools.getDefaultHints());
-
-        com.vividsolutions.jts.shape.random.RandomPointsBuilder builder;
-
-        CoordinateReferenceSystem crs;
-
-        public RandomPoints(ReferencedEnvelope extent, SimpleFeatureCollection inputFeatures) {
-            this.builder = new RandomPointsBuilder(gf);
-            if (inputFeatures == null) {
-                this.crs = extent.getCoordinateReferenceSystem();
-                this.builder.setExtent(extent);
-            } else {
-                this.crs = inputFeatures.getSchema().getCoordinateReferenceSystem();
-                Geometry maskPoly = unionFeatures(inputFeatures);
-                if (maskPoly == null || maskPoly.isEmpty()) {
-                    this.builder.setExtent(inputFeatures.getBounds());
-                    LOGGER.log(Level.WARNING,
-                            "Failed to create mask polygon, random points builder will use feature's boundary");
-                } else {
-                    this.builder.setExtent(maskPoly);
-                }
-            }
-        }
-
-        public SimpleFeatureCollection getRandomFeatures(Integer pointCount) {
-            this.builder.setNumPoints(pointCount);
-
-            SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
-            typeBuilder.setName("RandomPoints");
-            typeBuilder.add("geom", Point.class, this.crs);
-            typeBuilder.add("weight", Integer.class);
-            SimpleFeatureType schema = typeBuilder.buildFeatureType();
-
-            ListFeatureCollection randomFeatures = new ListFeatureCollection(schema);
-
-            Geometry multiPoints = this.builder.getGeometry();
-            SimpleFeatureBuilder builder = new SimpleFeatureBuilder(schema);
-            for (int i = 0; i < multiPoints.getNumGeometries(); i++) {
-                Point point = (Point) multiPoints.getGeometryN(i);
-                String featureID = String.valueOf("RandomPoints." + (i + 1));
-                
-                builder.reset();
-                builder.addAll(new Object[] { point, 1 });
-                randomFeatures.add(builder.buildFeature(featureID));
-            }
-            return randomFeatures;
-        }
-
-        private Geometry unionFeatures(SimpleFeatureCollection inputFeatures) {
-            List<Geometry> geometries = new ArrayList<Geometry>();
-            SimpleFeatureIterator featureIter = null;
-            try {
-                featureIter = inputFeatures.features();
-                while (featureIter.hasNext()) {
-                    SimpleFeature feature = featureIter.next();
-                    Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                    if (geometry == null || geometry.isEmpty()) {
-                        continue;
-                    }
-                    geometries.add(geometry);
-                }
-            } finally {
-                featureIter.close();
-            }
-
-            if (geometries.size() == 0) {
-                return null;
-            } else if (geometries.size() == 1) {
-                return geometries.iterator().next();
-            }
-
-            com.vividsolutions.jts.operation.union.CascadedPolygonUnion unionOp = null;
-            unionOp = new CascadedPolygonUnion(geometries);
-            return unionOp.union();
         }
     }
 }

@@ -19,6 +19,7 @@ package org.geotools.process.spatialstatistics.operations;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
@@ -27,6 +28,7 @@ import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.enumeration.SpatialJoinType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.referencing.CRS;
+import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
@@ -44,6 +46,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * @source $URL$
  */
 public class SpatialJoinOperation extends GeneralOperation {
+    protected static final Logger LOGGER = Logging.getLogger(SpatialJoinOperation.class);
 
     private double searchRadius = 0.0d;
 

@@ -116,7 +116,6 @@ public class PointStatisticsProcess extends AbstractProcess {
             operation.setBufferDistance(0.0);
             SimpleFeatureCollection resultFc = operation.execute(polygonFeatures, countField,
                     statisticsFields, pointFeatures);
-            ;
 
             // end process
 

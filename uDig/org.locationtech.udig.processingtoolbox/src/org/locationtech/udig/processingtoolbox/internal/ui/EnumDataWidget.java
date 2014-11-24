@@ -37,7 +37,7 @@ public class EnumDataWidget extends AbstractToolboxWidget {
     public void create(final Composite parent, final int style,
             final Map<String, Object> processParams, final Parameter<?> param) {
         composite = new Composite(parent, style);
-        composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
+        composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 
         GridLayout layout = new GridLayout(1, false);
         layout.marginTop = 0;

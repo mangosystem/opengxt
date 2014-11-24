@@ -74,7 +74,8 @@ public class CollectEventsProcessFactory extends SpatialStatisticsProcessFactory
     /** countField */
     protected static final Parameter<String> countField = new Parameter<String>("countField",
             String.class, getResource("CollectEvents.countField.title"),
-            getResource("CollectEvents.countField.description"), false, 0, 1, "icount", null);
+            getResource("CollectEvents.countField.description"), false, 0, 1, "icount", new KVP(
+                    Parameter.OPTIONS, "inputFeatures.Number"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

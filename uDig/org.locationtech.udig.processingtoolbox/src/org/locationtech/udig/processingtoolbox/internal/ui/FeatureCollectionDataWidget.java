@@ -61,7 +61,7 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
             final Map<String, Object> processParams, final Parameter<?> param,
             final Map<Widget, String> uiParams) {
         composite = new Composite(parent, style);
-        composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
+        composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 
         GridLayout layout = new GridLayout(1, false);
         layout.marginTop = 0;
@@ -105,9 +105,6 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
                 if (sfc.getSchema().getCoordinateReferenceSystem() == null) {
                     sfc = new ForceCRSFeatureCollection(sfc, map.getViewportModel().getCRS());
                 }
-                // TODO: Important!!!!!!!!!!!!!!!
-                // if this layer's crs is different from map's crs
-
                 processParams.put(param.key, sfc);
 
                 // related field selection "파라미터명.필드유형"
@@ -129,8 +126,6 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
                         } else if (fieldType.equalsIgnoreCase(FieldType.Double.toString())) {
                             fillFields(cboField, schema, FieldType.Double);
                         }
-
-                        // default value
                     }
                 }
             }
@@ -173,6 +168,8 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
     }
 
     private void fillFields(Combo combo, SimpleFeatureType schema, FieldType fieldType) {
+        String selectedValue = combo.getText() == null ? null : combo.getText();
+
         combo.removeAll();
         for (AttributeDescriptor descriptor : schema.getAttributeDescriptors()) {
             if (descriptor instanceof GeometryDescriptor) {
@@ -207,6 +204,13 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
                 }
                 break;
             }
+        }
+
+        if (selectedValue != null) {
+            if (combo.indexOf(selectedValue) == -1) {
+                combo.add(selectedValue);
+            }
+            combo.setText(selectedValue);
         }
     }
 }

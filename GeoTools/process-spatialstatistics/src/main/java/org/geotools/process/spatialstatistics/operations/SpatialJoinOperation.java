@@ -16,16 +16,16 @@
  */
 package org.geotools.process.spatialstatistics.operations;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.store.ReprojectingFeatureCollection;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.enumeration.SpatialJoinType;
+import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.referencing.CRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -56,7 +56,7 @@ public class SpatialJoinOperation extends GeneralOperation {
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
-            SimpleFeatureCollection joinFeatures, SpatialJoinType joinType) {
+            SimpleFeatureCollection joinFeatures, SpatialJoinType joinType) throws IOException {
         String typeName = inputFeatures.getSchema().getTypeName();
         SimpleFeatureType schema = FeatureTypes.build(inputFeatures.getSchema(), typeName);
 
@@ -84,8 +84,7 @@ public class SpatialJoinOperation extends GeneralOperation {
         }
 
         // prepare transactional feature store
-        ListFeatureCollection featureCollection = new ListFeatureCollection(schema);
-        SimpleFeatureBuilder builder = new SimpleFeatureBuilder(schema);
+        IFeatureInserter featureWriter = getFeatureWriter(schema);
 
         SimpleFeatureIterator featureIter = null;
         try {
@@ -104,20 +103,23 @@ public class SpatialJoinOperation extends GeneralOperation {
                     continue;
                 }
 
-                builder.init(feature);
-                SimpleFeature newFeature = builder.buildFeature(feature.getID());
+                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                featureWriter.copyAttributes(feature, newFeature, true);
+
                 if (joinFeature != null) {
                     for (String name : propertyList) {
                         newFeature.setAttribute(name, joinFeature.getAttribute(name));
                     }
                 }
-                featureCollection.add(newFeature);
+                featureWriter.write(newFeature);
             }
+        } catch (Exception e) {
+            featureWriter.rollback(e);
         } finally {
-            featureIter.close();
+            featureWriter.close(featureIter);
         }
 
-        return featureCollection;
+        return featureWriter.getFeatureCollection();
     }
 
     private SimpleFeature searchNearestFeature(SimpleFeatureCollection joinFeatures,

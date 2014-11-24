@@ -338,12 +338,10 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
                 literalView.create(container, SWT.NONE, inputParams, param);
             } else {
                 if (metadata.containsKey(Parameter.OPTIONS)) {
-                    // layer's field ...
-                    // TODO: new KVP(Parameter.OPTIONS, "파라미터명.필드유형")
+                    // layer's field : KVP(Parameter.OPTIONS, "파라미터명.필드유형")
                     final Combo cboField = new Combo(container, SWT.NONE | SWT.DROP_DOWN);
-
                     uiParams.put(cboField, metadata.get(Parameter.OPTIONS).toString());
-
+                    
                     cboField.setLayoutData(layoutData);
                     cboField.setData(param.key);
                     if (param.sample != null) {

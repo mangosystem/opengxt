@@ -27,8 +27,8 @@ import org.eclipse.swt.widgets.Text;
 import org.geotools.data.DataStore;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
-import org.locationtech.udig.processingtoolbox.common.DataStoreFactory;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
+import org.locationtech.udig.processingtoolbox.storage.DataStoreFactory;
 
 /**
  * Output Data Viewer
@@ -82,7 +82,7 @@ public class OutputDataWidget extends AbstractToolboxWidget {
 
     public void create(final Composite parent, final int style, final int colspan) {
         composite = new Composite(parent, style);
-        composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, colspan, 1));
+        composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, colspan, 1));
         
         GridLayout layout = new GridLayout(3, false);
         layout.marginTop = 0;

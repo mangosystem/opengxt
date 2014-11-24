@@ -40,7 +40,7 @@ import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.ToolboxView;
 import org.locationtech.udig.processingtoolbox.common.FeatureTypes;
 import org.locationtech.udig.processingtoolbox.common.ForceCRSFeatureCollection;
-import org.locationtech.udig.processingtoolbox.common.RasterSaveAsOp;
+import org.locationtech.udig.processingtoolbox.storage.RasterExportOperation;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.Layer;
@@ -214,7 +214,7 @@ public class MapUtils {
     }
 
     public static GridCoverage2D saveAsGeoTiff(GridCoverage2D source, File filePath) {
-        RasterSaveAsOp saveAs = new RasterSaveAsOp();
+        RasterExportOperation saveAs = new RasterExportOperation();
         return saveAs.saveAsGeoTiff(source, filePath.getAbsolutePath());
     }
 
@@ -224,7 +224,7 @@ public class MapUtils {
             if (filePath == null || !filePath.exists()) {
                 String tempDir = ToolboxView.getWorkspace();
                 filePath = File.createTempFile("udig_", ".tif", new File(tempDir)); //$NON-NLS-1$//$NON-NLS-2$
-                RasterSaveAsOp saveAs = new RasterSaveAsOp();
+                RasterExportOperation saveAs = new RasterExportOperation();
                 source = saveAs.saveAsGeoTiff(source, filePath.getAbsolutePath());
             }
 

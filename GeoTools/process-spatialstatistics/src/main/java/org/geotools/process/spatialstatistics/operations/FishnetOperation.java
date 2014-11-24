@@ -19,12 +19,11 @@ package org.geotools.process.spatialstatistics.operations;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.enumeration.FishnetType;
+import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -36,16 +35,16 @@ import com.vividsolutions.jts.geom.Polygon;
 /**
  * Creates a fishnet of rectangular cells.
  * 
- * @author Minpa Lee, MangoSystem  
- *
+ * @author Minpa Lee, MangoSystem
+ * 
  * @source $URL$
  * 
  */
 public class FishnetOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(FishnetOperation.class);
-    
+
     private final String TYPE_NAME = "fishnet";
-    
+
     private final String UID = "uid";
 
     private FishnetType fishnetType = FishnetType.Rectangle;
@@ -101,47 +100,53 @@ public class FishnetOperation extends GeneralOperation {
         ReferencedEnvelope bounds = new ReferencedEnvelope(crs);
 
         // insert features
-        int featureID = 0;
-        ListFeatureCollection fishnet = new ListFeatureCollection(schema);
-        SimpleFeatureBuilder builder = new SimpleFeatureBuilder(schema);
-        for (int row = 0; row < rows; row++) {
-            final double ypos = minY + (height * row);
-            for (int col = 0; col < columns; col++) {
-                final double xpos = minX + (width * col);
-                bounds.init(xpos, xpos + width, ypos, ypos + height);
-                
-                Geometry cellGeom = null;
-                switch (fishnetType) {
-                case Rectangle:
-                    cellGeom = gf.toGeometry(bounds);
-                    break;
-                case Circle:
-                    final double radius = bounds.getWidth() / 2.0;
-                    cellGeom = gf.createPoint(bounds.centre()).buffer(radius);
-                    break;
-                }
+        IFeatureInserter featureWriter = getFeatureWriter(schema);
 
-                if (geometryBoundary != null) {
-                    if (boundaryInside) {
-                        if (!geometryBoundary.contains(cellGeom)) {
-                            continue;
-                        }
-                    } else {
-                        if (!geometryBoundary.intersects(cellGeom)) {
-                            continue;
+        try {
+            int featureID = 0;
+            for (int row = 0; row < rows; row++) {
+                final double ypos = minY + (height * row);
+                for (int col = 0; col < columns; col++) {
+                    final double xpos = minX + (width * col);
+                    bounds.init(xpos, xpos + width, ypos, ypos + height);
+
+                    Geometry cellGeom = null;
+                    switch (fishnetType) {
+                    case Rectangle:
+                        cellGeom = gf.toGeometry(bounds);
+                        break;
+                    case Circle:
+                        final double radius = bounds.getWidth() / 2.0;
+                        cellGeom = gf.createPoint(bounds.centre()).buffer(radius);
+                        break;
+                    }
+
+                    if (geometryBoundary != null) {
+                        if (boundaryInside) {
+                            if (!geometryBoundary.contains(cellGeom)) {
+                                continue;
+                            }
+                        } else {
+                            if (!geometryBoundary.intersects(cellGeom)) {
+                                continue;
+                            }
                         }
                     }
-                }
 
-                // create feature and set geometry
-                builder.reset();
-                builder.set(UID, ++featureID);
-                SimpleFeature newFeature = builder.buildFeature(TYPE_NAME + "." + featureID);
-                newFeature.setDefaultGeometry(cellGeom);
-                fishnet.add(newFeature);
+                    // create feature and set geometry
+                    SimpleFeature newFeature = featureWriter.buildFeature(null);
+                    newFeature.setAttribute(UID, ++featureID);
+                    newFeature.setDefaultGeometry(cellGeom);
+
+                    featureWriter.write(newFeature);
+                }
             }
+        } catch (Exception e) {
+            featureWriter.rollback(e);
+        } finally {
+            featureWriter.close();
         }
 
-        return fishnet;
+        return featureWriter.getFeatureCollection();
     }
 }

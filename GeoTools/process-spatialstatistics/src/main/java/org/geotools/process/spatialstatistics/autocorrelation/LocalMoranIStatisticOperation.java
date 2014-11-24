@@ -20,10 +20,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.SSUtils;
@@ -33,6 +31,7 @@ import org.geotools.process.spatialstatistics.core.SpatialWeightMatrix;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
+import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -204,8 +203,7 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
         featureType = FeatureTypes.add(featureType, fieldList[5], String.class, 10);
 
         // prepare transactional feature store
-        ListFeatureCollection featureCollection = new ListFeatureCollection(featureType);
-        SimpleFeatureBuilder builder = new SimpleFeatureBuilder(featureType);
+        IFeatureInserter featureWriter = getFeatureWriter(featureType);
 
         // insert features
         int idx = 0;
@@ -216,8 +214,8 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
                 final SimpleFeature feature = featureIter.next();
 
                 // create feature and set geometry
-                builder.init(feature);
-                SimpleFeature newFeature = builder.buildFeature(feature.getID());
+                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                featureWriter.copyAttributes(feature, newFeature, true);
 
                 // "LMiIndex", "LMiZScore", "LMiPValue", "COType"
                 double localI = this.dcIndex[idx];
@@ -243,14 +241,17 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
                 newFeature.setAttribute(fieldList[3], FormatUtils.round(dczv));
                 newFeature.setAttribute(fieldList[4], FormatUtils.round(dcwv));
                 newFeature.setAttribute(fieldList[5], coType);
+
                 idx++;
-                featureCollection.add(newFeature);
+                featureWriter.write(newFeature);
             }
+        } catch (Exception e) {
+            featureWriter.rollback(e);
         } finally {
-            featureIter.close();
+            featureWriter.close(featureIter);
         }
 
-        return featureCollection;
+        return featureWriter.getFeatureCollection();
     }
 
     private String returnMoranBin(double zScore, double featureVal, double globalMean,

@@ -23,16 +23,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.store.ReprojectingFeatureCollection;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.StatisticsField;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitorResult;
 import org.geotools.process.spatialstatistics.core.SummaryFieldBuilder;
+import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
@@ -114,8 +113,7 @@ public class PointStatisticsOperation extends GeneralOperation {
 
         // prepare transactional feature store
         final String the_geom = points.getSchema().getGeometryDescriptor().getLocalName();
-        ListFeatureCollection featureCollection = new ListFeatureCollection(schema);
-        SimpleFeatureBuilder builder = new SimpleFeatureBuilder(schema);
+        IFeatureInserter featureWriter = getFeatureWriter(schema);
 
         SimpleFeatureIterator featureIter = null;
         try {
@@ -153,8 +151,9 @@ public class PointStatisticsOperation extends GeneralOperation {
                 }
 
                 // create & insert feature
-                builder.init(feature);
-                SimpleFeature newFeature = builder.buildFeature(feature.getID());
+                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                featureWriter.copyAttributes(feature, newFeature, true);
+
                 if (hasCountField) {
                     newFeature.setAttribute(cntField, featureCount);
                 }
@@ -168,13 +167,15 @@ public class PointStatisticsOperation extends GeneralOperation {
                     }
                 }
 
-                featureCollection.add(newFeature);
+                featureWriter.write(newFeature);
             }
+        } catch (Exception e) {
+            featureWriter.rollback(e);
         } finally {
-            featureIter.close();
+            featureWriter.close(featureIter);
         }
 
-        return featureCollection;
+        return featureWriter.getFeatureCollection();
     }
 
     private SimpleFeatureType addAttributes(SimpleFeatureType schema,

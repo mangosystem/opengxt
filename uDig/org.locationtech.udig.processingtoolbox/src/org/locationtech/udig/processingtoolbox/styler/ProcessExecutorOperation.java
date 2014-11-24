@@ -43,13 +43,13 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.util.GeoToolsAdapters;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
-import org.locationtech.udig.processingtoolbox.common.DataStoreFactory;
 import org.locationtech.udig.processingtoolbox.common.FeatureTypes;
 import org.locationtech.udig.processingtoolbox.common.FeatureTypes.SimpleShapeType;
 import org.locationtech.udig.processingtoolbox.common.FormatUtils;
-import org.locationtech.udig.processingtoolbox.common.RasterSaveAsOp;
-import org.locationtech.udig.processingtoolbox.common.ShapeExportOp;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
+import org.locationtech.udig.processingtoolbox.storage.DataStoreFactory;
+import org.locationtech.udig.processingtoolbox.storage.RasterExportOperation;
+import org.locationtech.udig.processingtoolbox.storage.ShapeExportOperation;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.ui.ApplicationGIS;
@@ -146,7 +146,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                                 resultInfo.get(entrySet.getKey()).metadata, monitor);
                     } else if (val instanceof GridCoverage2D) {
                         File outputFile = new File(outputParams.get(entrySet.getKey()).toString());
-                        RasterSaveAsOp saveAs = new RasterSaveAsOp();
+                        RasterExportOperation saveAs = new RasterExportOperation();
                         GridCoverage2D output = saveAs.saveAsGeoTiff((GridCoverage2D) val,
                                 outputFile.getAbsolutePath());
                         ToolboxPlugin.log(Messages.Task_AddingLayer);
@@ -178,7 +178,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
         String typeName = FilenameUtils.removeExtension(FilenameUtils.getName(filePath.getPath()));
         SimpleFeatureSource featureSource = null;
         try {
-            ShapeExportOp exportOp = ShapeExportOp.getDefault();
+            ShapeExportOperation exportOp = ShapeExportOperation.getDefault();
             exportOp.setOutputDataStore(DataStoreFactory.getShapefileDataStore(
                     filePath.getParent(), false));
             exportOp.setOutputTypeName(typeName);

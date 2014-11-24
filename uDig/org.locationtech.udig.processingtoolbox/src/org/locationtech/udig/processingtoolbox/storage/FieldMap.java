@@ -20,8 +20,9 @@ import org.opengis.feature.type.GeometryType;
 /**
  * FieldMap class
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public final class FieldMap {
     public int soruceID = -1;

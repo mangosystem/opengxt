@@ -24,8 +24,9 @@ import org.locationtech.udig.processingtoolbox.internal.Messages;
 /**
  * Process Descriptor
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class ProcessDescriptor {
     protected static final Logger LOGGER = Logging.getLogger(ProcessDescriptor.class);

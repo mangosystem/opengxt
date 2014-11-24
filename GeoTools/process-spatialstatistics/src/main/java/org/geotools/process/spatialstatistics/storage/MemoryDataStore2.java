@@ -34,8 +34,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 /**
  * MemoryDataStore2
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem
  * 
+ * @source $URL$
  */
 public final class MemoryDataStore2 extends MemoryDataStore {
 

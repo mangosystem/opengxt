@@ -53,8 +53,9 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 /**
  * Shapefile Feature Inserter
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem
  * 
+ * @source $URL$
  */
 @SuppressWarnings("nls")
 public class ShapefileFeatureInserter implements IFeatureInserter {

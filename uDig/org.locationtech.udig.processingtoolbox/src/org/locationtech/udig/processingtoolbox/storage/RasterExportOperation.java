@@ -32,9 +32,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 /**
  * Converts a raster dataset to a raster dataset format.
  * 
- * @author Minpa Lee
- * @since 1.0
- * @version $Id: RasterSaveAsOp.java 1 2011-09-01 11:22:29Z minpa.lee $
+ * @author Minpa Lee, MangoSystem
+ * 
+ * @source $URL$
  */
 @SuppressWarnings("nls")
 public class RasterExportOperation {

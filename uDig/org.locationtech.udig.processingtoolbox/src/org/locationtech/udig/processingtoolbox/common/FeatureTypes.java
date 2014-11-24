@@ -33,6 +33,13 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
+/**
+ * FeatureType Utilities
+ * 
+ * @author Minpa Lee, MangoSystem  
+ * 
+ * @source $URL$
+ */
 @SuppressWarnings("nls")
 public class FeatureTypes {
     protected static final Logger LOGGER = Logging.getLogger(FeatureTypes.class);

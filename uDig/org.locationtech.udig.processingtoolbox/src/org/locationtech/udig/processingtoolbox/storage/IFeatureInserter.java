@@ -21,8 +21,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 /**
  * IFeatureInserter interface
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public interface IFeatureInserter {
 

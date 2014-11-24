@@ -65,8 +65,9 @@ import com.vividsolutions.jts.geom.Geometry;
 /**
  * ProcessExecutorOperation
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem
  * 
+ * @source $URL$
  */
 public class ProcessExecutorOperation implements IRunnableWithProgress {
     protected static final Logger LOGGER = Logging.getLogger(ProcessExecutorOperation.class);

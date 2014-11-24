@@ -56,8 +56,9 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * Geometry Picker Dialog
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class GeometryPickerDialog extends Dialog {
     protected static final Logger LOGGER = Logging.getLogger(GeometryPickerDialog.class);

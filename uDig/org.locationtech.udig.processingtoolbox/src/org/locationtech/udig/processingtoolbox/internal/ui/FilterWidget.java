@@ -36,8 +36,9 @@ import org.opengis.filter.Filter;
 /**
  * Filter control
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class FilterWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(FilterWidget.class);

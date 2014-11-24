@@ -20,8 +20,9 @@ import org.locationtech.udig.processingtoolbox.ToolboxView;
 /**
  * Toolbox Setting Action
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class ToolboxSettingAction implements IViewActionDelegate {
 

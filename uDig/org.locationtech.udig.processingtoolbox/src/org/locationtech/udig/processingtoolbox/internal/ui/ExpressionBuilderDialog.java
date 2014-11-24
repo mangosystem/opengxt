@@ -64,8 +64,9 @@ import org.opengis.parameter.Parameter;
 /**
  * Expression Builder Dialog
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 @SuppressWarnings("nls")
 public class ExpressionBuilderDialog extends Dialog {

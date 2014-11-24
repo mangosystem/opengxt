@@ -32,8 +32,9 @@ import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 /**
  * Process information & loader class
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class ProcessInformation {
     protected static final Logger LOGGER = Logging.getLogger(ProcessInformation.class);

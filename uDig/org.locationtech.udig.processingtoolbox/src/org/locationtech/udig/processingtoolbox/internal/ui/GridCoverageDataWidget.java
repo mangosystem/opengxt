@@ -32,8 +32,9 @@ import org.opengis.coverage.grid.GridCoverageReader;
 /**
  * GridCoverage Layer Data control
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class GridCoverageDataWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(GridCoverageDataWidget.class);

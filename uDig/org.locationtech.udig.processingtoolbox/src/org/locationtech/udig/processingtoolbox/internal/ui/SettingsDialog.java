@@ -31,6 +31,13 @@ import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxView;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 
+/**
+ * Setting Dialog
+ * 
+ * @author Minpa Lee, MangoSystem  
+ * 
+ * @source $URL$
+ */
 public class SettingsDialog extends Dialog {
     protected static final Logger LOGGER = Logging.getLogger(SettingsDialog.class);
 

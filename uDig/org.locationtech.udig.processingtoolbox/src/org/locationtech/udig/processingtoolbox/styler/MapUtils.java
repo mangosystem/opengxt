@@ -57,8 +57,9 @@ import com.vividsolutions.jts.geom.Geometry;
 /**
  * uDig Map Utilities class
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem
  * 
+ * @source $URL$
  */
 public class MapUtils {
     protected static final Logger LOGGER = Logging.getLogger(MapUtils.class);

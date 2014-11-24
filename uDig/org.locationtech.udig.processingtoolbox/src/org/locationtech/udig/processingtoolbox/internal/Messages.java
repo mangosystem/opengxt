@@ -11,6 +11,13 @@ package org.locationtech.udig.processingtoolbox.internal;
 
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * Localization
+ * 
+ * @author Minpa Lee, MangoSystem  
+ * 
+ * @source $URL$
+ */
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.locationtech.udig.processingtoolbox.internal.messages"; //$NON-NLS-1$
 

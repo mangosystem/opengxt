@@ -38,8 +38,9 @@ import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget.File
 /**
  * Output location control
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 @SuppressWarnings("nls")
 public class OutputLocationWidget extends AbstractToolboxWidget {

@@ -27,9 +27,9 @@ import com.vividsolutions.jts.geom.Geometry;
 /**
  * Force(Define) CRS(Projection) SimpleFeatureCollection Implementation
  * 
- * @author MapPlus, onspatial.com
- * @since 2012
- * @version $Id: ForceCRSFeatureCollection.java 1 2012-11-26 11:22:29Z minpa.lee $
+ * @author Minpa Lee, MangoSystem  
+ * 
+ * @source $URL$
  */
 public class ForceCRSFeatureCollection extends DecoratingSimpleFeatureCollection {
     protected static final Logger LOGGER = Logging.getLogger(ForceCRSFeatureCollection.class);

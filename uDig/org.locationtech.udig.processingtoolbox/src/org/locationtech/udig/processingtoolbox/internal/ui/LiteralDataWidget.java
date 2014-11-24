@@ -41,8 +41,9 @@ import org.locationtech.udig.project.IMap;
 /**
  * LiteralData control
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class LiteralDataWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(LiteralDataWidget.class);

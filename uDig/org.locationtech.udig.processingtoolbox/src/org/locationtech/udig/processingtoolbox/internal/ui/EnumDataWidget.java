@@ -25,8 +25,9 @@ import org.geotools.util.logging.Logging;
 /**
  * Enum Data control
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class EnumDataWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(EnumDataWidget.class);

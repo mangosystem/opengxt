@@ -9,6 +9,17 @@
  */
 package org.locationtech.udig.processingtoolbox.storage;
 
+/**
+ * Name Policy
+ * 
+ * @author Minpa Lee, MangoSystem  
+ * 
+ * @source $URL$
+ */
 public enum NamePolicy {
-    NORMAL, UPPERCASE, LOWERCASE
+    NORMAL, 
+    
+    UPPERCASE, 
+    
+    LOWERCASE
 }

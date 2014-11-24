@@ -44,8 +44,9 @@ import org.opengis.feature.type.GeometryDescriptor;
 /**
  * Multiple Fields Selection Dialog
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class MultipleFieldsSelectionDialog extends Dialog {
     protected static final Logger LOGGER = Logging.getLogger(MultipleFieldsSelectionDialog.class);

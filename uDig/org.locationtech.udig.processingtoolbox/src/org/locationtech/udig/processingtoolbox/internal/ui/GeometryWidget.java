@@ -47,8 +47,9 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * Geometry control
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class GeometryWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(GeometryWidget.class);

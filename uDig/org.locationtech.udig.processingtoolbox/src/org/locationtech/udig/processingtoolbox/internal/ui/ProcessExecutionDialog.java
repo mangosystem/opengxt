@@ -63,7 +63,9 @@ import com.vividsolutions.jts.geom.Geometry;
 /**
  * Process Execution Dialog
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
+ * 
+ * @source $URL$
  */
 public class ProcessExecutionDialog extends TitleAreaDialog {
     protected static final Logger LOGGER = Logging.getLogger(ProcessExecutionDialog.class);

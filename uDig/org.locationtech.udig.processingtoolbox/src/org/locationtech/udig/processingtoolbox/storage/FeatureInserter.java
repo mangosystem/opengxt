@@ -33,8 +33,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 /**
  * General Feature Inserter
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class FeatureInserter implements IFeatureInserter {
     protected static final Logger LOGGER = Logging.getLogger(FeatureInserter.class);

@@ -20,8 +20,9 @@ import org.geotools.util.logging.Logging;
 /**
  * Abstract viewer control
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public abstract class AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(AbstractToolboxWidget.class);

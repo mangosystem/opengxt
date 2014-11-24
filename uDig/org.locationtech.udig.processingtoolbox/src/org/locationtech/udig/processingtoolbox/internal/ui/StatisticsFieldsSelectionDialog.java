@@ -47,8 +47,9 @@ import org.opengis.feature.type.GeometryDescriptor;
 /**
  * Statistics Fields Selection Dialog
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class StatisticsFieldsSelectionDialog extends Dialog {
     protected static final Logger LOGGER = Logging.getLogger(StatisticsFieldsSelectionDialog.class);

@@ -63,8 +63,9 @@ import org.opengis.filter.FilterFactory2;
 /**
  * Query Builder Dialog
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 @SuppressWarnings("nls")
 public class QueryBuilderDialog extends Dialog {

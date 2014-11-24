@@ -24,6 +24,8 @@ import com.thoughtworks.xstream.mapper.MapperWrapper;
  * A PPIO to generate good looking xml for the StatisticsFeatures process results
  * 
  * @author Minpa Lee, MangoSystem
+ * 
+ * @source $URL$
  */
 public class DataStatisticsResultPPIO extends XStreamPPIO {
 

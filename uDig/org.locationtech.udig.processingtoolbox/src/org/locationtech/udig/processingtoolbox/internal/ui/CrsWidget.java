@@ -47,8 +47,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 /**
  * Coordinate Reference System control
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class CrsWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(CrsWidget.class);

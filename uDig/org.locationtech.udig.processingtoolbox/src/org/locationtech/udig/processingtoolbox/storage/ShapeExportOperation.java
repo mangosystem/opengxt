@@ -45,6 +45,13 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+/**
+ * Converts a feature collstion to a shapefile format.
+ * 
+ * @author Minpa Lee, MangoSystem
+ * 
+ * @source $URL$
+ */
 @SuppressWarnings("nls")
 public class ShapeExportOperation {
     protected static final Logger LOGGER = Logging.getLogger(ShapeExportOperation.class);

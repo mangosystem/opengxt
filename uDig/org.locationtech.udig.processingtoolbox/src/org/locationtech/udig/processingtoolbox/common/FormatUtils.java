@@ -14,6 +14,13 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+/**
+ * Number Format Utilities
+ * 
+ * @author Minpa Lee, MangoSystem  
+ * 
+ * @source $URL$
+ */
 @SuppressWarnings("nls")
 public class FormatUtils {
 

@@ -27,8 +27,9 @@ import org.geotools.util.logging.Logging;
 /**
  * Integer Data control
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class IntegerDataWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(IntegerDataWidget.class);

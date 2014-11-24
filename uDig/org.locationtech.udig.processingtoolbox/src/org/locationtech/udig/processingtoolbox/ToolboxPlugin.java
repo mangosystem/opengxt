@@ -34,7 +34,9 @@ import org.osgi.framework.BundleContext;
 /**
  * The activator class controls the plug-in life cycle
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
+ * 
+ * @source $URL$
  */
 @SuppressWarnings("restriction")
 public class ToolboxPlugin extends AbstractUIPlugin {

@@ -17,7 +17,9 @@ import com.thoughtworks.xstream.mapper.MapperWrapper;
 /**
  * A PPIO to generate good looking xml for the StatisticsFeatures process results
  * 
- * @author MapPlus - OnSpatial
+ * @author Minpa Lee, MangoSystem
+ * 
+ * @source $URL$
  */
 public class MoransIPPIO extends XStreamPPIO {
     final XmlFriendlyNameCoder nameCoder = new XmlFriendlyNameCoder("__", "_");

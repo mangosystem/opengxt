@@ -33,8 +33,9 @@ import org.locationtech.udig.processingtoolbox.storage.DataStoreFactory;
 /**
  * Output Data Viewer
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class OutputDataWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(OutputDataWidget.class);

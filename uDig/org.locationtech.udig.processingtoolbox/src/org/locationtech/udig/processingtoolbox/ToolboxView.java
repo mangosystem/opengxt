@@ -58,10 +58,10 @@ import org.opengis.feature.type.Name;
 
 /**
  * ToolboxView
- * <p>
  * 
- * @author Minpa Lee
- * @since 1.0.0
+ * @author Minpa Lee, MangoSystem  
+ * 
+ * @source $URL$
  */
 
 public class ToolboxView extends ViewPart implements ISetSelectionTarget {

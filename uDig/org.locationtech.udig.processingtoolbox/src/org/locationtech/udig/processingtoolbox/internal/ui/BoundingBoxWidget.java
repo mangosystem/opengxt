@@ -49,8 +49,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 /**
  * BoundingBox control
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class BoundingBoxWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(BoundingBoxWidget.class);

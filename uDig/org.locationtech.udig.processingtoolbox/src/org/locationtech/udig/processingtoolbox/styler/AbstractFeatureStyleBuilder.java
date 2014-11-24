@@ -25,8 +25,9 @@ import org.opengis.filter.expression.Function;
 /**
  * AbstractFeatureStyleBuilder
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem
  * 
+ * @source $URL$
  */
 @SuppressWarnings("nls")
 public abstract class AbstractFeatureStyleBuilder {

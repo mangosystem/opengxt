@@ -37,6 +37,8 @@ import com.vividsolutions.jts.geom.Geometry;
  * A PPIO to generate good looking xml for the StatisticsFeatures process results
  * 
  * @author Minpa Lee, MangoSystem
+ * 
+ * @source $URL$
  */
 public class FeatureCollectionGML311PPIO extends XMLPPIO {
 

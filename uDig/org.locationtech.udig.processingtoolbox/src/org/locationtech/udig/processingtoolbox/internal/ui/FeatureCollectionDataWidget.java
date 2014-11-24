@@ -45,8 +45,9 @@ import com.vividsolutions.jts.geom.Polygon;
 /**
  * FeatureCollection Layer Data control
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(FeatureCollectionDataWidget.class);

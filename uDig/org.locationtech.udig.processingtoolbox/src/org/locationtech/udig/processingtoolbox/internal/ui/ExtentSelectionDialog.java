@@ -37,8 +37,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 /**
  * Extent Selection Dialog
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class ExtentSelectionDialog extends TitleAreaDialog {
     protected static final Logger LOGGER = Logging.getLogger(ExtentSelectionDialog.class);

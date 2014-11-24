@@ -55,8 +55,9 @@ import com.vividsolutions.jts.geom.Polygon;
 /**
  * Number Data control
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class NumberDataWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(NumberDataWidget.class);

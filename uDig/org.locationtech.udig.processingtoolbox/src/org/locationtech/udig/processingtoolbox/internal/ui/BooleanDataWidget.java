@@ -26,8 +26,9 @@ import org.locationtech.udig.processingtoolbox.internal.Messages;
 /**
  * Boolean Data control
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class BooleanDataWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(BooleanDataWidget.class);

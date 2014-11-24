@@ -35,8 +35,9 @@ import org.opengis.filter.Filter;
 /**
  * GraduatedSymbolStyleBuilder
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem
  * 
+ * @source $URL$
  */
 @SuppressWarnings("nls")
 public class GraduatedSymbolStyleBuilder extends AbstractFeatureStyleBuilder {

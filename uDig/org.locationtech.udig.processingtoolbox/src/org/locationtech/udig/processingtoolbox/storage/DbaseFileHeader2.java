@@ -1,11 +1,21 @@
 /*
- * uDig - User Friendly Desktop Internet GIS client
- * (C) MangoSystem - www.mangosystem.com 
+ *    GeoTools - The Open Source Java GIS Toolkit
+ *    http://geotools.org
  *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * (http://www.eclipse.org/legal/epl-v10.html), and the HydroloGIS BSD
- * License v1.0 (http://udig.refractions.net/files/hsd3-v10.html).
+ *    (C) 2002-2008, Open Source Geospatial Foundation (OSGeo)
+ *
+ *    This library is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation;
+ *    version 2.1 of the License.
+ *
+ *    This library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ *
+ *    This file is based on an origional contained in the GISToolkit project:
+ *    http://gistoolkit.sourceforge.net/
  */
 package org.locationtech.udig.processingtoolbox.storage;
 
@@ -30,6 +40,8 @@ import org.geotools.resources.NIOUtilities;
 
 /**
  * Class to represent the header of a Dbase III file. Creation date: (5/15/2001 5:15:30 PM)
+ * 
+ * Original Code: org.geotools.data.shapefile.dbf.DbaseFileHeader
  * 
  * @source $URL$
  */

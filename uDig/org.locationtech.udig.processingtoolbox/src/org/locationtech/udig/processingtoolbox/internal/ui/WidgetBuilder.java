@@ -39,8 +39,9 @@ import org.geotools.util.logging.Logging;
 /**
  * SWT Widget UI Builder
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 public class WidgetBuilder {
     protected final Logger LOGGER = Logging.getLogger(WidgetBuilder.class);

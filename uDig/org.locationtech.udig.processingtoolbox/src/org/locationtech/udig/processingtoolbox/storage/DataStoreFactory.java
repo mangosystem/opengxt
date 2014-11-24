@@ -32,8 +32,9 @@ import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 /**
  * DataStore Factory
  * 
- * @author MapPlus, mapplus@gmail.com
+ * @author Minpa Lee, MangoSystem  
  * 
+ * @source $URL$
  */
 @SuppressWarnings("nls")
 public class DataStoreFactory {

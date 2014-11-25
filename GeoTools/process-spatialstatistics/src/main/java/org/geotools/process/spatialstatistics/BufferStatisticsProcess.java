@@ -25,7 +25,6 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
-import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.operations.PointStatisticsOperation;
 import org.geotools.text.Text;
@@ -43,7 +42,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * 
  * @source $URL$
  */
-public class BufferStatisticsProcess extends AbstractProcess {
+public class BufferStatisticsProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(BufferStatisticsProcess.class);
 
     private boolean started = false;

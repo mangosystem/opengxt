@@ -52,7 +52,7 @@ public class AreaProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new AreaProcess(this);
     }
 
@@ -62,12 +62,12 @@ public class AreaProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("Area.description");
     }
 
     /** inputFeatures */
-    protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("Area.inputFeatures.title"), getResource("Area.inputFeatures.description"),
             true, 1, 1, null, new KVP(Parameter.FEATURE_TYPE, "Polygon"));
@@ -80,7 +80,7 @@ public class AreaProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     /** result */
-    protected static final Parameter<Double> RESULT = new Parameter<Double>("result", Double.class,
+    public static final Parameter<Double> RESULT = new Parameter<Double>("result", Double.class,
             getResource("Area.result.title"), getResource("Area.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();

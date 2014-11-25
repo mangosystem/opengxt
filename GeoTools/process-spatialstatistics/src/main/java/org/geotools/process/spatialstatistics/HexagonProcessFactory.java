@@ -54,7 +54,7 @@ public class HexagonProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new HexagonProcess(this);
     }
 
@@ -64,19 +64,19 @@ public class HexagonProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("Hexagon.description");
     }
 
     /** extent */
-    protected static final Parameter<ReferencedEnvelope> extent = new Parameter<ReferencedEnvelope>(
+    public static final Parameter<ReferencedEnvelope> extent = new Parameter<ReferencedEnvelope>(
             "extent", ReferencedEnvelope.class,
             getResource("Hexagon.extent.title"),
             getResource("Hexagon.extent.description"), false, 0, 1, null, null);
 
 
     /** boundsSource */
-    protected static final Parameter<SimpleFeatureCollection> boundsSource = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> boundsSource = new Parameter<SimpleFeatureCollection>(
             "boundsSource", SimpleFeatureCollection.class,
             getResource("Hexagon.boundsSource.title"),
             getResource("Hexagon.boundsSource.description"), false, 0, 1, null, new KVP(
@@ -88,7 +88,7 @@ public class HexagonProcessFactory extends SpatialStatisticsProcessFactory {
             getResource("Hexagon.sideLen.description"), true, 1, 1, null, null);
 
     /** orientation */
-    protected static final Parameter<HexagonOrientation> orientation = new Parameter<HexagonOrientation>(
+    public static final Parameter<HexagonOrientation> orientation = new Parameter<HexagonOrientation>(
             "orientation", HexagonOrientation.class,
             getResource("Hexagon.orientation.title"),
             getResource("Hexagon.orientation.description"), false, 0, 1, HexagonOrientation.FLAT, null);
@@ -104,7 +104,7 @@ public class HexagonProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     /** result */
-    protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>("result", SimpleFeatureCollection.class,
+    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>("result", SimpleFeatureCollection.class,
             getResource("Hexagon.result.title"), getResource("Hexagon.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();

@@ -26,7 +26,6 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
-import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
@@ -43,7 +42,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * 
  * @source $URL$
  */
-public class AreaProcess extends AbstractProcess {
+public class AreaProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(AreaProcess.class);
 
     private boolean started = false;

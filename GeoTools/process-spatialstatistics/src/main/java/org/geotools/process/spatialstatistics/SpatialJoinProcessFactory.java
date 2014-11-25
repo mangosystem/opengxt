@@ -52,7 +52,7 @@ public class SpatialJoinProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new SpatialJoinProcess(this);
     }
 
@@ -62,30 +62,30 @@ public class SpatialJoinProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("SpatialJoin.description");
     }
 
     /** inputFeatures */
-    protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("SpatialJoin.inputFeatures.title"),
             getResource("SpatialJoin.inputFeatures.description"), true, 1, 1, null, null);
 
     /** joinFeatures */
-    protected static final Parameter<SimpleFeatureCollection> joinFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> joinFeatures = new Parameter<SimpleFeatureCollection>(
             "joinFeatures", SimpleFeatureCollection.class,
             getResource("SpatialJoin.joinFeatures.title"),
             getResource("SpatialJoin.joinFeatures.description"), true, 1, 1, null, null);
 
     /** joinType */
-    protected static final Parameter<SpatialJoinType> joinType = new Parameter<SpatialJoinType>(
+    public static final Parameter<SpatialJoinType> joinType = new Parameter<SpatialJoinType>(
             "joinType", SpatialJoinType.class, getResource("SpatialJoin.joinType.title"),
             getResource("SpatialJoin.joinType.description"), false, 0, 1,
             SpatialJoinType.KeepAllRecord, null);
 
     /** searchRadius */
-    protected static final Parameter<Double> searchRadius = new Parameter<Double>("searchRadius",
+    public static final Parameter<Double> searchRadius = new Parameter<Double>("searchRadius",
             Double.class, getResource("SpatialJoin.searchRadius.title"),
             getResource("SpatialJoin.searchRadius.description"), false, 0, 1, Double.valueOf(0.0d),
             null);
@@ -101,7 +101,7 @@ public class SpatialJoinProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     /** result */
-    protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("SpatialJoin.result.title"),
             getResource("SpatialJoin.result.description"));
 

@@ -56,7 +56,7 @@ public class LocalMoransIProcessFactory extends SpatialStatisticsProcessFactory 
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new LocalMoransIProcess(this);
     }
 
@@ -66,12 +66,12 @@ public class LocalMoransIProcessFactory extends SpatialStatisticsProcessFactory 
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("LocalMoransI.description");
     }
 
     /** inputFeatures */
-    protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("LocalMoransI.inputFeatures.title"),
             getResource("LocalMoransI.inputFeatures.description"), true, 1, 1, null, null);
@@ -83,28 +83,28 @@ public class LocalMoransIProcessFactory extends SpatialStatisticsProcessFactory 
                     Parameter.OPTIONS, "inputFeatures.Number"));
 
     /** spatialConcept */
-    protected static final Parameter<SpatialConcept> spatialConcept = new Parameter<SpatialConcept>(
+    public static final Parameter<SpatialConcept> spatialConcept = new Parameter<SpatialConcept>(
             "spatialConcept", SpatialConcept.class,
             getResource("LocalMoransI.spatialConcept.title"),
             getResource("LocalMoransI.spatialConcept.description"), false, 0, 1,
             SpatialConcept.INVERSEDISTANCE, null);
 
     /** distanceMethod */
-    protected static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
+    public static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
             "distanceMethod", DistanceMethod.class,
             getResource("LocalMoransI.distanceMethod.title"),
             getResource("LocalMoransI.distanceMethod.description"), false, 0, 1,
             DistanceMethod.Euclidean, null);
 
     /** standardization */
-    protected static final Parameter<StandardizationMethod> standardization = new Parameter<StandardizationMethod>(
+    public static final Parameter<StandardizationMethod> standardization = new Parameter<StandardizationMethod>(
             "standardization", StandardizationMethod.class,
             getResource("LocalMoransI.standardization.title"),
             getResource("LocalMoransI.standardization.description"), false, 0, 1,
             StandardizationMethod.NONE, null);
 
     /** searchDistance */
-    protected static final Parameter<Double> searchDistance = new Parameter<Double>(
+    public static final Parameter<Double> searchDistance = new Parameter<Double>(
             "searchDistance", Double.class, getResource("LocalMoransI.searchDistance.title"),
             getResource("LocalMoransI.searchDistance.description"), false, 0, 1,
             Double.valueOf(0.0), null);
@@ -122,7 +122,7 @@ public class LocalMoransIProcessFactory extends SpatialStatisticsProcessFactory 
     }
 
     /** result */
-    protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("LocalMoransI.result.title"),
             getResource("LocalMoransI.result.description"));
 

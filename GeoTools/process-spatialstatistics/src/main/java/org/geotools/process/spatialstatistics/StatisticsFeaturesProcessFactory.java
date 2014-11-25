@@ -54,7 +54,7 @@ public class StatisticsFeaturesProcessFactory extends SpatialStatisticsProcessFa
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new StatisticsFeaturesProcess(this);
     }
 
@@ -64,12 +64,12 @@ public class StatisticsFeaturesProcessFactory extends SpatialStatisticsProcessFa
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("StatisticsFeatures.description");
     }
 
     /** inputFeatures */
-    protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("StatisticsFeatures.inputFeatures.title"),
             getResource("StatisticsFeatures.inputFeatures.description"), true, 1, 1, null, new KVP(
@@ -89,7 +89,7 @@ public class StatisticsFeaturesProcessFactory extends SpatialStatisticsProcessFa
     }
 
     /** result */
-    protected static final Parameter<DataStatisticsResult> RESULT = new Parameter<DataStatisticsResult>(
+    public static final Parameter<DataStatisticsResult> RESULT = new Parameter<DataStatisticsResult>(
             "result", DataStatisticsResult.class, getResource("StatisticsFeatures.result.title"),
             getResource("StatisticsFeatures.result.description"));
 

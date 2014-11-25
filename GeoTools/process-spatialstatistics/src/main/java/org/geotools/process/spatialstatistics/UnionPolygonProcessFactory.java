@@ -52,7 +52,7 @@ public class UnionPolygonProcessFactory extends SpatialStatisticsProcessFactory 
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new UnionPolygonProcess(this);
     }
 
@@ -62,19 +62,19 @@ public class UnionPolygonProcessFactory extends SpatialStatisticsProcessFactory 
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("UnionPolygon.description");
     }
 
     /** polygonFeatures */
-    protected static final Parameter<SimpleFeatureCollection> polygonFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> polygonFeatures = new Parameter<SimpleFeatureCollection>(
             "polygonFeatures", SimpleFeatureCollection.class,
             getResource("UnionPolygon.polygonFeatures.title"),
             getResource("UnionPolygon.polygonFeatures.description"),
             true, 1, 1, null, new KVP(Parameter.FEATURE_TYPE, "Polygon"));
 
     /** preserveHole */
-    protected static final Parameter<Boolean> preserveHole = new Parameter<Boolean>("preserveHole",
+    public static final Parameter<Boolean> preserveHole = new Parameter<Boolean>("preserveHole",
             Boolean.class, getResource("UnionPolygon.preserveHole.title"),
             getResource("UnionPolygon.preserveHole.description"), false, 0, 1, Boolean.TRUE, null);
 
@@ -87,7 +87,7 @@ public class UnionPolygonProcessFactory extends SpatialStatisticsProcessFactory 
     }
 
     /** result */
-    protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("UnionPolygon.result.title"),
             getResource("UnionPolygon.result.description"));
 

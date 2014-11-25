@@ -53,7 +53,7 @@ public class PointStatisticsProcessFactory extends SpatialStatisticsProcessFacto
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new PointStatisticsProcess(this);
     }
 
@@ -63,31 +63,31 @@ public class PointStatisticsProcessFactory extends SpatialStatisticsProcessFacto
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("PointStatistics.description");
     }
 
     /** polygonFeatures */
-    protected static final Parameter<SimpleFeatureCollection> polygonFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> polygonFeatures = new Parameter<SimpleFeatureCollection>(
             "polygonFeatures", SimpleFeatureCollection.class,
             getResource("PointStatistics.polygonFeatures.title"),
             getResource("PointStatistics.polygonFeatures.description"), true, 1, 1, null, new KVP(
                     Parameter.FEATURE_TYPE, "Polygon"));
 
     /** pointFeatures */
-    protected static final Parameter<SimpleFeatureCollection> pointFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> pointFeatures = new Parameter<SimpleFeatureCollection>(
             "pointFeatures", SimpleFeatureCollection.class,
             getResource("PointStatistics.pointFeatures.title"),
             getResource("PointStatistics.pointFeatures.description"), true, 1, 1, null, new KVP(
                     Parameter.FEATURE_TYPE, "Point"));
 
     /** countField */
-    protected static final Parameter<String> countField = new Parameter<String>("countField",
+    public static final Parameter<String> countField = new Parameter<String>("countField",
             String.class, getResource("PointStatistics.countField.title"),
             getResource("PointStatistics.countField.description"), false, 0, 1, "count", null);
 
     /** statisticsFields */
-    protected static final Parameter<String> statisticsFields = new Parameter<String>(
+    public static final Parameter<String> statisticsFields = new Parameter<String>(
             "statisticsFields", String.class,
             getResource("PointStatistics.statisticsFields.title"),
             getResource("PointStatistics.statisticsFields.description"), false, 0, 1, null, null);
@@ -103,7 +103,7 @@ public class PointStatisticsProcessFactory extends SpatialStatisticsProcessFacto
     }
 
     /** result */
-    protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("PointStatistics.result.title"),
             getResource("PointStatistics.result.description"), true, 1, 1, null, new KVP(
                     Parameter.OPTIONS, "EqualInterval.countField"));

@@ -25,7 +25,6 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
-import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
@@ -41,7 +40,7 @@ import org.opengis.util.ProgressListener;
  * 
  * @source $URL$
  */
-public class StatisticsFeaturesProcess extends AbstractProcess {
+public class StatisticsFeaturesProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(StatisticsFeaturesProcess.class);
 
     private boolean started = false;

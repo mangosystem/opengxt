@@ -52,7 +52,7 @@ public class MeanCenterProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new MeanCenterProcess(this);
     }
 
@@ -62,12 +62,12 @@ public class MeanCenterProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("MeanCenter.description");
     }
 
     /** inputFeatures */
-    protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("MeanCenter.inputFeatures.title"),
             getResource("MeanCenter.inputFeatures.description"), true, 1, 1, null, new KVP(
@@ -102,7 +102,7 @@ public class MeanCenterProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     /** result */
-    protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("MeanCenter.result.title"),
             getResource("MeanCenter.result.description"));
 

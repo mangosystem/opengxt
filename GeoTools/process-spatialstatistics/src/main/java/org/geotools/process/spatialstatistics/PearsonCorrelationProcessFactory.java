@@ -54,7 +54,7 @@ public class PearsonCorrelationProcessFactory extends SpatialStatisticsProcessFa
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new PearsonCorrelationProcess(this);
     }
 
@@ -64,12 +64,12 @@ public class PearsonCorrelationProcessFactory extends SpatialStatisticsProcessFa
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("Pearson.description");
     }
 
     /** inputFeatures */
-    protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("Pearson.inputFeatures.title"),
             getResource("Pearson.inputFeatures.description"), true, 1, 1, null, new KVP(
@@ -89,7 +89,7 @@ public class PearsonCorrelationProcessFactory extends SpatialStatisticsProcessFa
     }
 
     /** result */
-    protected static final Parameter<PearsonResult> RESULT = new Parameter<PearsonResult>("result",
+    public static final Parameter<PearsonResult> RESULT = new Parameter<PearsonResult>("result",
             PearsonResult.class, getResource("Pearson.result.title"),
             getResource("Pearson.result.description"));
 

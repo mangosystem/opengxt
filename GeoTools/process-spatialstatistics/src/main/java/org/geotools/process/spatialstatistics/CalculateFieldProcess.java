@@ -27,7 +27,6 @@ import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
-import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.transformation.FieldCalculationFeatureCollection;
 import org.geotools.text.Text;
@@ -43,7 +42,7 @@ import org.opengis.util.ProgressListener;
  * 
  * @source $URL$
  */
-public class CalculateFieldProcess extends AbstractProcess {
+public class CalculateFieldProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(CalculateFieldProcess.class);
 
     private boolean started = false;

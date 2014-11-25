@@ -53,7 +53,7 @@ public class NearestNeighborProcessFactory extends SpatialStatisticsProcessFacto
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new NearestNeighborProcess(this);
     }
 
@@ -63,25 +63,25 @@ public class NearestNeighborProcessFactory extends SpatialStatisticsProcessFacto
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("NearestNeighbor.description");
     }
 
     /** inputFeatures */
-    protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("NearestNeighbor.inputFeatures.title"),
             getResource("NearestNeighbor.inputFeatures.description"), true, 1, 1, null, null);
 
     /** distanceMethod */
-    protected static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
+    public static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
             "distanceMethod", DistanceMethod.class,
             getResource("NearestNeighbor.distanceMethod.title"),
             getResource("NearestNeighbor.distanceMethod.description"), false, 0, 1,
             DistanceMethod.Euclidean, null);
 
     /** area */
-    protected static final Parameter<Double> area = new Parameter<Double>("area", Double.class,
+    public static final Parameter<Double> area = new Parameter<Double>("area", Double.class,
             getResource("NearestNeighbor.area.title"),
             getResource("NearestNeighbor.area.description"), false, 0, 1, 0.0, null);
 
@@ -95,7 +95,7 @@ public class NearestNeighborProcessFactory extends SpatialStatisticsProcessFacto
     }
 
     /** result */
-    protected static final Parameter<NearestNeighborResult> RESULT = new Parameter<NearestNeighborResult>(
+    public static final Parameter<NearestNeighborResult> RESULT = new Parameter<NearestNeighborResult>(
             "result", NearestNeighborResult.class, getResource("NearestNeighbor.result.title"),
             getResource("NearestNeighbor.result.description"));
 

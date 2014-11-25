@@ -25,7 +25,6 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
-import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
@@ -39,7 +38,7 @@ import org.opengis.util.ProgressListener;
  *
  * @source $URL$
  */
-public class CountFeaturesProcess extends AbstractProcess {
+public class CountFeaturesProcess extends AbstractStatisticsProcess {
 
     protected static final Logger LOGGER = Logging.getLogger(CountFeaturesProcess.class);
 

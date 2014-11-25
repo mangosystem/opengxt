@@ -25,7 +25,6 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
-import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation;
@@ -42,7 +41,7 @@ import org.opengis.util.ProgressListener;
  * 
  * @source $URL$
  */
-public class NearestNeighborProcess extends AbstractProcess {
+public class NearestNeighborProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(NearestNeighborProcess.class);
 
     private boolean started = false;

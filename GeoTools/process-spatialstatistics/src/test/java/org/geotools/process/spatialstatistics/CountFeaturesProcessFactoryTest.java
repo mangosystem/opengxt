@@ -1,22 +1,19 @@
 package org.geotools.process.spatialstatistics;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Set;
 
 import org.geotools.feature.NameImpl;
 import org.junit.Test;
 import org.opengis.feature.type.Name;
 
-public class CountFeaturesProcessFactoryTest {
+public class CountFeaturesProcessFactoryTest extends SpatialStatisticsTestCase {
 
     CountFeaturesProcessFactory factory = new CountFeaturesProcessFactory();
 
     @Test
     public void testLookup() {
-        Set<Name> names = factory.getNames(); 
+        Set<Name> names = factory.getNames();
         assertFalse(names.isEmpty());
-        assertTrue(names.contains(new NameImpl("ss", "Count Features")));
+        assertTrue(names.contains(new NameImpl("statistics", "CountFeatures")));
     }
 }

@@ -236,7 +236,8 @@ public class SSStyleBuilder {
             } catch (TransformerException te) {
                 LOGGER.log(Level.FINE, te.getMessage(), te);
             }
+            return style.toString();
         }
-        return style.toString();
+        return null;
     }
 }

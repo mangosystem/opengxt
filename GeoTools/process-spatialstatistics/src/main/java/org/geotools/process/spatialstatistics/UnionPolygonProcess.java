@@ -32,7 +32,6 @@ import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
-import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
@@ -58,7 +57,7 @@ import com.vividsolutions.jts.operation.union.CascadedPolygonUnion;
  * 
  * @source $URL$
  */
-public class UnionPolygonProcess extends AbstractProcess {
+public class UnionPolygonProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(UnionPolygonProcess.class);
 
     private boolean started = false;
@@ -141,7 +140,8 @@ public class UnionPolygonProcess extends AbstractProcess {
                 unionGeometry = removeHoles(unionGeometry);
             }
 
-            CoordinateReferenceSystem crs = polygonFeatures.getSchema().getCoordinateReferenceSystem();
+            CoordinateReferenceSystem crs = polygonFeatures.getSchema()
+                    .getCoordinateReferenceSystem();
             SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
             typeBuilder.setName("UnionPolygon");
             typeBuilder.add("geom", MultiPolygon.class, crs);

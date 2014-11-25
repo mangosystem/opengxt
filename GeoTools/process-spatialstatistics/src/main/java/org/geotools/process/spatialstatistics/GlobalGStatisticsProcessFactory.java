@@ -57,7 +57,7 @@ public class GlobalGStatisticsProcessFactory extends SpatialStatisticsProcessFac
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new GlobalGStatisticsProcess(this);
     }
 
@@ -67,12 +67,12 @@ public class GlobalGStatisticsProcessFactory extends SpatialStatisticsProcessFac
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("GlobalGStatistics.description");
     }
 
     /** inputFeatures */
-    protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("GlobalGStatistics.inputFeatures.title"),
             getResource("GlobalGStatistics.inputFeatures.description"), true, 1, 1, null, null);
@@ -84,28 +84,28 @@ public class GlobalGStatisticsProcessFactory extends SpatialStatisticsProcessFac
                     Parameter.OPTIONS, "inputFeatures.Number"));
 
     /** spatialConcept */
-    protected static final Parameter<SpatialConcept> spatialConcept = new Parameter<SpatialConcept>(
+    public static final Parameter<SpatialConcept> spatialConcept = new Parameter<SpatialConcept>(
             "spatialConcept", SpatialConcept.class,
             getResource("GlobalGStatistics.spatialConcept.title"),
             getResource("GlobalGStatistics.spatialConcept.description"), false, 0, 1,
             SpatialConcept.INVERSEDISTANCE, null);
 
     /** distanceMethod */
-    protected static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
+    public static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
             "distanceMethod", DistanceMethod.class,
             getResource("GlobalGStatistics.distanceMethod.title"),
             getResource("GlobalGStatistics.distanceMethod.description"), false, 0, 1,
             DistanceMethod.Euclidean, null);
 
     /** standardization */
-    protected static final Parameter<StandardizationMethod> standardization = new Parameter<StandardizationMethod>(
+    public static final Parameter<StandardizationMethod> standardization = new Parameter<StandardizationMethod>(
             "standardization", StandardizationMethod.class,
             getResource("GlobalGStatistics.standardization.title"),
             getResource("GlobalGStatistics.standardization.description"), false, 0, 1,
             StandardizationMethod.NONE, null);
 
     /** searchDistance */
-    protected static final Parameter<Double> searchDistance = new Parameter<Double>(
+    public static final Parameter<Double> searchDistance = new Parameter<Double>(
             "searchDistance", Double.class, getResource("GlobalGStatistics.searchDistance.title"),
             getResource("GlobalGStatistics.searchDistance.description"), false, 0, 1,
             Double.valueOf(0.0), null);
@@ -123,7 +123,7 @@ public class GlobalGStatisticsProcessFactory extends SpatialStatisticsProcessFac
     }
 
     /** result */
-    protected static final Parameter<GStatisticsProcessResult> RESULT = new Parameter<GStatisticsProcessResult>(
+    public static final Parameter<GStatisticsProcessResult> RESULT = new Parameter<GStatisticsProcessResult>(
             "result", GStatisticsProcessResult.class,
             getResource("GlobalGStatistics.result.title"),
             getResource("GlobalGStatistics.result.description"));

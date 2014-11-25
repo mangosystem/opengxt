@@ -53,7 +53,7 @@ public class FishnetProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new FishnetProcess(this);
     }
 
@@ -63,17 +63,17 @@ public class FishnetProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("Fishnet.description");
     }
 
     /** extent */
-    protected static final Parameter<ReferencedEnvelope> extent = new Parameter<ReferencedEnvelope>(
+    public static final Parameter<ReferencedEnvelope> extent = new Parameter<ReferencedEnvelope>(
             "extent", ReferencedEnvelope.class, getResource("Fishnet.extent.title"),
             getResource("Fishnet.extent.description"), false, 0, 1, null, null);
 
     /** boundsSource */
-    protected static final Parameter<SimpleFeatureCollection> boundsSource = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> boundsSource = new Parameter<SimpleFeatureCollection>(
             "boundsSource", SimpleFeatureCollection.class,
             getResource("Fishnet.boundsSource.title"),
             getResource("Fishnet.boundsSource.description"), false, 0, 1, null, null);
@@ -84,22 +84,22 @@ public class FishnetProcessFactory extends SpatialStatisticsProcessFactory {
             getResource("Fishnet.boundaryInside.description"), false, 0, 1, Boolean.FALSE, null);
 
     /** columns */
-    protected static final Parameter<Integer> columns = new Parameter<Integer>("columns",
+    public static final Parameter<Integer> columns = new Parameter<Integer>("columns",
             Integer.class, getResource("Fishnet.columns.title"),
             getResource("Fishnet.columns.description"), false, 0, 1, Integer.valueOf(0), null);
 
     /** rows */
-    protected static final Parameter<Integer> rows = new Parameter<Integer>("rows", Integer.class,
+    public static final Parameter<Integer> rows = new Parameter<Integer>("rows", Integer.class,
             getResource("Fishnet.rows.title"), getResource("Fishnet.rows.description"), false, 0,
             1, Integer.valueOf(0), null);
 
     /** width */
-    protected static final Parameter<Double> width = new Parameter<Double>("width", Double.class,
+    public static final Parameter<Double> width = new Parameter<Double>("width", Double.class,
             getResource("Fishnet.width.title"), getResource("Fishnet.width.description"), false, 0,
             1, Double.valueOf(0.0), null);
 
     /** height */
-    protected static final Parameter<Double> height = new Parameter<Double>("height", Double.class,
+    public static final Parameter<Double> height = new Parameter<Double>("height", Double.class,
             getResource("Fishnet.height.title"), getResource("Fishnet.height.description"), false,
             0, 1, Double.valueOf(0.0), null);
 
@@ -117,7 +117,7 @@ public class FishnetProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     /** result */
-    protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("Fishnet.result.title"),
             getResource("Fishnet.result.description"));
 

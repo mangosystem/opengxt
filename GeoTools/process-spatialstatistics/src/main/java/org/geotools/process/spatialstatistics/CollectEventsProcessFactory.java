@@ -50,7 +50,7 @@ public class CollectEventsProcessFactory extends SpatialStatisticsProcessFactory
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new CollectEventsProcess(this);
     }
 
@@ -60,19 +60,19 @@ public class CollectEventsProcessFactory extends SpatialStatisticsProcessFactory
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("CollectEvents.description");
     }
 
     /** inputFeatures */
-    protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("CollectEvents.inputFeatures.title"),
             getResource("CollectEvents.inputFeatures.description"), true, 1, 1, null, new KVP(
                     Parameter.FEATURE_TYPE, "Point"));
 
     /** countField */
-    protected static final Parameter<String> countField = new Parameter<String>("countField",
+    public static final Parameter<String> countField = new Parameter<String>("countField",
             String.class, getResource("CollectEvents.countField.title"),
             getResource("CollectEvents.countField.description"), false, 0, 1, "icount", new KVP(
                     Parameter.OPTIONS, "inputFeatures.Number"));
@@ -85,7 +85,7 @@ public class CollectEventsProcessFactory extends SpatialStatisticsProcessFactory
         return parameterInfo;
     }
 
-    protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("CollectEvents.result.title"),
             getResource("CollectEvents.result.description"), true, 1, 1, null, new KVP(
                     Parameter.OPTIONS, "EqualInterval.countField"));

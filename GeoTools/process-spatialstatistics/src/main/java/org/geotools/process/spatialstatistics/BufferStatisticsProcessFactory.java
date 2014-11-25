@@ -53,7 +53,7 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new BufferStatisticsProcess(this);
     }
 
@@ -63,36 +63,36 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("BufferPointStatistics.description");
     }
 
     /** inputFeatures */
-    protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("BufferPointStatistics.inputFeatures.title"),
             getResource("BufferPointStatistics.inputFeatures.description"), true, 1, 1, null, null);
 
     /** distance */
-    protected static final Parameter<Double> distance = new Parameter<Double>("distance",
+    public static final Parameter<Double> distance = new Parameter<Double>("distance",
             Double.class, getResource("BufferPointStatistics.distance.title"),
             getResource("BufferPointStatistics.distance.description"), true, 1, 1,
             Double.valueOf(0.0d), null);
 
     /** pointFeatures */
-    protected static final Parameter<SimpleFeatureCollection> pointFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> pointFeatures = new Parameter<SimpleFeatureCollection>(
             "pointFeatures", SimpleFeatureCollection.class,
             getResource("BufferPointStatistics.pointFeatures.title"),
             getResource("BufferPointStatistics.pointFeatures.description"), true, 1, 1, null,
             new KVP(Parameter.FEATURE_TYPE, "Point"));
 
     /** countField */
-    protected static final Parameter<String> countField = new Parameter<String>("countField",
+    public static final Parameter<String> countField = new Parameter<String>("countField",
             String.class, getResource("BufferPointStatistics.countField.title"),
             getResource("BufferPointStatistics.countField.description"), false, 0, 1, "count", null);
 
     /** statisticsFields */
-    protected static final Parameter<String> statisticsFields = new Parameter<String>(
+    public static final Parameter<String> statisticsFields = new Parameter<String>(
             "statisticsFields", String.class,
             getResource("BufferPointStatistics.statisticsFields.title"),
             getResource("BufferPointStatistics.statisticsFields.description"), false, 0, 1, null,
@@ -110,7 +110,7 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
     }
 
     /** result */
-    protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class,
             getResource("BufferPointStatistics.result.title"),
             getResource("BufferPointStatistics.result.description"), true, 1, 1, null, new KVP(

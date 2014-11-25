@@ -208,10 +208,11 @@ public class DistanceFactory {
         SimpleFeatureCollection features = null;
         try {
             features = featureSource.getFeatures(filter);
+            return loadEvents(features, weightField);
         } catch (IOException e) {
             LOGGER.log(Level.FINE, e.getMessage(), e);
         }
-        return loadEvents(features, weightField);
+        return null;
     }
 
     public static List<SpatialEvent> loadEvents(SimpleFeatureCollection features, String weightField) {

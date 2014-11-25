@@ -27,7 +27,6 @@ import org.geotools.grid.hexagon.HexagonOrientation;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
-import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.operations.HexagonOperation;
 import org.geotools.text.Text;
@@ -42,7 +41,7 @@ import org.opengis.util.ProgressListener;
  * 
  * @source $URL$
  */
-public class HexagonProcess extends AbstractProcess {
+public class HexagonProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(HexagonProcess.class);
 
     private boolean started = false;

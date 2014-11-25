@@ -29,7 +29,6 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
-import org.geotools.process.impl.AbstractProcess;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.FishnetType;
 import org.geotools.process.spatialstatistics.operations.FishnetOperation;
@@ -49,7 +48,7 @@ import com.vividsolutions.jts.operation.union.CascadedPolygonUnion;
  * 
  * @source $URL$
  */
-public class FishnetProcess extends AbstractProcess {
+public class FishnetProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(FishnetProcess.class);
 
     private boolean started = false;

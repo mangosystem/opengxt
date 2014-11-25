@@ -52,7 +52,7 @@ public class CalculateFieldProcessFactory extends SpatialStatisticsProcessFactor
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new CalculateFieldProcess(this);
     }
 
@@ -62,12 +62,12 @@ public class CalculateFieldProcessFactory extends SpatialStatisticsProcessFactor
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("CalculateField.description");
     }
 
     /** inputFeatures */
-    protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("CalculateField.inputFeatures.title"),
             getResource("CalculateField.inputFeatures.description"), true, 1, 1, null, new KVP(
@@ -94,7 +94,7 @@ public class CalculateFieldProcessFactory extends SpatialStatisticsProcessFactor
     }
 
     /** result */
-    protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("CalculateField.result.title"),
             getResource("CalculateField.result.description"), true, 1, 1, null, new KVP(
                     Parameter.OPTIONS, "NaturalBreaks.fieldName"));

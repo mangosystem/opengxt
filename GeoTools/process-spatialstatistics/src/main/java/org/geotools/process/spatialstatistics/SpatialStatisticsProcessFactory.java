@@ -36,16 +36,16 @@ import org.opengis.util.InternationalString;
 public abstract class SpatialStatisticsProcessFactory extends SingleProcessFactory {
     protected static final Logger LOGGER = Logging.getLogger(SpatialStatisticsProcessFactory.class);
 
-    public final static String NAMESPACE = "statistics";
+    protected static final String NAMESPACE = "statistics";
 
-    public final static String VERSION = "1.0.0";
+    protected static final String VERSION = "1.0.0";
 
     static final ResourceBundle bundle;
     static {
         bundle = ResourceBundle.getBundle("resource", Locale.getDefault());
     }
 
-    public static InternationalString getResource(String key) {
+    protected static InternationalString getResource(String key) {
         return Text.text(bundle.getString(key));
     }
 
@@ -54,12 +54,12 @@ public abstract class SpatialStatisticsProcessFactory extends SingleProcessFacto
     }
 
     @Override
-    protected String getVersion() {
+    public String getVersion() {
         return VERSION;
     }
 
     @Override
-    protected boolean supportsProgress() {
+    public boolean supportsProgress() {
         return true;
     }
 }

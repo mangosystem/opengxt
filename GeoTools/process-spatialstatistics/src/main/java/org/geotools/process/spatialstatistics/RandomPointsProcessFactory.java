@@ -52,7 +52,7 @@ public class RandomPointsProcessFactory extends SpatialStatisticsProcessFactory 
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new RandomPointsProcess(this);
     }
 
@@ -62,22 +62,22 @@ public class RandomPointsProcessFactory extends SpatialStatisticsProcessFactory 
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("RandomPoints.description");
     }
 
     /** pointCount */
-    protected static final Parameter<Integer> pointCount = new Parameter<Integer>("pointCount",
+    public static final Parameter<Integer> pointCount = new Parameter<Integer>("pointCount",
             Integer.class, getResource("RandomPoints.pointCount.title"),
             getResource("RandomPoints.pointCount.description"), true, 1, 1, 1000, null);
 
     /** extent */
-    protected static final Parameter<ReferencedEnvelope> extent = new Parameter<ReferencedEnvelope>(
+    public static final Parameter<ReferencedEnvelope> extent = new Parameter<ReferencedEnvelope>(
             "extent", ReferencedEnvelope.class, getResource("RandomPoints.extent.title"),
             getResource("RandomPoints.extent.description"), false, 0, 1, null, null);
 
     /** polygonFeatures */
-    protected static final Parameter<SimpleFeatureCollection> polygonFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> polygonFeatures = new Parameter<SimpleFeatureCollection>(
             "polygonFeatures", SimpleFeatureCollection.class,
             getResource("RandomPoints.polygonFeatures.title"),
             getResource("RandomPoints.polygonFeatures.description"),
@@ -93,7 +93,7 @@ public class RandomPointsProcessFactory extends SpatialStatisticsProcessFactory 
     }
 
     /** result */
-    protected static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("RandomPoints.result.title"),
             getResource("RandomPoints.result.description"));
 

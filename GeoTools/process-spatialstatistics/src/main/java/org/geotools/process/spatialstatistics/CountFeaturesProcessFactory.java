@@ -51,7 +51,7 @@ public class CountFeaturesProcessFactory extends SpatialStatisticsProcessFactory
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new CountFeaturesProcess(this);
     }
 
@@ -61,12 +61,12 @@ public class CountFeaturesProcessFactory extends SpatialStatisticsProcessFactory
     }
 
     @Override
-    protected InternationalString getDescription() {
+    public InternationalString getDescription() {
         return getResource("CountFeatures.description");
     }
 
     /** inputFeatures */
-    protected static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("CountFeatures.inputFeatures.title"),
             getResource("CountFeatures.inputFeatures.description"));
@@ -79,7 +79,7 @@ public class CountFeaturesProcessFactory extends SpatialStatisticsProcessFactory
     }
 
     /** result */
-    protected static final Parameter<Integer> RESULT = new Parameter<Integer>("result",
+    public static final Parameter<Integer> RESULT = new Parameter<Integer>("result",
             Integer.class, getResource("CountFeatures.result.title"),
             getResource("CountFeatures.result.description"));
 

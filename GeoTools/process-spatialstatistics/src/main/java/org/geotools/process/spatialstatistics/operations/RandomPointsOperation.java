@@ -25,6 +25,8 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.filter.text.cql2.CQLException;
+import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.Converters;
@@ -50,9 +52,9 @@ import com.vividsolutions.jts.shape.random.RandomPointsBuilder;
 public class RandomPointsOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(RandomPointsOperation.class);
 
-    com.vividsolutions.jts.shape.random.RandomPointsBuilder builder;
+    private com.vividsolutions.jts.shape.random.RandomPointsBuilder builder;
 
-    CoordinateReferenceSystem crs;
+    private CoordinateReferenceSystem crs;
 
     public RandomPointsOperation() {
 
@@ -83,19 +85,48 @@ public class RandomPointsOperation extends GeneralOperation {
         return execute(pointCount);
     }
 
+    private SimpleFeatureCollection execute(int pointCount) throws IOException {
+        builder.setNumPoints(pointCount);
+
+        IFeatureInserter featureWriter = getFeatureWriter(createSchema(false));
+        try {
+            Geometry multiPoints = builder.getGeometry();
+            for (int i = 0; i < multiPoints.getNumGeometries(); i++) {
+                Point point = (Point) multiPoints.getGeometryN(i);
+
+                // create feature and set geometry
+                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                newFeature.setAttribute("weight", 1);
+                newFeature.setDefaultGeometry(point);
+
+                featureWriter.write(newFeature);
+            }
+        } catch (Exception e) {
+            featureWriter.rollback(e);
+        } finally {
+            featureWriter.close();
+        }
+
+        return featureWriter.getFeatureCollection();
+    }
+
+    public SimpleFeatureCollection executeperFeatures(SimpleFeatureCollection polygonFeatures,
+            int pointCount) throws IOException {
+        try {
+            Expression expression = ECQL.toExpression(String.valueOf(pointCount));
+            return executeperFeatures(polygonFeatures, expression);
+        } catch (CQLException e1) {
+            LOGGER.log(Level.FINER, e1.getMessage(), e1);
+        }
+        return null;
+    }
+
     public SimpleFeatureCollection executeperFeatures(SimpleFeatureCollection polygonFeatures,
             Expression expression) throws IOException {
         builder = new RandomPointsBuilder(gf);
         crs = polygonFeatures.getSchema().getCoordinateReferenceSystem();
 
-        SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
-        typeBuilder.setName("RandomPoints");
-        typeBuilder.add("geom", Point.class, crs);
-        typeBuilder.add("id", String.class);
-        typeBuilder.add("weight", Integer.class);
-        SimpleFeatureType schema = typeBuilder.buildFeatureType();
-
-        IFeatureInserter featureWriter = getFeatureWriter(schema);
+        IFeatureInserter featureWriter = getFeatureWriter(createSchema(true));
 
         SimpleFeatureIterator featureIter = null;
         try {
@@ -142,84 +173,15 @@ public class RandomPointsOperation extends GeneralOperation {
         return featureWriter.getFeatureCollection();
     }
 
-    public SimpleFeatureCollection executeperFeatures(SimpleFeatureCollection polygonFeatures,
-            int pointCount) throws IOException {
-        builder = new RandomPointsBuilder(gf);
-        crs = polygonFeatures.getSchema().getCoordinateReferenceSystem();
-
+    private SimpleFeatureType createSchema(boolean createID) {
         SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
         typeBuilder.setName("RandomPoints");
         typeBuilder.add("geom", Point.class, crs);
-        typeBuilder.add("id", String.class);
-        typeBuilder.add("weight", Integer.class);
-        SimpleFeatureType schema = typeBuilder.buildFeatureType();
-
-        IFeatureInserter featureWriter = getFeatureWriter(schema);
-
-        SimpleFeatureIterator featureIter = null;
-        try {
-            featureIter = polygonFeatures.features();
-            while (featureIter.hasNext()) {
-                SimpleFeature feature = featureIter.next();
-                Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                if (geometry == null || geometry.isEmpty()) {
-                    continue;
-                }
-
-                builder.setExtent(geometry);
-                builder.setNumPoints(pointCount);
-
-                Geometry multiPoints = builder.getGeometry();
-                for (int i = 0; i < multiPoints.getNumGeometries(); i++) {
-                    Point point = (Point) multiPoints.getGeometryN(i);
-
-                    // create feature and set geometry
-                    SimpleFeature newFeature = featureWriter.buildFeature(null);
-                    newFeature.setAttribute("id", feature.getID());
-                    newFeature.setAttribute("weight", 1);
-                    newFeature.setDefaultGeometry(point);
-
-                    featureWriter.write(newFeature);
-                }
-            }
-        } catch (Exception e) {
-            featureWriter.rollback(e);
-        } finally {
-            featureWriter.close(featureIter);
+        if (createID) {
+            typeBuilder.add("id", String.class);
         }
-
-        return featureWriter.getFeatureCollection();
-    }
-
-    private SimpleFeatureCollection execute(int pointCount) throws IOException {
-        builder.setNumPoints(pointCount);
-
-        SimpleFeatureTypeBuilder typeBuilder = new SimpleFeatureTypeBuilder();
-        typeBuilder.setName("RandomPoints");
-        typeBuilder.add("geom", Point.class, crs);
         typeBuilder.add("weight", Integer.class);
-        SimpleFeatureType schema = typeBuilder.buildFeatureType();
-
-        IFeatureInserter featureWriter = getFeatureWriter(schema);
-        try {
-            Geometry multiPoints = builder.getGeometry();
-            for (int i = 0; i < multiPoints.getNumGeometries(); i++) {
-                Point point = (Point) multiPoints.getGeometryN(i);
-
-                // create feature and set geometry
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
-                newFeature.setAttribute("weight", 1);
-                newFeature.setDefaultGeometry(point);
-
-                featureWriter.write(newFeature);
-            }
-        } catch (Exception e) {
-            featureWriter.rollback(e);
-        } finally {
-            featureWriter.close();
-        }
-
-        return featureWriter.getFeatureCollection();
+        return typeBuilder.buildFeatureType();
     }
 
     private Geometry unionFeatures(SimpleFeatureCollection inputFeatures) {

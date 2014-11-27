@@ -10,11 +10,11 @@ org.geotools.process.spatialstatistics.GlobalGStatisticsProcessFactory
 
 org.geotools.process.spatialstatistics.LocalMoransIProcessFactory
 org.geotools.process.spatialstatistics.LocalGStatisticsProcessFactory
-org.geotools.process.spatialstatistics.KMeansClusterProcessFactory
 
 org.geotools.process.spatialstatistics.MeanCenterProcessFactory
 
 org.geotools.process.spatialstatistics.RandomPointsProcessFactory
+org.geotools.process.spatialstatistics.RandomPointsPerFeaturesProcessFactory
 org.geotools.process.spatialstatistics.CollectEventsProcessFactory
 org.geotools.process.spatialstatistics.UnionPolygonProcessFactory
 org.geotools.process.spatialstatistics.CalculateFieldProcessFactory

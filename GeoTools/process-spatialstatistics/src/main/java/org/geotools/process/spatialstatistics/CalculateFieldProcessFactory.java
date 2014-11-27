@@ -32,7 +32,7 @@ import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
 
 /**
- * AreaProcessFactory
+ * CalculateFieldProcessFactory
  * 
  * @author Minpa Lee, MangoSystem
  * 

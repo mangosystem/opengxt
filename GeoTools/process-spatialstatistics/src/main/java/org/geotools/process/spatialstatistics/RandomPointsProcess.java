@@ -34,7 +34,7 @@ import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
 /**
- * Calculates area values for each feature in a polygon features.
+ * Generate random points in as extent or polygon features.
  * 
  * @author Minpa Lee, MangoSystem RandomShapeFactory
  * 
@@ -126,13 +126,14 @@ public class RandomPointsProcess extends AbstractStatisticsProcess {
             }
 
             // start process
-            RandomPointsOperation operator = null;
+            RandomPointsOperation operator = new RandomPointsOperation();
+            SimpleFeatureCollection randomPoints = null;
+
             if (polygonFeatures == null) {
-                operator = new RandomPointsOperation(extent);
+                randomPoints = operator.execute(extent, pointCount);
             } else {
-                operator = new RandomPointsOperation(polygonFeatures);
+                randomPoints = operator.execute(polygonFeatures, pointCount);
             }
-            SimpleFeatureCollection randomPoints = operator.execute(pointCount);
             // end process
 
             monitor.setTask(Text.text("Encoding result"));

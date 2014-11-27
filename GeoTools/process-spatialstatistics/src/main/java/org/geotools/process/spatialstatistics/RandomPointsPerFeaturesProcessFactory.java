@@ -26,76 +26,76 @@ import java.util.logging.Logger;
 import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
 
 /**
- * RandomPointsProcessFactory
+ * RandomPointsPerFeaturesProcessFactory
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class RandomPointsProcessFactory extends SpatialStatisticsProcessFactory {
-    protected static final Logger LOGGER = Logging.getLogger(RandomPointsProcessFactory.class);
+public class RandomPointsPerFeaturesProcessFactory extends SpatialStatisticsProcessFactory {
+    protected static final Logger LOGGER = Logging
+            .getLogger(RandomPointsPerFeaturesProcessFactory.class);
 
-    private static final String PROCESS_NAME = "RandomPoints";
+    private static final String PROCESS_NAME = "RandomPointsPerFeatures";
 
-    // RandomPoints(Integer pointCount, ReferenceEnvelope extent): SimpleFeatureCollection
-    // RandomPoints(Integer pointCount, SimpleFeatureCollection polygonFeatures): SimpleFeatureCollection
+    // RandomPointsPerFeatures(SimpleFeatureCollection polygonFeatures, String expression, Integer pointCount): SimpleFeatureCollection
 
-    public RandomPointsProcessFactory() {
+    public RandomPointsPerFeaturesProcessFactory() {
         super(new NameImpl(NAMESPACE, PROCESS_NAME));
     }
 
     @Override
     public Process create() {
-        return new RandomPointsProcess(this);
+        return new RandomPointsPerFeaturesProcess(this);
     }
 
     @Override
     public InternationalString getTitle() {
-        return getResource("RandomPoints.title");
+        return getResource("RandomPointsPerFeatures.title");
     }
 
     @Override
     public InternationalString getDescription() {
-        return getResource("RandomPoints.description");
+        return getResource("RandomPointsPerFeatures.description");
     }
-
-    /** extent */
-    public static final Parameter<ReferencedEnvelope> extent = new Parameter<ReferencedEnvelope>(
-            "extent", ReferencedEnvelope.class, getResource("RandomPoints.extent.title"),
-            getResource("RandomPoints.extent.description"), false, 0, 1, null, null);
 
     /** polygonFeatures */
     public static final Parameter<SimpleFeatureCollection> polygonFeatures = new Parameter<SimpleFeatureCollection>(
             "polygonFeatures", SimpleFeatureCollection.class,
-            getResource("RandomPoints.polygonFeatures.title"),
-            getResource("RandomPoints.polygonFeatures.description"), false, 0, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Polygon"));
+            getResource("RandomPointsPerFeatures.polygonFeatures.title"),
+            getResource("RandomPointsPerFeatures.polygonFeatures.description"), true, 1, 1, null,
+            new KVP(Parameter.FEATURE_TYPE, "Polygon"));
+
+    /** expression */
+    public static final Parameter<String> expression = new Parameter<String>("expression",
+            String.class, getResource("RandomPointsPerFeatures.expression.title"),
+            getResource("RandomPointsPerFeatures.expression.description"), false, 0, 1, null, null);
 
     /** pointCount */
     public static final Parameter<Integer> pointCount = new Parameter<Integer>("pointCount",
-            Integer.class, getResource("RandomPoints.pointCount.title"),
-            getResource("RandomPoints.pointCount.description"), true, 1, 1, 1000, null);
+            Integer.class, getResource("RandomPointsPerFeatures.pointCount.title"),
+            getResource("RandomPointsPerFeatures.pointCount.description"), false, 0, 1, null, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
-        parameterInfo.put(extent.key, extent);
         parameterInfo.put(polygonFeatures.key, polygonFeatures);
+        parameterInfo.put(expression.key, expression);
         parameterInfo.put(pointCount.key, pointCount);
         return parameterInfo;
     }
 
     /** result */
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
-            "result", SimpleFeatureCollection.class, getResource("RandomPoints.result.title"),
-            getResource("RandomPoints.result.description"));
+            "result", SimpleFeatureCollection.class,
+            getResource("RandomPointsPerFeatures.result.title"),
+            getResource("RandomPointsPerFeatures.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

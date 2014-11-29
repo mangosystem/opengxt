@@ -1,7 +1,7 @@
 # Spatial Statistics for GeoTools, GeoServer, uDig
 
 ## Overview
- ...
+The goal of this project is to provide a spatial statistics tools for Geotools, Geoserver WPS, uDig Statistics Toolbox
  
 ## Related Projects
 
@@ -11,11 +11,7 @@
 allows users to share and edit geospatial data. Designed for interoperability, it publishes data from 
 any major spatial data source using open standards.
 
-The User-friendly Desktop Internet GIS ([uDig](http://locationtech.org/projects/technology.udig)) is an open source ("EPL":http://www.eclipse.org/legal/epl-v10.html + "BSD":http://udig.refractions.net/files/bsd3-v10.html) desktop application framework, built with the Eclipse Rich Client (RCP) technology.
-
-* uDig can be used as a stand-alone application
-* uDig can be extended with RCP "plug-ins"
-* uDig can be used as a plug-in in an existing RCP application
+[uDig-User-friendly Desktop Internet GIS](http://locationtech.org/projects/technology.udig) is an open source desktop application framework, built with the Eclipse Rich Client (RCP) technology.
 
 ## License
 
@@ -25,12 +21,6 @@ GeoServer licensed under the [GPL](http://www.gnu.org/licenses/old-licenses/gpl-
 
 uDig licensed under the [EPL](http://www.eclipse.org/legal/epl-v10.html) + [BSD](http://udig.refractions.net/files/bsd3-v10.html).
 
-
-## Using
-...
-
-## Building
-...
 
 ## Localization
 [Transifex](https://www.transifex.com/projects/p/ss-rd/)

@@ -1,0 +1,319 @@
+/*
+ * uDig - User Friendly Desktop Internet GIS client
+ * (C) MangoSystem - www.mangosystem.com 
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the HydroloGIS BSD
+ * License v1.0 (http://udig.refractions.net/files/hsd3-v10.html).
+ */
+package org.locationtech.udig.processingtoolbox.operation;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.io.IOUtils;
+import org.geotools.util.logging.Logging;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+
+/**
+ * TextColumn
+ * 
+ * @author Minpa Lee, MangoSystem
+ * 
+ * @source $URL$
+ */
+@SuppressWarnings("nls")
+public class TextColumn {
+    protected static final Logger LOGGER = Logging.getLogger(TextColumn.class);
+
+    private static final String prefix = "col_";
+
+    public static final Map<String, String> reservedMap = new HashMap<String, String>();
+    static {
+        reservedMap.put("^", "\\^");
+        reservedMap.put("$", "\\$");
+        reservedMap.put("+", "\\+");
+        reservedMap.put("*", "\\*");
+        reservedMap.put(".", "\\.");
+        reservedMap.put("|", "\\|");
+    }
+
+    private static final String[] attributesTypes = new String[] { "String", "Short", "Integer",
+            "Long", "Float", "Double", "BigDecimal", "Date", "Boolean" };
+
+    private static final String[] spatialTypes = new String[] { "String", "Short", "Integer",
+            "Long", "Float", "Double", "BigDecimal", "Date", "Boolean", "X Coordinate",
+            "Y Coordinate" };
+
+    public static String[] getFieldTypes(boolean isSpatial) {
+        if (isSpatial) {
+            return spatialTypes;
+        } else {
+            return attributesTypes;
+        }
+    }
+
+    private String name;
+
+    private String type;
+
+    private int length = 254;
+
+    private int columnIndex = -1;
+
+    private List<String> sampleValues = new ArrayList<String>();
+
+    public TextColumn() {
+    }
+
+    public TextColumn(String name, String type, int length) {
+        setName(name);
+        setType(type);
+        setLength(length);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name.trim();
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public Class<?> getBinding() {
+        if (isX() || isY()) {
+            return Double.class;
+        } else {
+            return findBestBinding(getType());
+        }
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public boolean isX() {
+        return type.equalsIgnoreCase("X Coordinate");
+    }
+
+    public boolean isY() {
+        return type.equalsIgnoreCase("Y Coordinate");
+    }
+
+    public int getLength() {
+        return length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
+
+    public int getColumnIndex() {
+        return columnIndex;
+    }
+
+    public void setColumnIndex(int columnIndex) {
+        this.columnIndex = columnIndex;
+    }
+
+    public List<String> getSampleValues() {
+        return sampleValues;
+    }
+
+    public void setSampleValues(List<String> sampleValues) {
+        this.sampleValues = sampleValues;
+    }
+
+    public String[] getItems() {
+        String[] items = new String[3 + sampleValues.size()];
+        items[0] = name;
+        items[1] = type;
+        items[2] = String.valueOf(length);
+
+        for (int index = 0; index < sampleValues.size(); index++) {
+            items[3 + index] = sampleValues.get(index);
+        }
+
+        return items;
+    }
+
+    public Class<?> findBestBinding(String typeName) {
+        Class<?> binding = null;
+
+        if (typeName.contains("AUTOINCREMENT") || typeName.contains("SERIAL")
+                || typeName.contains("COUNTER")) {
+            binding = Integer.class;
+            return binding;
+        }
+
+        if ("GEOMETRY".equalsIgnoreCase(typeName)) {
+            binding = Geometry.class;
+        } else if ("MULTIPOLYGON".equalsIgnoreCase(typeName)) {
+            binding = MultiPolygon.class;
+        } else if ("MULTILINESTRING".equalsIgnoreCase(typeName)) {
+            binding = MultiLineString.class;
+        } else if ("MULTIPOINT".equalsIgnoreCase(typeName)) {
+            binding = MultiPoint.class;
+        } else if ("POLYGON".equalsIgnoreCase(typeName)) {
+            binding = Polygon.class;
+        } else if ("LINESTRING".equalsIgnoreCase(typeName)) {
+            binding = LineString.class;
+        } else if ("POINT".equalsIgnoreCase(typeName)) {
+            binding = Point.class;
+        } else if ("GEOMETRYCOLLECTION".equalsIgnoreCase(typeName)) {
+            binding = GeometryCollection.class;
+        } else if ("SMALLINT".equalsIgnoreCase(typeName)) {
+            binding = Short.class;
+        } else if ("SHORT".equalsIgnoreCase(typeName)) {
+            binding = Short.class;
+        } else if ("INTEGER".equalsIgnoreCase(typeName)) {
+            binding = Integer.class;
+        } else if ("INT4".equalsIgnoreCase(typeName)) {
+            binding = Integer.class;
+        } else if ("LONG".equalsIgnoreCase(typeName)) {
+            binding = Long.class;
+        } else if ("BIGINT".equalsIgnoreCase(typeName)) {
+            binding = Long.class;
+        } else if ("REAL".equalsIgnoreCase(typeName)) {
+            binding = Float.class;
+        } else if ("FLOAT".equalsIgnoreCase(typeName)) {
+            binding = Double.class;
+        } else if ("FLOAT8".equalsIgnoreCase(typeName)) {
+            binding = Double.class;
+        } else if ("INT8".equalsIgnoreCase(typeName)) {
+            binding = Long.class;
+        } else if ("DOUBLE".equalsIgnoreCase(typeName)) {
+            binding = Double.class;
+        } else if ("DECIMAL".equalsIgnoreCase(typeName)) {
+            binding = Double.class;
+        } else if ("BigDecimal".equalsIgnoreCase(typeName)) {
+            binding = Double.class;
+        } else if ("NUMERIC".equalsIgnoreCase(typeName)) {
+            binding = Double.class;
+        } else if (typeName.contains("CHAR")) {
+            binding = String.class;
+        } else if ("CLOB".equalsIgnoreCase(typeName)) {
+            binding = String.class;
+        } else if ("TEXT".equalsIgnoreCase(typeName)) {
+            binding = String.class;
+        } else if ("STRING".equalsIgnoreCase(typeName)) {
+            binding = String.class;
+        } else if ("DATE".equalsIgnoreCase(typeName)) {
+            binding = Date.class;
+        } else if ("DATETIME".equalsIgnoreCase(typeName)) {
+            binding = Date.class;
+        } else if ("TIMESTAMP".equalsIgnoreCase(typeName)) {
+            binding = Date.class;
+        } else if ("BLOB".equalsIgnoreCase(typeName)) {
+            binding = byte[].class;
+        } else if ("BINARY".equalsIgnoreCase(typeName)) {
+            binding = byte[].class;
+        } else if ("LONGBINARY".equalsIgnoreCase(typeName)) {
+            binding = byte[].class;
+        } else if ("LONGVARBINARY".equalsIgnoreCase(typeName)) {
+            binding = byte[].class;
+        } else if ("VARBINARY".equalsIgnoreCase(typeName)) {
+            binding = byte[].class;
+        }
+
+        return binding;
+    }
+
+    public static TextColumn[] getColumns(File textFile, Charset charset, String splitter,
+            boolean headerFirst) {
+        if (reservedMap.containsKey(splitter)) {
+            splitter = reservedMap.get(splitter);
+        }
+
+        TextColumn[] columns = null;
+
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(textFile),
+                    charset));
+
+            int sampleSize = 1;
+            String line = reader.readLine();
+            String[] values = line.split(splitter);
+
+            // build header
+            columns = new TextColumn[values.length];
+            for (int index = 0; index < values.length; index++) {
+                columns[index] = new TextColumn();
+                columns[index].setType("String");
+                columns[index].setColumnIndex(index);
+
+                String value = removeDoubleQuote(values[index]);
+                if (headerFirst) {
+                    columns[index].setName(value);
+                } else {
+                    columns[index].setName(prefix + index);
+                    columns[index].getSampleValues().add(value);
+                }
+            }
+
+            // build sample value
+            while (line != null) {
+                line = reader.readLine();
+                sampleSize++;
+                values = line.split(splitter);
+
+                for (int index = 0; index < columns.length; index++) {
+                    columns[index].getSampleValues().add(removeDoubleQuote(values[index]));
+                }
+
+                if (sampleSize >= 5) {
+                    break;
+                }
+            }
+        } catch (FileNotFoundException e) {
+            LOGGER.log(Level.FINER, e.getMessage(), e);
+        } catch (IOException e) {
+            LOGGER.log(Level.FINER, e.getMessage(), e);
+        } finally {
+            IOUtils.closeQuietly(reader);
+        }
+
+        return columns;
+    }
+
+    // 시작 및 끝 문자열이 "~"로 구성된 문자 패턴
+    private static final Pattern pattern = Pattern.compile("^\"|\"$");
+
+    public static String removeDoubleQuote(String value) {
+        // http://stackoverflow.com/questions/1441556/parsing-csv-input-with-a-regex-in-java
+        Matcher matcher = pattern.matcher(value);
+        if (matcher.find()) {
+            return matcher.replaceAll("").trim();
+        } else {
+            return value.trim();
+        }
+    }
+}

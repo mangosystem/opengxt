@@ -36,7 +36,7 @@ import org.opengis.util.ProgressListener;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
- * Calculates area values for each feature in a polygon features.
+ * Calculates area for each feature in a polygon features.
  * 
  * @author Minpa Lee, MangoSystem  
  * 

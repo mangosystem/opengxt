@@ -22,6 +22,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -44,6 +45,7 @@ import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.ViewPart;
+import org.geotools.feature.NameImpl;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.Processors;
 import org.geotools.util.logging.Logging;
@@ -52,6 +54,7 @@ import org.locationtech.udig.processingtoolbox.ProcessInformation.SubCategory;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;
 import org.locationtech.udig.processingtoolbox.internal.ui.SettingsDialog;
+import org.locationtech.udig.processingtoolbox.tools.TextfileToPointDialog;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.opengis.feature.type.Name;
@@ -59,7 +62,7 @@ import org.opengis.feature.type.Name;
 /**
  * ToolboxView
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -76,7 +79,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
     public static void setShowLog(Boolean showLog) {
         ToolboxView.showLog = showLog;
     }
-    
+
     /** Temporary workspace */
     private static String workspace = null;
 
@@ -124,7 +127,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         // create tree viewer
         PatternFilter patternFilter = new PatternFilter();
         FilteredTree filter = new FilteredTree(parent, SWT.SINGLE | SWT.BORDER, patternFilter, true);
-        
+
         viewer = filter.getViewer();
         viewer.setContentProvider(new ViewContentProvider());
         viewer.setLabelProvider(new ViewLabelProvider());
@@ -135,21 +138,33 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
             @Override
             public void doubleClick(DoubleClickEvent event) {
                 IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-                final TreeObject obj = (TreeObject) selection.getFirstElement();
-                if (obj.getProcessName() == null) {
+                final TreeObject node = (TreeObject) selection.getFirstElement();
+                if (TreeParent.class.isAssignableFrom(node.getClass())) {
                     return;
                 }
 
-                final IMap map = ApplicationGIS.getActiveMap();
                 final Shell shell = Display.getCurrent().getActiveShell();
+                final IMap map = ApplicationGIS.getActiveMap();
+
                 Display.getCurrent().asyncExec(new Runnable() {
                     @Override
                     public void run() {
                         if (map != ApplicationGIS.NO_MAP) {
-                            ProcessExecutionDialog tad = new ProcessExecutionDialog(shell, map,
-                                    obj.getFactory(), obj.getProcessName());
-                            tad.setBlockOnOpen(true);
-                            tad.open();
+                            Dialog dialog = null;
+                            if (node.getFactory() == null) {
+                                if (node.getProcessName().getLocalPart()
+                                        .equalsIgnoreCase("TextfileToPointDialog")) {
+                                    dialog = new TextfileToPointDialog(shell, map);
+                                }
+                            } else {
+                                dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
+                                        node.getProcessName());
+                            }
+
+                            if (dialog != null) {
+                                dialog.setBlockOnOpen(true);
+                                dialog.open();
+                            }
                         } else {
                             MessageDialog.openInformation(shell, "Confirm", "No Active Map"); //$NON-NLS-1$//$NON-NLS-2$
                         }
@@ -190,7 +205,13 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         // find all the process factories and print out their names
         TreeParent root = new TreeParent("Toolbox", null, null); //$NON-NLS-1$
 
-        // 1. gxt process
+        // 0. general operation dialog
+        TreeParent generalTool = new TreeParent("General Tools", null, null);
+        generalTool.addChild(new TreeObject(Messages.TextfileToPointDialog_title, null,
+                new NameImpl(null, "TextfileToPointDialog")));
+        root.addChild(generalTool);
+
+        // 1. gt-process-spatialstatistics process
         InputStream inputStream = null;
         try {
             URL url = ToolboxPlugin.urlFromPlugin("ProcessFactory.xml"); //$NON-NLS-1$
@@ -258,11 +279,12 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         }
         return root;
     }
-    
+
     @SuppressWarnings("nls")
     private String getWindowTitle(String processName) {
-        String windowTitle = Character.toUpperCase(processName.charAt(0)) + processName.substring(1);
-        if (!processName.contains("ST_")) { 
+        String windowTitle = Character.toUpperCase(processName.charAt(0))
+                + processName.substring(1);
+        if (!processName.contains("ST_")) {
             if (windowTitle.substring(2, 3).equalsIgnoreCase("_")) {
                 windowTitle = windowTitle.substring(3);
             }

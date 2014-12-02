@@ -31,6 +31,9 @@ public class Messages extends NLS {
 
     public static String Task_AddingLayer;
     public static String Task_Completed;
+    public static String Task_ParameterRequired;
+    public static String Task_ConfirmErrorFile;
+    public static String Task_CheckFile;
     public static String Task_Executing;
     public static String Task_Internal;
     public static String Task_Running;
@@ -140,6 +143,28 @@ public class Messages extends NLS {
     public static String StatisticsFieldsSelectionDialog_TargetField;
     public static String StatisticsFieldsSelectionDialog_StatisticsType;
     public static String StatisticsFieldsSelectionDialog_WarningDuplicate;
+    
+    public static String TextfileToPointDialog_title;
+    public static String TextfileToPointDialog_description;
+    public static String TextfileToPointDialog_Textfile;
+    public static String TextfileToPointDialog_CRS;
+    public static String TextfileToPointDialog_Encoding;
+    public static String TextfileToPointDialog_Schema;
+    public static String TextfileToPointDialog_FieldNameSetting;
+    public static String TextfileToPointDialog_ColumnFirst;
+    public static String TextfileToPointDialog_Delimiters;
+    public static String TextfileToPointDialog_Tab;
+    public static String TextfileToPointDialog_Semicolon;
+    public static String TextfileToPointDialog_Colon;
+    public static String TextfileToPointDialog_Space;
+    public static String TextfileToPointDialog_Custom;
+    public static String TextfileToPointDialog_FieldName;
+    public static String TextfileToPointDialog_FieldType;
+    public static String TextfileToPointDialog_FieldLength;
+    public static String TextfileToPointDialog_FieldRow1;
+    public static String TextfileToPointDialog_FieldRow2;
+    public static String TextfileToPointDialog_FieldRow3;
+    public static String TextfileToPointDialog_FieldRow4;
 
     static {
         // initialize resource bundle

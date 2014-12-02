@@ -15,6 +15,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
@@ -39,7 +45,7 @@ import org.geotools.util.logging.Logging;
 /**
  * SWT Widget UI Builder
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -135,17 +141,17 @@ public class WidgetBuilder {
         combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, colspan, 1));
         return combo;
     }
-    
+
     public CTabFolder createTabFolder(Composite parent, int colspan) {
         CTabFolder tabFolder = new CTabFolder(parent, SWT.NONE);
-        tabFolder.setUnselectedCloseVisible(false);        
+        tabFolder.setUnselectedCloseVisible(false);
         tabFolder.setLayout(new FillLayout());
         tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         return tabFolder;
     }
-    
-    public CTabItem createTabItem(CTabFolder parent, String text) {  
+
+    public CTabItem createTabItem(CTabFolder parent, String text) {
         CTabItem tabItem = new CTabItem(parent, SWT.NONE);
         tabItem.setText(text);
         return tabItem;
@@ -165,8 +171,7 @@ public class WidgetBuilder {
         if (text != null) {
             group.setText(text);
         }
-        
-        
+
         group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, colspan, 1));
         group.setLayout(new GridLayout(2, false));
 
@@ -350,6 +355,121 @@ public class WidgetBuilder {
                     }
 
                     index++;
+                }
+            }
+        });
+
+        return table;
+    }
+
+    public Table createSchemaEditableTable(Composite composite, String[] columns,
+            final String[] comboItems, int colspan, int rowspan, boolean itemCheck) {
+        int style = SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION;
+        if (itemCheck) {
+            style = SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI
+                    | SWT.FULL_SELECTION;
+        }
+
+        final Table table = new Table(composite, style);
+
+        GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true, colspan, rowspan);
+        gridData.heightHint = 200;
+
+        table.setLayoutData(gridData);
+        table.setHeaderVisible(true);
+        table.setLinesVisible(true);
+
+        final int tableWidth = 550;
+        for (int i = 0; i < columns.length; ++i) {
+            TableColumn column = new TableColumn(table, SWT.NONE);
+            column.setText(columns[i]);
+            column.setWidth(tableWidth / columns.length);
+        }
+
+        final TableEditor editor = new TableEditor(table);
+        editor.horizontalAlignment = SWT.LEFT;
+        editor.grabHorizontal = true;
+
+        table.addListener(SWT.MouseDown, new Listener() {
+            public void handleEvent(Event event) {
+                Rectangle clientArea = table.getClientArea();
+                Point pt = new Point(event.x, event.y);
+                int indexItem = table.getTopIndex();
+                while (indexItem < table.getItemCount()) {
+                    boolean visible = false;
+                    final TableItem item = table.getItem(indexItem);
+                    for (int index = 0; index < 3; index++) {
+                        Rectangle rect = item.getBounds(index);
+                        if (rect.contains(pt)) {
+                            final int column = index;
+
+                            // 첫번째와 세번째는 텍스트, 두번째는 콤보박스
+                            if (column == 1) {
+                                final Combo combo = new Combo(table, SWT.NONE | SWT.READ_ONLY);
+                                combo.setItems(comboItems);
+                                combo.addSelectionListener(new SelectionAdapter() {
+                                    @Override
+                                    public void widgetSelected(SelectionEvent e) {
+                                        item.setText(column, combo.getText());
+                                    }
+                                });
+
+                                combo.addFocusListener(new FocusAdapter() {
+                                    @Override
+                                    public void focusLost(FocusEvent e) {
+                                        combo.setVisible(false);
+                                    }
+
+                                    @Override
+                                    public void focusGained(FocusEvent e) {
+                                        combo.setVisible(true);
+                                    }
+                                });
+
+                                combo.setText(item.getText(index));
+                                combo.setFocus();
+                                editor.setEditor(combo, item, index);
+                            } else {
+                                final Text text = new Text(table, SWT.NONE);
+                                text.setTextLimit(10);
+                                text.addModifyListener(new ModifyListener() {
+                                    @Override
+                                    public void modifyText(ModifyEvent e) {
+                                        item.setText(column, text.getText());
+                                    }
+                                });
+
+                                text.addFocusListener(new FocusAdapter() {
+                                    @Override
+                                    public void focusLost(FocusEvent e) {
+                                        text.setVisible(false);
+                                    }
+
+                                    @Override
+                                    public void focusGained(FocusEvent e) {
+                                        text.setVisible(true);
+                                    }
+                                });
+
+                                text.setText(item.getText(index));
+                                text.selectAll();
+                                text.setFocus();
+                                editor.setEditor(text, item, index);
+                            }
+
+                            return;
+                        }
+
+                        if (!visible && rect.intersects(clientArea)) {
+                            visible = true;
+                        }
+                    }
+
+                    if (!visible) {
+                        return;
+                    }
+
+                    indexItem++;
                 }
             }
         });

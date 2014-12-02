@@ -81,9 +81,9 @@ public class OutputDataWidget extends AbstractToolboxWidget {
         }
     }
 
-    public void create(final Composite parent, final int style, final int colspan) {
+    public void create(final Composite parent, final int style, final int colspan, final int rowspan) {
         composite = new Composite(parent, style);
-        composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, colspan, 1));
+        composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, colspan, rowspan));
         
         GridLayout layout = new GridLayout(3, false);
         layout.marginTop = 0;

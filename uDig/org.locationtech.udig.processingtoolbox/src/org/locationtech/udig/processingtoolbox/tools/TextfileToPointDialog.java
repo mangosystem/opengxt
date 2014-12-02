@@ -45,7 +45,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.PlatformUI;
-import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.spatialstatistics.core.StringHelper;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
@@ -142,9 +142,11 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
         cboEncoding.setText(ToolboxPlugin.defaultCharset());
 
         // 4. define schema
-        Group group = uiBuilder.createGroup(container, Messages.TextfileToPointDialog_Schema, false, 3);
+        Group group = uiBuilder.createGroup(container, Messages.TextfileToPointDialog_Schema,
+                false, 3);
         uiBuilder.createLabel(group, Messages.TextfileToPointDialog_FieldNameSetting, null, 1);
-        chkHeader = uiBuilder.createCheckbox(group, Messages.TextfileToPointDialog_ColumnFirst, null, 1);
+        chkHeader = uiBuilder.createCheckbox(group, Messages.TextfileToPointDialog_ColumnFirst,
+                null, 1);
         chkHeader.setSelection(true);
         chkHeader.addSelectionListener(selectionListener);
 
@@ -157,20 +159,24 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
         optTab.setData("\t"); //$NON-NLS-1$
         optTab.addSelectionListener(selectionListener);
 
-        optColon = uiBuilder.createRadioButton(grpField,  Messages.TextfileToPointDialog_Semicolon, null, 1);
+        optColon = uiBuilder.createRadioButton(grpField, Messages.TextfileToPointDialog_Semicolon,
+                null, 1);
         optColon.setData(";"); //$NON-NLS-1$
         optColon.addSelectionListener(selectionListener);
 
-        optComma = uiBuilder.createRadioButton(grpField,  Messages.TextfileToPointDialog_Colon, null, 1);
+        optComma = uiBuilder.createRadioButton(grpField, Messages.TextfileToPointDialog_Colon,
+                null, 1);
         optComma.setData(","); //$NON-NLS-1$
         optComma.setSelection(true);
         optComma.addSelectionListener(selectionListener);
 
-        optSpace = uiBuilder.createRadioButton(grpField,  Messages.TextfileToPointDialog_Space, null, 1);
+        optSpace = uiBuilder.createRadioButton(grpField, Messages.TextfileToPointDialog_Space,
+                null, 1);
         optSpace.setData(" "); //$NON-NLS-1$
         optSpace.addSelectionListener(selectionListener);
 
-        optEtc = uiBuilder.createRadioButton(grpField,  Messages.TextfileToPointDialog_Custom, null, 1);
+        optEtc = uiBuilder.createRadioButton(grpField, Messages.TextfileToPointDialog_Custom, null,
+                1);
         optEtc.addSelectionListener(selectionListener);
 
         txtSplit = uiBuilder.createText(grpField, EMPTY, 1);
@@ -299,19 +305,22 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
     protected void okPressed() {
         if (invalidWidgetValue(cboSource) || getTextColumns().isEmpty()
                 || locationView.getFile().isEmpty()) {
-            openInformation(getShell(), Messages.Task_Completed);
+            openInformation(getShell(), Messages.Task_ParameterRequired);
             return;
         }
 
         try {
-            PlatformUI.getWorkbench().getProgressService().run(true, true, this);
-            openInformation(getShell(), String.format(Messages.Task_Completed, locationView.getFile()));
+            PlatformUI.getWorkbench().getProgressService().run(false, true, this);
+            openInformation(getShell(),
+                    String.format(Messages.Task_Completed, locationView.getFile()));
 
             if (!StringHelper.isNullOrEmpty(error)) {
-                if (MessageDialog.openConfirm(getShell(), windowTitle, Messages.Task_ConfirmErrorFile)) {
+                if (MessageDialog.openConfirm(getShell(), windowTitle,
+                        Messages.Task_ConfirmErrorFile)) {
                     String errorPath = saveErrorAsText();
                     if (errorPath != null) {
-                        openInformation(getShell(), String.format(Messages.Task_CheckFile, errorPath));
+                        openInformation(getShell(),
+                                String.format(Messages.Task_CheckFile, errorPath));
                     }
                 }
             }
@@ -350,12 +359,12 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
             process.setOutputDataStore(locationView.getDataStore());
             process.setOutputTypeName(outputName);
 
-            SimpleFeatureSource outputSfs = process.execute(textFile, charset, splitter,
+            SimpleFeatureCollection features = process.execute(textFile, charset, splitter,
                     headerFirst, schema, crs);
             error = process.getError();
             monitor.worked(increment);
 
-            if (outputSfs != null) {
+            if (features != null) {
                 monitor.setTaskName(Messages.Task_AddingLayer);
                 addFeaturesToMap(map, locationView.getFile(), outputName);
                 monitor.worked(increment);

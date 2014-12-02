@@ -19,11 +19,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.IOUtils;
-import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.process.spatialstatistics.core.FeatureTypes;
-import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.util.Converters;
 import org.geotools.util.logging.Logging;
+import org.locationtech.udig.processingtoolbox.common.FeatureTypes;
+import org.locationtech.udig.processingtoolbox.storage.IFeatureInserter;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -78,7 +78,7 @@ public class TextfileToPointOperation extends GeneralOperation {
         return schema;
     }
 
-    public SimpleFeatureSource execute(File textFile, Charset charset, String splitter,
+    public SimpleFeatureCollection execute(File textFile, Charset charset, String splitter,
             boolean headerFirst, List<TextColumn> columns, CoordinateReferenceSystem crs)
             throws Exception {
 
@@ -155,6 +155,6 @@ public class TextfileToPointOperation extends GeneralOperation {
             featureWriter.close();
         }
 
-        return featureWriter.getFeatureSource();
+        return featureWriter.getFeatureCollection();
     }
 }

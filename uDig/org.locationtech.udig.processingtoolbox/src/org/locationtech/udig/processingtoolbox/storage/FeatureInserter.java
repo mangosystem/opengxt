@@ -131,6 +131,16 @@ public class FeatureInserter implements IFeatureInserter {
         return null;
     }
 
+    @Override
+    public SimpleFeatureCollection getFeatureCollection() throws IOException {
+        SimpleFeatureSource featureSource = getFeatureSource();
+        if (featureSource == null) {
+            return null;
+        } else {
+            return featureSource.getFeatures();
+        }
+    }
+
     /*
      * (non-Javadoc)
      * 

@@ -31,6 +31,8 @@ public interface IFeatureInserter {
 
     public abstract SimpleFeatureSource getFeatureSource();
 
+    public abstract SimpleFeatureCollection getFeatureCollection() throws IOException;
+
     public abstract int getFlushInterval();
 
     public abstract void setFlushInterval(int flushInterval);

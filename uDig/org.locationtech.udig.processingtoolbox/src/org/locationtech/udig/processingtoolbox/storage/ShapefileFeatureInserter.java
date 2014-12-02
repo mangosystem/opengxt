@@ -137,6 +137,16 @@ public class ShapefileFeatureInserter implements IFeatureInserter {
     }
 
     @Override
+    public SimpleFeatureCollection getFeatureCollection() throws IOException {
+        SimpleFeatureSource featureSource = getFeatureSource();
+        if (featureSource == null) {
+            return null;
+        } else {
+            return featureSource.getFeatures();
+        }
+    }
+
+    @Override
     public int getFlushInterval() {
         return 0;
     }

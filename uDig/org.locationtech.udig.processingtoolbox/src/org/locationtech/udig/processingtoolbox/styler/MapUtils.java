@@ -29,6 +29,9 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.storage.RasterExportOperation;
+import org.geotools.process.spatialstatistics.transformation.ForceCRSFeatureCollection;
 import org.geotools.referencing.CRS;
 import org.geotools.styling.Style;
 import org.geotools.util.logging.Logging;
@@ -38,9 +41,6 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.ToolboxView;
-import org.locationtech.udig.processingtoolbox.common.FeatureTypes;
-import org.locationtech.udig.processingtoolbox.common.ForceCRSFeatureCollection;
-import org.locationtech.udig.processingtoolbox.storage.RasterExportOperation;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.Layer;
@@ -72,28 +72,33 @@ public class MapUtils {
         ALL, String, Number, Integer, Double
     }
 
+    public static SimpleFeatureCollection getFeatures(ILayer layer) {
+        try {
+            SimpleFeatureSource sfs = (SimpleFeatureSource) layer.getResource(FeatureSource.class,
+                    new NullProgressMonitor());
+            // apply selected features
+            Filter filter = Filter.INCLUDE;
+            if (layer.getFilter() != Filter.EXCLUDE) {
+                filter = layer.getFilter();
+            }
+
+            // check layer & FeatureCollection's crs
+            SimpleFeatureCollection sfc = sfs.getFeatures(filter);
+            CoordinateReferenceSystem bCrs = sfc.getSchema().getCoordinateReferenceSystem();
+            if (!CRS.equalsIgnoreMetadata(layer.getCRS(), bCrs)) {
+                sfc = new ForceCRSFeatureCollection(sfc, layer.getCRS());
+            }
+            return sfc;
+        } catch (IOException e) {
+            LOGGER.log(Level.FINER, e.getMessage(), e);
+        }
+        return null;
+    }
+
     public static SimpleFeatureCollection getFeatures(IMap map, String layerName) {
         for (ILayer layer : map.getMapLayers()) {
             if (layer.getName().equals(layerName) && layer.hasResource(FeatureSource.class)) {
-                try {
-                    SimpleFeatureSource sfs = (SimpleFeatureSource) layer.getResource(
-                            FeatureSource.class, new NullProgressMonitor());
-                    // apply selected features
-                    Filter filter = Filter.INCLUDE;
-                    if (layer.getFilter() != Filter.EXCLUDE) {
-                        filter = layer.getFilter();
-                    }
-
-                    // check layer & FeatureCollection's crs
-                    SimpleFeatureCollection sfc = sfs.getFeatures(filter);
-                    CoordinateReferenceSystem bCrs = sfc.getSchema().getCoordinateReferenceSystem();
-                    if (!CRS.equalsIgnoreMetadata(layer.getCRS(), bCrs)) {
-                        sfc = new ForceCRSFeatureCollection(sfc, layer.getCRS());
-                    }
-                    return sfc;
-                } catch (IOException e) {
-                    LOGGER.log(Level.FINER, e.getMessage(), e);
-                }
+                return getFeatures(layer);
             }
         }
         return null;
@@ -127,17 +132,17 @@ public class MapUtils {
         return null;
     }
 
-    public static void addGeometryToMap(IMap map, Geometry source, String layerName) {
+    public static ILayer addGeometryToMap(IMap map, Geometry source, String layerName) {
         CoordinateReferenceSystem crs = map.getViewportModel().getCRS();
         if (source.getUserData() != null
                 && CoordinateReferenceSystem.class
                         .isAssignableFrom(source.getUserData().getClass())) {
             crs = (CoordinateReferenceSystem) source.getUserData();
         }
-        addGeometryToMap(map, source, crs, layerName);
+        return addGeometryToMap(map, source, crs, layerName);
     }
 
-    public static void addGeometryToMap(IMap map, Geometry source, CoordinateReferenceSystem crs,
+    public static ILayer addGeometryToMap(IMap map, Geometry source, CoordinateReferenceSystem crs,
             String layerName) {
         SimpleFeatureType schema = FeatureTypes.getDefaultType(layerName, source.getClass(), crs);
 
@@ -148,17 +153,17 @@ public class MapUtils {
         feature.setDefaultGeometry(source);
         features.add(feature);
 
-        addFeaturesToMap(map, features, layerName);
+        return addFeaturesToMap(map, features, layerName);
     }
 
-    public static void addFeatureToMap(IMap map, SimpleFeature feature, String layerName) {
+    public static ILayer addFeatureToMap(IMap map, SimpleFeature feature, String layerName) {
         ListFeatureCollection features = new ListFeatureCollection(feature.getFeatureType());
         features.add(feature);
 
-        addFeaturesToMap(map, features, layerName);
+        return addFeaturesToMap(map, features, layerName);
     }
 
-    public static void addFeaturesToMap(IMap map, SimpleFeatureCollection source, String layerName) {
+    public static ILayer addFeaturesToMap(IMap map, SimpleFeatureCollection source, String layerName) {
         try {
             ICatalog catalog = CatalogPlugin.getDefault().getLocalCatalog();
             IGeoResource resource = catalog.createTemporaryResource(source.getSchema());
@@ -176,17 +181,19 @@ public class MapUtils {
 
             // refresh
             layer.refresh(layer.getBounds(new NullProgressMonitor(), null));
+            return layer;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
-    public static void addFeaturesToMap(IMap map, File shapefile) {
+    public static ILayer addFeaturesToMap(IMap map, File shapefile) {
         String name = FilenameUtils.removeExtension(FilenameUtils.getName(shapefile.getPath()));
-        addFeaturesToMap(map, shapefile, name);
+        return addFeaturesToMap(map, shapefile, name);
     }
 
-    public static void addFeaturesToMap(IMap map, File shapefile, String layerName) {
+    public static ILayer addFeaturesToMap(IMap map, File shapefile, String layerName) {
         try {
             CatalogPlugin catalogPlugin = CatalogPlugin.getDefault();
             ICatalog localCatalog = catalogPlugin.getLocalCatalog();
@@ -205,6 +212,7 @@ public class MapUtils {
 
                     // refresh
                     layer.refresh(layer.getBounds(new NullProgressMonitor(), null));
+                    return layer;
                 }
             }
         } catch (MalformedURLException e) {
@@ -212,6 +220,7 @@ public class MapUtils {
         } catch (IOException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
+        return null;
     }
 
     public static GridCoverage2D saveAsGeoTiff(GridCoverage2D source, File filePath) {
@@ -219,7 +228,7 @@ public class MapUtils {
         return saveAs.saveAsGeoTiff(source, filePath.getAbsolutePath());
     }
 
-    public static void addGridCoverageToMap(IMap map, GridCoverage2D source, File filePath,
+    public static ILayer addGridCoverageToMap(IMap map, GridCoverage2D source, File filePath,
             Style style) {
         try {
             if (filePath == null || !filePath.exists()) {
@@ -252,11 +261,13 @@ public class MapUtils {
 
                     // refresh
                     layer.refresh(layer.getBounds(new NullProgressMonitor(), null));
+                    return layer;
                 }
             }
         } catch (IOException e) {
             ToolboxPlugin.log(e.getMessage());
         }
+        return null;
     }
 
     private static int findBestRasterLayerPosition(IMap map) {

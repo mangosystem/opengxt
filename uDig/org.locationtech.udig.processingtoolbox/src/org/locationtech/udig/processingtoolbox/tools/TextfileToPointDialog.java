@@ -47,14 +47,14 @@ import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.PlatformUI;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.spatialstatistics.core.StringHelper;
+import org.geotools.process.spatialstatistics.operations.TextColumn;
+import org.geotools.process.spatialstatistics.operations.TextfileToPointOperation;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget;
 import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget.FileDataType;
-import org.locationtech.udig.processingtoolbox.operation.TextColumn;
-import org.locationtech.udig.processingtoolbox.operation.TextfileToPointOperation;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.ui.CRSChooserDialog;
 import org.opengis.referencing.FactoryException;
@@ -63,7 +63,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 /**
  * Convert Text file to Point features.
  * 
- * @author MapPlus
+ * @author Minpa Lee, MangoSystem
+ * 
+ * @source $URL$
  */
 public class TextfileToPointDialog extends AbstractGeoProcessingDialog implements
         IRunnableWithProgress {

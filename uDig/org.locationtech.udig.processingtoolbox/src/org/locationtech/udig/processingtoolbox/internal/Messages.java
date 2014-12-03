@@ -144,6 +144,9 @@ public class Messages extends NLS {
     public static String StatisticsFieldsSelectionDialog_StatisticsType;
     public static String StatisticsFieldsSelectionDialog_WarningDuplicate;
     
+    public static String MoranScatterPlotDialog_title;
+    public static String MoranScatterPlotDialog_description;
+    
     public static String TextfileToPointDialog_title;
     public static String TextfileToPointDialog_description;
     public static String TextfileToPointDialog_Textfile;

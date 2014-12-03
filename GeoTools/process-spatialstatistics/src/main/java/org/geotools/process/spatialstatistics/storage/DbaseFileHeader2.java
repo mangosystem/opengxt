@@ -17,7 +17,7 @@
  *    This file is based on an origional contained in the GISToolkit project:
  *    http://gistoolkit.sourceforge.net/
  */
-package org.locationtech.udig.processingtoolbox.storage;
+package org.geotools.process.spatialstatistics.storage;
 
 import java.io.EOFException;
 import java.io.IOException;

@@ -12,6 +12,7 @@ package org.locationtech.udig.processingtoolbox.internal.ui;
 import java.util.logging.Logger;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.TableEditor;
@@ -23,6 +24,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -62,6 +64,21 @@ public class WidgetBuilder {
         if (text != null) {
             label.setText(text);
         }
+        label.setToolTipText(tooltip);
+        return label;
+    }
+
+    public CLabel createLabel(Composite parent, String text, String tooltip, Image image, int colspan) {
+        CLabel label = new CLabel(parent, SWT.NONE);
+        label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, colspan, 1));
+        if (text != null) {
+            label.setText(text);
+        }
+        
+        if (image != null) {
+            label.setImage(image);
+        }
+        
         label.setToolTipText(tooltip);
         return label;
     }

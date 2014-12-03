@@ -1,13 +1,20 @@
 /*
- * uDig - User Friendly Desktop Internet GIS client
- * (C) MangoSystem - www.mangosystem.com 
+ *    GeoTools - The Open Source Java GIS Toolkit
+ *    http://geotools.org
  *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * (http://www.eclipse.org/legal/epl-v10.html), and the HydroloGIS BSD
- * License v1.0 (http://udig.refractions.net/files/hsd3-v10.html).
+ *    (C) 2014, Open Source Geospatial Foundation (OSGeo)
+ *
+ *    This library is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation;
+ *    version 2.1 of the License.
+ *
+ *    This library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
  */
-package org.locationtech.udig.processingtoolbox.operation;
+package org.geotools.process.spatialstatistics.operations;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -26,7 +33,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
 import org.geotools.util.logging.Logging;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -298,7 +304,13 @@ public class TextColumn {
         } catch (IOException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         } finally {
-            IOUtils.closeQuietly(reader);
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException ioe) {
+                // ignore
+            }
         }
 
         return columns;

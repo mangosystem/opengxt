@@ -25,10 +25,10 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Text;
 import org.geotools.data.DataStore;
+import org.geotools.process.spatialstatistics.storage.DataStoreFactory;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
-import org.locationtech.udig.processingtoolbox.storage.DataStoreFactory;
 
 /**
  * Output Data Viewer

@@ -14,7 +14,7 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *    Lesser General Public License for more details.
  */
-package org.geotools.process.spatialstatistics.core;
+package org.geotools.process.spatialstatistics.styler;
 
 import java.awt.Color;
 import java.util.Random;
@@ -55,6 +55,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * 
  * @source $URL$
  */
+@SuppressWarnings("nls")
 public class SSStyleBuilder {
     protected static final Logger LOGGER = Logging.getLogger(SSStyleBuilder.class);
 
@@ -236,8 +237,7 @@ public class SSStyleBuilder {
             } catch (TransformerException te) {
                 LOGGER.log(Level.FINE, te.getMessage(), te);
             }
-            return style.toString();
         }
-        return null;
+        return style.toString();
     }
 }

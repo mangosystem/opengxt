@@ -54,6 +54,7 @@ import org.locationtech.udig.processingtoolbox.ProcessInformation.SubCategory;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;
 import org.locationtech.udig.processingtoolbox.internal.ui.SettingsDialog;
+import org.locationtech.udig.processingtoolbox.tools.MoranScatterPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.TextfileToPointDialog;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.ui.ApplicationGIS;
@@ -155,6 +156,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                 if (node.getProcessName().getLocalPart()
                                         .equalsIgnoreCase("TextfileToPointDialog")) {
                                     dialog = new TextfileToPointDialog(shell, map);
+                                } else if (node.getProcessName().getLocalPart()
+                                        .equalsIgnoreCase("MoranScatterPlotDialog")) {
+                                    dialog = new MoranScatterPlotDialog(shell, map);
                                 }
                             } else {
                                 dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
@@ -209,6 +213,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent generalTool = new TreeParent("General Tools", null, null);
         generalTool.addChild(new TreeObject(Messages.TextfileToPointDialog_title, null,
                 new NameImpl(null, "TextfileToPointDialog")));
+        generalTool.addChild(new TreeObject(Messages.MoranScatterPlotDialog_title, null,
+                new NameImpl(null, "MoranScatterPlotDialog")));
+
         root.addChild(generalTool);
 
         // 1. gt-process-spatialstatistics process

@@ -38,7 +38,9 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.geotools.data.DataUtilities;
+import org.geotools.data.FeatureSource;
 import org.geotools.process.spatialstatistics.core.StringHelper;
+import org.geotools.process.spatialstatistics.styler.SSStyleBuilder;
 import org.geotools.styling.Style;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.catalog.CatalogPlugin;
@@ -48,11 +50,22 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget;
 import org.locationtech.udig.processingtoolbox.internal.ui.WidgetBuilder;
-import org.locationtech.udig.processingtoolbox.styler.SSStyleBuilder;
+import org.locationtech.udig.processingtoolbox.styler.MapUtils.FieldType;
+import org.locationtech.udig.processingtoolbox.styler.MapUtils.VectorLayerType;
+import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.style.sld.SLDContent;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.feature.type.GeometryDescriptor;
+
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Abstract GeoProcessing Dialog
@@ -65,9 +78,9 @@ public abstract class AbstractGeoProcessingDialog extends TitleAreaDialog {
     protected static final Logger LOGGER = Logging.getLogger(AbstractGeoProcessingDialog.class);
 
     protected int increment = 10; // IRunnableWithProgress
-    
+
     protected final String EMPTY = ""; //$NON-NLS-1$
-    
+
     protected final String DOT3 = "..."; //$NON-NLS-1$
 
     protected String windowTitle = EMPTY;
@@ -80,13 +93,13 @@ public abstract class AbstractGeoProcessingDialog extends TitleAreaDialog {
 
     protected String error;
 
-    protected IMap map;
+    protected org.locationtech.udig.project.internal.Map map;
 
     protected WidgetBuilder uiBuilder = WidgetBuilder.newInstance();
 
     public AbstractGeoProcessingDialog(Shell parentShell, IMap map) {
         super(parentShell);
-        this.map = map;
+        this.map = (org.locationtech.udig.project.internal.Map) map;
     }
 
     @Override
@@ -209,4 +222,82 @@ public abstract class AbstractGeoProcessingDialog extends TitleAreaDialog {
         }
     }
 
+    protected void fillLayers(IMap map, Combo combo, VectorLayerType layerType) {
+        combo.removeAll();
+        for (ILayer layer : map.getMapLayers()) {
+            if (layer.hasResource(FeatureSource.class)) {
+                GeometryDescriptor descriptor = layer.getSchema().getGeometryDescriptor();
+                Class<?> geometryBinding = descriptor.getType().getBinding();
+                switch (layerType) {
+                case ALL:
+                    combo.add(layer.getName());
+                    break;
+                case LINESTRING:
+                    if (geometryBinding.isAssignableFrom(LineString.class)
+                            || geometryBinding.isAssignableFrom(MultiLineString.class)) {
+                        combo.add(layer.getName());
+                    }
+                    break;
+                case POINT:
+                    if (geometryBinding.isAssignableFrom(Point.class)
+                            || geometryBinding.isAssignableFrom(MultiPoint.class)) {
+                        combo.add(layer.getName());
+                    }
+                    break;
+                case POLYGON:
+                    if (geometryBinding.isAssignableFrom(Polygon.class)
+                            || geometryBinding.isAssignableFrom(MultiPolygon.class)) {
+                        combo.add(layer.getName());
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    protected void fillEnum(Combo combo, Class<?> enumType) {
+        combo.removeAll();
+        for (Object enumVal : enumType.getEnumConstants()) {
+            combo.add(enumVal.toString());
+        }
+        combo.select(0);
+    }
+
+    protected void fillFields(Combo combo, SimpleFeatureType schema, FieldType fieldType) {
+        combo.removeAll();
+        for (AttributeDescriptor descriptor : schema.getAttributeDescriptors()) {
+            if (descriptor instanceof GeometryDescriptor) {
+                continue;
+            }
+
+            Class<?> binding = descriptor.getType().getBinding();
+            switch (fieldType) {
+            case ALL:
+                combo.add(descriptor.getLocalName());
+                break;
+            case Double:
+                if (Double.class.isAssignableFrom(binding) || Float.class.isAssignableFrom(binding)) {
+                    combo.add(descriptor.getLocalName());
+                }
+                break;
+            case Integer:
+                if (Short.class.isAssignableFrom(binding)
+                        || Integer.class.isAssignableFrom(binding)
+                        || Long.class.isAssignableFrom(binding)) {
+                    combo.add(descriptor.getLocalName());
+                }
+                break;
+            case Number:
+                if (Number.class.isAssignableFrom(binding)) {
+                    combo.add(descriptor.getLocalName());
+                }
+                break;
+            case String:
+                if (String.class.isAssignableFrom(binding)) {
+                    combo.add(descriptor.getLocalName());
+                }
+                break;
+            }
+        }
+    }
 }

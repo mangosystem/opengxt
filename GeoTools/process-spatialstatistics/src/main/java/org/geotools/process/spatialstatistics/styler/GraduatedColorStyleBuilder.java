@@ -1,13 +1,20 @@
 /*
- * uDig - User Friendly Desktop Internet GIS client
- * (C) MangoSystem - www.mangosystem.com 
+ *    GeoTools - The Open Source Java GIS Toolkit
+ *    http://geotools.org
  *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * (http://www.eclipse.org/legal/epl-v10.html), and the HydroloGIS BSD
- * License v1.0 (http://udig.refractions.net/files/hsd3-v10.html).
+ *    (C) 2014, Open Source Geospatial Foundation (OSGeo)
+ *
+ *    This library is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation;
+ *    version 2.1 of the License.
+ *
+ *    This library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
  */
-package org.locationtech.udig.processingtoolbox.styler;
+package org.geotools.process.spatialstatistics.styler;
 
 import java.awt.Color;
 import java.util.logging.Level;
@@ -17,6 +24,8 @@ import org.geotools.brewer.color.BrewerPalette;
 import org.geotools.brewer.color.ColorBrewer;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.filter.function.RangedClassifier;
+import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.styling.FeatureTypeStyle;
 import org.geotools.styling.Fill;
 import org.geotools.styling.Graphic;
@@ -26,8 +35,6 @@ import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
 import org.geotools.styling.Symbolizer;
 import org.geotools.util.logging.Logging;
-import org.locationtech.udig.processingtoolbox.common.FeatureTypes;
-import org.locationtech.udig.processingtoolbox.common.FeatureTypes.SimpleShapeType;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.Filter;

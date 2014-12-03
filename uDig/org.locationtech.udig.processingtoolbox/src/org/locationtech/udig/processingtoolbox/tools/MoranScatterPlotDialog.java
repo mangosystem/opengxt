@@ -9,6 +9,7 @@
  */
 package org.locationtech.udig.processingtoolbox.tools;
 
+import java.awt.Font;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.lang.reflect.InvocationTargetException;
@@ -18,7 +19,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -28,6 +28,7 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
@@ -70,7 +71,6 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.experimental.chart.swt.ChartComposite;
 import org.locationtech.udig.catalog.util.GeoToolsAdapters;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
@@ -81,7 +81,6 @@ import org.locationtech.udig.processingtoolbox.styler.MapUtils.FieldType;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils.VectorLayerType;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
-import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
@@ -100,9 +99,7 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
 
     protected final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
 
-    private ChartComposite chartComposite;
-
-    private XYSeries xySeries;
+    private ChartComposite2 chartComposite;
 
     private Map<String, Object> params = new HashMap<String, Object>();
 
@@ -113,6 +110,8 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
     private Text txtOutput;
 
     private CTabItem inputTab, plotTab, outputTab;
+
+    private boolean crossCenter = false;
 
     private XYMinMaxVisitor minMaxVisitor = new XYMinMaxVisitor();
 
@@ -174,14 +173,47 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
 
         uiBuilder.createLabel(container, "Conceptualization of Spatial Relationships", EMPTY, 1);
         cboConcept = uiBuilder.createCombo(container, 1, true);
+        cboConcept.addModifyListener(new ModifyListener() {
+            @Override
+            public void modifyText(ModifyEvent e) {
+                for (Object enumVal : SpatialConcept.class.getEnumConstants()) {
+                    if (enumVal.toString().equalsIgnoreCase(cboConcept.getText())) {
+                        params.put(GlobalMoransIProcessFactory.spatialConcept.key, enumVal);
+                        break;
+                    }
+                }
+            }
+        });
         fillEnum(cboConcept, SpatialConcept.class);
 
         uiBuilder.createLabel(container, "Distance Method", EMPTY, 1);
         cboDistance = uiBuilder.createCombo(container, 1, true);
+        cboDistance.addModifyListener(new ModifyListener() {
+            @Override
+            public void modifyText(ModifyEvent e) {
+                for (Object enumVal : DistanceMethod.class.getEnumConstants()) {
+                    if (enumVal.toString().equalsIgnoreCase(cboDistance.getText())) {
+                        params.put(GlobalMoransIProcessFactory.distanceMethod.key, enumVal);
+                        break;
+                    }
+                }
+            }
+        });
         fillEnum(cboDistance, DistanceMethod.class);
 
         uiBuilder.createLabel(container, "Row Standardization", EMPTY, 1);
         cboStandard = uiBuilder.createCombo(container, 1, true);
+        cboStandard.addModifyListener(new ModifyListener() {
+            @Override
+            public void modifyText(ModifyEvent e) {
+                for (Object enumVal : StandardizationMethod.class.getEnumConstants()) {
+                    if (enumVal.toString().equalsIgnoreCase(cboStandard.getText())) {
+                        params.put(GlobalMoransIProcessFactory.standardization.key, enumVal);
+                        break;
+                    }
+                }
+            }
+        });
         fillEnum(cboStandard, StandardizationMethod.class);
 
         uiBuilder.createLabel(container, "Distance Band or Threshold Distance", EMPTY, 1);
@@ -199,8 +231,8 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
         });
 
         // output
-        locationView = new OutputDataWidget(FileDataType.SHAPEFILE, SWT.SAVE);
-        locationView.create(container, SWT.BORDER, 1, 1);
+        // locationView = new OutputDataWidget(FileDataType.SHAPEFILE, SWT.SAVE);
+        // locationView.create(container, SWT.BORDER, 1, 1);
 
         // register events
         cboLayer.addModifyListener(new ModifyListener() {
@@ -220,42 +252,6 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
             @Override
             public void modifyText(ModifyEvent e) {
                 params.put(GlobalMoransIProcessFactory.inputField.key, cboField.getText());
-            }
-        });
-
-        cboConcept.addModifyListener(new ModifyListener() {
-            @Override
-            public void modifyText(ModifyEvent e) {
-                for (Object enumVal : SpatialConcept.class.getEnumConstants()) {
-                    if (enumVal.toString().equalsIgnoreCase(cboConcept.getText())) {
-                        params.put(GlobalMoransIProcessFactory.spatialConcept.key, enumVal);
-                        break;
-                    }
-                }
-            }
-        });
-
-        cboDistance.addModifyListener(new ModifyListener() {
-            @Override
-            public void modifyText(ModifyEvent e) {
-                for (Object enumVal : DistanceMethod.class.getEnumConstants()) {
-                    if (enumVal.toString().equalsIgnoreCase(cboDistance.getText())) {
-                        params.put(GlobalMoransIProcessFactory.distanceMethod.key, enumVal);
-                        break;
-                    }
-                }
-            }
-        });
-
-        cboStandard.addModifyListener(new ModifyListener() {
-            @Override
-            public void modifyText(ModifyEvent e) {
-                for (Object enumVal : StandardizationMethod.class.getEnumConstants()) {
-                    if (enumVal.toString().equalsIgnoreCase(cboStandard.getText())) {
-                        params.put(GlobalMoransIProcessFactory.standardization.key, enumVal);
-                        break;
-                    }
-                }
             }
         });
 
@@ -299,11 +295,12 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
         chart.setBackgroundPaint(java.awt.Color.WHITE);
         chart.setBorderVisible(false);
 
-        chartComposite = new ChartComposite(parentTabFolder, SWT.NONE | SWT.EMBEDDED, chart, true);
+        chartComposite = new ChartComposite2(parentTabFolder, SWT.NONE | SWT.EMBEDDED, chart, true);
         chartComposite.setLayout(new FillLayout());
         chartComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         chartComposite.setDomainZoomable(false);
         chartComposite.setRangeZoomable(false);
+        chartComposite.setMap(map);
         chartComposite.addChartMouseListener(new PlotMouseListener());
 
         plotTab.setControl(chartComposite);
@@ -321,12 +318,12 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
             ChartEntity entity = event.getEntity();
             if (entity != null && (entity instanceof XYItemEntity)) {
                 XYItemEntity item = (XYItemEntity) entity;
+                XYSeriesCollection dataSet = (XYSeriesCollection) item.getDataset();
+                XYSeries xySeries = dataSet.getSeries(item.getSeriesIndex());
                 XYDataItem2 dataItem = (XYDataItem2) xySeries.getDataItem(item.getItem());
 
                 Filter selectionFilter = ff.id(ff.featureId(dataItem.getFeature().getID()));
                 map.select(selectionFilter, outputLayer);
-
-                System.out.println(dataItem.getFeature());
             } else {
                 map.select(Filter.EXCLUDE, outputLayer);
             }
@@ -342,8 +339,8 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
         plot.setRangePannable(false);
         plot.setSeriesRenderingOrder(SeriesRenderingOrder.FORWARD);
 
-        plot.setDomainCrosshairVisible(true);
-        plot.setRangeCrosshairVisible(true);
+        plot.setDomainCrosshairVisible(false);
+        plot.setRangeCrosshairVisible(false);
         plot.setDomainCrosshairLockedOnData(true);
         plot.setRangeCrosshairLockedOnData(true);
         plot.setDomainCrosshairPaint(java.awt.Color.CYAN);
@@ -354,16 +351,18 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
 
         // 2. Setup Scatter plot
         // Create the scatter data, renderer, and axis
+        int fontStyle = java.awt.Font.BOLD;
+        FontData fontData = getShell().getDisplay().getSystemFont().getFontData()[0];
         NumberAxis xAxis = new NumberAxis(propertyName); // ZScore
-        xAxis.setAutoRangeIncludesZero(false);
-        // xAxis.setLabelFont(JFreeChart.DEFAULT_TITLE_FONT);
+        xAxis.setLabelFont(new Font(fontData.getName(), fontStyle, 12));
+        xAxis.setTickLabelFont(new Font(fontData.getName(), fontStyle, 10));
+
         NumberAxis yAxis = new NumberAxis("Moran index"); //$NON-NLS-1$ LMiIndex
-        yAxis.setAutoRangeIncludesZero(false);
-        // yAxis.setLabelFont(JFreeChart.DEFAULT_TITLE_FONT);
+        yAxis.setLabelFont(new Font(fontData.getName(), fontStyle, 12));
+        yAxis.setTickLabelFont(new Font(fontData.getName(), fontStyle, 10));
 
         XYToolTipGenerator toolTipGenerator = new StandardXYToolTipGenerator();
 
-        // Shape shape = ShapeUtilities.createDiagonalCross(2, 1)
         Shape shape = new Ellipse2D.Double(0, 0, 4, 4);
         XYItemRenderer plotRenderer = new XYLineAndShapeRenderer(false, true); // Shapes only
         plotRenderer.setSeriesShape(0, shape);
@@ -379,6 +378,10 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
         // Map the scatter to the first Domain and first Range
         plot.mapDatasetToDomainAxis(0, 0);
         plot.mapDatasetToRangeAxis(0, 0);
+        if (crossCenter) {
+            xAxis.setRange(-minMaxVisitor.getAbsMaxX(), minMaxVisitor.getAbsMaxX());
+            yAxis.setRange(-minMaxVisitor.getAbsMaxY(), minMaxVisitor.getAbsMaxY());
+        }
 
         // 3. Setup line
         // Create the line data, renderer, and axis
@@ -386,10 +389,17 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
         lineRenderer.setSeriesPaint(0, java.awt.Color.RED); // dot
 
         // Set the line data, renderer, and axis into plot
-        plot.setDataset(1, getLinePlotData());
+        NumberAxis xLineAxis = new NumberAxis(EMPTY);
+        xLineAxis.setTickMarksVisible(false);
+        xLineAxis.setTickLabelsVisible(false);
+        NumberAxis yLineAxis = new NumberAxis(EMPTY);
+        yLineAxis.setTickMarksVisible(false);
+        yLineAxis.setTickLabelsVisible(false);
+
+        plot.setDataset(1, getLinePlotData(crossCenter));
         plot.setRenderer(1, lineRenderer);
-        plot.setDomainAxis(1, new NumberAxis(EMPTY));
-        plot.setRangeAxis(1, new NumberAxis(EMPTY));
+        plot.setDomainAxis(1, xLineAxis);
+        plot.setRangeAxis(1, yLineAxis);
 
         // Map the line to the second Domain and second Range
         plot.mapDatasetToDomainAxis(1, 1);
@@ -397,7 +407,8 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
 
         // 4. Finally, Create the chart with the plot and a legend
         String title = "Moran's I = " + morani; //$NON-NLS-1$
-        JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, false);
+        java.awt.Font titleFont = new Font(fontData.getName(), fontStyle, 20);
+        JFreeChart chart = new JFreeChart(title, titleFont, plot, false);
         chart.setBackgroundPaint(java.awt.Color.WHITE);
         chart.setBorderVisible(false);
 
@@ -405,19 +416,29 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
         chartComposite.forceRedraw();
     }
 
-    private XYDataset getLinePlotData() {
+    private XYDataset getLinePlotData(boolean center) {
         XYSeriesCollection dataset = new XYSeriesCollection();
 
         // Horizontal
         XYSeries horizontal = new XYSeries("Horizontal"); //$NON-NLS-1$
-        horizontal.add(minMaxVisitor.getMinX(), 0);
-        horizontal.add(minMaxVisitor.getMaxX(), 0);
+        if (center) {
+            horizontal.add(-minMaxVisitor.getAbsMaxX(), 0);
+            horizontal.add(minMaxVisitor.getAbsMaxX(), 0);
+        } else {
+            horizontal.add(minMaxVisitor.getMinX(), 0);
+            horizontal.add(minMaxVisitor.getMaxX(), 0);
+        }
         dataset.addSeries(horizontal);
 
         // Vertical
         XYSeries vertical = new XYSeries("Vertical"); //$NON-NLS-1$
-        vertical.add(0, minMaxVisitor.getMinY());
-        vertical.add(0, minMaxVisitor.getMaxY());
+        if (center) {
+            vertical.add(0, -minMaxVisitor.getAbsMaxY());
+            vertical.add(0, minMaxVisitor.getAbsMaxY());
+        } else {
+            vertical.add(0, minMaxVisitor.getMinY());
+            vertical.add(0, minMaxVisitor.getMaxY());
+        }
         dataset.addSeries(vertical);
 
         return dataset;
@@ -426,7 +447,7 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
     @SuppressWarnings("nls")
     private XYDataset getScatterPlotData(SimpleFeatureCollection features) {
         // "LMiIndex", "LMiZScore", "LMiPValue", "COType"
-        xySeries = new XYSeries(features.getSchema().getTypeName());
+        XYSeries xySeries = new XYSeries(features.getSchema().getTypeName());
         minMaxVisitor.reset();
 
         SimpleFeatureIterator featureIter = null;
@@ -498,28 +519,18 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
                     .get(GlobalMoransIProcessFactory.RESULT.key);
 
             monitor.subTask(Messages.Task_AddingLayer);
-            if (locationView.getFile().length() == 0) {
-                // temporary
-                outputLayer = MapUtils.addFeaturesToMap(map, features, "Local Moran's I");
-            } else {
-                // export
-                outputLayer = MapUtils.addFeaturesToMap(map, features, "Local Moran's I");
-            }
 
-            SSStyleBuilder ssBuilder = new SSStyleBuilder(outputLayer.getSchema());
-            ssBuilder.setOpacity(0.8f);
+            SSStyleBuilder ssBuilder = new SSStyleBuilder(features.getSchema());
+            ssBuilder.setOpacity(0.85f);
             Style style = ssBuilder.getLISAStyle("COType"); //$NON-NLS-1$
-            if (style != null) {
-                // put the style on the blackboard
-                outputLayer.getStyleBlackboard().clear();
-                outputLayer.getStyleBlackboard().put(SLDContent.ID, style);
-                outputLayer.getStyleBlackboard().flush();
-                outputLayer.refresh(outputLayer.getBounds(new NullProgressMonitor(), null));
-            }
+
+            outputLayer = MapUtils.addFeaturesToMap(map, features, "Local Moran's I", style);
+
             features = MapUtils.getFeatures(outputLayer);
             monitor.worked(increment);
 
             monitor.subTask("Updating scatter plot...");
+            chartComposite.setLayer(outputLayer);
             updateChart(features, moran.getPropertyName(), moran.getMoran_Index());
             plotTab.getParent().setSelection(plotTab);
             monitor.worked(increment);

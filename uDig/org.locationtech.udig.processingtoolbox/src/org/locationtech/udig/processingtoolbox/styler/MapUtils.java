@@ -164,6 +164,11 @@ public class MapUtils {
     }
 
     public static ILayer addFeaturesToMap(IMap map, SimpleFeatureCollection source, String layerName) {
+        return addFeaturesToMap(map, source, layerName, null);
+    }
+
+    public static ILayer addFeaturesToMap(IMap map, SimpleFeatureCollection source,
+            String layerName, Style style) {
         try {
             ICatalog catalog = CatalogPlugin.getDefault().getLocalCatalog();
             IGeoResource resource = catalog.createTemporaryResource(source.getSchema());
@@ -177,6 +182,12 @@ public class MapUtils {
             List<IGeoResource> resourceList = Collections.singletonList(resource);
             Layer layer = (Layer) ApplicationGIS.addLayersToMap(map, resourceList, pos).get(0);
             layer.setName(layerName);
+            if (style != null) {
+                // put the style on the blackboard
+                layer.getStyleBlackboard().clear();
+                layer.getStyleBlackboard().put(SLDContent.ID, style);
+                layer.getStyleBlackboard().flush();
+            }
             layer.setVisible(true);
 
             // refresh
@@ -194,6 +205,10 @@ public class MapUtils {
     }
 
     public static ILayer addFeaturesToMap(IMap map, File shapefile, String layerName) {
+        return addFeaturesToMap(map, shapefile, layerName, null);
+    }
+
+    public static ILayer addFeaturesToMap(IMap map, File shapefile, String layerName, Style style) {
         try {
             CatalogPlugin catalogPlugin = CatalogPlugin.getDefault();
             ICatalog localCatalog = catalogPlugin.getLocalCatalog();
@@ -208,6 +223,12 @@ public class MapUtils {
                     Layer layer = (Layer) ApplicationGIS.addLayersToMap(map, resourceList, pos)
                             .get(0);
                     layer.setName(layerName);
+                    if (style != null) {
+                        // put the style on the blackboard
+                        layer.getStyleBlackboard().clear();
+                        layer.getStyleBlackboard().put(SLDContent.ID, style);
+                        layer.getStyleBlackboard().flush();
+                    }
                     layer.setVisible(true);
 
                     // refresh
@@ -251,13 +272,12 @@ public class MapUtils {
                     Layer layer = (Layer) ApplicationGIS.addLayersToMap(map, resourceList, pos)
                             .get(0);
                     layer.setName(source.getName().toString());
-                    layer.setVisible(true);
-
                     if (style != null) {
                         // put the style on the blackboard
                         layer.getStyleBlackboard().put(SLDContent.ID, style);
                         layer.getStyleBlackboard().setSelected(new String[] { SLDContent.ID });
                     }
+                    layer.setVisible(true);
 
                     // refresh
                     layer.refresh(layer.getBounds(new NullProgressMonitor(), null));

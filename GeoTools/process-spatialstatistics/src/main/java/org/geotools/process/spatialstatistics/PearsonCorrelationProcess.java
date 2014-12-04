@@ -56,11 +56,11 @@ public class PearsonCorrelationProcess extends AbstractStatisticsProcess {
         return factory;
     }
 
-    public static PearsonResult process(SimpleFeatureCollection inputFeatures, String fieldName,
+    public static PearsonResult process(SimpleFeatureCollection inputFeatures, String inputFields,
             ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(PearsonCorrelationProcessFactory.inputFeatures.key, inputFeatures);
-        map.put(PearsonCorrelationProcessFactory.inputFields.key, fieldName);
+        map.put(PearsonCorrelationProcessFactory.inputFields.key, inputFields);
 
         Process process = new PearsonCorrelationProcess(null);
         Map<String, Object> resultMap;

@@ -55,6 +55,7 @@ import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;
 import org.locationtech.udig.processingtoolbox.internal.ui.SettingsDialog;
 import org.locationtech.udig.processingtoolbox.tools.MoranScatterPlotDialog;
+import org.locationtech.udig.processingtoolbox.tools.ScatterPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.TextfileToPointDialog;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.ui.ApplicationGIS;
@@ -148,6 +149,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                 final IMap map = ApplicationGIS.getActiveMap();
 
                 Display.getCurrent().asyncExec(new Runnable() {
+                    @SuppressWarnings("nls")
                     @Override
                     public void run() {
                         if (map != ApplicationGIS.NO_MAP) {
@@ -159,6 +161,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                 } else if (node.getProcessName().getLocalPart()
                                         .equalsIgnoreCase("MoranScatterPlotDialog")) {
                                     dialog = new MoranScatterPlotDialog(shell, map);
+                                } else if (node.getProcessName().getLocalPart()
+                                        .equalsIgnoreCase("ScatterPlotDialog")) {
+                                    dialog = new ScatterPlotDialog(shell, map);
                                 }
                             } else {
                                 dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
@@ -205,15 +210,27 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         return actionEnv;
     }
 
+    @SuppressWarnings("nls")
     private TreeObject buildTree() {
         // find all the process factories and print out their names
         TreeParent root = new TreeParent("Toolbox", null, null); //$NON-NLS-1$
 
         // 0. general operation dialog
         TreeParent generalTool = new TreeParent("General Tools", null, null);
-        generalTool.addChild(new TreeObject(Messages.TextfileToPointDialog_title, null,
+
+        TreeParent utilityTool = new TreeParent("Utilities", null, null);
+        generalTool.addChild(utilityTool);
+
+        utilityTool.addChild(new TreeObject(Messages.TextfileToPointDialog_title, null,
                 new NameImpl(null, "TextfileToPointDialog")));
-        generalTool.addChild(new TreeObject(Messages.MoranScatterPlotDialog_title, null,
+
+        TreeParent graphTool = new TreeParent("Graph", null, null);
+        generalTool.addChild(graphTool);
+
+        graphTool.addChild(new TreeObject(Messages.ScatterPlotDialog_title, null,
+                new NameImpl(null, "ScatterPlotDialog")));
+
+        graphTool.addChild(new TreeObject(Messages.MoranScatterPlotDialog_title, null,
                 new NameImpl(null, "MoranScatterPlotDialog")));
 
         root.addChild(generalTool);

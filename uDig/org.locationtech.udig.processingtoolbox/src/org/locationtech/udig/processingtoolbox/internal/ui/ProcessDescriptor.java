@@ -66,7 +66,8 @@ public class ProcessDescriptor {
         sb.append("        font-size:9pt;").append(NEWLINE);
         sb.append("        vertical-align:center;").append(NEWLINE);
         sb.append("        border-collapse:collapse;").append(NEWLINE);
-        sb.append("        padding:0px; border-spacing:0px;").append(NEWLINE);        sb.append("        font-family: \"Lucida Sans\", \"Lucida Sans Unicode\", \"Lucida Grande\", Verdana, Arial, Helvetica, sans-serif;}").append(NEWLINE);
+        sb.append("        padding:0px; border-spacing:0px;").append(NEWLINE);        
+        sb.append("        font-family: \"Lucida Sans\", \"Lucida Sans Unicode\", \"Lucida Grande\", Verdana, Arial, Helvetica, sans-serif;}").append(NEWLINE);
         
         sb.append("  </style>").append(NEWLINE);
         sb.append("</head>").append(NEWLINE);

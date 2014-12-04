@@ -25,6 +25,12 @@ class XYMinMaxVisitor {
 
     private double maxY = Double.MIN_VALUE;
 
+    private double sumX = 0d;
+
+    private double sumY = 0d;
+
+    private int count = 0;
+
     public void reset() {
         minX = Double.MAX_VALUE;
         maxX = Double.MIN_VALUE;
@@ -38,6 +44,18 @@ class XYMinMaxVisitor {
 
         minY = Math.min(minY, y);
         maxY = Math.max(maxY, y);
+
+        sumX += x;
+        sumY += y;
+        count++;
+    }
+
+    public double getAverageX() {
+        return sumX / count;
+    }
+
+    public double getAverageY() {
+        return sumY / count;
     }
 
     public double getAbsMaxX() {

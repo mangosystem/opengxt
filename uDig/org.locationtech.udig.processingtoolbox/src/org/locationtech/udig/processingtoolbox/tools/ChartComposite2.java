@@ -89,33 +89,44 @@ class ChartComposite2 extends ChartComposite {
     @Override
     public void zoom(Rectangle selection) {
         Set<FeatureId> selected = new HashSet<FeatureId>();
+        try {
+            XYSeriesCollection ds = (XYSeriesCollection) getChart().getXYPlot().getDataset(2);
+            XYSeries selectionSeries = ds.getSeries(0);
+            selectionSeries.clear();
 
-        EntityCollection entities = this.getChartRenderingInfo().getEntityCollection();
-        Iterator iter = entities.iterator();
-        while (iter.hasNext()) {
-            ChartEntity entity = (ChartEntity) iter.next();
-            if (entity instanceof XYItemEntity) {
-                XYItemEntity item = (XYItemEntity) entity;
-                java.awt.Rectangle bound = item.getArea().getBounds();
-                if (selection.intersects(bound.x, bound.y, bound.width, bound.height)) {
-                    XYSeriesCollection dataSet = (XYSeriesCollection) item.getDataset();
-                    XYSeries xySeries = dataSet.getSeries(item.getSeriesIndex());
-                    XYDataItem xyDataItem = xySeries.getDataItem(item.getItem());
-                    if (xyDataItem instanceof XYDataItem2) {
-                        XYDataItem2 dataItem = (XYDataItem2) xyDataItem;
-                        selected.add(ff.featureId(dataItem.getFeature().getID()));
+            EntityCollection entities = this.getChartRenderingInfo().getEntityCollection();
+            Iterator iter = entities.iterator();
+            while (iter.hasNext()) {
+                ChartEntity entity = (ChartEntity) iter.next();
+                if (entity instanceof XYItemEntity) {
+                    XYItemEntity item = (XYItemEntity) entity;
+                    if (item.getSeriesIndex() != 0) {
+                        continue;
+                    }
+
+                    java.awt.Rectangle bound = item.getArea().getBounds();
+                    if (selection.intersects(bound.x, bound.y, bound.width, bound.height)) {
+                        XYSeriesCollection dataSet = (XYSeriesCollection) item.getDataset();
+                        XYSeries xySeries = dataSet.getSeries(item.getSeriesIndex());
+                        XYDataItem xyDataItem = xySeries.getDataItem(item.getItem());
+                        if (xyDataItem instanceof XYDataItem2) {
+                            XYDataItem2 dataItem = (XYDataItem2) xyDataItem;
+                            selectionSeries.add(dataItem);
+                            selected.add(ff.featureId(dataItem.getFeature().getID()));
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            // skip
+        } finally {
+            if (selected.size() > 0) {
+                map.select(ff.id(selected), layer);
+            } else {
+                map.select(Filter.EXCLUDE, layer);
+            }
+            this.forceRedraw();
         }
-
-        if (selected.size() > 0) {
-            map.select(ff.id(selected), layer);
-        } else {
-            map.select(Filter.EXCLUDE, layer);
-        }
-
-        return;
     }
 
     @Override

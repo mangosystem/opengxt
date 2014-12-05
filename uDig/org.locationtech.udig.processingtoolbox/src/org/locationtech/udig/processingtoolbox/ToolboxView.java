@@ -10,15 +10,12 @@
 package org.locationtech.udig.processingtoolbox;
 
 import java.io.File;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.IOUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
@@ -49,8 +46,6 @@ import org.geotools.feature.NameImpl;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.Processors;
 import org.geotools.util.logging.Logging;
-import org.locationtech.udig.processingtoolbox.ProcessInformation.Category;
-import org.locationtech.udig.processingtoolbox.ProcessInformation.SubCategory;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;
 import org.locationtech.udig.processingtoolbox.internal.ui.SettingsDialog;
@@ -76,16 +71,19 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
 
     private static Boolean showLog = Boolean.TRUE;
 
-    public static Boolean getShowLog() {
-        return showLog;
-    }
+    private static boolean loadGeoToolsProcess = true;
 
-    public static void setShowLog(Boolean showLog) {
-        ToolboxView.showLog = showLog;
-    }
+    private TreeViewer viewer;
 
-    /** Temporary workspace */
+    private IAction actionEnv;
+
+    private String envIcon = "icons/applications-system-3.png"; //$NON-NLS-1$
+
     private static String workspace = null;
+
+    public ToolboxView() {
+        // nothing to do
+    }
 
     public static String getWorkspace() {
         if (ToolboxView.workspace == null) {
@@ -108,16 +106,20 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         ToolboxView.workspace = workspace;
     }
 
-    private TreeViewer viewer;
+    public static Boolean getShowLog() {
+        return showLog;
+    }
 
-    private boolean loadAll = true;
+    public static void setShowLog(Boolean showLog) {
+        ToolboxView.showLog = showLog;
+    }
 
-    private IAction actionEnv;
+    public static boolean isLoadGeoToolsProcess() {
+        return ToolboxView.loadGeoToolsProcess;
+    }
 
-    private String envIcon = "icons/applications-system-3.png"; //$NON-NLS-1$
-
-    public ToolboxView() {
-        // nothing to do
+    public static void setLoadGeoToolsProcess(boolean loadGeoToolsProcess) {
+        ToolboxView.loadGeoToolsProcess = loadGeoToolsProcess;
     }
 
     @Override
@@ -157,22 +159,18 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                         if (map != ApplicationGIS.NO_MAP) {
                             Dialog dialog = null;
                             if (node.getFactory() == null) {
-                                if (node.getProcessName().getLocalPart()
-                                        .equalsIgnoreCase("TextfileToPointDialog")) {
+                                String nodeName = node.getProcessName().getLocalPart();
+                                if (nodeName.equalsIgnoreCase("TextfileToPointDialog")) {
                                     dialog = new TextfileToPointDialog(shell, map);
-                                } else if (node.getProcessName().getLocalPart()
-                                        .equalsIgnoreCase("MoranScatterPlotDialog")) {
+                                } else if (nodeName.equalsIgnoreCase("MoranScatterPlotDialog")) {
                                     dialog = new MoranScatterPlotDialog(shell, map);
-                                } else if (node.getProcessName().getLocalPart()
-                                        .equalsIgnoreCase("ScatterPlotDialog")) {
+                                } else if (nodeName.equalsIgnoreCase("ScatterPlotDialog")) {
                                     dialog = new ScatterPlotDialog(shell, map);
-                                } else if (node.getProcessName().getLocalPart()
-                                        .equalsIgnoreCase("HistogramDialog")) {
+                                } else if (nodeName.equalsIgnoreCase("HistogramDialog")) {
                                     dialog = new HistogramDialog(shell, map);
-                                } else if (node.getProcessName().getLocalPart()
-                                        .equalsIgnoreCase("ThematicMapDialog")) {
+                                } else if (nodeName.equalsIgnoreCase("ThematicMapDialog")) {
                                     dialog = new ThematicMapDialog(shell, map);
-                                } 
+                                }
                             } else {
                                 dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
                                         node.getProcessName());
@@ -183,7 +181,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                 dialog.open();
                             }
                         } else {
-                            MessageDialog.openInformation(shell, "Confirm", "No Active Map"); //$NON-NLS-1$//$NON-NLS-2$
+                            MessageDialog.openInformation(shell, Messages.ToolboxView_Title,
+                                    Messages.ToolboxView_NoActiveMap);
                         }
                     }
                 });
@@ -218,104 +217,151 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         return actionEnv;
     }
 
-    @SuppressWarnings("nls")
     private TreeObject buildTree() {
         // find all the process factories and print out their names
-        TreeParent root = new TreeParent("Toolbox", null, null); //$NON-NLS-1$
+        TreeParent root = new TreeParent(Messages.ToolboxView_Title, null, null);
 
+        // 1. build general tools
+        buildGeneralTools(root);
+
+        // 2. build spatial statistics tools
+        buildStatisticsTools(root);
+
+        // 3. build GeoTools process
+        if (loadGeoToolsProcess) {
+            buildGeoTools(root);
+        }
+
+        return root;
+    }
+
+    @SuppressWarnings("nls")
+    private void buildStatisticsTools(TreeParent root) {
+        TreeParent ssTools = new TreeParent(Messages.ToolboxView_SpatialStatistics, null, null);
+        root.addChild(ssTools);
+
+        // Descriptive Statistics
+        TreeParent desTools = new TreeParent(Messages.ToolboxView_DescriptiveStatistics, null, null);
+        ssTools.addChild(desTools);
+        buildTool(desTools, "org.geotools.process.spatialstatistics.CountFeaturesProcessFactory");
+        buildTool(desTools, "org.geotools.process.spatialstatistics.AreaProcessFactory");
+        buildTool(desTools,
+                "org.geotools.process.spatialstatistics.StatisticsFeaturesProcessFactory");
+        buildTool(desTools,
+                "org.geotools.process.spatialstatistics.PearsonCorrelationProcessFactory");
+
+        // Point Pattern Analysis
+        TreeParent patternTools = new TreeParent(Messages.ToolboxView_PointPattern, null, null);
+        ssTools.addChild(patternTools);
+        buildTool(patternTools,
+                "org.geotools.process.spatialstatistics.NearestNeighborProcessFactory");
+
+        // Spatial Autocorrelation
+        TreeParent autoTools = new TreeParent(Messages.ToolboxView_Autocorrelation, null, null);
+        ssTools.addChild(autoTools);
+        buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalMoransIProcessFactory");
+        buildTool(autoTools,
+                "org.geotools.process.spatialstatistics.GlobalGStatisticsProcessFactory");
+
+        // Spatial Cluster and Outlier
+        TreeParent clusterTools = new TreeParent(Messages.ToolboxView_Cluster, null, null);
+        ssTools.addChild(clusterTools);
+        buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalMoransIProcessFactory");
+        buildTool(clusterTools,
+                "org.geotools.process.spatialstatistics.LocalGStatisticsProcessFactory");
+
+        // Spatial Distribution
+        TreeParent distributionTools = new TreeParent(Messages.ToolboxView_Distribution, null, null);
+        ssTools.addChild(distributionTools);
+        buildTool(distributionTools,
+                "org.geotools.process.spatialstatistics.MeanCenterProcessFactory");
+        buildTool(distributionTools, "org.geotools.process.spatialstatistics.SDEProcessFactory");
+    }
+
+    private void buildTool(TreeParent ssTools, String className) {
+        try {
+            Class<?> factoryClass = ToolboxView.class.getClassLoader().loadClass(className);
+            ProcessFactory factory = (ProcessFactory) factoryClass.newInstance();
+
+            Iterator<Name> nameIter = factory.getNames().iterator();
+            while (nameIter.hasNext()) {
+                Name processName = nameIter.next();
+                String name = factory.getTitle(processName).toString();
+                TreeObject node = new TreeObject(name, factory, processName);
+                ssTools.addChild(node);
+            }
+        } catch (ClassNotFoundException e) {
+            LOGGER.log(Level.FINEST, e.getMessage(), e);
+        } catch (InstantiationException e) {
+            LOGGER.log(Level.FINEST, e.getMessage(), e);
+        } catch (IllegalAccessException e) {
+            LOGGER.log(Level.FINEST, e.getMessage(), e);
+        } catch (Throwable t) {
+            LOGGER.log(Level.FINEST, t.getMessage(), t);
+        }
+    }
+
+    private void buildGeoTools(TreeParent root) {
+        TreeParent parent = new TreeParent(Messages.ToolboxView_GeoTools, null, null);
+        Set<ProcessFactory> processFactories = Processors.getProcessFactories();
+        Iterator<ProcessFactory> iterator = processFactories.iterator();
+        while (iterator.hasNext()) {
+            ProcessFactory factory = iterator.next();
+            String category = getWindowTitle(factory.getTitle().toString());
+            TreeParent to1 = new TreeParent(category, factory, null);
+            Iterator<Name> nameIter = factory.getNames().iterator();
+            while (nameIter.hasNext()) {
+                Name processName = nameIter.next();
+                String name = getWindowTitle(processName.getLocalPart());
+                TreeObject to2 = new TreeObject(name, factory, processName);
+                to1.addChild(to2);
+            }
+            parent.addChild(to1);
+        }
+        root.addChild(parent);
+    }
+
+    @SuppressWarnings("nls")
+    private void buildGeneralTools(TreeParent root) {
         // 0. general operation dialog
-        TreeParent generalTool = new TreeParent("General Tools", null, null);
-        
-        generalTool.addChild(new TreeObject(Messages.ThematicMapDialog_title, null,
-                new NameImpl(null, "ThematicMapDialog")));
-        
-        TreeParent utilityTool = new TreeParent("Utilities", null, null);
-        generalTool.addChild(utilityTool);
-
-        utilityTool.addChild(new TreeObject(Messages.TextfileToPointDialog_title, null,
-                new NameImpl(null, "TextfileToPointDialog")));
-
-        TreeParent graphTool = new TreeParent("Graph", null, null);
-        generalTool.addChild(graphTool);
-
-        graphTool.addChild(new TreeObject(Messages.HistogramDialog_title, null,
-                new NameImpl(null, "HistogramDialog")));
-
-        graphTool.addChild(new TreeObject(Messages.ScatterPlotDialog_title, null,
-                new NameImpl(null, "ScatterPlotDialog")));
-
-        graphTool.addChild(new TreeObject(Messages.MoranScatterPlotDialog_title, null,
-                new NameImpl(null, "MoranScatterPlotDialog")));
-
+        TreeParent generalTool = new TreeParent(Messages.ToolboxView_GeneralTools, null, null);
         root.addChild(generalTool);
 
-        // 1. gt-process-spatialstatistics process
-        InputStream inputStream = null;
-        try {
-            URL url = ToolboxPlugin.urlFromPlugin("ProcessFactory.xml"); //$NON-NLS-1$
-            inputStream = url.openStream();
-            ProcessInformation pi = ProcessInformation.decode(inputStream);
+        buildTool(generalTool, Messages.ThematicMapDialog_title, "ThematicMapDialog");
 
-            ClassLoader classLoader = ToolboxView.class.getClassLoader();
-            for (Category category : pi.getItems()) {
-                TreeParent to1 = new TreeParent(category.Name, null, null);
-                for (SubCategory subCat : category.getItems()) {
-                    TreeParent to2 = new TreeParent(subCat.Name, null, null);
+        // Creation
+        TreeParent createTool = new TreeParent(Messages.ToolboxView_DataCreation, null, null);
+        generalTool.addChild(createTool);
 
-                    for (String facName : subCat.getItems()) {
-                        try {
-                            final Class<?> aClass = classLoader.loadClass(facName);
-                            final ProcessFactory factory = (ProcessFactory) aClass.newInstance();
+        buildTool(createTool, Messages.TextfileToPointDialog_title, "TextfileToPointDialog");
+        buildTool(createTool, "org.geotools.process.spatialstatistics.RandomPointsProcessFactory");
+        buildTool(createTool,
+                "org.geotools.process.spatialstatistics.RandomPointsPerFeaturesProcessFactory");
+        buildTool(createTool, "org.geotools.process.spatialstatistics.FishnetProcessFactory");
+        buildTool(createTool, "org.geotools.process.spatialstatistics.HexagonProcessFactory");
 
-                            Iterator<Name> nameIter = factory.getNames().iterator();
-                            while (nameIter.hasNext()) {
-                                final Name processName = nameIter.next();
-                                String name = factory.getTitle(processName).toString();
-                                TreeObject to3 = new TreeObject(name, factory, processName);
-                                to2.addChild(to3);
-                            }
-                        } catch (ClassNotFoundException e) {
-                            LOGGER.log(Level.FINEST, e.getMessage(), e);
-                        } catch (InstantiationException e) {
-                            LOGGER.log(Level.FINEST, e.getMessage(), e);
-                        } catch (IllegalAccessException e) {
-                            LOGGER.log(Level.FINEST, e.getMessage(), e);
-                        } catch (Throwable t) {
-                            LOGGER.log(Level.FINEST, t.getMessage(), t);
-                            t.printStackTrace();
-                        }
-                    }
-                    to1.addChild(to2);
-                }
-                root.addChild(to1);
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, e.getMessage(), e);
-        } finally {
-            IOUtils.closeQuietly(inputStream);
-        }
+        // Graph
+        TreeParent graphTool = new TreeParent(Messages.ToolboxView_Graph, null, null);
+        generalTool.addChild(graphTool);
 
-        // 2. GeoTools process
-        if (loadAll) {
-            TreeParent parent = new TreeParent(Messages.ToolboxView_GeoTools, null, null);
-            Set<ProcessFactory> processFactories = Processors.getProcessFactories();
-            Iterator<ProcessFactory> iterator = processFactories.iterator();
-            while (iterator.hasNext()) {
-                ProcessFactory factory = iterator.next();
-                String category = getWindowTitle(factory.getTitle().toString());
-                TreeParent to1 = new TreeParent(category, factory, null);
-                Iterator<Name> nameIter = factory.getNames().iterator();
-                while (nameIter.hasNext()) {
-                    Name processName = nameIter.next();
-                    String name = getWindowTitle(processName.getLocalPart());
-                    TreeObject to2 = new TreeObject(name, factory, processName);
-                    to1.addChild(to2);
-                }
-                parent.addChild(to1);
-            }
-            root.addChild(parent);
-        }
-        return root;
+        buildTool(graphTool, Messages.HistogramDialog_title, "HistogramDialog");
+        buildTool(graphTool, Messages.ScatterPlotDialog_title, "ScatterPlotDialog");
+        buildTool(graphTool, Messages.MoranScatterPlotDialog_title, "MoranScatterPlotDialog");
+
+        // Utilities
+        TreeParent utilTool = new TreeParent(Messages.ToolboxView_Utilities, null, null);
+        generalTool.addChild(utilTool);
+
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.CollectEventsProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.UnionPolygonProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.CalculateFieldProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.SpatialJoinProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.PointStatisticsProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.BufferStatisticsProcessFactory");
+    }
+
+    private void buildTool(TreeParent parent, String title, String dialogName) {
+        parent.addChild(new TreeObject(title, null, new NameImpl(null, dialogName)));
     }
 
     @SuppressWarnings("nls")

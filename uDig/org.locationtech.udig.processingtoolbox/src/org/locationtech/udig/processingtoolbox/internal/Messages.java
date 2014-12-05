@@ -203,7 +203,19 @@ public class Messages extends NLS {
     public static String ThematicMapDialog_OutlineWidth;
     
     public static String ToolboxView_workspace;
-    public static String ToolboxView_GeoTools;
+    public static String ToolboxView_GeoTools;    
+    public static String ToolboxView_Title;
+    public static String ToolboxView_SpatialStatistics;
+    public static String ToolboxView_DescriptiveStatistics;
+    public static String ToolboxView_PointPattern;
+    public static String ToolboxView_Autocorrelation;
+    public static String ToolboxView_Cluster;
+    public static String ToolboxView_Distribution;
+    public static String ToolboxView_GeneralTools;
+    public static String ToolboxView_DataCreation;
+    public static String ToolboxView_Graph;
+    public static String ToolboxView_Utilities;
+    public static String ToolboxView_NoActiveMap;
 
     static {
         // initialize resource bundle

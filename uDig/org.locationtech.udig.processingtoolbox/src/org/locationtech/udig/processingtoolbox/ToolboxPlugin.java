@@ -27,6 +27,7 @@ import org.eclipse.ui.internal.util.BundleUtility;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.internal.ui.UiPlugin;
+import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.ui.preferences.PreferenceConstants;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -94,7 +95,7 @@ public class ToolboxPlugin extends AbstractUIPlugin {
 
     public void print(Object message) {
         if (console == null) {
-            console = new MessageConsole("Processing Toolbox", null); //$NON-NLS-1$
+            console = new MessageConsole(Messages.ToolboxView_Title, null);
 
             IConsoleManager manager = ConsolePlugin.getDefault().getConsoleManager();
             manager.addConsoles(new IConsole[] { console });
@@ -138,10 +139,6 @@ public class ToolboxPlugin extends AbstractUIPlugin {
 
         return fullPathString;
     }
-
-    //public static boolean useSpatialIndex() {
-    //    return UiPlugin.getDefault().getPreferenceStore().getBoolean(org.locationtech.udig.catalog.shp.preferencesPreferenceConstants.P_CREATE_INDEX);
-    //}
 
     public static String defaultCharset() {
         return UiPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.P_DEFAULT_CHARSET);

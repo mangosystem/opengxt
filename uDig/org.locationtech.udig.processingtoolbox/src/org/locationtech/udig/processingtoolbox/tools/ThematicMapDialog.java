@@ -91,7 +91,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
         this.windowTitle = Messages.ThematicMapDialog_title;
         this.windowDesc = Messages.ThematicMapDialog_description;
         this.windowSize = new Point(500, 330);
-        this.brewer = PlatformGIS.getColorBrewer();
+        this.brewer = ColorBrewer.instance();
     }
 
     @Override
@@ -170,6 +170,9 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
         cboLayer.addModifyListener(new ModifyListener() {
             @Override
             public void modifyText(ModifyEvent e) {
+                if (cboLayer.getSelectionIndex() == -1) {
+                    return;
+                }
                 activeLayer = MapUtils.getLayer(map, cboLayer.getText());
                 if (activeLayer != null) {
                     fillFields(cboField, activeLayer.getSchema(), FieldType.Number);

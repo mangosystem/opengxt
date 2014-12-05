@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -68,17 +69,18 @@ public class WidgetBuilder {
         return label;
     }
 
-    public CLabel createLabel(Composite parent, String text, String tooltip, Image image, int colspan) {
+    public CLabel createLabel(Composite parent, String text, String tooltip, Image image,
+            int colspan) {
         CLabel label = new CLabel(parent, SWT.NONE);
         label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, colspan, 1));
         if (text != null) {
             label.setText(text);
         }
-        
+
         if (image != null) {
             label.setImage(image);
         }
-        
+
         label.setToolTipText(tooltip);
         return label;
     }
@@ -141,6 +143,15 @@ public class WidgetBuilder {
         spinner.setValues(selection, minimum, maximum, digits, increment, pageIncrement);
 
         return spinner;
+    }
+
+    public Slider createSlider(Composite parent, int selection, int minimum, int maximum,
+            int digits, int increment, int pageIncrement, int colspan) {
+        Slider slider = new Slider(parent, SWT.HORIZONTAL | SWT.BORDER);
+        slider.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, colspan, 1));
+        slider.setValues(selection, minimum, maximum, digits, increment, pageIncrement);
+
+        return slider;
     }
 
     public Combo createCombo(Composite parent, int colspan) {

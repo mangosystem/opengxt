@@ -58,6 +58,7 @@ import org.locationtech.udig.processingtoolbox.tools.HistogramDialog;
 import org.locationtech.udig.processingtoolbox.tools.MoranScatterPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.ScatterPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.TextfileToPointDialog;
+import org.locationtech.udig.processingtoolbox.tools.ThematicMapDialog;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.opengis.feature.type.Name;
@@ -168,7 +169,10 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                 } else if (node.getProcessName().getLocalPart()
                                         .equalsIgnoreCase("HistogramDialog")) {
                                     dialog = new HistogramDialog(shell, map);
-                                }
+                                } else if (node.getProcessName().getLocalPart()
+                                        .equalsIgnoreCase("ThematicMapDialog")) {
+                                    dialog = new ThematicMapDialog(shell, map);
+                                } 
                             } else {
                                 dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
                                         node.getProcessName());
@@ -221,7 +225,10 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
 
         // 0. general operation dialog
         TreeParent generalTool = new TreeParent("General Tools", null, null);
-
+        
+        generalTool.addChild(new TreeObject(Messages.ThematicMapDialog_title, null,
+                new NameImpl(null, "ThematicMapDialog")));
+        
         TreeParent utilityTool = new TreeParent("Utilities", null, null);
         generalTool.addChild(utilityTool);
 

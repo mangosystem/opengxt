@@ -190,6 +190,18 @@ public class Messages extends NLS {
     public static String TextfileToPointDialog_FieldRow3;
     public static String TextfileToPointDialog_FieldRow4;
     
+    public static String ThematicMapDialog_title;
+    public static String ThematicMapDialog_description;
+    public static String ThematicMapDialog_InputLayer;
+    public static String ThematicMapDialog_InputField;
+    public static String ThematicMapDialog_Normalization;
+    public static String ThematicMapDialog_Mode;
+    public static String ThematicMapDialog_Classes;
+    public static String ThematicMapDialog_ColorRamp;
+    public static String ThematicMapDialog_Transparency;
+    public static String ThematicMapDialog_OutlineColor;
+    public static String ThematicMapDialog_OutlineWidth;
+    
     public static String ToolboxView_workspace;
     public static String ToolboxView_GeoTools;
 

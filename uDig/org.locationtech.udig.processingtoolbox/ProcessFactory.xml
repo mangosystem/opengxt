@@ -27,6 +27,7 @@
     <SubCategory>
       <Name>Spatial Distribution</Name>
       <Process>org.geotools.process.spatialstatistics.MeanCenterProcessFactory</Process>
+      <Process>org.geotools.process.spatialstatistics.SDEProcessFactory</Process>
     </SubCategory>
     <SubCategory>
       <Name>Utilities</Name>

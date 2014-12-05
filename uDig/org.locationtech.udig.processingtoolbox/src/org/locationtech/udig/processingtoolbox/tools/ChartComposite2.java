@@ -88,6 +88,9 @@ class ChartComposite2 extends ChartComposite {
     @SuppressWarnings("rawtypes")
     @Override
     public void zoom(Rectangle selection) {
+        if (map == null || layer == null) {
+            return;
+        }
         Set<FeatureId> selected = new HashSet<FeatureId>();
         try {
             XYSeriesCollection ds = (XYSeriesCollection) getChart().getXYPlot().getDataset(2);

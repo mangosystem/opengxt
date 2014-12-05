@@ -493,6 +493,10 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
             openInformation(getShell(), Messages.Task_ParameterRequired);
             return;
         }
+        
+        if (inputLayer.getFilter() != Filter.EXCLUDE) {
+            map.select(Filter.EXCLUDE, inputLayer);
+        }
 
         try {
             PlatformUI.getWorkbench().getProgressService().run(false, true, this);

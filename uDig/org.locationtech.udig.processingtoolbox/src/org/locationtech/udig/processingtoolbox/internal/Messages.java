@@ -61,6 +61,12 @@ public class Messages extends NLS {
     public static String GeometryViewer_MapExtent;
     public static String GeometryViewer_GeometryFromFeatures;
     
+    public static String HistogramDialog_title;
+    public static String HistogramDialog_description;
+    public static String HistogramDialog_InputLayer;
+    public static String HistogramDialog_InputField;
+    public static String HistogramDialog_BinCount;
+    
     public static String LiteralDataViewer_ExpressionBuilder;
     public static String LiteralDataViewer_MultipleFieldsSelection;
     public static String LiteralDataViewer_StatisticsFieldsSelection;
@@ -135,6 +141,8 @@ public class Messages extends NLS {
     public static String ScatterPlotDialog_InputLayer;
     public static String ScatterPlotDialog_IndependentField;
     public static String ScatterPlotDialog_DependentField;
+    public static String ScatterPlotDialog_BasicStatistics;
+    public static String ScatterPlotDialog_Pearson;
     
     public static String SettingsDialog_title;
     public static String SettingsDialog_general;

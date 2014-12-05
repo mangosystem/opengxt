@@ -54,6 +54,7 @@ import org.locationtech.udig.processingtoolbox.ProcessInformation.SubCategory;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;
 import org.locationtech.udig.processingtoolbox.internal.ui.SettingsDialog;
+import org.locationtech.udig.processingtoolbox.tools.HistogramDialog;
 import org.locationtech.udig.processingtoolbox.tools.MoranScatterPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.ScatterPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.TextfileToPointDialog;
@@ -164,6 +165,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                 } else if (node.getProcessName().getLocalPart()
                                         .equalsIgnoreCase("ScatterPlotDialog")) {
                                     dialog = new ScatterPlotDialog(shell, map);
+                                } else if (node.getProcessName().getLocalPart()
+                                        .equalsIgnoreCase("HistogramDialog")) {
+                                    dialog = new HistogramDialog(shell, map);
                                 }
                             } else {
                                 dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
@@ -226,6 +230,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
 
         TreeParent graphTool = new TreeParent("Graph", null, null);
         generalTool.addChild(graphTool);
+
+        graphTool.addChild(new TreeObject(Messages.HistogramDialog_title, null,
+                new NameImpl(null, "HistogramDialog")));
 
         graphTool.addChild(new TreeObject(Messages.ScatterPlotDialog_title, null,
                 new NameImpl(null, "ScatterPlotDialog")));

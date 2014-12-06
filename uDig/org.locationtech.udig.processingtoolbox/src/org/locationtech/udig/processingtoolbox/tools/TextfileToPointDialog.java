@@ -111,11 +111,30 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
         btnSource = uiBuilder.createButton(container, DOT3, null, 1);
         btnSource.addSelectionListener(selectionListener);
 
-        // 2. output spatial reference
-        uiBuilder.createLabel(container, Messages.TextfileToPointDialog_CRS, null, 1);
-        txtCrs = uiBuilder.createText(container, EMPTY, 1, true);
+        // 3. encoding & spatial reference
+        uiBuilder.createLabel(container, Messages.TextfileToPointDialog_Encoding, null, 1);
+        GridLayout layout = new GridLayout(5, false);
+        layout.marginLeft = 0;
+        layout.marginRight = 0;
+        layout.horizontalSpacing = 0;
 
-        final Button btnOpen = uiBuilder.createButton(container, DOT3, null, 1);
+        Composite subCon = new Composite(container, SWT.NONE);
+        subCon.setLayout(layout);
+        subCon.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+        cboEncoding = uiBuilder.createCombo(subCon, 1, false);
+        Map<String, Charset> charsetMap = Charset.availableCharsets();
+        for (Entry<String, Charset> entrySet : charsetMap.entrySet()) {
+            cboEncoding.add(entrySet.getKey());
+        }
+        cboEncoding.addModifyListener(modifyListener);
+        cboEncoding.setText(ToolboxPlugin.defaultCharset());
+
+        uiBuilder.createLabel(subCon, "   ", null, 1); //$NON-NLS-1$
+        uiBuilder.createLabel(subCon, Messages.TextfileToPointDialog_CRS, null, 1);
+        txtCrs = uiBuilder.createText(subCon, EMPTY, 1, true);
+        txtCrs.setEditable(false);
+        final Button btnOpen = uiBuilder.createButton(subCon, DOT3, null, 1);
         btnOpen.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
@@ -133,17 +152,7 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
             }
         });
 
-        // 3. encoding
-        uiBuilder.createLabel(container, Messages.TextfileToPointDialog_Encoding, null, 1);
-        cboEncoding = uiBuilder.createCombo(container, 2, false);
-        Map<String, Charset> charsetMap = Charset.availableCharsets();
-        for (Entry<String, Charset> entrySet : charsetMap.entrySet()) {
-            cboEncoding.add(entrySet.getKey());
-        }
-        cboEncoding.addModifyListener(modifyListener);
-        cboEncoding.setText(ToolboxPlugin.defaultCharset());
-
-        // 4. define schema
+        // 3. define schema
         Group group = uiBuilder.createGroup(container, Messages.TextfileToPointDialog_Schema,
                 false, 3);
         uiBuilder.createLabel(group, Messages.TextfileToPointDialog_FieldNameSetting, null, 1);

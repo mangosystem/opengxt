@@ -49,6 +49,7 @@ import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;
 import org.locationtech.udig.processingtoolbox.internal.ui.SettingsDialog;
+import org.locationtech.udig.processingtoolbox.tools.FormatConversionDialog;
 import org.locationtech.udig.processingtoolbox.tools.HistogramDialog;
 import org.locationtech.udig.processingtoolbox.tools.MoranScatterPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.ScatterPlotDialog;
@@ -170,6 +171,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                     dialog = new HistogramDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("ThematicMapDialog")) {
                                     dialog = new ThematicMapDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("FormatConversionDialog")) {
+                                    dialog = new FormatConversionDialog(shell, map);
                                 }
                             } else {
                                 dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
@@ -328,15 +331,22 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         root.addChild(generalTool);
 
         buildTool(generalTool, Messages.ThematicMapDialog_title, "ThematicMapDialog");
+        
+        // import 
+        TreeParent importTool = new TreeParent(Messages.ToolboxView_Import, null, null);
+        generalTool.addChild(importTool);
+        buildTool(importTool, Messages.TextfileToPointDialog_title, "TextfileToPointDialog");
+        
+        // export
+        TreeParent exportTool = new TreeParent(Messages.ToolboxView_Export, null, null);
+        generalTool.addChild(exportTool);
+        buildTool(exportTool, Messages.FormatConversionDialog_title, "FormatConversionDialog");
 
         // Creation
         TreeParent createTool = new TreeParent(Messages.ToolboxView_DataCreation, null, null);
         generalTool.addChild(createTool);
-
-        buildTool(createTool, Messages.TextfileToPointDialog_title, "TextfileToPointDialog");
         buildTool(createTool, "org.geotools.process.spatialstatistics.RandomPointsProcessFactory");
-        buildTool(createTool,
-                "org.geotools.process.spatialstatistics.RandomPointsPerFeaturesProcessFactory");
+        buildTool(createTool, "org.geotools.process.spatialstatistics.RandomPointsPerFeaturesProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.FishnetProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.HexagonProcessFactory");
 

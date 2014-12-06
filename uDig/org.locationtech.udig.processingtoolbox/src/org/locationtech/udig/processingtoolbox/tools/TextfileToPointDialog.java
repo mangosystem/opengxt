@@ -114,9 +114,7 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
         // 3. encoding & spatial reference
         uiBuilder.createLabel(container, Messages.TextfileToPointDialog_Encoding, null, 1);
         GridLayout layout = new GridLayout(5, false);
-        layout.marginLeft = 0;
-        layout.marginRight = 0;
-        layout.horizontalSpacing = 0;
+        layout.marginWidth = 0;
 
         Composite subCon = new Composite(container, SWT.NONE);
         subCon.setLayout(layout);

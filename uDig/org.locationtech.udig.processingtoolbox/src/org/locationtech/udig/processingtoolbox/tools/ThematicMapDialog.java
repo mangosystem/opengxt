@@ -51,7 +51,6 @@ import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.locationtech.udig.style.sld.editor.BorderColorComboListener.Outline;
-import org.locationtech.udig.ui.PlatformGIS;
 import org.locationtech.udig.ui.graphics.Glyph;
 
 /**

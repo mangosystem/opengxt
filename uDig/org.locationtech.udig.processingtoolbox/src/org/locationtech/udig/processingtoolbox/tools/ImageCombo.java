@@ -141,6 +141,7 @@ public class ImageCombo extends Composite {
         //if ((style & SWT.H_SCROLL) != 0) this.style |= SWT.H_SCROLL;
         this.style |= SWT.H_SCROLL;
 
+        @SuppressWarnings("unused")
         int textStyle = SWT.SINGLE;
         if ( (style & SWT.READ_ONLY) != 0 ) {
             textStyle |= SWT.READ_ONLY;

@@ -45,10 +45,20 @@ public class Messages extends NLS {
     public static String ExtentSelection_layerextent;
     public static String ExtentSelection_message;
     public static String ExtentSelection_title;
+    
+    public static String FormatConversionDialog_title;
+    public static String FormatConversionDialog_description;
+    public static String FormatConversionDialog_SelectLayers;
+    public static String FormatConversionDialog_Name;
+    public static String FormatConversionDialog_Type;
+    public static String FormatConversionDialog_CRS;
+    public static String FormatConversionDialog_Format;
+    public static String FormatConversionDialog_Warning;
 
     public static String General_Cancelled;
     public static String General_Error;
     public static String General_ErrorOccurred;
+    public static String General_Completed;
     
     public static String GeometryPickerDialog_title;
     public static String GeometryPickerDialog_Layer;
@@ -157,6 +167,10 @@ public class Messages extends NLS {
     public static String StatisticsFieldsSelectionDialog_TargetField;
     public static String StatisticsFieldsSelectionDialog_StatisticsType;
     public static String StatisticsFieldsSelectionDialog_WarningDuplicate;
+    
+    public static String TableSelectionWidget_SelectAll;
+    public static String TableSelectionWidget_ClearSelection;
+    public static String TableSelectionWidget_SwitchSelection;
 
     public static String Task_AddingLayer;
     public static String Task_Completed;
@@ -216,6 +230,8 @@ public class Messages extends NLS {
     public static String ToolboxView_Graph;
     public static String ToolboxView_Utilities;
     public static String ToolboxView_NoActiveMap;
+    public static String ToolboxView_Import;
+    public static String ToolboxView_Export;
 
     static {
         // initialize resource bundle

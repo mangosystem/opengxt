@@ -393,6 +393,7 @@ public class QueryBuilderDialog extends Dialog {
     private void updateUniqueValues(final boolean useSample) {
         valueTable.removeAll();
         Runnable runnable = new Runnable() {
+            @Override
             @SuppressWarnings({ "unchecked", "rawtypes" })
             public void run() {
                 String attribute = fieldTable.getSelection()[0].getText();

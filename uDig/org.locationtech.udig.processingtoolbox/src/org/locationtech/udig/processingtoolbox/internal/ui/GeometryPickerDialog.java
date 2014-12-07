@@ -211,6 +211,7 @@ public class GeometryPickerDialog extends Dialog {
             public void widgetSelected(SelectionEvent event) {
                 // add geometry to map layer
                 Runnable runnable = new Runnable() {
+                    @Override
                     @SuppressWarnings({})
                     public void run() {
                         String typeName = featureTable.getSelection()[0].getText();
@@ -243,6 +244,7 @@ public class GeometryPickerDialog extends Dialog {
     private void updateFeatures(final SimpleFeatureCollection source) {
         featureTable.removeAll();
         Runnable runnable = new Runnable() {
+            @Override
             @SuppressWarnings({ })
             public void run() {
                 SimpleFeatureIterator featureIter = null;

@@ -56,10 +56,12 @@ public final class MemoryDataStore2 extends MemoryDataStore {
 
             SimpleFeature current = null; // current Feature returned to user
 
+            @Override
             public SimpleFeatureType getFeatureType() {
                 return featureType;
             }
 
+            @Override
             public SimpleFeature next() throws IOException, NoSuchElementException {
                 if (hasNext()) {
                     // existing content
@@ -87,6 +89,7 @@ public final class MemoryDataStore2 extends MemoryDataStore {
                 return current;
             }
 
+            @Override
             public void remove() throws IOException {
                 if (contents == null) {
                     throw new IOException("FeatureWriter has been closed");
@@ -109,6 +112,7 @@ public final class MemoryDataStore2 extends MemoryDataStore {
                 }
             }
 
+            @Override
             public void write() throws IOException {
                 if (contents == null) {
                     throw new IOException("FeatureWriter has been closed");
@@ -148,6 +152,7 @@ public final class MemoryDataStore2 extends MemoryDataStore {
                 }
             }
 
+            @Override
             public boolean hasNext() throws IOException {
                 if (contents == null) {
                     throw new IOException("FeatureWriter has been closed");
@@ -156,6 +161,7 @@ public final class MemoryDataStore2 extends MemoryDataStore {
                 return (iterator != null) && iterator.hasNext();
             }
 
+            @Override
             public void close() {
                 if (iterator != null) {
                     iterator = null;

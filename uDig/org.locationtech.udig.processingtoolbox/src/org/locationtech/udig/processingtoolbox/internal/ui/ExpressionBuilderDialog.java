@@ -358,6 +358,7 @@ public class ExpressionBuilderDialog extends Dialog {
     
     private void updateFunctions() {
         Runnable runnable = new Runnable() {
+            @Override
             public void run() {
                 Set<FunctionFactory> functionFactories = CommonFactoryFinder.getFunctionFactories(null);
                 for (FunctionFactory factory : functionFactories) {
@@ -369,6 +370,7 @@ public class ExpressionBuilderDialog extends Dialog {
                     List<FunctionName> functionNames = factory.getFunctionNames();
                     ArrayList<FunctionName> sorted = new ArrayList<FunctionName>(functionNames);
                     Collections.sort(sorted, new Comparator<FunctionName>() {
+                        @Override
                         public int compare(FunctionName o1, FunctionName o2) {
                             if (o1 == null && o2 == null)
                                 return 0;

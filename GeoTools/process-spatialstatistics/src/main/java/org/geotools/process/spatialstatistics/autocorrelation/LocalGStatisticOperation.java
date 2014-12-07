@@ -19,10 +19,8 @@ package org.geotools.process.spatialstatistics.autocorrelation;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.SSUtils;

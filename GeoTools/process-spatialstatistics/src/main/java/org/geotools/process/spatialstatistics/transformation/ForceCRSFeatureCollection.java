@@ -64,6 +64,7 @@ public class ForceCRSFeatureCollection extends GXTSimpleFeatureCollection {
         return schema;
     }
 
+    @Override
     public ReferencedEnvelope getBounds() {
         return new ReferencedEnvelope(delegate.getBounds(), schema.getCoordinateReferenceSystem());
     }
@@ -82,14 +83,17 @@ public class ForceCRSFeatureCollection extends GXTSimpleFeatureCollection {
             this.builder = new SimpleFeatureBuilder(schema);
         }
 
+        @Override
         public void close() {
             delegate.close();
         }
 
+        @Override
         public boolean hasNext() {
             return delegate.hasNext();
         }
 
+        @Override
         public SimpleFeature next() throws NoSuchElementException {
             SimpleFeature feature = delegate.next();
             for (Object attribute : feature.getAttributes()) {

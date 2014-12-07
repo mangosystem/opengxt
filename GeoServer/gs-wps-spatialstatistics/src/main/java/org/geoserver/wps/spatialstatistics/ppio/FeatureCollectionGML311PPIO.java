@@ -140,7 +140,7 @@ public class FeatureCollectionGML311PPIO extends XMLPPIO {
 
         if (names.size() < original.getDescriptors().size()) {
             // System.out.println("RetypingFeatureCollection !");
-            String[] namesArray = (String[]) names.toArray(new String[names.size()]);
+            String[] namesArray = names.toArray(new String[names.size()]);
             SimpleFeatureType target = SimpleFeatureTypeBuilder.retype(original, namesArray);
             return new RetypingFeatureCollection(fc, target);
         }

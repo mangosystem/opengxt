@@ -200,6 +200,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
     public IAction getEnvironmentAction() {
         if (actionEnv == null) {
             actionEnv = new Action() {
+                @Override
                 public void run() {
                     SettingsDialog dialog = new SettingsDialog(Display.getCurrent()
                             .getActiveShell());

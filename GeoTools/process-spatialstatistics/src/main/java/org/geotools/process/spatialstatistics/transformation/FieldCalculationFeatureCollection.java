@@ -128,14 +128,17 @@ public class FieldCalculationFeatureCollection extends GXTSimpleFeatureCollectio
             this.builder = new SimpleFeatureBuilder(schema);
         }
 
+        @Override
         public void close() {
             delegate.close();
         }
 
+        @Override
         public boolean hasNext() {
             return delegate.hasNext();
         }
 
+        @Override
         public SimpleFeature next() throws NoSuchElementException {
             SimpleFeature sourceFeature = delegate.next();
             SimpleFeature nextFeature = builder.buildFeature(sourceFeature.getID());

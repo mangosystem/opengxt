@@ -273,6 +273,7 @@ public class WidgetBuilder {
         editor.grabHorizontal = true;
 
         table.addListener(SWT.MouseDown, new Listener() {
+            @Override
             public void handleEvent(Event event) {
                 Rectangle clientArea = table.getClientArea();
                 Point pt = new Point(event.x, event.y);
@@ -286,6 +287,7 @@ public class WidgetBuilder {
                             final int column = i;
                             final Text text = new Text(table, SWT.NONE);
                             Listener textListener = new Listener() {
+                                @Override
                                 public void handleEvent(final Event e) {
                                     switch (e.type) {
                                     case SWT.FocusOut:
@@ -341,6 +343,7 @@ public class WidgetBuilder {
         editor.grabHorizontal = true;
 
         table.addListener(SWT.MouseDown, new Listener() {
+            @Override
             public void handleEvent(Event event) {
                 Rectangle clientArea = table.getClientArea();
                 Point pt = new Point(event.x, event.y);
@@ -354,6 +357,7 @@ public class WidgetBuilder {
                             final int column = i;
                             final Text text = new Text(table, SWT.NONE);
                             Listener textListener = new Listener() {
+                                @Override
                                 public void handleEvent(final Event e) {
                                     switch (e.type) {
                                     case SWT.FocusOut:
@@ -428,6 +432,7 @@ public class WidgetBuilder {
         editor.grabHorizontal = true;
 
         table.addListener(SWT.MouseDown, new Listener() {
+            @Override
             public void handleEvent(Event event) {
                 Rectangle clientArea = table.getClientArea();
                 Point pt = new Point(event.x, event.y);

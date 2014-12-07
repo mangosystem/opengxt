@@ -238,7 +238,7 @@ public class StatisticsVisitor {
             if (Float.isNaN(curVal) || Float.isInfinite(curVal)) {
                 invalidCount++;
                 return;
-            } else if (noData != null && SSUtils.compareFloat(curVal, (float) noData)) {
+            } else if (noData != null && SSUtils.compareFloat(curVal, noData)) {
                 invalidCount++;
                 return;
             }

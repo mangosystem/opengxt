@@ -176,6 +176,7 @@ public class ImageCombo extends Composite {
         this.arrow = new Button(this, arrowStyle);
 
         this.listener = new Listener() {
+            @Override
             public void handleEvent(Event event) {
                 if ( ImageCombo.this.popup == event.widget ) {
                     popupEvent(event);
@@ -203,6 +204,7 @@ public class ImageCombo extends Composite {
             }
         };
         this.filter = new Listener() {
+            @Override
             public void handleEvent(Event event) {
                 Shell shell = ((Control) event.widget).getShell();
                 if ( shell == ImageCombo.this.getShell() ) {
@@ -356,6 +358,7 @@ public class ImageCombo extends Composite {
         return style & mask;
     }
 
+    @Override
     public Point computeSize(int wHint, int hHint, boolean changed) {
         checkWidget();
         int width = 0, height = 0;
@@ -499,6 +502,7 @@ public class ImageCombo extends Composite {
      * 
      * @since 2.1.2
      */
+    @Override
     public int getOrientation() {
         checkWidget();
         return this.style & (SWT.LEFT_TO_RIGHT | SWT.RIGHT_TO_LEFT);
@@ -790,6 +794,7 @@ public class ImageCombo extends Composite {
         }
     }
 
+    @Override
     public void setFont(Font font) {
         checkWidget();
         super.setFont(font);
@@ -843,6 +848,7 @@ public class ImageCombo extends Composite {
         this.table.showSelection();
     }
 
+    @Override
     public void setToolTipText(String string) {
         checkWidget();
         super.setToolTipText(string);
@@ -1256,6 +1262,7 @@ public class ImageCombo extends Composite {
 
     void initAccessible() {
         AccessibleAdapter accessibleAdapter = new AccessibleAdapter() {
+            @Override
             public void getName(AccessibleEvent e) {
                 String name = null;
                 Label label = getAssociatedLabel();
@@ -1265,6 +1272,7 @@ public class ImageCombo extends Composite {
                 e.result = name;
             }
 
+            @Override
             public void getKeyboardShortcut(AccessibleEvent e) {
                 String shortcut = null;
                 Label label = getAssociatedLabel();
@@ -1280,6 +1288,7 @@ public class ImageCombo extends Composite {
                 e.result = shortcut;
             }
 
+            @Override
             public void getHelp(AccessibleEvent e) {
                 e.result = getToolTipText();
             }
@@ -1289,26 +1298,31 @@ public class ImageCombo extends Composite {
         this.table.getAccessible().addAccessibleListener(accessibleAdapter);
 
         this.arrow.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+            @Override
             public void getName(AccessibleEvent e) {
                 e.result = isDropped() ? SWT.getMessage("SWT_Close") : SWT.getMessage("SWT_Open"); //$NON-NLS-1$ //$NON-NLS-2$
             }
 
+            @Override
             public void getKeyboardShortcut(AccessibleEvent e) {
                 e.result = "Alt+Down Arrow"; //$NON-NLS-1$
             }
 
+            @Override
             public void getHelp(AccessibleEvent e) {
                 e.result = getToolTipText();
             }
         });
 
         getAccessible().addAccessibleTextListener(new AccessibleTextAdapter() {
+            @Override
             public void getCaretOffset(AccessibleTextEvent e) {
                 e.offset = ImageCombo.this.text.getCaretPosition();
             }
         });
 
         getAccessible().addAccessibleControlListener(new AccessibleControlAdapter() {
+            @Override
             public void getChildAtPoint(AccessibleControlEvent e) {
                 Point testPoint = toControl(e.x, e.y);
                 if ( getBounds().contains(testPoint) ) {
@@ -1316,6 +1330,7 @@ public class ImageCombo extends Composite {
                 }
             }
 
+            @Override
             public void getLocation(AccessibleControlEvent e) {
                 Rectangle location = getBounds();
                 Point pt = toDisplay(location.x, location.y);
@@ -1325,30 +1340,36 @@ public class ImageCombo extends Composite {
                 e.height = location.height;
             }
 
+            @Override
             public void getChildCount(AccessibleControlEvent e) {
                 e.detail = 0;
             }
 
+            @Override
             public void getRole(AccessibleControlEvent e) {
                 e.detail = ACC.ROLE_COMBOBOX;
             }
 
+            @Override
             public void getState(AccessibleControlEvent e) {
                 e.detail = ACC.STATE_NORMAL;
             }
 
+            @Override
             public void getValue(AccessibleControlEvent e) {
                 e.result = getText();
             }
         });
 
         this.text.getAccessible().addAccessibleControlListener(new AccessibleControlAdapter() {
+            @Override
             public void getRole(AccessibleControlEvent e) {
                 e.detail = ACC.ROLE_LABEL;
             }
         });
 
         this.arrow.getAccessible().addAccessibleControlListener(new AccessibleControlAdapter() {
+            @Override
             public void getDefaultAction(AccessibleControlEvent e) {
                 e.result = isDropped() ? SWT.getMessage("SWT_Close") : SWT.getMessage("SWT_Open"); //$NON-NLS-1$ //$NON-NLS-2$
             }

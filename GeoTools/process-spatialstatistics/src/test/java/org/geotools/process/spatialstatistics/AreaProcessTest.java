@@ -15,12 +15,14 @@ import org.junit.Test;
 public class AreaProcessTest extends SpatialStatisticsTestCase {
     DataStore dataStore;
 
+    @Override
     @Before
     protected void setUp() throws Exception {
         super.setUp();
         dataStore = new PropertyDataStore(TestData.file(this, null));
     }
 
+    @Override
     @After
     protected void tearDown() throws Exception {
         super.tearDown();

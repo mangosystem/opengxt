@@ -138,6 +138,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * @param i The index of the field, from 0 to <CODE>getNumFields() - 1</CODE> .
      * @return A Class which closely represents the dbase field type.
      */
+    @Override
     @SuppressWarnings("rawtypes")
     public Class getFieldClass(int i) {
         Class typeClass = null;
@@ -207,6 +208,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * @param inDecimalCount For numeric fields, the number of decimal places to track.
      * @throws DbaseFileException If the type is not recognized.
      */
+    @Override
     public void addColumn(String inFieldName, char inFieldType, int inFieldLength,
             int inDecimalCount) throws DbaseFileException {
         if (inFieldLength <= 0) {
@@ -353,6 +355,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * @param inFieldName The name of the field, will ignore case and trim.
      * @return index of the removed column, -1 if no found
      */
+    @Override
     public int removeColumn(String inFieldName) {
 
         int retCol = -1;
@@ -392,6 +395,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * @param inIndex The field index.
      * @return The length in bytes.
      */
+    @Override
     public int getFieldLength(int inIndex) {
         return fields[inIndex].fieldLength;
     }
@@ -403,6 +407,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * @param inIndex The field index.
      * @return The decimal count.
      */
+    @Override
     public int getFieldDecimalCount(int inIndex) {
         return fields[inIndex].decimalCount;
     }
@@ -414,6 +419,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * @param inIndex The field index.
      * @return The name of the field.
      */
+    @Override
     public String getFieldName(int inIndex) {
         return fields[inIndex].fieldName;
     }
@@ -425,6 +431,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * @param inIndex The field index.
      * @return The dbase character representing this field.
      */
+    @Override
     public char getFieldType(int inIndex) {
         return fields[inIndex].fieldType;
     }
@@ -434,6 +441,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * 
      * @return The Date last modified.
      */
+    @Override
     public Date getLastUpdateDate() {
         return date;
     }
@@ -443,6 +451,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * 
      * @return The number of fields in this table.
      */
+    @Override
     public int getNumFields() {
         return fields.length;
     }
@@ -452,6 +461,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * 
      * @return The number of records in this table.
      */
+    @Override
     public int getNumRecords() {
         return recordCnt;
     }
@@ -461,6 +471,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * 
      * @return The number of bytes per record.
      */
+    @Override
     public int getRecordLength() {
         return recordLength;
     }
@@ -470,6 +481,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * 
      * @return The length of the header in bytes.
      */
+    @Override
     public int getHeaderLength() {
         return headerLength;
     }
@@ -481,6 +493,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      *        call java.nio.Channels.getChannel(InputStream in).
      * @throws IOException If errors occur while reading.
      */
+    @Override
     public void readHeader(ReadableByteChannel channel) throws IOException {
         readHeader(channel, Charset.defaultCharset());
     }
@@ -492,6 +505,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      *        call java.nio.Channels.getChannel(InputStream in).
      * @throws IOException If errors occur while reading.
      */
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void readHeader(ReadableByteChannel channel, Charset charset) throws IOException {
         // we'll read in chunks of 1K
@@ -579,7 +593,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
                 field.fieldDataAddress = in.getInt();
 
                 // read the field length in bytes
-                int length = (int) in.get();
+                int length = in.get();
                 if (length < 0) {
                     length = length + 256;
                 }
@@ -590,7 +604,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
                 }
 
                 // read the field decimal count in bytes
-                field.decimalCount = (int) in.get();
+                field.decimalCount = in.get();
 
                 // reserved bytes.
                 // in.skipBytes(14);
@@ -622,6 +636,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      *        call java.nio.Channels.getChannel(InputStream in).
      * @throws IOException If errors occur while reading.
      */
+    @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void readHeader(ByteBuffer in) throws IOException {
         // do this or GO CRAZY
@@ -696,7 +711,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
             field.fieldDataAddress = in.getInt();
 
             // read the field length in bytes
-            int length = (int) in.get();
+            int length = in.get();
             if (length < 0) {
                 length = length + 256;
             }
@@ -707,7 +722,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
             }
 
             // read the field decimal count in bytes
-            field.decimalCount = (int) in.get();
+            field.decimalCount = in.get();
 
             // reserved bytes.
             // in.skipBytes(14);
@@ -734,6 +749,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * 
      * @return The largest field size in bytes.
      */
+    @Override
     public int getLargestFieldSize() {
         return largestFieldSize;
     }
@@ -743,6 +759,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * 
      * @param inNumRecords The number of records.
      */
+    @Override
     public void setNumRecords(int inNumRecords) {
         recordCnt = inNumRecords;
     }
@@ -754,6 +771,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      *        channel by using java.nio.Channels.newChannel(OutputStream out).
      * @throws IOException If errors occur.
      */
+    @Override
     public void writeHeader(WritableByteChannel out) throws IOException {
         // take care of the annoying case where no records have been added...
         if (headerLength == -1) {
@@ -764,7 +782,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
             buffer.order(ByteOrder.LITTLE_ENDIAN);
 
             // write the output file type.
-            buffer.put((byte) MAGIC);
+            buffer.put(MAGIC);
 
             // write the date stuff
             Calendar c = Calendar.getInstance();
@@ -836,6 +854,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      * 
      * @return A String representing the state of the header.
      */
+    @Override
     public String toString() {
         StringBuffer fs = new StringBuffer();
         for (int i = 0, ii = fields.length; i < ii; i++) {

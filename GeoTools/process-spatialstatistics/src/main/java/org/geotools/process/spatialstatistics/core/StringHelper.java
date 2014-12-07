@@ -167,7 +167,7 @@ public class StringHelper {
         int retLength = 0;
         int tempSize = 0;
         for (int index = 1; index <= value.length(); index++) {
-            int asc = (int) value.charAt(index - 1);
+            int asc = value.charAt(index - 1);
             if (asc > 127) {
                 if (byte_len >= tempSize + 2) {
                     tempSize += 2;

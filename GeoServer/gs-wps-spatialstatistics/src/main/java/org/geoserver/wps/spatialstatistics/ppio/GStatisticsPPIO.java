@@ -33,10 +33,12 @@ public class GStatisticsPPIO extends XStreamPPIO {
     @Override
     protected XStream buildXStream() {
         XStream xstream = new XStream(new DomDriver("UTF-8", nameCoder)) {
+            @Override
             protected boolean useXStream11XmlFriendlyMapper() {
                 return true;
             }
 
+            @Override
             protected MapperWrapper wrapMapper(MapperWrapper next) {
                 return new UppercaseTagMapper(next);
             };

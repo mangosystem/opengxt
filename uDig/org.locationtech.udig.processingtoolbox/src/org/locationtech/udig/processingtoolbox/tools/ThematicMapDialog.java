@@ -212,12 +212,14 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
         });
 
         sldTransparency.addListener(SWT.Selection, new Listener() {
+            @Override
             public void handleEvent(Event event) {
                 spnTransparency.setSelection(sldTransparency.getSelection());
             }
         });
 
         spnTransparency.addListener(SWT.Selection, new Listener() {
+            @Override
             public void handleEvent(Event event) {
                 sldTransparency.setSelection(spnTransparency.getSelection());
             }
@@ -263,6 +265,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
         // Style origStyle = (Style) inputLayer.getStyleBlackboard().get(SLDContent.ID);
 
         Runnable runnable = new Runnable() {
+            @Override
             @SuppressWarnings({})
             public void run() {
 

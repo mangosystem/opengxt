@@ -129,8 +129,18 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
 
         // transparency
         uiBuilder.createLabel(container, Messages.ThematicMapDialog_Transparency, EMPTY, image, 1);
-        sldTransparency = uiBuilder.createSlider(container, 10, 0, 100, 0, 1, 10, 4);
-        spnTransparency = uiBuilder.createSpinner(container, 10, 0, 100, 0, 1, 10, 1);
+
+        Composite subCon = new Composite(container, SWT.NONE);
+        subCon.setLayout(uiBuilder.createGridLayout(5, false, 0, 5));
+        subCon.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5, 1));
+
+        sldTransparency = uiBuilder.createSlider(subCon, 10, 0, 100, 0, 1, 10, 4);
+
+        spnTransparency = new Spinner(subCon, SWT.RIGHT_TO_LEFT | SWT.BORDER);
+        GridData gridData = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+        gridData.widthHint = 20;
+        spnTransparency.setLayoutData(gridData);
+        spnTransparency.setValues(10, 0, 100, 0, 1, 10);
 
         // outline
         uiBuilder.createLabel(container, Messages.ThematicMapDialog_OutlineColor, EMPTY, image, 1);
@@ -189,7 +199,8 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
                 if (cboField.getSelectionIndex() == -1) {
                     return;
                 }
-                boolean numeric = FeatureTypes.isNumeric(activeLayer.getSchema(), cboField.getText());
+                boolean numeric = FeatureTypes.isNumeric(activeLayer.getSchema(),
+                        cboField.getText());
                 cboNormal.setEnabled(numeric);
                 if (numeric) {
                     cboMethod.setItems(NUMERIC_METHOD);
@@ -239,7 +250,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
             Image image = Glyph.palette(palette.getColors()).createImage();
             cboColorRamp.add(image, name);
         }
-        cboColorRamp.select(0);
+        cboColorRamp.select(cboColorRamp.getItemCount() > 5 ? 5 : 0);
     }
 
     @Override
@@ -278,7 +289,8 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
                 Style style = ssBuilder.getDefaultFeatureStyle();
 
                 // crate thematic style
-                SimpleShapeType shapeType = FeatureTypes.getSimpleShapeType(activeLayer.getSchema());
+                SimpleShapeType shapeType = FeatureTypes
+                        .getSimpleShapeType(activeLayer.getSchema());
                 if (shapeType == SimpleShapeType.POINT) {
                     GraduatedSymbolStyleBuilder builder = new GraduatedSymbolStyleBuilder();
                     builder.setFillOpacity(opacity);

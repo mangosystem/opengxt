@@ -59,6 +59,15 @@ public class WidgetBuilder {
         return new WidgetBuilder();
     }
 
+    public GridLayout createGridLayout(int numColumns, boolean makeColumnsEqualWidth,
+            int marginWidth, int marginHeight) {
+        GridLayout layout = new GridLayout(numColumns, makeColumnsEqualWidth);
+        layout.marginWidth = 0;
+        layout.marginHeight = 0;
+
+        return layout;
+    }
+
     public Label createLabel(Composite parent, String text, String tooltip, int colspan) {
         Label label = new Label(parent, SWT.NONE);
         label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, colspan, 1));

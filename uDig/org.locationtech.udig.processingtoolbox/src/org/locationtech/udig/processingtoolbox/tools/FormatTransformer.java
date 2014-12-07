@@ -36,9 +36,9 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.store.ReprojectingFeatureCollection;
 import org.geotools.geojson.feature.FeatureJSON;
 import org.geotools.referencing.CRS;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.util.logging.Logging;
 import org.geotools.xml.Configuration;
+import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
@@ -132,21 +132,17 @@ public class FormatTransformer {
     }
 
     public void encodeKML(SimpleFeatureCollection features, File outputFile) throws IOException {
-        // confirm WGS84 = EPSG:4326
         SimpleFeatureCollection wgs84 = features;
-
-        SimpleFeatureType schema = features.getSchema();
-        CoordinateReferenceSystem sourceCRS = schema.getCoordinateReferenceSystem();
+        CoordinateReferenceSystem sourceCRS = wgs84.getSchema().getCoordinateReferenceSystem();
         try {
-            Integer code = CRS.lookupEpsgCode(sourceCRS, true);
-            if (code != null && code.intValue() != 4326) {
-                CoordinateReferenceSystem targetCRS = DefaultGeographicCRS.WGS84;
+            CoordinateReferenceSystem targetCRS = CRS.decode("EPSG:4326");
+            if (!CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
                 wgs84 = new ReprojectingFeatureCollection(features, targetCRS);
             }
-        } catch (NoSuchAuthorityCodeException e1) {
-            LOGGER.log(Level.FINER, e1.getMessage(), e1);
-        } catch (FactoryException e1) {
-            LOGGER.log(Level.FINER, e1.getMessage(), e1);
+        } catch (NoSuchAuthorityCodeException e) {
+            ToolboxPlugin.log(e.getMessage());
+        } catch (FactoryException e) {
+            ToolboxPlugin.log(e.getMessage());
         }
 
         QName qName = org.geotools.kml.KML.kml;
@@ -166,15 +162,18 @@ public class FormatTransformer {
         switch (encodeType) {
         case GML212:
             qName = org.geotools.gml2.GML._FeatureCollection;
-            config = new org.geotools.wfs.v1_0.WFSConfiguration();
+            config = new org.geotools.gml2.GMLConfiguration();
+            // config = new org.geotools.wfs.v1_0.WFSConfiguration();
             break;
         case GML311:
             qName = org.geotools.gml3.GML.FeatureCollection;
-            config = new org.geotools.wfs.v1_1.WFSConfiguration();
+            config = new org.geotools.gml3.GMLConfiguration();
+            // config = new org.geotools.wfs.v1_1.WFSConfiguration();
             break;
         case GML32:
             qName = org.geotools.gml3.v3_2.GML.FeatureCollection;
-            config = new org.geotools.wfs.v2_0.WFSConfiguration();
+            config = new org.geotools.gml3.v3_2.GMLConfiguration();
+            // config = new org.geotools.wfs.v2_0.WFSConfiguration();
             break;
         default:
             qName = org.geotools.gml3.GML.FeatureCollection;
@@ -187,11 +186,11 @@ public class FormatTransformer {
 
     public void encodeCSV(SimpleFeatureCollection features, File outputFile, Charset charset,
             String splitter) throws IOException {
-        FileOutputStream fos = null;
+        BufferedWriter writer = null;
         try {
             String newLine = System.getProperty("line.separator"); //$NON-NLS-1$
-            fos = new FileOutputStream(outputFile);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos, charset));
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            writer = new BufferedWriter(new OutputStreamWriter(fos, charset));
 
             // write fields
             SimpleFeatureType schema = features.getSchema();
@@ -234,11 +233,12 @@ public class FormatTransformer {
             } finally {
                 featureIter.close();
             }
+            writer.flush();
             writer.close();
         } catch (FileNotFoundException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         } finally {
-            closeQuietly(fos);
+            closeQuietly(writer);
         }
     }
 

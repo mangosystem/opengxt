@@ -252,6 +252,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                 "org.geotools.process.spatialstatistics.StatisticsFeaturesProcessFactory");
         buildTool(desTools,
                 "org.geotools.process.spatialstatistics.PearsonCorrelationProcessFactory");
+        buildTool(desTools, Messages.HistogramDialog_title, "HistogramDialog");
+        buildTool(desTools, Messages.ScatterPlotDialog_title, "ScatterPlotDialog");
 
         // Point Pattern Analysis
         TreeParent patternTools = new TreeParent(Messages.ToolboxView_PointPattern, null, null);
@@ -270,6 +272,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent clusterTools = new TreeParent(Messages.ToolboxView_Cluster, null, null);
         ssTools.addChild(clusterTools);
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalMoransIProcessFactory");
+        buildTool(clusterTools, Messages.MoranScatterPlotDialog_title, "MoranScatterPlotDialog");
         buildTool(clusterTools,
                 "org.geotools.process.spatialstatistics.LocalGStatisticsProcessFactory");
 

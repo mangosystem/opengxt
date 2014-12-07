@@ -65,7 +65,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
 
     @SuppressWarnings("nls")
     static final String[] NUMERIC_METHOD = new String[] { "Equal Interval", "Natural Breaks",
-            "Quantile" };
+            "Quantile", "Standard Deviation" };
 
     @SuppressWarnings("nls")
     static final String[] CATEGORY_METHOD = new String[] { "Unique Values", "LISA Style" };

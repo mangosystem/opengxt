@@ -161,18 +161,18 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                             Dialog dialog = null;
                             if (node.getFactory() == null) {
                                 String nodeName = node.getProcessName().getLocalPart();
-                                if (nodeName.equalsIgnoreCase("TextfileToPointDialog")) {
-                                    dialog = new TextfileToPointDialog(shell, map);
+                                if (nodeName.equalsIgnoreCase("FormatConversionDialog")) {
+                                    dialog = new FormatConversionDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("HistogramDialog")) {
+                                    dialog = new HistogramDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("MoranScatterPlotDialog")) {
                                     dialog = new MoranScatterPlotDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("ScatterPlotDialog")) {
                                     dialog = new ScatterPlotDialog(shell, map);
-                                } else if (nodeName.equalsIgnoreCase("HistogramDialog")) {
-                                    dialog = new HistogramDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("TextfileToPointDialog")) {
+                                    dialog = new TextfileToPointDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("ThematicMapDialog")) {
                                     dialog = new ThematicMapDialog(shell, map);
-                                } else if (nodeName.equalsIgnoreCase("FormatConversionDialog")) {
-                                    dialog = new FormatConversionDialog(shell, map);
                                 }
                             } else {
                                 dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
@@ -334,12 +334,12 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         root.addChild(generalTool);
 
         buildTool(generalTool, Messages.ThematicMapDialog_title, "ThematicMapDialog");
-        
-        // import 
+
+        // import
         TreeParent importTool = new TreeParent(Messages.ToolboxView_Import, null, null);
         generalTool.addChild(importTool);
         buildTool(importTool, Messages.TextfileToPointDialog_title, "TextfileToPointDialog");
-        
+
         // export
         TreeParent exportTool = new TreeParent(Messages.ToolboxView_Export, null, null);
         generalTool.addChild(exportTool);
@@ -349,7 +349,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent createTool = new TreeParent(Messages.ToolboxView_DataCreation, null, null);
         generalTool.addChild(createTool);
         buildTool(createTool, "org.geotools.process.spatialstatistics.RandomPointsProcessFactory");
-        buildTool(createTool, "org.geotools.process.spatialstatistics.RandomPointsPerFeaturesProcessFactory");
+        buildTool(createTool,
+                "org.geotools.process.spatialstatistics.RandomPointsPerFeaturesProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.FishnetProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.HexagonProcessFactory");
 

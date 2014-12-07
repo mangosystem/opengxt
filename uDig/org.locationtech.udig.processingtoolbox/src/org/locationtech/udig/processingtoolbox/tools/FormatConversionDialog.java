@@ -94,7 +94,7 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
         cboOption.setItems(new String[] { "Geography Markup Language (GML2.1.2)",
                 "Geography Markup Language (GML3.1.1)", "Geography Markup Language (GML3.2)",
                 "GeoJSON", "Keyhole Markup Language (KML 2.1)",
-                "Keyhole Markup Language (KML 2.2)", "CSV", "ESRI Shapefiles" });
+                "Keyhole Markup Language (KML 2.2)", "Comma separated CSV files", "ESRI Shapefiles" });
         cboOption.select(1);
 
         locationView = new OutputDataWidget(FileDataType.FOLDER, SWT.OPEN);

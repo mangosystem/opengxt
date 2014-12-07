@@ -236,7 +236,7 @@ public class FormatTransformer {
             writer.flush();
             writer.close();
         } catch (FileNotFoundException e) {
-            LOGGER.log(Level.FINER, e.getMessage(), e);
+            ToolboxPlugin.log(e.getMessage());
         } finally {
             closeQuietly(writer);
         }
@@ -252,7 +252,7 @@ public class FormatTransformer {
             encoder.setIndentSize(2);
             encoder.encode(features, qName, fos);
         } catch (FileNotFoundException e) {
-            LOGGER.log(Level.FINER, e.getMessage(), e);
+            ToolboxPlugin.log(e.getMessage());
         } finally {
             closeQuietly(fos);
         }
@@ -266,7 +266,7 @@ public class FormatTransformer {
             featureJson.setEncodeFeatureCollectionCRS(true);
             featureJson.writeFeatureCollection(features, fos);
         } catch (FileNotFoundException e) {
-            LOGGER.log(Level.FINER, e.getMessage(), e);
+            ToolboxPlugin.log(e.getMessage());
         } finally {
             closeQuietly(fos);
         }

@@ -10,11 +10,21 @@
    </description>
 
    <copyright url="http://www.mangosystem.com:8080/gxt/udig/copyright">
-      Spatial Statistics Toolbox for uDig
+      Copyright Mango System, 2014-2014
    </copyright>
 
    <license url="http://www.mangosystem.com:8080/gxt/udig/license">
-      This Spatial Statistics Toolbox plug-in is free for anyone who use uDig GIS
+      This Spatial Statistics Toolbox plug-in is free for anyone who use uDig GIS.
+
+Copyright Mango System, 2014-2014 This 
+software is available using Eclipse Public License and
+the Refractions BSD License.
+
+Visit http://www.mangosystem.com
+      
+This product includes software developed by the
+EclipseFoundation, Open Source Geospatial Foundation
+and the Apache Software Foundation.
    </license>
 
    <url>

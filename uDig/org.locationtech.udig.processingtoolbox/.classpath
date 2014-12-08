@@ -4,15 +4,15 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.locationtech.udig.core"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.locationtech.udig.libs"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.locationtech.udig.project"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.locationtech.udig.project.ui"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.locationtech.udig.ui"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.locationtech.udig.catalog"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.locationtech.udig.catalog.shp"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.locationtech.udig.catalog.ui"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.locationtech.udig.style"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.locationtech.udig.style.sld"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.locationtech.udig.core"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.locationtech.udig.libs"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.locationtech.udig.project"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.locationtech.udig.project.ui"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.locationtech.udig.ui"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.locationtech.udig.catalog"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.locationtech.udig.catalog.shp"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.locationtech.udig.catalog.ui"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.locationtech.udig.style"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.locationtech.udig.style.sld"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

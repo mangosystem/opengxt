@@ -22,5 +22,6 @@ org.geotools.process.spatialstatistics.CalculateFieldProcessFactory
 org.geotools.process.spatialstatistics.SpatialJoinProcessFactory
 org.geotools.process.spatialstatistics.PointStatisticsProcessFactory
 org.geotools.process.spatialstatistics.BufferStatisticsProcessFactory
+org.geotools.process.spatialstatistics.SumLineLengthProcessFactory
 org.geotools.process.spatialstatistics.HexagonProcessFactory
 org.geotools.process.spatialstatistics.FishnetProcessFactory

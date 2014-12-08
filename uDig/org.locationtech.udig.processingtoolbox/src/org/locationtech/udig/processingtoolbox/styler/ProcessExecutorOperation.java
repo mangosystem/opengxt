@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.Parameter;
 import org.geotools.data.collection.ListFeatureCollection;
@@ -76,7 +77,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
     protected static final Logger LOGGER = Logging.getLogger(ProcessExecutorOperation.class);
 
     final String lineSeparator = System.getProperty("line.separator"); //$NON-NLS-1$
-    
+
     private IMap map;
 
     private org.geotools.process.ProcessFactory factory;
@@ -182,9 +183,10 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
         String typeName = FilenameUtils.removeExtension(FilenameUtils.getName(filePath.getPath()));
         SimpleFeatureSource featureSource = null;
         try {
+            DataStore dataStore = DataStoreFactory.getShapefileDataStore(filePath.getParent(),
+                    false);
             ShapeExportOperation exportOp = ShapeExportOperation.getDefault();
-            exportOp.setOutputDataStore(DataStoreFactory.getShapefileDataStore(
-                    filePath.getParent(), false));
+            exportOp.setOutputDataStore(dataStore);
             exportOp.setOutputTypeName(typeName);
             featureSource = exportOp.execute(source);
         } catch (IOException e) {
@@ -195,7 +197,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
             return;
         }
 
-        monitor.setTaskName(Messages.Task_AddingLayer); 
+        monitor.setTaskName(Messages.Task_AddingLayer);
         ToolboxPlugin.log(Messages.Task_AddingLayer);
 
         SimpleFeatureType schema = source.getSchema();

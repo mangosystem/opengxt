@@ -17,22 +17,14 @@ Require-Bundle: org.locationtech.udig.ui,
  org.eclipse.ui.forms
 Bundle-ActivationPolicy: lazy
 Export-Package: org.locationtech.udig.processingtoolbox;
-  uses:="org.geotools.data.simple,
-   org.geotools.styling,
-   org.eclipse.jface.resource,
+  uses:="org.eclipse.jface.resource,
    org.geotools.process,
-   org.geotools.coverage.grid,
    org.eclipse.ui.plugin,
    org.eclipse.ui.part,
-   org.locationtech.udig.project,
-   org.opengis.feature.simple,
    org.eclipse.jface.action,
-   com.thoughtworks.xstream.io.xml,
    org.eclipse.jface.viewers,
    org.eclipse.swt.graphics,
-   com.vividsolutions.jts.geom,
    org.osgi.framework,
-   org.opengis.referencing.crs,
    org.eclipse.swt.widgets,
    org.opengis.feature.type"
 Bundle-ClassPath: .,

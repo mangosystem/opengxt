@@ -99,7 +99,7 @@ public class ShapefileFeatureInserter implements IFeatureInserter {
 
     private FileChannel dbfChannel;
 
-    private Charset dbfCharset = Charset.defaultCharset();
+    private Charset dbfCharset = Charset.forName(DataStoreFactory.DEFAULT_CHARSET);
 
     private TimeZone dbfTimeZone = TimeZone.getDefault();;
 

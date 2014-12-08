@@ -38,7 +38,7 @@ import org.geotools.util.logging.Logging;
 /**
  * DataStore Factory
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -46,7 +46,8 @@ import org.geotools.util.logging.Logging;
 public class DataStoreFactory {
     protected static final Logger LOGGER = Logging.getLogger(DataStoreFactory.class);
 
-    public static final String CharacterSet = Charset.defaultCharset().name();
+    // if debug mode, Charset = UTF-8
+    public static String DEFAULT_CHARSET = Charset.defaultCharset().name();
 
     public static DataStoreFactory newInstance() {
         return new DataStoreFactory();
@@ -83,7 +84,7 @@ public class DataStoreFactory {
         final File file = new File(folder);
         params.put(ShapefileDataStoreFactory.URLP.key, DataUtilities.fileToURL(file));
         params.put(ShapefileDataStoreFactory.CREATE_SPATIAL_INDEX.key, createSpatialIndex);
-        params.put(ShapefileDataStoreFactory.DBFCHARSET.key, CharacterSet);
+        params.put(ShapefileDataStoreFactory.DBFCHARSET.key, DEFAULT_CHARSET);
         params.put(ShapefileDataStoreFactory.MEMORY_MAPPED.key, Boolean.TRUE);
 
         return getDataStore(Collections.unmodifiableMap(params));
@@ -95,7 +96,7 @@ public class DataStoreFactory {
         final File file = new File(dxfFile);
         params.put("url", DataUtilities.fileToURL(file));
         params.put("srs", epsgCode);
-        params.put("charset", Charset.forName(CharacterSet));
+        params.put("charset", Charset.forName(DEFAULT_CHARSET));
 
         return getDataStore(Collections.unmodifiableMap(params));
     }

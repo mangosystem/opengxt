@@ -25,6 +25,7 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.internal.util.BundleUtility;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.geotools.process.spatialstatistics.storage.DataStoreFactory;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.internal.ui.UiPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
@@ -35,7 +36,7 @@ import org.osgi.framework.BundleContext;
 /**
  * The activator class controls the plug-in life cycle
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -64,6 +65,9 @@ public class ToolboxPlugin extends AbstractUIPlugin {
     public void start(BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
+
+        // setup default charset for shapefile
+        DataStoreFactory.DEFAULT_CHARSET = defaultCharset();
     }
 
     /*
@@ -141,7 +145,8 @@ public class ToolboxPlugin extends AbstractUIPlugin {
     }
 
     public static String defaultCharset() {
-        return UiPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.P_DEFAULT_CHARSET);
+        return UiPlugin.getDefault().getPreferenceStore()
+                .getString(PreferenceConstants.P_DEFAULT_CHARSET);
     }
 
     public static void log(Object message) {
@@ -149,4 +154,5 @@ public class ToolboxPlugin extends AbstractUIPlugin {
             getDefault().print(message);
         }
     }
+
 }

@@ -18,18 +18,18 @@
    </license>
 
    <url>
-      <update label="Spatial Statistics Toolbox" url="http://1.234.82.19:8080/s2toolbox_updates"/>
+      <update label="Spatial Statistics Toolbox" url="http://www.mangosystem.com:8080/s2toolbox_updates"/>
    </url>
 
    <requires>
-      <import plugin="org.locationtech.udig.ui" version="2.0.0" match="greaterOrEqual"/>
-      <import plugin="org.locationtech.udig.project" version="2.0.0" match="greaterOrEqual"/>
-      <import plugin="org.locationtech.udig.project.ui" version="2.0.0" match="greaterOrEqual"/>
-      <import plugin="org.locationtech.udig.catalog.ui" version="2.0.0" match="greaterOrEqual"/>
-      <import plugin="org.locationtech.udig.catalog.shp" version="2.0.0" match="greaterOrEqual"/>
-      <import plugin="org.locationtech.udig.style" version="2.0.0" match="greaterOrEqual"/>
-      <import plugin="org.locationtech.udig.style.sld" version="2.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ui.console" version="3.4.0" match="greaterOrEqual"/>
+      <import plugin="org.locationtech.udig.ui" version="2.0.0" match="equivalent"/>
+      <import plugin="org.locationtech.udig.project" version="2.0.0" match="equivalent"/>
+      <import plugin="org.locationtech.udig.project.ui" version="2.0.0" match="equivalent"/>
+      <import plugin="org.locationtech.udig.catalog.ui" version="2.0.0" match="equivalent"/>
+      <import plugin="org.locationtech.udig.catalog.shp" version="2.0.0" match="equivalent"/>
+      <import plugin="org.locationtech.udig.style" version="2.0.0" match="equivalent"/>
+      <import plugin="org.locationtech.udig.style.sld" version="2.0.0" match="equivalent"/>
+      <import plugin="org.eclipse.ui.console" version="3.4.0" match="compatible"/>
       <import plugin="org.eclipse.ui.forms"/>
    </requires>
 

@@ -9,6 +9,10 @@
  */
 package org.locationtech.udig.processingtoolbox.tools;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.geotools.data.Parameter;
 import org.geotools.process.spatialstatistics.GlobalGStatisticsProcess.GStatisticsProcessResult;
 import org.geotools.process.spatialstatistics.GlobalMoransIProcess.MoransIProcessResult;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
@@ -18,6 +22,8 @@ import org.geotools.process.spatialstatistics.operations.PearsonOperation.Pearso
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName;
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName.PearsonItem;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
+import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
+import org.locationtech.udig.processingtoolbox.internal.Messages;
 
 /**
  * HTML Writer
@@ -90,6 +96,75 @@ public class HtmlWriter {
         sb.append(value).append(NEWLINE);
     }
 
+    public void writeProcessMetadata(org.geotools.process.ProcessFactory factory,
+            org.opengis.feature.type.Name processName) {
+        // input parameters
+        sb.append("<h1>" + Messages.ProcessDescriptor_Input_Parameters + "</h1>").append(NEWLINE);
+        describeparameters(sb, factory.getParameterInfo(processName));
+
+        // output parameters
+        sb.append("<h1>" + Messages.ProcessDescriptor_Output_Parameters + "</h1>").append(NEWLINE);
+        describeparameters(sb, factory.getResultInfo(processName, null));
+
+        // general information
+        sb.append("<h1>" + Messages.ProcessDescriptor_General_Information + "</h1>");
+        sb.append(NEWLINE);
+        sb.append("<ul>").append(NEWLINE);
+        if (factory.getClass().getName().startsWith("org.geotools.process.spatialstatistics")) {
+            sb.append("<li>" + Messages.ProcessDescriptor_Product + ": Processing ToolBox ");
+            sb.append(ToolboxPlugin.getDefault().getBundle().getVersion()).append("</li>");
+            sb.append(NEWLINE);
+            sb.append("<li>" + Messages.ProcessDescriptor_Author + ": <a href=\"")
+                    .append("www.mangosystem.com").append("\">");
+            sb.append("Mango System").append("</a></li>").append(NEWLINE);
+            sb.append("<li>" + Messages.ProcessDescriptor_Document + ": <a href=\"").append(
+                    "www.mangosystem.com");
+            sb.append("\">" + Messages.ProcessDescriptor_Online_Help + "</a>");
+            sb.append(", <a href=\"http://onspatial.com\">" + Messages.ProcessDescriptor_Team_Blog
+                    + "</a></li>");
+            sb.append(NEWLINE);
+
+            sb.append("<li>" + Messages.ProcessDescriptor_Contact
+                    + ": <a href=\"mailto:mapplus@gmail.com\">mapplus@gmail.com</a>, ");
+            sb.append("<a href=\"mailto:jya1210@gmail.com\">jya1210@gmail.com</a></li>");
+            sb.append(NEWLINE);
+        } else {
+            sb.append("<li>" + Messages.ProcessDescriptor_Product + ": GeoTools</li>");
+            sb.append(NEWLINE);
+            sb.append("<li>" + Messages.ProcessDescriptor_Home
+                    + ": <a href=\"http://www.geotools.org\">http://www.geotools.org</a></li>");
+            sb.append(NEWLINE);
+        }
+
+        sb.append("</ul>").append(NEWLINE);
+    }
+
+    private void describeparameters(StringBuffer sb, Map<String, Parameter<?>> params) {
+        sb.append("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+        sb.append(NEWLINE);
+
+        sb.append("<colgroup>").append(NEWLINE);
+        sb.append("<col width=\"30%\" />").append(NEWLINE);
+        sb.append("<col width=\"60%\" />").append(NEWLINE);
+        sb.append("<col width=\"10%\" />").append(NEWLINE);
+        sb.append("</colgroup>").append(NEWLINE);
+
+        sb.append("<tr bgcolor=\"#cccccc\"><td><strong>" + Messages.ProcessDescriptor_Parameter
+                + "</strong></td>");
+        sb.append(NEWLINE);
+        sb.append("<td><strong>" + Messages.ProcessDescriptor_Explanation + "</strong></td>");
+        sb.append(NEWLINE);
+        sb.append("<td><strong>" + Messages.ProcessDescriptor_Required + "</strong></td></tr>");
+        sb.append(NEWLINE);
+        for (Entry<String, Parameter<?>> entrySet : params.entrySet()) {
+            Parameter<?> param = entrySet.getValue();
+            sb.append("<tr><td>").append(param.title).append("</td>").append(NEWLINE);
+            sb.append("<td>").append(param.description).append("</td>").append(NEWLINE);
+            sb.append("<td>").append(param.required).append("</td></tr>").append(NEWLINE);
+        }
+        sb.append("</table>").append(NEWLINE);
+    }
+
     // DataStatisticsResult
     public void writeDataStatistics(DataStatisticsResult value) {
         writeH1("Summary Statistics");
@@ -111,17 +186,17 @@ public class HtmlWriter {
             // body
             write("<tr><td>Count</td><td>" + item.getCount() + "</td></tr>");
             write("<tr><td>Invalid Count</td><td>" + item.getInvalidCount() + "</td></tr>");
-            write("<tr><td>Minimum</td><td>" + item.getMinimum() + "</td></tr>");
-            write("<tr><td>Maximum</td><td>" + item.getMaximum() + "</td></tr>");
-            write("<tr><td>Range</td><td>" + item.getRange() + "</td></tr>");
+            write("<tr><td>Minimum</td><td>" + format(item.getMinimum()) + "</td></tr>");
+            write("<tr><td>Maximum</td><td>" + format(item.getMaximum()) + "</td></tr>");
+            write("<tr><td>Range</td><td>" + format(item.getRange()) + "</td></tr>");
             write("<tr><td>Ranges</td><td>" + item.getRanges() + "</td></tr>");
-            write("<tr><td>Sum</td><td>" + item.getSum() + "</td></tr>");
-            write("<tr><td>Mean</td><td>" + item.getMean() + "</td></tr>");
-            write("<tr><td>Variance</td><td>" + item.getVariance() + "</td></tr>");
-            write("<tr><td>Standard Deviation</td><td>" + item.getStandardDeviation()
+            write("<tr><td>Sum</td><td>" + format(item.getSum()) + "</td></tr>");
+            write("<tr><td>Mean</td><td>" + format(item.getMean()) + "</td></tr>");
+            write("<tr><td>Variance</td><td>" + format(item.getVariance()) + "</td></tr>");
+            write("<tr><td>Standard Deviation</td><td>" + format(item.getStandardDeviation())
                     + "</td></tr>");
-            write("<tr><td>Coefficient Of Variance</td><td>" + item.getCoefficientOfVariance()
-                    + "</td></tr>");
+            write("<tr><td>Coefficient Of Variance</td><td>"
+                    + format(item.getCoefficientOfVariance()) + "</td></tr>");
             if (item.getNoData() != null) {
                 write("<tr><td>NoData</td><td>" + item.getNoData() + "</td></tr>");
             }
@@ -242,17 +317,21 @@ public class HtmlWriter {
         // body
         write("<tr><td>Observed Point Count</td><td>" + value.getObserved_Point_Count()
                 + "</td></tr>");
-        write("<tr><td>Study Area</td><td>" + value.getStudy_Area() + "</td></tr>");
-        write("<tr><td>Observed Mean Distance</td><td>" + value.getObserved_Mean_Distance()
+        write("<tr><td>Study Area</td><td>" + format(value.getStudy_Area()) + "</td></tr>");
+        write("<tr><td>Observed Mean Distance</td><td>" + format(value.getObserved_Mean_Distance())
                 + "</td></tr>");
-        write("<tr><td>Expected Mean Distance</td><td>" + value.getExpected_Mean_Distance()
+        write("<tr><td>Expected Mean Distance</td><td>" + format(value.getExpected_Mean_Distance())
                 + "</td></tr>");
-        write("<tr><td>Nearest Neighbor Ratio</td><td>" + value.getNearest_Neighbor_Ratio()
+        write("<tr><td>Nearest Neighbor Ratio</td><td>" + format(value.getNearest_Neighbor_Ratio())
                 + "</td></tr>");
-        write("<tr><td>Z-Score</td><td>" + value.getZ_Score() + "</td></tr>");
-        write("<tr><td>p-Value</td><td>" + value.getP_Value() + "</td></tr>");
-        write("<tr><td>Standard Error</td><td>" + value.getStandard_Error() + "</td></tr>");
+        write("<tr><td>Z-Score</td><td>" + format(value.getZ_Score()) + "</td></tr>");
+        write("<tr><td>p-Value</td><td>" + format(value.getP_Value()) + "</td></tr>");
+        write("<tr><td>Standard Error</td><td>" + format(value.getStandard_Error()) + "</td></tr>");
 
         write("</table>");
+    }
+
+    private String format(double value) {
+        return FormatUtils.format(value);
     }
 }

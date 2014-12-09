@@ -41,7 +41,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.data.DataUtilities;
 import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -51,6 +50,7 @@ import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget.FileDataType;
 import org.locationtech.udig.processingtoolbox.styler.ProcessExecutorOperation;
+import org.locationtech.udig.processingtoolbox.tools.HtmlWriter;
 import org.locationtech.udig.project.IMap;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
@@ -180,8 +180,10 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
             Browser browser = new Browser(parentTabFolder, SWT.NONE);
             GridData layoutData = new GridData(GridData.FILL_BOTH);
             browser.setLayoutData(layoutData);
-            File file = ProcessDescriptor.generate(factory, processName);
-            browser.setUrl(DataUtilities.fileToURL(file).toExternalForm());
+            
+            HtmlWriter writer = new HtmlWriter(windowTitle);
+            writer.writeProcessMetadata(factory, processName);
+            browser.setText(writer.getHTML());
             tab.setControl(browser);
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, e.getMessage(), e);

@@ -28,17 +28,22 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.Parameter;
 import org.geotools.data.collection.ListFeatureCollection;
+import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.JTS;
+import org.geotools.process.spatialstatistics.GlobalGStatisticsProcess.GStatisticsProcessResult;
+import org.geotools.process.spatialstatistics.GlobalMoransIProcess.MoransIProcessResult;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
+import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
+import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
+import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
 import org.geotools.process.spatialstatistics.storage.DataStoreFactory;
 import org.geotools.process.spatialstatistics.storage.RasterExportOperation;
 import org.geotools.process.spatialstatistics.storage.ShapeExportOperation;
@@ -54,6 +59,7 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.util.GeoToolsAdapters;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
+import org.locationtech.udig.processingtoolbox.tools.HtmlWriter;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.ui.ApplicationGIS;
@@ -156,12 +162,8 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                                 outputFile.getAbsolutePath());
                         ToolboxPlugin.log(Messages.Task_AddingLayer);
                         MapUtils.addGridCoverageToMap(map, output, outputFile, null);
-                    } else if (Number.class.isAssignableFrom(val.getClass())) {
-                        outputBuffer.append(FormatUtils.format(Double.parseDouble(val.toString())));
-                        outputBuffer.append(lineSeparator);
                     } else {
-                        outputBuffer.append(val.toString());
-                        outputBuffer.append(lineSeparator);
+                        postProcessing(val);
                     }
                     monitor.worked(increment);
                 }
@@ -175,6 +177,26 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
         }
     }
 
+    private void postProcessing(Object value) {
+        HtmlWriter writer = new HtmlWriter(windowTitle);
+        if (value instanceof DataStatisticsResult) {
+            writer.writeDataStatistics((DataStatisticsResult) value);
+        } else if (value instanceof GStatisticsProcessResult) {
+            writer.writeGStatistics((GStatisticsProcessResult) value);
+        } else if (value instanceof MoransIProcessResult) {
+            writer.writeMoransI((MoransIProcessResult) value);
+        } else if (value instanceof NearestNeighborResult) {
+            writer.writeNearestNeighbor((NearestNeighborResult) value);
+        } else if (value instanceof PearsonResult) {
+            writer.writePearson((PearsonResult) value);
+        } else if (Number.class.isAssignableFrom(value.getClass())) {
+            writer.writeH2(FormatUtils.format(Double.parseDouble(value.toString())));
+        } else {
+            writer.writeH2(value.toString());
+        }
+        outputBuffer.append(writer.getHTML());
+    }
+
     private void postProcessing(SimpleFeatureCollection source, Object outputPath,
             Map<String, Object> outputMeta, IProgressMonitor monitor) {
         File filePath = new File(outputPath.toString());
@@ -183,10 +205,14 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
         String typeName = FilenameUtils.removeExtension(FilenameUtils.getName(filePath.getPath()));
         SimpleFeatureSource featureSource = null;
         try {
-            DataStore dataStore = DataStoreFactory.getShapefileDataStore(filePath.getParent(),
-                    false);
+            Map<String, Object> params = new HashMap<String, Object>();
+            File file = new File(filePath.getParent());
+            params.put(ShapefileDataStoreFactory.URLP.key, DataUtilities.fileToURL(file));
+            params.put(ShapefileDataStoreFactory.CREATE_SPATIAL_INDEX.key, false);
+            params.put(ShapefileDataStoreFactory.DBFCHARSET.key, ToolboxPlugin.defaultCharset());
+
             ShapeExportOperation exportOp = ShapeExportOperation.getDefault();
-            exportOp.setOutputDataStore(dataStore);
+            exportOp.setOutputDataStore(DataStoreFactory.getDataStore(params));
             exportOp.setOutputTypeName(typeName);
             featureSource = exportOp.execute(source);
         } catch (IOException e) {

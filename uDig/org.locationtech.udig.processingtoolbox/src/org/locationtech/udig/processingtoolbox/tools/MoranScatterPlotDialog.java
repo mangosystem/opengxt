@@ -493,7 +493,7 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
             openInformation(getShell(), Messages.Task_ParameterRequired);
             return;
         }
-        
+
         if (inputLayer.getFilter() != Filter.EXCLUDE) {
             map.select(Filter.EXCLUDE, inputLayer);
         }
@@ -530,7 +530,10 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
             MoransIProcessResult moran = (MoransIProcessResult) result
                     .get(GlobalMoransIProcessFactory.RESULT.key);
 
-            browser.setText(formatHTML(moran));
+            // write html
+            HtmlWriter writer = new HtmlWriter(inputLayer.getName());
+            writer.writeMoransI(moran);
+            browser.setText(writer.getHTML());
 
             monitor.subTask("Analyzing local moran...");
             subMonitor = GeoToolsAdapters.progress(SubMonitor.convert(monitor,
@@ -564,42 +567,5 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
             ToolboxPlugin.log(String.format(Messages.Task_Completed, windowTitle));
             monitor.done();
         }
-    }
-
-    @SuppressWarnings("nls")
-    private String formatHTML(MoransIProcessResult moran) {
-        HtmlWriter writer = new HtmlWriter(inputLayer.getName());
-        writer.writeH1("Global Moran's I");
-        writer.writeH2(moran.getTypeName() + ": " + moran.getPropertyName());
-        writer.write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
-
-        // header
-        writer.write("<colgroup>");
-        writer.write("<col width=\"60%\" />");
-        writer.write("<col width=\"40%\" />");
-        writer.write("</colgroup>");
-
-        writer.write("<tr bgcolor=\"#cccccc\">");
-        writer.write("<td><strong>Category</strong></td>");
-        writer.write("<td><strong>Value</strong></td>");
-        writer.write("</tr>");
-
-        // body
-        writer.write("<tr><td>Moran Index</td><td>" + moran.getMoran_Index() + "</td></tr>");
-        writer.write("<tr><td>Expected Index</td><td>" + moran.getExpected_Index() + "</td></tr>");
-        writer.write("<tr><td>Variance</td><td>" + moran.getVariance() + "</td></tr>");
-        writer.write("<tr><td>z Score</td><td>" + moran.getZ_Score() + "</td></tr>");
-        writer.write("<tr><td>p Value</td><td>" + moran.getP_Value() + "</td></tr>");
-        writer.write("<tr><td>Conceptualization</td><td>" + moran.getConceptualization()
-                + "</td></tr>");
-        writer.write("<tr><td>Distance Method</td><td>" + moran.getDistanceMethod() + "</td></tr>");
-        writer.write("<tr><td>Row Standardization</td><td>" + moran.getRowStandardization()
-                + "</td></tr>");
-        writer.write("<tr><td>Distance Threshold</td><td>" + moran.getDistanceThreshold()
-                + "</td></tr>");
-
-        writer.write("</table>");
-        writer.close();
-        return writer.getHTML();
     }
 }

@@ -39,7 +39,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.DataUtilities;
@@ -63,7 +62,7 @@ import com.vividsolutions.jts.geom.Geometry;
 /**
  * Process Execution Dialog
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -88,7 +87,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
 
     private int height = 100;
 
-    private Text txtOutput;
+    private Browser browser;
 
     private CTabItem inputTab, outputTab;
 
@@ -162,9 +161,10 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
         tab.setText(Messages.ProcessExecutionDialog_taboutput);
 
         try {
-            txtOutput = new Text(parentTabFolder, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
-            txtOutput.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-            tab.setControl(txtOutput);
+            browser = new Browser(parentTabFolder, SWT.NONE);
+            GridData layoutData = new GridData(GridData.FILL_BOTH);
+            browser.setLayoutData(layoutData);
+            tab.setControl(browser);
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
@@ -343,7 +343,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
                     // layer's field : KVP(Parameter.OPTIONS, "파라미터명.필드유형")
                     final Combo cboField = new Combo(container, SWT.NONE | SWT.DROP_DOWN);
                     uiParams.put(cboField, metadata.get(Parameter.OPTIONS).toString());
-                    
+
                     cboField.setLayoutData(layoutData);
                     cboField.setData(param.key);
                     if (param.sample != null) {
@@ -443,10 +443,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
             String outputText = runnable.getOutputText();
             if (outputText.length() > 0) {
                 outputTab.getParent().setSelection(outputTab);
-                String pattern = "[,()]"; //$NON-NLS-1$
-                String message = outputText.replaceAll(pattern,
-                        System.getProperty("line.separator")); //$NON-NLS-1$
-                txtOutput.setText(message);
+                browser.setText(outputText);
             }
         } else {
             super.okPressed();

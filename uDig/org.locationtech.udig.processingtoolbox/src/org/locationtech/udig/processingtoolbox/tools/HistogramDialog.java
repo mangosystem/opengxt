@@ -48,7 +48,6 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.process.spatialstatistics.StatisticsFeaturesProcess;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
-import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult.DataStatisticsItem;
 import org.geotools.util.logging.Logging;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartMouseEvent;
@@ -433,8 +432,7 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
                         field, subMonitor);
 
                 HtmlWriter writer = new HtmlWriter(inputLayer.getName());
-                writeStats(writer, statistics);
-                writer.close();
+                writer.writeDataStatistics(statistics);
                 browser.setText(writer.getHTML());
             }
 
@@ -448,43 +446,6 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
         } finally {
             ToolboxPlugin.log(String.format(Messages.Task_Completed, windowTitle));
             monitor.done();
-        }
-    }
-
-    @SuppressWarnings("nls")
-    private void writeStats(HtmlWriter writer, DataStatisticsResult statistics) {
-        writer.writeH1("Summary Statistics");
-        for (DataStatisticsItem item : statistics.getList()) {
-            writer.writeH2(item.getTypeName() + ": " + item.getPropertyName());
-            writer.write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
-
-            // header
-            writer.write("<colgroup>");
-            writer.write("<col width=\"60%\" />");
-            writer.write("<col width=\"40%\" />");
-            writer.write("</colgroup>");
-
-            writer.write("<tr bgcolor=\"#cccccc\">");
-            writer.write("<td><strong>Category</strong></td>");
-            writer.write("<td><strong>Value</strong></td>");
-            writer.write("</tr>");
-
-            // body
-            writer.write("<tr><td>Count</td><td>" + item.getCount() + "</td></tr>");
-            writer.write("<tr><td>Invalid Count</td><td>" + item.getInvalidCount() + "</td></tr>");
-            writer.write("<tr><td>Minimum</td><td>" + item.getMinimum() + "</td></tr>");
-            writer.write("<tr><td>Maximum</td><td>" + item.getMaximum() + "</td></tr>");
-            writer.write("<tr><td>Range</td><td>" + item.getRange() + "</td></tr>");
-            writer.write("<tr><td>Ranges</td><td>" + item.getRanges() + "</td></tr>");
-            writer.write("<tr><td>Sum</td><td>" + item.getSum() + "</td></tr>");
-            writer.write("<tr><td>Mean</td><td>" + item.getMean() + "</td></tr>");
-            writer.write("<tr><td>Variance</td><td>" + item.getVariance() + "</td></tr>");
-            writer.write("<tr><td>Standard Deviation</td><td>" + item.getStandardDeviation()
-                    + "</td></tr>");
-            writer.write("<tr><td>Coefficient Of Variance</td><td>"
-                    + item.getCoefficientOfVariance() + "</td></tr>");
-            writer.write("<tr><td>NoData</td><td>" + item.getNoData() + "</td></tr>");
-            writer.write("</table>");
         }
     }
 

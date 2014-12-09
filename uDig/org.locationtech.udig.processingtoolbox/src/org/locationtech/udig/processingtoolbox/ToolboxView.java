@@ -66,13 +66,12 @@ import org.opengis.feature.type.Name;
  * 
  * @source $URL$
  */
-
 public class ToolboxView extends ViewPart implements ISetSelectionTarget {
     protected static final Logger LOGGER = Logging.getLogger(ToolboxView.class);
 
-    private static Boolean showLog = Boolean.TRUE;
+    private static Boolean showLog = Boolean.FALSE;
 
-    private static boolean loadGeoToolsProcess = true;
+    private static Boolean loadGeoToolsProcess = Boolean.TRUE;
 
     private TreeViewer viewer;
 
@@ -115,11 +114,11 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         ToolboxView.showLog = showLog;
     }
 
-    public static boolean isLoadGeoToolsProcess() {
+    public static Boolean isLoadGeoToolsProcess() {
         return ToolboxView.loadGeoToolsProcess;
     }
 
-    public static void setLoadGeoToolsProcess(boolean loadGeoToolsProcess) {
+    public static void setLoadGeoToolsProcess(Boolean loadGeoToolsProcess) {
         ToolboxView.loadGeoToolsProcess = loadGeoToolsProcess;
     }
 

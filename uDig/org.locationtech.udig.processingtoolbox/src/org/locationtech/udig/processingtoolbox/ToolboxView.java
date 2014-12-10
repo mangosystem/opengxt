@@ -49,6 +49,8 @@ import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;
 import org.locationtech.udig.processingtoolbox.internal.ui.SettingsDialog;
+import org.locationtech.udig.processingtoolbox.tools.BoxPlotDialog;
+import org.locationtech.udig.processingtoolbox.tools.BubbleChartDialog;
 import org.locationtech.udig.processingtoolbox.tools.FormatConversionDialog;
 import org.locationtech.udig.processingtoolbox.tools.HistogramDialog;
 import org.locationtech.udig.processingtoolbox.tools.MoranScatterPlotDialog;
@@ -160,7 +162,11 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                             Dialog dialog = null;
                             if (node.getFactory() == null) {
                                 String nodeName = node.getProcessName().getLocalPart();
-                                if (nodeName.equalsIgnoreCase("FormatConversionDialog")) {
+                                if (nodeName.equalsIgnoreCase("BoxPlotDialog")) {
+                                    dialog = new BoxPlotDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("BubbleChartDialog")) {
+                                    dialog = new BubbleChartDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("FormatConversionDialog")) {
                                     dialog = new FormatConversionDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("HistogramDialog")) {
                                     dialog = new HistogramDialog(shell, map);
@@ -253,7 +259,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(desTools,
                 "org.geotools.process.spatialstatistics.PearsonCorrelationProcessFactory");
         buildTool(desTools, Messages.HistogramDialog_title, "HistogramDialog");
+        buildTool(desTools, Messages.BoxPlotDialog_title, "BoxPlotDialog");
         buildTool(desTools, Messages.ScatterPlotDialog_title, "ScatterPlotDialog");
+        buildTool(desTools, Messages.BubbleChartDialog_title, "BubbleChartDialog");
 
         // Point Pattern Analysis
         TreeParent patternTools = new TreeParent(Messages.ToolboxView_PointPattern, null, null);
@@ -359,7 +367,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(graphTool);
 
         buildTool(graphTool, Messages.HistogramDialog_title, "HistogramDialog");
+        buildTool(graphTool, Messages.BoxPlotDialog_title, "BoxPlotDialog");
         buildTool(graphTool, Messages.ScatterPlotDialog_title, "ScatterPlotDialog");
+        buildTool(graphTool, Messages.BubbleChartDialog_title, "BubbleChartDialog");
         buildTool(graphTool, Messages.MoranScatterPlotDialog_title, "MoranScatterPlotDialog");
 
         // Utilities

@@ -45,8 +45,8 @@ and the Apache Software Foundation.
 
    <plugin
          id="org.locationtech.udig.processingtoolbox"
-         download-size="628"
-         install-size="628"
+         download-size="654"
+         install-size="654"
          version="2.0.0.qualifier"
          unpack="false"/>
 

@@ -44,7 +44,7 @@ import org.opengis.feature.type.GeometryDescriptor;
 /**
  * Multiple Fields Selection Dialog
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -143,7 +143,7 @@ public class MultipleFieldsSelectionDialog extends Dialog {
         grdList.widthHint = 200;
         grpFeatures.setLayoutData(grdList);
 
-        schemaTable = widget.createTable(grpFeatures, new String[] { "name" }, 1); //$NON-NLS-1$
+        schemaTable = widget.createTable(grpFeatures, new String[] { Messages.General_Name }, 1);
         schemaTable.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
@@ -154,7 +154,8 @@ public class MultipleFieldsSelectionDialog extends Dialog {
         // ========================================================
         // 2. Selected Fields
         // ========================================================
-        Group grpValues = widget.createGroup(grpLayer, Messages.MultipleFieldsSelectionDialog_SelectedFields, false, 1);
+        Group grpValues = widget.createGroup(grpLayer,
+                Messages.MultipleFieldsSelectionDialog_SelectedFields, false, 1);
         grpValues.setLayout(new GridLayout(3, true));
 
         txtFields = new Text(grpValues, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
@@ -188,7 +189,7 @@ public class MultipleFieldsSelectionDialog extends Dialog {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 for (TableItem item : schemaTable.getItems()) {
-                    item.setChecked(! item.getChecked());
+                    item.setChecked(!item.getChecked());
                 }
                 updateFields();
             }
@@ -221,7 +222,7 @@ public class MultipleFieldsSelectionDialog extends Dialog {
         }
         schemaTable.setRedraw(true);
     }
-    
+
     private void updateFields() {
         StringBuffer buffer = new StringBuffer();
         for (TableItem item : schemaTable.getItems()) {

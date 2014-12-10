@@ -315,8 +315,9 @@ public class BubbleChartDialog extends AbstractGeoProcessingDialog implements IR
         xPlotAxis.setAutoRange(false);
         xPlotAxis.setRange(minMaxVisitor.getMinX(), minMaxVisitor.getMaxX());
 
-        yPlotAxis.setAutoRange(false);
-        yPlotAxis.setRange(minMaxVisitor.getMinY(), minMaxVisitor.getMaxY());
+        //yPlotAxis.setAutoRange(false);
+        //yPlotAxis.setRange(minMaxVisitor.getMinY(), minMaxVisitor.getMaxY());
+        yPlotAxis.setAutoRangeIncludesZero(false);
 
         plot.setRenderer(0, plotRenderer);
         plot.setDomainAxis(0, xPlotAxis);

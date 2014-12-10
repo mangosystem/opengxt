@@ -27,6 +27,7 @@ public class Messages extends NLS {
     
     public static String BoxPlotDialog_title;
     public static String BoxPlotDialog_description;
+    public static String BoxPlotDialog_Fields;
     
     public static String BubbleChartDialog_title;
     public static String BubbleChartDialog_description;
@@ -68,6 +69,7 @@ public class Messages extends NLS {
     public static String General_Error;
     public static String General_ErrorOccurred;
     public static String General_Completed;
+    public static String General_Name; 
     
     public static String GeometryPickerDialog_title;
     public static String GeometryPickerDialog_Layer;

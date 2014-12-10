@@ -10,8 +10,11 @@
 package org.locationtech.udig.processingtoolbox.tools;
 
 import java.awt.Font;
-import java.awt.geom.Ellipse2D;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,6 +29,8 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -37,79 +42,80 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.process.spatialstatistics.PearsonCorrelationProcess;
 import org.geotools.process.spatialstatistics.StatisticsFeaturesProcess;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
-import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
 import org.geotools.util.logging.Logging;
 import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.entity.ChartEntity;
-import org.jfree.chart.entity.XYItemEntity;
-import org.jfree.chart.labels.StandardXYToolTipGenerator;
-import org.jfree.chart.labels.XYToolTipGenerator;
+import org.jfree.chart.labels.BoxAndWhiskerToolTipGenerator;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.SeriesRenderingOrder;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.jfree.experimental.chart.swt.ChartComposite;
 import org.jfree.ui.RectangleInsets;
 import org.locationtech.udig.catalog.util.GeoToolsAdapters;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils;
-import org.locationtech.udig.processingtoolbox.styler.MapUtils.FieldType;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils.VectorLayerType;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
 import org.opengis.util.ProgressListener;
 
 /**
- * Scatter Plot Dialog
+ * Box Plot(Box and Whisker) Dialog
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IRunnableWithProgress {
-    protected static final Logger LOGGER = Logging.getLogger(ScatterPlotDialog.class);
+public class BoxPlotDialog extends AbstractGeoProcessingDialog implements IRunnableWithProgress {
+    protected static final Logger LOGGER = Logging.getLogger(BoxPlotDialog.class);
 
     protected final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
 
-    private ChartComposite2 chartComposite;
+    private ChartComposite chartComposite;
 
     private ILayer inputLayer;
 
-    private Combo cboLayer, cboXField, cboYField;
+    private Combo cboLayer;
 
-    private Button chkStatistics, chkPearson;
+    private Table schemaTable;
+
+    private Button chkStatistics;
 
     private Browser browser;
+
+    private String selectedFields;
 
     private CTabItem inputTab, plotTab, outputTab;
 
     private XYMinMaxVisitor minMaxVisitor = new XYMinMaxVisitor();
 
-    public ScatterPlotDialog(Shell parentShell, IMap map) {
+    public BoxPlotDialog(Shell parentShell, IMap map) {
         super(parentShell, map);
 
         setShellStyle(SWT.CLOSE | SWT.MIN | SWT.TITLE | SWT.BORDER | SWT.MODELESS | SWT.RESIZE);
 
-        this.windowTitle = Messages.ScatterPlotDialog_title;
-        this.windowDesc = Messages.ScatterPlotDialog_description;
+        this.windowTitle = Messages.BoxPlotDialog_title;
+        this.windowDesc = Messages.BoxPlotDialog_description;
         this.windowSize = new Point(650, 450);
     }
 
@@ -125,12 +131,6 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
 
         // 1. Input Tab
         createInputTab(parentTabFolder);
-
-        // 2. Graph Tab
-        // createGraphTab(parentTabFolder);
-
-        // 3. Output Tab
-        // createOutputTab(parentTabFolder);
 
         parentTabFolder.setSelection(inputTab);
         parentTabFolder.pack();
@@ -156,28 +156,43 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         cboLayer = uiBuilder.createCombo(container, 1, true);
         fillLayers(map, cboLayer, VectorLayerType.ALL);
 
-        uiBuilder.createLabel(container, Messages.ScatterPlotDialog_IndependentField, EMPTY, image,
-                1);
-        cboXField = uiBuilder.createCombo(container, 1, true);
-
-        uiBuilder
-                .createLabel(container, Messages.ScatterPlotDialog_DependentField, EMPTY, image, 1);
-        cboYField = uiBuilder.createCombo(container, 1, true);
+        uiBuilder.createLabel(container, Messages.BoxPlotDialog_Fields, EMPTY, image, 1);
+        schemaTable = uiBuilder.createTable(container, new String[] { Messages.General_Name }, 1);
+        schemaTable.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent event) {
+                StringBuffer buffer = new StringBuffer();
+                for (TableItem item : schemaTable.getItems()) {
+                    if (item.getChecked()) {
+                        if (buffer.length() > 0) {
+                            buffer.append(",").append(item.getText()); //$NON-NLS-1$
+                        } else {
+                            buffer.append(item.getText());
+                        }
+                    }
+                }
+                selectedFields = buffer.toString();
+            }
+        });
 
         uiBuilder.createLabel(container, null, null, 1);
         chkStatistics = uiBuilder.createCheckbox(container,
                 Messages.ScatterPlotDialog_BasicStatistics, null, 1);
-        chkPearson = uiBuilder.createCheckbox(container, Messages.ScatterPlotDialog_Pearson, null,
-                1);
 
         // register events
         cboLayer.addModifyListener(new ModifyListener() {
             @Override
             public void modifyText(ModifyEvent e) {
+                schemaTable.removeAll();
                 inputLayer = MapUtils.getLayer(map, cboLayer.getText());
                 if (inputLayer != null) {
-                    fillFields(cboXField, inputLayer.getSchema(), FieldType.Number);
-                    fillFields(cboYField, inputLayer.getSchema(), FieldType.Number);
+                    for (AttributeDescriptor dsc : inputLayer.getSchema().getAttributeDescriptors()) {
+                        Class<?> binding = dsc.getType().getBinding();
+                        if (Number.class.isAssignableFrom(binding)) {
+                            TableItem item = new TableItem(schemaTable, SWT.NULL);
+                            item.setText(dsc.getLocalName());
+                        }
+                    }
                 }
             }
         });
@@ -212,23 +227,21 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         plotTab = new CTabItem(parentTabFolder, SWT.NONE);
         plotTab.setText(Messages.ScatterPlotDialog_Graph);
 
-        XYPlot plot = new XYPlot();
+        CategoryPlot plot = new CategoryPlot();
         plot.setOrientation(PlotOrientation.VERTICAL);
         plot.setBackgroundPaint(java.awt.Color.WHITE);
-        plot.setDomainPannable(false);
         plot.setRangePannable(false);
-        plot.setSeriesRenderingOrder(SeriesRenderingOrder.FORWARD);
 
         JFreeChart chart = new JFreeChart(EMPTY, JFreeChart.DEFAULT_TITLE_FONT, plot, false);
         chart.setBackgroundPaint(java.awt.Color.WHITE);
         chart.setBorderVisible(false);
 
-        chartComposite = new ChartComposite2(parentTabFolder, SWT.NONE | SWT.EMBEDDED, chart, true);
+        chartComposite = new ChartComposite(parentTabFolder, SWT.NONE | SWT.EMBEDDED, chart, true);
         chartComposite.setLayout(new FillLayout());
         chartComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         chartComposite.setDomainZoomable(false);
         chartComposite.setRangeZoomable(false);
-        chartComposite.setMap(map);
+        // chartComposite.setMap(map);
         chartComposite.addChartMouseListener(new PlotMouseListener());
 
         plotTab.setControl(chartComposite);
@@ -243,121 +256,66 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
 
         @Override
         public void chartMouseClicked(ChartMouseEvent event) {
-            ChartEntity entity = event.getEntity();
-            if (entity != null && (entity instanceof XYItemEntity)) {
-                XYItemEntity item = (XYItemEntity) entity;
-                if (item.getSeriesIndex() == 0) {
-                    XYSeriesCollection dataSet = (XYSeriesCollection) item.getDataset();
-                    XYSeries xySeries = dataSet.getSeries(item.getSeriesIndex());
-                    XYDataItem2 dataItem = (XYDataItem2) xySeries.getDataItem(item.getItem());
-
-                    Filter selectionFilter = ff.id(ff.featureId(dataItem.getFeature().getID()));
-                    map.select(selectionFilter, inputLayer);
-                } else {
-                    map.select(Filter.EXCLUDE, inputLayer);
-                }
-            } else {
-                map.select(Filter.EXCLUDE, inputLayer);
-            }
+            // ChartEntity entity = event.getEntity();
         }
     }
 
-    private void updateChart(SimpleFeatureCollection features, String xField, String yField) {
-        // 1. Create a single plot containing both the scatter and line
-        XYPlot plot = new XYPlot();
+    private void updateChart(SimpleFeatureCollection features, String[] fields) {
+        // Setup Box plot
+        int fontStyle = java.awt.Font.BOLD;
+        FontData fontData = getShell().getDisplay().getSystemFont().getFontData()[0];
+
+        CategoryAxis xPlotAxis = new CategoryAxis(EMPTY); // Type
+        xPlotAxis.setLabelFont(new Font(fontData.getName(), fontStyle, 12));
+        xPlotAxis.setTickLabelFont(new Font(fontData.getName(), fontStyle, 12));
+
+        NumberAxis yPlotAxis = new NumberAxis("Value"); // Value //$NON-NLS-1$
+        yPlotAxis.setLabelFont(new Font(fontData.getName(), fontStyle, 12));
+        yPlotAxis.setTickLabelFont(new Font(fontData.getName(), fontStyle, 10));
+        yPlotAxis.setAutoRangeIncludesZero(false);
+
+        BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+        renderer.setAutoPopulateSeriesFillPaint(true);
+        renderer.setAutoPopulateSeriesShape(true);
+        renderer.setMedianVisible(true);
+        renderer.setFillBox(true);
+        renderer.setBaseToolTipGenerator(new BoxAndWhiskerToolTipGenerator());
+
+        // Set the scatter data, renderer, and axis into plot
+        CategoryDataset dataset = getDataset(features, fields);
+        CategoryPlot plot = new CategoryPlot(dataset, xPlotAxis, yPlotAxis, renderer);
         plot.setOrientation(PlotOrientation.VERTICAL);
         plot.setBackgroundPaint(java.awt.Color.WHITE);
-        plot.setDomainPannable(false);
         plot.setRangePannable(false);
-        plot.setSeriesRenderingOrder(SeriesRenderingOrder.FORWARD);
 
         plot.setDomainCrosshairVisible(false);
         plot.setRangeCrosshairVisible(false);
         plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
-
-        // 2. Setup Scatter plot
-        // Create the scatter data, renderer, and axis
-        int fontStyle = java.awt.Font.BOLD;
-        FontData fontData = getShell().getDisplay().getSystemFont().getFontData()[0];
-        NumberAxis xPlotAxis = new NumberAxis(xField); // Independent variable
-        xPlotAxis.setLabelFont(new Font(fontData.getName(), fontStyle, 12));
-        xPlotAxis.setTickLabelFont(new Font(fontData.getName(), fontStyle, 10));
-
-        NumberAxis yPlotAxis = new NumberAxis(yField); // Dependent variable
-        yPlotAxis.setLabelFont(new Font(fontData.getName(), fontStyle, 12));
-        yPlotAxis.setTickLabelFont(new Font(fontData.getName(), fontStyle, 10));
-
-        XYToolTipGenerator plotToolTip = new StandardXYToolTipGenerator();
-
-        XYItemRenderer plotRenderer = new XYLineAndShapeRenderer(false, true); // Shapes only
-        plotRenderer.setSeriesShape(0, new Ellipse2D.Double(0, 0, 3, 3));
-        plotRenderer.setSeriesPaint(0, java.awt.Color.BLUE); // dot
-        plotRenderer.setBaseToolTipGenerator(plotToolTip);
-
-        // Set the scatter data, renderer, and axis into plot
-        plot.setDataset(0, getScatterPlotData(features, xField, yField));
-
-        xPlotAxis.setAutoRange(false);
-        xPlotAxis.setRange(minMaxVisitor.getMinX(), minMaxVisitor.getMaxX());
-
-        //yPlotAxis.setAutoRange(false);
-        //yPlotAxis.setRange(minMaxVisitor.getMinY(), minMaxVisitor.getMaxY());
-        yPlotAxis.setAutoRangeIncludesZero(false);
-
-        plot.setRenderer(0, plotRenderer);
-        plot.setDomainAxis(0, xPlotAxis);
-        plot.setRangeAxis(0, yPlotAxis);
+        plot.setForegroundAlpha(0.85f);
 
         // Map the scatter to the first Domain and first Range
         plot.mapDatasetToDomainAxis(0, 0);
         plot.mapDatasetToRangeAxis(0, 0);
 
-        // 3. Setup line
-        // Create the line data, renderer, and axis
-        XYItemRenderer lineRenderer = new XYLineAndShapeRenderer(true, false); // Lines only
-        lineRenderer.setSeriesPaint(0, java.awt.Color.GRAY);
-        lineRenderer.setSeriesPaint(1, java.awt.Color.GRAY);
-        lineRenderer.setSeriesPaint(2, java.awt.Color.RED);
-
-        // Set the line data, renderer, and axis into plot
-        NumberAxis xLineAxis = new NumberAxis(EMPTY);
-        xLineAxis.setTickMarksVisible(false);
-        xLineAxis.setTickLabelsVisible(false);
-
-        NumberAxis yLineAxis = new NumberAxis(EMPTY);
-        yLineAxis.setTickMarksVisible(false);
-        yLineAxis.setTickLabelsVisible(false);
-
-        plot.setDataset(1, getLinePlotData());
-        plot.setRenderer(1, lineRenderer);
-        plot.setDomainAxis(1, xLineAxis);
-        plot.setRangeAxis(1, yLineAxis);
-
-        // Map the line to the second Domain and second Range
-        plot.mapDatasetToDomainAxis(1, 0);
-        plot.mapDatasetToRangeAxis(1, 0);
-
-        // 4. Setup Selection
-        NumberAxis xSelectionAxis = new NumberAxis(EMPTY);
-        xSelectionAxis.setTickMarksVisible(false);
-        xSelectionAxis.setTickLabelsVisible(false);
-
-        NumberAxis ySelectionAxis = new NumberAxis(EMPTY);
-        ySelectionAxis.setTickMarksVisible(false);
-        ySelectionAxis.setTickLabelsVisible(false);
-
-        XYItemRenderer selectionRenderer = new XYLineAndShapeRenderer(false, true); // Shapes only
-        selectionRenderer.setSeriesShape(0, new Ellipse2D.Double(0, 0, 6, 6));
-        selectionRenderer.setSeriesPaint(0, java.awt.Color.RED); // dot
-
-        plot.setDataset(2, new XYSeriesCollection(new XYSeries(EMPTY)));
-        plot.setRenderer(2, selectionRenderer);
-        plot.setDomainAxis(2, xSelectionAxis);
-        plot.setRangeAxis(2, ySelectionAxis);
-
-        // Map the scatter to the second Domain and second Range
-        plot.mapDatasetToDomainAxis(2, 0);
-        plot.mapDatasetToRangeAxis(2, 0);
+        // 3. Setup Selection
+        /*****************************************************************************************
+         * CategoryAxis xSelectionAxis = new CategoryAxis(EMPTY);
+         * xSelectionAxis.setTickMarksVisible(false); xSelectionAxis.setTickLabelsVisible(false);
+         * 
+         * NumberAxis ySelectionAxis = new NumberAxis(EMPTY);
+         * ySelectionAxis.setTickMarksVisible(false); ySelectionAxis.setTickLabelsVisible(false);
+         * 
+         * BoxAndWhiskerRenderer selectionRenderer = new BoxAndWhiskerRenderer();
+         * selectionRenderer.setSeriesShape(0, new Ellipse2D.Double(0, 0, 6, 6));
+         * selectionRenderer.setSeriesPaint(0, java.awt.Color.RED); // dot
+         * 
+         * plot.setDataset(2, new DefaultBoxAndWhiskerCategoryDataset()); plot.setRenderer(2,
+         * selectionRenderer); plot.setDomainAxis(2, xSelectionAxis); plot.setRangeAxis(2,
+         * ySelectionAxis);
+         * 
+         * // Map the scatter to the second Domain and second Range plot.mapDatasetToDomainAxis(2,
+         * 0); plot.mapDatasetToRangeAxis(2, 0);
+         *****************************************************************************************/
 
         // 5. Finally, Create the chart with the plot and a legend
         java.awt.Font titleFont = new Font(fontData.getName(), fontStyle, 20);
@@ -369,67 +327,46 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         chartComposite.forceRedraw();
     }
 
-    private XYDataset getLinePlotData() {
-        XYSeriesCollection dataset = new XYSeriesCollection();
-
-        // Horizontal
-        XYSeries horizontal = new XYSeries("Horizontal"); //$NON-NLS-1$
-        horizontal.add(minMaxVisitor.getMinX(), minMaxVisitor.getAverageY());
-        horizontal.add(minMaxVisitor.getMaxX(), minMaxVisitor.getAverageY());
-        dataset.addSeries(horizontal);
-
-        // Vertical
-        XYSeries vertical = new XYSeries("Vertical"); //$NON-NLS-1$
-        vertical.add(minMaxVisitor.getAverageX(), minMaxVisitor.getMinY());
-        vertical.add(minMaxVisitor.getAverageX(), minMaxVisitor.getMaxY());
-        dataset.addSeries(vertical);
-
-        // Deegree
-        XYSeries deegree = new XYSeries("Deegree"); //$NON-NLS-1$
-        deegree.add(minMaxVisitor.getMinX(), minMaxVisitor.getMinY());
-        deegree.add(minMaxVisitor.getMaxX(), minMaxVisitor.getMaxY());
-        dataset.addSeries(deegree);
-
-        return dataset;
-    }
-
-    private XYDataset getScatterPlotData(SimpleFeatureCollection features, String xField,
-            String yField) {
-        XYSeries xySeries = new XYSeries(features.getSchema().getTypeName());
+    private BoxAndWhiskerCategoryDataset getDataset(SimpleFeatureCollection features,
+            String[] fields) {
         minMaxVisitor.reset();
 
-        Expression xExpression = ff.property(xField);
-        Expression yExpression = ff.property(yField);
+        Expression[] expression = new Expression[fields.length];
+        Map<String, List<Double>> listMap = new TreeMap<String, List<Double>>();
+        for (int index = 0; index < expression.length; index++) {
+            expression[index] = ff.property(fields[index]);
+            listMap.put(fields[index], new ArrayList<Double>());
+        }
 
         SimpleFeatureIterator featureIter = null;
         try {
             featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
-
-                Double xVal = xExpression.evaluate(feature, Double.class);
-                if (xVal == null || xVal.isNaN() || xVal.isInfinite()) {
-                    continue;
+                for (int index = 0; index < expression.length; index++) {
+                    Double val = expression[index].evaluate(feature, Double.class);
+                    if (val == null || val.isNaN() || val.isInfinite()) {
+                        continue;
+                    }
+                    minMaxVisitor.visit(val, val);
+                    listMap.get(fields[index]).add(val);
                 }
-
-                Double yVal = yExpression.evaluate(feature, Double.class);
-                if (yVal == null || yVal.isNaN() || yVal.isInfinite()) {
-                    continue;
-                }
-
-                minMaxVisitor.visit(xVal, yVal);
-                xySeries.add(new XYDataItem2(feature, xVal, yVal));
             }
         } finally {
             featureIter.close();
         }
 
-        return new XYSeriesCollection(xySeries);
+        DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+        for (int index = 0; index < fields.length; index++) {
+            dataset.add(listMap.get(fields[index]), "Series1", fields[index]); //$NON-NLS-1$
+        }
+        return dataset;
     }
 
     @Override
     protected void okPressed() {
-        if (invalidWidgetValue(cboLayer, cboXField, cboYField)) {
+        if (invalidWidgetValue(cboLayer, schemaTable) || selectedFields == null
+                || selectedFields.length() == 0) {
             openInformation(getShell(), Messages.Task_ParameterRequired);
             return;
         }
@@ -454,50 +391,35 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         monitor.beginTask(String.format(Messages.Task_Executing, windowTitle), 100);
         try {
             if (plotTab == null) {
-                monitor.subTask("Preparing scatter plot...");
+                monitor.subTask("Preparing box plot...");
                 createGraphTab(inputTab.getParent());
             }
 
-            if (outputTab == null) {
-                createOutputTab(inputTab.getParent());
-            }
-
             monitor.worked(increment);
 
-            String xField = cboXField.getText();
-            String yField = cboYField.getText();
             SimpleFeatureCollection features = MapUtils.getFeatures(inputLayer);
-
-            String fields = xField + "," + yField;
-
-            HtmlWriter writer = new HtmlWriter(inputLayer.getName());
-            DataStatisticsResult statistics = null;
-            PearsonResult pearson = null;
-
             if (chkStatistics.getSelection()) {
+                if (outputTab == null) {
+                    createOutputTab(inputTab.getParent());
+                }
+
                 ProgressListener subMonitor = GeoToolsAdapters.progress(SubMonitor.convert(monitor,
                         Messages.Task_Internal, 20));
-                statistics = StatisticsFeaturesProcess.process(features, fields, subMonitor);
+                HtmlWriter writer = new HtmlWriter(inputLayer.getName());
+                DataStatisticsResult statistics = null;
+                statistics = StatisticsFeaturesProcess
+                        .process(features, selectedFields, subMonitor);
                 writer.writeDataStatistics(statistics);
-            }
-
-            if (chkPearson.getSelection()) {
-                ProgressListener subMonitor = GeoToolsAdapters.progress(SubMonitor.convert(monitor,
-                        Messages.Task_Internal, 20));
-                pearson = PearsonCorrelationProcess.process(features, fields, subMonitor);
-                writer.writePearson(pearson);
-            }
-
-            if (statistics != null || pearson != null) {
                 browser.setText(writer.getHTML());
             }
 
-            monitor.subTask("Updating scatter plot...");
-            chartComposite.setLayer(inputLayer);
-            updateChart(features, xField, yField);
+            monitor.subTask("Updating box plot...");
+            // chartComposite.setLayer(inputLayer);
+            updateChart(features, selectedFields.split(","));
             plotTab.getParent().setSelection(plotTab);
             monitor.worked(increment);
         } catch (Exception e) {
+            e.printStackTrace();
             ToolboxPlugin.log(e.getMessage());
             throw new InvocationTargetException(e.getCause(), e.getMessage());
         } finally {

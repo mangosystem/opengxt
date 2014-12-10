@@ -10,8 +10,12 @@
 package org.locationtech.udig.processingtoolbox.tools;
 
 import java.awt.Font;
-import java.awt.geom.Ellipse2D;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,6 +33,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -41,28 +46,33 @@ import org.eclipse.ui.PlatformUI;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.process.spatialstatistics.PearsonCorrelationProcess;
 import org.geotools.process.spatialstatistics.StatisticsFeaturesProcess;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
-import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
 import org.geotools.util.logging.Logging;
 import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.entity.ChartEntity;
+import org.jfree.chart.entity.EntityCollection;
 import org.jfree.chart.entity.XYItemEntity;
-import org.jfree.chart.labels.StandardXYToolTipGenerator;
-import org.jfree.chart.labels.XYToolTipGenerator;
+import org.jfree.chart.labels.BubbleXYItemLabelGenerator;
+import org.jfree.chart.labels.ItemLabelAnchor;
+import org.jfree.chart.labels.ItemLabelPosition;
+import org.jfree.chart.labels.StandardXYZToolTipGenerator;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.SeriesRenderingOrder;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYBubbleRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.data.xy.XYZDataset;
+import org.jfree.experimental.chart.swt.ChartComposite;
 import org.jfree.ui.RectangleInsets;
+import org.jfree.ui.TextAnchor;
 import org.locationtech.udig.catalog.util.GeoToolsAdapters;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
@@ -75,27 +85,28 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
+import org.opengis.filter.identity.FeatureId;
 import org.opengis.util.ProgressListener;
 
 /**
- * Scatter Plot Dialog
+ * Bubble Chart Dialog
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IRunnableWithProgress {
-    protected static final Logger LOGGER = Logging.getLogger(ScatterPlotDialog.class);
+public class BubbleChartDialog extends AbstractGeoProcessingDialog implements IRunnableWithProgress {
+    protected static final Logger LOGGER = Logging.getLogger(BubbleChartDialog.class);
 
     protected final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
 
-    private ChartComposite2 chartComposite;
+    private ChartComposite3 chartComposite;
 
     private ILayer inputLayer;
 
-    private Combo cboLayer, cboXField, cboYField;
+    private Combo cboLayer, cboXField, cboYField, cboSize;
 
-    private Button chkStatistics, chkPearson;
+    private Button chkStatistics;
 
     private Browser browser;
 
@@ -103,13 +114,13 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
 
     private XYMinMaxVisitor minMaxVisitor = new XYMinMaxVisitor();
 
-    public ScatterPlotDialog(Shell parentShell, IMap map) {
+    public BubbleChartDialog(Shell parentShell, IMap map) {
         super(parentShell, map);
 
-        setShellStyle(SWT.CLOSE | SWT.MIN | SWT.TITLE | SWT.BORDER | SWT.MODELESS | SWT.RESIZE);
+        setShellStyle(SWT.CLOSE | SWT.MAX | SWT.TITLE | SWT.BORDER | SWT.MODELESS | SWT.RESIZE);
 
-        this.windowTitle = Messages.ScatterPlotDialog_title;
-        this.windowDesc = Messages.ScatterPlotDialog_description;
+        this.windowTitle = Messages.BubbleChartDialog_title;
+        this.windowDesc = Messages.BubbleChartDialog_description;
         this.windowSize = new Point(650, 450);
     }
 
@@ -125,12 +136,6 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
 
         // 1. Input Tab
         createInputTab(parentTabFolder);
-
-        // 2. Graph Tab
-        // createGraphTab(parentTabFolder);
-
-        // 3. Output Tab
-        // createOutputTab(parentTabFolder);
 
         parentTabFolder.setSelection(inputTab);
         parentTabFolder.pack();
@@ -156,19 +161,18 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         cboLayer = uiBuilder.createCombo(container, 1, true);
         fillLayers(map, cboLayer, VectorLayerType.ALL);
 
-        uiBuilder.createLabel(container, Messages.ScatterPlotDialog_IndependentField, EMPTY, image,
-                1);
+        uiBuilder.createLabel(container, Messages.BubbleChartDialog_XField, EMPTY, image, 1);
         cboXField = uiBuilder.createCombo(container, 1, true);
 
-        uiBuilder
-                .createLabel(container, Messages.ScatterPlotDialog_DependentField, EMPTY, image, 1);
+        uiBuilder.createLabel(container, Messages.BubbleChartDialog_YField, EMPTY, image, 1);
         cboYField = uiBuilder.createCombo(container, 1, true);
+
+        uiBuilder.createLabel(container, Messages.BubbleChartDialog_SizeField, EMPTY, image, 1);
+        cboSize = uiBuilder.createCombo(container, 1, true);
 
         uiBuilder.createLabel(container, null, null, 1);
         chkStatistics = uiBuilder.createCheckbox(container,
                 Messages.ScatterPlotDialog_BasicStatistics, null, 1);
-        chkPearson = uiBuilder.createCheckbox(container, Messages.ScatterPlotDialog_Pearson, null,
-                1);
 
         // register events
         cboLayer.addModifyListener(new ModifyListener() {
@@ -178,6 +182,7 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
                 if (inputLayer != null) {
                     fillFields(cboXField, inputLayer.getSchema(), FieldType.Number);
                     fillFields(cboYField, inputLayer.getSchema(), FieldType.Number);
+                    fillFields(cboSize, inputLayer.getSchema(), FieldType.Number);
                 }
             }
         });
@@ -223,7 +228,7 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         chart.setBackgroundPaint(java.awt.Color.WHITE);
         chart.setBorderVisible(false);
 
-        chartComposite = new ChartComposite2(parentTabFolder, SWT.NONE | SWT.EMBEDDED, chart, true);
+        chartComposite = new ChartComposite3(parentTabFolder, SWT.NONE | SWT.EMBEDDED, chart, true);
         chartComposite.setLayout(new FillLayout());
         chartComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         chartComposite.setDomainZoomable(false);
@@ -243,26 +248,35 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
 
         @Override
         public void chartMouseClicked(ChartMouseEvent event) {
+            DefaultXYZDataset2 ds = (DefaultXYZDataset2) chartComposite.getChart().getXYPlot()
+                    .getDataset(2);
             ChartEntity entity = event.getEntity();
             if (entity != null && (entity instanceof XYItemEntity)) {
                 XYItemEntity item = (XYItemEntity) entity;
                 if (item.getSeriesIndex() == 0) {
-                    XYSeriesCollection dataSet = (XYSeriesCollection) item.getDataset();
-                    XYSeries xySeries = dataSet.getSeries(item.getSeriesIndex());
-                    XYDataItem2 dataItem = (XYDataItem2) xySeries.getDataItem(item.getItem());
-
-                    Filter selectionFilter = ff.id(ff.featureId(dataItem.getFeature().getID()));
+                    DefaultXYZDataset2 dataSet = (DefaultXYZDataset2) item.getDataset();
+                    String featureID = dataSet.getFeatrureID(0, item.getItem());
+                    Filter selectionFilter = ff.id(ff.featureId(featureID));
                     map.select(selectionFilter, inputLayer);
+
+                    ds.addSeries(EMPTY,
+                            new double[][] { new double[] { dataSet.getXValue(0, item.getItem()) },
+                                    new double[] { dataSet.getYValue(0, item.getItem()) },
+                                    new double[] { dataSet.getZValue(0, item.getItem()) } });
+                    ds.addFeatrureIDS(EMPTY, new String[] { featureID });
                 } else {
                     map.select(Filter.EXCLUDE, inputLayer);
+                    ds.removeSeries(EMPTY);
                 }
             } else {
                 map.select(Filter.EXCLUDE, inputLayer);
+                ds.removeSeries(EMPTY);
             }
         }
     }
 
-    private void updateChart(SimpleFeatureCollection features, String xField, String yField) {
+    private void updateChart(SimpleFeatureCollection features, String xField, String yField,
+            String sizeField) {
         // 1. Create a single plot containing both the scatter and line
         XYPlot plot = new XYPlot();
         plot.setOrientation(PlotOrientation.VERTICAL);
@@ -274,6 +288,7 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         plot.setDomainCrosshairVisible(false);
         plot.setRangeCrosshairVisible(false);
         plot.setAxisOffset(new RectangleInsets(5.0, 5.0, 5.0, 5.0));
+        plot.setForegroundAlpha(0.75f);
 
         // 2. Setup Scatter plot
         // Create the scatter data, renderer, and axis
@@ -287,15 +302,15 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         yPlotAxis.setLabelFont(new Font(fontData.getName(), fontStyle, 12));
         yPlotAxis.setTickLabelFont(new Font(fontData.getName(), fontStyle, 10));
 
-        XYToolTipGenerator plotToolTip = new StandardXYToolTipGenerator();
-
-        XYItemRenderer plotRenderer = new XYLineAndShapeRenderer(false, true); // Shapes only
-        plotRenderer.setSeriesShape(0, new Ellipse2D.Double(0, 0, 3, 3));
-        plotRenderer.setSeriesPaint(0, java.awt.Color.BLUE); // dot
-        plotRenderer.setBaseToolTipGenerator(plotToolTip);
+        XYItemRenderer plotRenderer = new XYBubbleRenderer(XYBubbleRenderer.SCALE_ON_RANGE_AXIS);
+        plotRenderer.setSeriesPaint(0, java.awt.Color.ORANGE); // dot
+        plotRenderer.setBaseItemLabelGenerator(new BubbleXYItemLabelGenerator());
+        plotRenderer.setBaseToolTipGenerator(new StandardXYZToolTipGenerator());
+        plotRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.CENTER,
+                TextAnchor.CENTER));
 
         // Set the scatter data, renderer, and axis into plot
-        plot.setDataset(0, getScatterPlotData(features, xField, yField));
+        plot.setDataset(0, getScatterPlotData(features, xField, yField, sizeField));
 
         xPlotAxis.setAutoRange(false);
         xPlotAxis.setRange(minMaxVisitor.getMinX(), minMaxVisitor.getMaxX());
@@ -316,7 +331,7 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         XYItemRenderer lineRenderer = new XYLineAndShapeRenderer(true, false); // Lines only
         lineRenderer.setSeriesPaint(0, java.awt.Color.GRAY);
         lineRenderer.setSeriesPaint(1, java.awt.Color.GRAY);
-        lineRenderer.setSeriesPaint(2, java.awt.Color.RED);
+        lineRenderer.setSeriesPaint(2, java.awt.Color.GRAY);
 
         // Set the line data, renderer, and axis into plot
         NumberAxis xLineAxis = new NumberAxis(EMPTY);
@@ -345,11 +360,12 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         ySelectionAxis.setTickMarksVisible(false);
         ySelectionAxis.setTickLabelsVisible(false);
 
-        XYItemRenderer selectionRenderer = new XYLineAndShapeRenderer(false, true); // Shapes only
-        selectionRenderer.setSeriesShape(0, new Ellipse2D.Double(0, 0, 6, 6));
+        XYItemRenderer selectionRenderer = new XYBubbleRenderer(
+                XYBubbleRenderer.SCALE_ON_RANGE_AXIS);
         selectionRenderer.setSeriesPaint(0, java.awt.Color.RED); // dot
+        selectionRenderer.setSeriesOutlinePaint(0, java.awt.Color.RED);
 
-        plot.setDataset(2, new XYSeriesCollection(new XYSeries(EMPTY)));
+        plot.setDataset(2, new DefaultXYZDataset2());
         plot.setRenderer(2, selectionRenderer);
         plot.setDomainAxis(2, xSelectionAxis);
         plot.setRangeAxis(2, ySelectionAxis);
@@ -384,27 +400,44 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         dataset.addSeries(vertical);
 
         // Deegree
-        XYSeries deegree = new XYSeries("Deegree"); //$NON-NLS-1$
-        deegree.add(minMaxVisitor.getMinX(), minMaxVisitor.getMinY());
-        deegree.add(minMaxVisitor.getMaxX(), minMaxVisitor.getMaxY());
-        dataset.addSeries(deegree);
+        // XYSeries deegree = new XYSeries("Deegree"); //$NON-NLS-1$
+        // deegree.add(minMaxVisitor.getMinX(), minMaxVisitor.getMinY());
+        // deegree.add(minMaxVisitor.getMaxX(), minMaxVisitor.getMaxY());
+        // dataset.addSeries(deegree);
 
         return dataset;
     }
 
-    private XYDataset getScatterPlotData(SimpleFeatureCollection features, String xField,
-            String yField) {
-        XYSeries xySeries = new XYSeries(features.getSchema().getTypeName());
-        minMaxVisitor.reset();
+    private XYZDataset getScatterPlotData(SimpleFeatureCollection features, String xField,
+            String yField, String sizeField) {
+        DefaultXYZDataset2 xyzDataset = new DefaultXYZDataset2();
+
+        // 1. prepare bubble size
+        minMaxVisitor.visit(features, xField, yField, sizeField);
+
+        final double minVal = minMaxVisitor.getMinZ();
+        final double maxVal = minMaxVisitor.getMaxZ();
+        final double diffVal = maxVal - minVal;
+        final double scale = Math.min(minMaxVisitor.getMaxX(), minMaxVisitor.getMaxY()) / 10d;
+
+        // 2. calculate x, y, z values
+        final int featureCount = features.size();
+        double[] xAxis = new double[featureCount];
+        double[] yAxis = new double[featureCount];
+        double[] zAxis = new double[featureCount];
+        String[] featureIDS = new String[featureCount];
 
         Expression xExpression = ff.property(xField);
         Expression yExpression = ff.property(yField);
+        Expression sizeExpression = ff.property(sizeField);
 
+        int index = 0;
         SimpleFeatureIterator featureIter = null;
         try {
             featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
+                featureIDS[index] = feature.getID();
 
                 Double xVal = xExpression.evaluate(feature, Double.class);
                 if (xVal == null || xVal.isNaN() || xVal.isInfinite()) {
@@ -416,19 +449,35 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
                     continue;
                 }
 
-                minMaxVisitor.visit(xVal, yVal);
-                xySeries.add(new XYDataItem2(feature, xVal, yVal));
+                Double sizeVal = sizeExpression.evaluate(feature, Double.class);
+                if (sizeVal == null || sizeVal.isNaN() || sizeVal.isInfinite()) {
+                    continue;
+                }
+
+                xAxis[index] = xVal;
+                yAxis[index] = yVal;
+
+                double transformed = 0;
+                if (diffVal != 0) {
+                    transformed = (sizeVal - minVal) / diffVal;
+                }
+
+                zAxis[index] = transformed * scale;
+                index++;
             }
         } finally {
             featureIter.close();
         }
 
-        return new XYSeriesCollection(xySeries);
+        xyzDataset.addSeries(EMPTY, new double[][] { xAxis, yAxis, zAxis });
+        xyzDataset.addFeatrureIDS(EMPTY, featureIDS);
+
+        return xyzDataset;
     }
 
     @Override
     protected void okPressed() {
-        if (invalidWidgetValue(cboLayer, cboXField, cboYField)) {
+        if (invalidWidgetValue(cboLayer, cboXField, cboYField, cboSize)) {
             openInformation(getShell(), Messages.Task_ParameterRequired);
             return;
         }
@@ -453,47 +502,36 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         monitor.beginTask(String.format(Messages.Task_Executing, windowTitle), 100);
         try {
             if (plotTab == null) {
-                monitor.subTask("Preparing scatter plot...");
+                monitor.subTask("Preparing bubble chart...");
                 createGraphTab(inputTab.getParent());
-            }
-
-            if (outputTab == null) {
-                createOutputTab(inputTab.getParent());
             }
 
             monitor.worked(increment);
 
             String xField = cboXField.getText();
             String yField = cboYField.getText();
+            String sizeField = cboSize.getText();
             SimpleFeatureCollection features = MapUtils.getFeatures(inputLayer);
 
-            String fields = xField + "," + yField;
-
-            HtmlWriter writer = new HtmlWriter(inputLayer.getName());
-            DataStatisticsResult statistics = null;
-            PearsonResult pearson = null;
+            String fields = xField + "," + yField + "," + sizeField;
 
             if (chkStatistics.getSelection()) {
+                if (outputTab == null) {
+                    createOutputTab(inputTab.getParent());
+                }
+
                 ProgressListener subMonitor = GeoToolsAdapters.progress(SubMonitor.convert(monitor,
                         Messages.Task_Internal, 20));
-                statistics = StatisticsFeaturesProcess.process(features, fields, subMonitor);
+                DataStatisticsResult statistics = StatisticsFeaturesProcess.process(features,
+                        fields, subMonitor);
+                HtmlWriter writer = new HtmlWriter(inputLayer.getName());
                 writer.writeDataStatistics(statistics);
-            }
-
-            if (chkPearson.getSelection()) {
-                ProgressListener subMonitor = GeoToolsAdapters.progress(SubMonitor.convert(monitor,
-                        Messages.Task_Internal, 20));
-                pearson = PearsonCorrelationProcess.process(features, fields, subMonitor);
-                writer.writePearson(pearson);
-            }
-
-            if (statistics != null || pearson != null) {
                 browser.setText(writer.getHTML());
             }
 
-            monitor.subTask("Updating scatter plot...");
+            monitor.subTask("Updating bubble chart...");
             chartComposite.setLayer(inputLayer);
-            updateChart(features, xField, yField);
+            updateChart(features, xField, yField, sizeField);
             plotTab.getParent().setSelection(plotTab);
             monitor.worked(increment);
         } catch (Exception e) {
@@ -503,5 +541,121 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
             ToolboxPlugin.log(String.format(Messages.Task_Completed, windowTitle));
             monitor.done();
         }
+    }
+
+    class ChartComposite3 extends ChartComposite {
+
+        private final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+
+        private org.locationtech.udig.project.internal.Map map;
+
+        private ILayer layer;
+
+        public ChartComposite3(Composite comp, int style, JFreeChart chart, boolean useBuffer) {
+            super(comp, style, chart, useBuffer);
+        }
+
+        public org.locationtech.udig.project.internal.Map getMap() {
+            return map;
+        }
+
+        public void setMap(org.locationtech.udig.project.internal.Map map) {
+            this.map = map;
+        }
+
+        public ILayer getLayer() {
+            return layer;
+        }
+
+        public void setLayer(ILayer layer) {
+            this.layer = layer;
+        }
+
+        @SuppressWarnings("rawtypes")
+        @Override
+        public void zoom(Rectangle selection) {
+            if (map == null || layer == null) {
+                return;
+            }
+
+            DefaultXYZDataset2 ds = (DefaultXYZDataset2) getChart().getXYPlot().getDataset(2);
+            List<XYZItem> itemList = new ArrayList<XYZItem>();
+            try {
+                EntityCollection entities = this.getChartRenderingInfo().getEntityCollection();
+                Iterator iter = entities.iterator();
+                while (iter.hasNext()) {
+                    ChartEntity entity = (ChartEntity) iter.next();
+                    if (entity instanceof XYItemEntity) {
+                        XYItemEntity item = (XYItemEntity) entity;
+                        if (item.getSeriesIndex() != 0
+                                || !(item.getDataset() instanceof DefaultXYZDataset2)) {
+                            continue;
+                        }
+
+                        java.awt.Rectangle bound = item.getArea().getBounds();
+                        if (selection.intersects(bound.x, bound.y, bound.width, bound.height)) {
+                            DefaultXYZDataset2 dataSet = (DefaultXYZDataset2) item.getDataset();
+                            String featureID = dataSet.getFeatrureID(0, item.getItem());
+                            itemList.add(new XYZItem(featureID,
+                                    dataSet.getXValue(0, item.getItem()), dataSet.getYValue(0,
+                                            item.getItem()), dataSet.getZValue(0, item.getItem())));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // skip
+            } finally {
+                if (itemList.size() > 0) {
+                    Set<FeatureId> selected = new HashSet<FeatureId>();
+                    double[] xAxis = new double[itemList.size()];
+                    double[] yAxis = new double[itemList.size()];
+                    double[] zAxis = new double[itemList.size()];
+                    String[] featureIDS = new String[itemList.size()];
+                    for (int i = 0; i < itemList.size(); i++) {
+                        XYZItem item = itemList.get(i);
+                        xAxis[i] = item.x;
+                        yAxis[i] = item.y;
+                        zAxis[i] = item.z;
+                        featureIDS[i] = item.featureID;
+                        selected.add(ff.featureId(item.featureID));
+                    }
+
+                    ds.addSeries(EMPTY, new double[][] { xAxis, yAxis, zAxis });
+                    ds.addFeatrureIDS(EMPTY, featureIDS);
+                    map.select(ff.id(selected), layer);
+                } else {
+                    map.select(Filter.EXCLUDE, layer);
+                    ds.removeSeries(EMPTY);
+                }
+                this.forceRedraw();
+            }
+        }
+
+        @Override
+        public void restoreAutoBounds() {
+            return;
+        }
+
+        final class XYZItem {
+            public double x;
+
+            public double y;
+
+            public double z;
+
+            public String featureID;
+
+            public XYZItem() {
+
+            }
+
+            public XYZItem(String featureID, double x, double y, double z) {
+                this.featureID = featureID;
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+        }
+
     }
 }

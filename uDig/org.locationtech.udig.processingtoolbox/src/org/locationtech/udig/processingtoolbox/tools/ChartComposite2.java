@@ -60,29 +60,8 @@ class ChartComposite2 extends ChartComposite {
         this.layer = layer;
     }
 
-    public ChartComposite2(Composite comp, int style) {
-        super(comp, style);
-    }
-
-    public ChartComposite2(Composite comp, int style, JFreeChart chart) {
-        super(comp, style, chart);
-    }
-
     public ChartComposite2(Composite comp, int style, JFreeChart chart, boolean useBuffer) {
         super(comp, style, chart, useBuffer);
-    }
-
-    public ChartComposite2(Composite comp, int style, JFreeChart chart, boolean properties,
-            boolean save, boolean print, boolean zoom, boolean tooltips) {
-        super(comp, style, chart, properties, save, print, zoom, tooltips);
-    }
-
-    public ChartComposite2(Composite comp, int style, JFreeChart jfreechart, int width, int height,
-            int minimumDrawW, int minimumDrawH, int maximumDrawW, int maximumDrawH,
-            boolean usingBuffer, boolean properties, boolean save, boolean print, boolean zoom,
-            boolean tooltips) {
-        super(comp, style, jfreechart, width, height, minimumDrawW, minimumDrawH, maximumDrawW,
-                maximumDrawH, usingBuffer, properties, save, print, zoom, tooltips);
     }
 
     @SuppressWarnings("rawtypes")

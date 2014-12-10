@@ -24,6 +24,15 @@ public class Messages extends NLS {
     public static String BoundingBoxViewer_CurrentMapExtent;
     public static String BoundingBoxViewer_CurrentMapFullExtent;
     public static String BoundingBoxViewer_LayerExtent;
+    
+    public static String BoxPlotDialog_title;
+    public static String BoxPlotDialog_description;
+    
+    public static String BubbleChartDialog_title;
+    public static String BubbleChartDialog_description;
+    public static String BubbleChartDialog_XField;
+    public static String BubbleChartDialog_YField;
+    public static String BubbleChartDialog_SizeField;
 
     public static String CrsViewer_CRSDialog;
     public static String CrsViewer_LayerCRS;

@@ -201,6 +201,7 @@ public class Messages extends NLS {
     public static String TextfileToPointDialog_description;
     public static String TextfileToPointDialog_Textfile;
     public static String TextfileToPointDialog_CRS;
+    public static String TextfileToPointDialog_TargetCRS;
     public static String TextfileToPointDialog_Encoding;
     public static String TextfileToPointDialog_Schema;
     public static String TextfileToPointDialog_FieldNameSetting;

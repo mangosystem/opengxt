@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FilenameUtils;
@@ -75,9 +74,11 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
 
     private Combo cboSource, cboEncoding;
 
-    private Text txtCrs, txtSplit;
+    private Text txtSourceCrs, txtTargetCrs, txtSplit;
 
     private Button btnSource, chkHeader, optTab, optColon, optComma, optSpace, optEtc;
+
+    private Button btnSourceCrs, btnTargetCrs;
 
     private String splitter = ","; //$NON-NLS-1$
 
@@ -113,7 +114,7 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
 
         // 3. encoding & spatial reference
         uiBuilder.createLabel(container, Messages.TextfileToPointDialog_Encoding, null, 1);
-        GridLayout layout = new GridLayout(5, false);
+        GridLayout layout = new GridLayout(8, false);
         layout.marginWidth = 0;
 
         Composite subCon = new Composite(container, SWT.NONE);
@@ -129,26 +130,22 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
         cboEncoding.setText(ToolboxPlugin.defaultCharset());
 
         uiBuilder.createLabel(subCon, "   ", null, 1); //$NON-NLS-1$
+
+        // source crs
         uiBuilder.createLabel(subCon, Messages.TextfileToPointDialog_CRS, null, 1);
-        txtCrs = uiBuilder.createText(subCon, EMPTY, 1, true);
-        txtCrs.setEditable(false);
-        final Button btnOpen = uiBuilder.createButton(subCon, DOT3, null, 1);
-        btnOpen.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent event) {
-                CRSChooserDialog dialog = new CRSChooserDialog(parent.getShell(), null);
-                if (dialog.open() == Window.OK) {
-                    CoordinateReferenceSystem crs = dialog.getResult();
-                    try {
-                        if (crs != null) {
-                            txtCrs.setText(CRS.lookupIdentifier(crs, true));
-                        }
-                    } catch (FactoryException e) {
-                        txtCrs.setText(EMPTY);
-                    }
-                }
-            }
-        });
+        txtSourceCrs = uiBuilder.createText(subCon, EMPTY, 1, true);
+        txtSourceCrs.setEditable(false);
+        txtSourceCrs.setData(null);
+        btnSourceCrs = uiBuilder.createButton(subCon, DOT3, null, 1);
+        btnSourceCrs.addSelectionListener(selectionListener);
+
+        // target crs
+        uiBuilder.createLabel(subCon, Messages.TextfileToPointDialog_TargetCRS, null, 1);
+        txtTargetCrs = uiBuilder.createText(subCon, EMPTY, 1, true);
+        txtTargetCrs.setEditable(false);
+        txtTargetCrs.setData(null);
+        btnTargetCrs = uiBuilder.createButton(subCon, DOT3, null, 1);
+        btnTargetCrs.addSelectionListener(selectionListener);
 
         // 3. define schema
         Group group = uiBuilder.createGroup(container, Messages.TextfileToPointDialog_Schema,
@@ -215,8 +212,8 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
         @Override
         public void widgetSelected(SelectionEvent event) {
             Widget widget = event.widget;
+            final Shell activeShell = event.display.getActiveShell();
             if (widget.equals(btnSource)) {
-                final Shell activeShell = event.display.getActiveShell();
                 FileDialog fileDialog = new FileDialog(activeShell, SWT.SINGLE);
                 fileDialog
                         .setFilterNames(new String[] { "Text file (*.txt, *.csv, *.tab, *.asc, *.dat)" });
@@ -238,6 +235,32 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
                 if (!StringHelper.isNullOrEmpty(txtSplit.getText())) {
                     splitter = txtSplit.getText();
                     loadTables();
+                }
+            } else if (widget.equals(btnSourceCrs)) {
+                CRSChooserDialog dialog = new CRSChooserDialog(activeShell, null);
+                if (dialog.open() == Window.OK) {
+                    CoordinateReferenceSystem crs = dialog.getResult();
+                    try {
+                        if (crs != null) {
+                            txtSourceCrs.setText(CRS.lookupIdentifier(crs, true));
+                        }
+                    } catch (FactoryException e) {
+                        txtSourceCrs.setText(EMPTY);
+                    }
+                    txtSourceCrs.setData(crs);
+                }
+            } else if (widget.equals(btnTargetCrs)) {
+                CRSChooserDialog dialog = new CRSChooserDialog(activeShell, null);
+                if (dialog.open() == Window.OK) {
+                    CoordinateReferenceSystem crs = dialog.getResult();
+                    try {
+                        if (crs != null) {
+                            txtTargetCrs.setText(CRS.lookupIdentifier(crs, true));
+                        }
+                    } catch (FactoryException e) {
+                        txtTargetCrs.setText(EMPTY);
+                    }
+                    txtTargetCrs.setData(crs);
                 }
             }
         }
@@ -351,13 +374,15 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
             boolean headerFirst = chkHeader.getSelection();
             List<TextColumn> schema = getTextColumns();
 
-            CoordinateReferenceSystem crs = null;
-            if (!StringHelper.isNullOrEmpty(txtCrs.getText())) {
-                try {
-                    crs = CRS.decode(txtCrs.getText());
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, e.getMessage(), e);
-                }
+            CoordinateReferenceSystem sourceCRS = null;
+            CoordinateReferenceSystem targetCRS = null;
+
+            if (txtSourceCrs.getData() != null) {
+                sourceCRS = (CoordinateReferenceSystem) txtSourceCrs.getData();
+            }
+
+            if (txtTargetCrs.getData() != null) {
+                targetCRS = (CoordinateReferenceSystem) txtTargetCrs.getData();
             }
 
             String outputName = FilenameUtils.removeExtension(FilenameUtils.getName(locationView
@@ -369,7 +394,7 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
             process.setOutputTypeName(outputName);
 
             SimpleFeatureCollection features = process.execute(textFile, charset, splitter,
-                    headerFirst, schema, crs);
+                    headerFirst, schema, sourceCRS, targetCRS);
             error = process.getError();
             monitor.worked(increment);
 

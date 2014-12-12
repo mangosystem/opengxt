@@ -27,15 +27,22 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.referencing.CRS;
 import org.geotools.util.Converters;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -86,10 +93,21 @@ public class TextfileToPointOperation extends GeneralOperation {
     }
 
     public SimpleFeatureCollection execute(File textFile, Charset charset, String splitter,
-            boolean headerFirst, List<TextColumn> columns, CoordinateReferenceSystem crs)
+            boolean headerFirst, List<TextColumn> columns, CoordinateReferenceSystem sourceCRS)
             throws Exception {
+        return execute(textFile, charset, splitter, headerFirst, columns, sourceCRS, null);
+    }
 
-        SimpleFeatureType schema = buildSchema(columns, crs);
+    public SimpleFeatureCollection execute(File textFile, Charset charset, String splitter,
+            boolean headerFirst, List<TextColumn> columns, CoordinateReferenceSystem sourceCRS,
+            CoordinateReferenceSystem targetCRS) throws Exception {
+
+        SimpleFeatureType schema = buildSchema(columns, sourceCRS);
+
+        MathTransform transform = null;
+        if (sourceCRS != null && targetCRS != null) {
+            transform = getMathTransform(sourceCRS, targetCRS);
+        }
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(schema);
@@ -141,7 +159,18 @@ public class TextfileToPointOperation extends GeneralOperation {
                 }
 
                 if (x != null && y != null) {
-                    newFeature.setDefaultGeometry(gf.createPoint(new Coordinate(x, y)));
+                    Geometry point = gf.createPoint(new Coordinate(x, y));
+                    if (transform != null) {
+                        try {
+                            point = JTS.transform(point, transform);
+                        } catch (MismatchedDimensionException e) {
+                            LOGGER.log(Level.FINER, e.getMessage(), e);
+                        } catch (TransformException e) {
+                            LOGGER.log(Level.FINER, e.getMessage(), e);
+                        }
+                    }
+
+                    newFeature.setDefaultGeometry(point);
                     try {
                         featureWriter.write(newFeature);
                     } catch (Exception e) {
@@ -169,5 +198,28 @@ public class TextfileToPointOperation extends GeneralOperation {
         }
 
         return featureWriter.getFeatureCollection();
+    }
+
+    private MathTransform getMathTransform(CoordinateReferenceSystem sourceCRS,
+            CoordinateReferenceSystem targetCRS) {
+        if (sourceCRS == null || targetCRS == null) {
+            LOGGER.log(Level.WARNING,
+                    "Input CoordinateReferenceSystem is Unknown Coordinate System!");
+            return null;
+        }
+
+        if (CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
+            LOGGER.log(Level.WARNING, "Input and Output Coordinate Reference Systems are equal!");
+            return null;
+        }
+
+        MathTransform transform = null;
+        try {
+            transform = CRS.findMathTransform(sourceCRS, targetCRS, false);
+        } catch (FactoryException e1) {
+            LOGGER.log(Level.WARNING, e1.getMessage(), 1);
+        }
+
+        return transform;
     }
 }

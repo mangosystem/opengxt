@@ -66,7 +66,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBubbleRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.data.xy.XYZDataset;
@@ -291,7 +290,7 @@ public class BubbleChartDialog extends AbstractGeoProcessingDialog implements IR
         plot.setForegroundAlpha(0.75f);
 
         // 2. Setup Scatter plot
-        // Create the scatter data, renderer, and axis
+        // Create the bubble chart data, renderer, and axis
         int fontStyle = java.awt.Font.BOLD;
         FontData fontData = getShell().getDisplay().getSystemFont().getFontData()[0];
         NumberAxis xPlotAxis = new NumberAxis(xField); // Independent variable
@@ -309,15 +308,30 @@ public class BubbleChartDialog extends AbstractGeoProcessingDialog implements IR
         plotRenderer.setBasePositiveItemLabelPosition(new ItemLabelPosition(ItemLabelAnchor.CENTER,
                 TextAnchor.CENTER));
 
-        // Set the scatter data, renderer, and axis into plot
-        plot.setDataset(0, getScatterPlotData(features, xField, yField, sizeField));
+        // Set the bubble chart data, renderer, and axis into plot
+        plot.setDataset(0, getBubbleChartData(features, xField, yField, sizeField));
 
+        xPlotAxis.setAutoRangeIncludesZero(false);
         xPlotAxis.setAutoRange(false);
-        xPlotAxis.setRange(minMaxVisitor.getMinX(), minMaxVisitor.getMaxX());
+        double differUpper = minMaxVisitor.getMaxX() - minMaxVisitor.getAverageX();
+        double differLower = minMaxVisitor.getAverageX() - minMaxVisitor.getMinX();
+        double gap = Math.abs(differUpper - differLower);
+        if (differUpper > differLower) {
+            xPlotAxis.setRange(minMaxVisitor.getMinX() - gap, minMaxVisitor.getMaxX());
+        } else {
+            xPlotAxis.setRange(minMaxVisitor.getMinX(), minMaxVisitor.getMaxX() + gap);
+        }
 
-        //yPlotAxis.setAutoRange(false);
-        //yPlotAxis.setRange(minMaxVisitor.getMinY(), minMaxVisitor.getMaxY());
         yPlotAxis.setAutoRangeIncludesZero(false);
+        yPlotAxis.setAutoRange(false);
+        differUpper = minMaxVisitor.getMaxY() - minMaxVisitor.getAverageY();
+        differLower = minMaxVisitor.getAverageY() - minMaxVisitor.getMinY();
+        gap = Math.abs(differUpper - differLower);
+        if (differUpper > differLower) {
+            yPlotAxis.setRange(minMaxVisitor.getMinY() - gap, minMaxVisitor.getMaxY());
+        } else {
+            yPlotAxis.setRange(minMaxVisitor.getMinY(), minMaxVisitor.getMaxY() + gap);
+        }
 
         plot.setRenderer(0, plotRenderer);
         plot.setDomainAxis(0, xPlotAxis);
@@ -343,7 +357,21 @@ public class BubbleChartDialog extends AbstractGeoProcessingDialog implements IR
         yLineAxis.setTickMarksVisible(false);
         yLineAxis.setTickLabelsVisible(false);
 
-        plot.setDataset(1, getLinePlotData());
+        XYSeriesCollection lineDataset = new XYSeriesCollection();
+
+        // AverageY
+        XYSeries horizontal = new XYSeries("AverageY"); //$NON-NLS-1$
+        horizontal.add(xPlotAxis.getRange().getLowerBound(), minMaxVisitor.getAverageY());
+        horizontal.add(xPlotAxis.getRange().getUpperBound(), minMaxVisitor.getAverageY());
+        lineDataset.addSeries(horizontal);
+
+        // AverageX
+        XYSeries vertical = new XYSeries("AverageX"); //$NON-NLS-1$
+        vertical.add(minMaxVisitor.getAverageX(), yPlotAxis.getRange().getLowerBound());
+        vertical.add(minMaxVisitor.getAverageX(), yPlotAxis.getRange().getUpperBound());
+        lineDataset.addSeries(vertical);
+
+        plot.setDataset(1, lineDataset);
         plot.setRenderer(1, lineRenderer);
         plot.setDomainAxis(1, xLineAxis);
         plot.setRangeAxis(1, yLineAxis);
@@ -385,31 +413,7 @@ public class BubbleChartDialog extends AbstractGeoProcessingDialog implements IR
         chartComposite.forceRedraw();
     }
 
-    private XYDataset getLinePlotData() {
-        XYSeriesCollection dataset = new XYSeriesCollection();
-
-        // Horizontal
-        XYSeries horizontal = new XYSeries("Horizontal"); //$NON-NLS-1$
-        horizontal.add(minMaxVisitor.getMinX(), minMaxVisitor.getAverageY());
-        horizontal.add(minMaxVisitor.getMaxX(), minMaxVisitor.getAverageY());
-        dataset.addSeries(horizontal);
-
-        // Vertical
-        XYSeries vertical = new XYSeries("Vertical"); //$NON-NLS-1$
-        vertical.add(minMaxVisitor.getAverageX(), minMaxVisitor.getMinY());
-        vertical.add(minMaxVisitor.getAverageX(), minMaxVisitor.getMaxY());
-        dataset.addSeries(vertical);
-
-        // Deegree
-        // XYSeries deegree = new XYSeries("Deegree"); //$NON-NLS-1$
-        // deegree.add(minMaxVisitor.getMinX(), minMaxVisitor.getMinY());
-        // deegree.add(minMaxVisitor.getMaxX(), minMaxVisitor.getMaxY());
-        // dataset.addSeries(deegree);
-
-        return dataset;
-    }
-
-    private XYZDataset getScatterPlotData(SimpleFeatureCollection features, String xField,
+    private XYZDataset getBubbleChartData(SimpleFeatureCollection features, String xField,
             String yField, String sizeField) {
         DefaultXYZDataset2 xyzDataset = new DefaultXYZDataset2();
 
@@ -419,7 +423,7 @@ public class BubbleChartDialog extends AbstractGeoProcessingDialog implements IR
         final double minVal = minMaxVisitor.getMinZ();
         final double maxVal = minMaxVisitor.getMaxZ();
         final double diffVal = maxVal - minVal;
-        final double scale = Math.min(minMaxVisitor.getMaxX(), minMaxVisitor.getMaxY()) / 10d;
+        final double scale = Math.min(minMaxVisitor.getMaxX(), minMaxVisitor.getMaxY()) / 8d;
 
         // 2. calculate x, y, z values
         final int featureCount = features.size();

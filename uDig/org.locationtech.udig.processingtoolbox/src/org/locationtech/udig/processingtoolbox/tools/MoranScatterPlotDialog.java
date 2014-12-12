@@ -136,12 +136,6 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
         // 1. Input Tab
         createInputTab(parentTabFolder);
 
-        // 2. Graph Tab
-        // createGraphTab(parentTabFolder);
-
-        // 3. Output Tab
-        // createOutputTab(parentTabFolder);
-
         parentTabFolder.setSelection(inputTab);
         parentTabFolder.pack();
         area.pack(true);
@@ -230,10 +224,6 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
                 }
             }
         });
-
-        // output
-        // locationView = new OutputDataWidget(FileDataType.SHAPEFILE, SWT.SAVE);
-        // locationView.create(container, SWT.BORDER, 1, 1);
 
         // register events
         cboLayer.addModifyListener(new ModifyListener() {
@@ -473,6 +463,16 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
             featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
+                // TODO: recalculate local moran's i
+                // The X axis of the scatter plot represents the standardised Z values of your
+                // variable (that is, they’ve been standardised to their Z scores, with a mean of
+                // zero, and a standard deviation of 1.)
+                // The Y axis represents the standardised values of the neighbouring values around
+                // your point of interest, that is the lagged values. These are calculated according
+                // to the spatial weights matrix that you specify. So, for instance, if you specify
+                // a contiguous spatial weights matrix, with a first order queen contiguity, the
+                // value of the y axis represents the mean value of the variable for all of the
+                // areas that share a border with the area of interest.
                 Double x = Converters.convert(feature.getAttribute("LMiZScore"), Double.class);
                 Double y = Converters.convert(feature.getAttribute("LMiIndex"), Double.class);
                 if (x != null && y != null) {

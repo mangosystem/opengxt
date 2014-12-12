@@ -87,6 +87,10 @@ public class Messages extends NLS {
     public static String HistogramDialog_InputLayer;
     public static String HistogramDialog_InputField;
     public static String HistogramDialog_BinCount;
+    public static String HistogramDialog_YAxisType;
+    public static String HistogramDialog_Frequency;
+    public static String HistogramDialog_Ratio;
+    public static String HistogramDialog_Value;
     
     public static String LiteralDataViewer_ExpressionBuilder;
     public static String LiteralDataViewer_MultipleFieldsSelection;

@@ -38,9 +38,17 @@ public class TableSelectionWidget extends AbstractToolboxWidget {
 
     public void create(final Composite parent, final int style, final int colspan, final int rowspan) {
         composite = new Composite(parent, style);
-        composite.setLayout(new GridLayout(3, false));
         composite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, colspan, rowspan));
 
+        GridLayout layout = new GridLayout(3, false);
+        layout.marginTop = 0;
+        layout.marginBottom = 0;
+        layout.marginLeft = 0;
+        layout.marginRight = 0;
+        layout.marginWidth = 0;
+        layout.marginHeight = 0;
+        composite.setLayout(layout);
+        
         btnSelectAll = widget.createButton(composite, Messages.TableSelectionWidget_SelectAll,
                 null, 1);
         btnSelectAll.addSelectionListener(selectionListener);

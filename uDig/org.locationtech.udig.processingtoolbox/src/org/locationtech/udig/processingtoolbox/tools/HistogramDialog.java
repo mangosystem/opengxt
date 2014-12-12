@@ -9,6 +9,7 @@
  */
 package org.locationtech.udig.processingtoolbox.tools;
 
+import java.awt.BasicStroke;
 import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
@@ -30,6 +31,8 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -66,8 +69,7 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.statistics.HistogramDataset;
-import org.jfree.data.xy.XYDataset;
+import org.jfree.data.statistics.HistogramType;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.experimental.chart.swt.ChartComposite;
@@ -112,6 +114,9 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
     private Button chkStatistics;
 
     private Browser browser;
+
+    // default = binCount / total
+    private HistogramType histogramType = HistogramType.RELATIVE_FREQUENCY;
 
     private CTabItem inputTab, plotTab, outputTab;
 
@@ -158,24 +163,54 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
         scroller.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         Composite container = new Composite(scroller, SWT.NONE);
-        container.setLayout(new GridLayout(1, false));
+        container.setLayout(new GridLayout(2, false));
         container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         // local moran's i
         Image image = ToolboxPlugin.getImageDescriptor("icons/public_co.gif").createImage(); //$NON-NLS-1$
-        uiBuilder.createLabel(container, Messages.HistogramDialog_InputLayer, EMPTY, image, 1);
-        cboLayer = uiBuilder.createCombo(container, 1, true);
+        uiBuilder.createLabel(container, Messages.HistogramDialog_InputLayer, EMPTY, image, 2);
+        cboLayer = uiBuilder.createCombo(container, 2, true);
         fillLayers(map, cboLayer, VectorLayerType.ALL);
 
-        uiBuilder.createLabel(container, Messages.HistogramDialog_InputField, EMPTY, image, 1);
-        cboField = uiBuilder.createCombo(container, 1, true);
+        uiBuilder.createLabel(container, Messages.HistogramDialog_InputField, EMPTY, image, 2);
+        cboField = uiBuilder.createCombo(container, 2, true);
 
-        uiBuilder.createLabel(container, Messages.HistogramDialog_BinCount, EMPTY, image, 1);
-        spinner = uiBuilder.createSpinner(container, 10, 1, 50, 0, 1, 5, 1);
+        uiBuilder.createLabel(container, Messages.HistogramDialog_BinCount, EMPTY, image, 2);
+        spinner = uiBuilder.createSpinner(container, 10, 1, 50, 0, 1, 5, 2);
 
-        uiBuilder.createLabel(container, null, null, 1);
+        // yXais Type
+        uiBuilder.createLabel(container, Messages.HistogramDialog_YAxisType, EMPTY, image, 1);
+        GridLayout layout = new GridLayout(2, false);
+        layout.marginWidth = 0;
+
+        Composite subCon = new Composite(container, SWT.NONE);
+        subCon.setLayout(layout);
+        subCon.setLayoutData(new GridData(SWT.LEFT_TO_RIGHT, SWT.CENTER, false, false, 1, 1));
+        final Button chkRatio = uiBuilder.createRadioButton(subCon, Messages.HistogramDialog_Ratio,
+                null, 1);
+        final Button chkFrequency = uiBuilder.createRadioButton(subCon,
+                Messages.HistogramDialog_Frequency, null, 1);
+        chkFrequency.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent event) {
+                if (chkFrequency.getSelection()) {
+                    histogramType = HistogramType.FREQUENCY;
+                }
+            }
+        });
+        chkRatio.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent event) {
+                if (chkRatio.getSelection()) {
+                    histogramType = HistogramType.RELATIVE_FREQUENCY;
+                }
+            }
+        });
+        chkRatio.setSelection(true);
+
+        uiBuilder.createLabel(container, null, null, 2);
         chkStatistics = uiBuilder.createCheckbox(container,
-                Messages.ScatterPlotDialog_BasicStatistics, null, 1);
+                Messages.ScatterPlotDialog_BasicStatistics, null, 2);
 
         // register events
         cboLayer.addModifyListener(new ModifyListener() {
@@ -244,7 +279,7 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
             ChartEntity entity = event.getEntity();
             if (entity != null && (entity instanceof XYItemEntity)) {
                 XYItemEntity item = (XYItemEntity) entity;
-                HistogramDataset dataSet = (HistogramDataset) item.getDataset();
+                HistogramDataset2 dataSet = (HistogramDataset2) item.getDataset();
                 double min = dataSet.getStartXValue(0, item.getItem());
                 double max = dataSet.getEndXValue(0, item.getItem());
                 CustomXYBarPainter.selectedColumn = item.getItem();
@@ -263,8 +298,9 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
         int bin = spinner.getSelection();
 
         double[] values = getValues(features, field);
-        HistogramDataset dataset = new HistogramDataset();
-        dataset.addSeries(field, values, bin);
+        HistogramDataset2 dataset = new HistogramDataset2();
+        dataset.addSeries(field, values, bin, minMaxVisitor.getMinX(), minMaxVisitor.getMaxX());
+        dataset.setType(histogramType);
 
         JFreeChart chart = ChartFactory.createHistogram(EMPTY, null, null, dataset,
                 PlotOrientation.VERTICAL, false, false, false);
@@ -274,7 +310,7 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
         chart.setBorderVisible(false);
 
         XYPlot plot = (XYPlot) chart.getPlot();
-        plot.setForegroundAlpha(0.7F);
+        plot.setForegroundAlpha(0.85F);
         plot.setBackgroundPaint(java.awt.Color.WHITE);
         plot.setOrientation(PlotOrientation.VERTICAL);
 
@@ -284,17 +320,20 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
         int fontStyle = java.awt.Font.BOLD;
         FontData fontData = getShell().getDisplay().getSystemFont().getFontData()[0];
 
-        NumberAxis valueAxis = new NumberAxis("Value"); //$NON-NLS-1$
+        NumberAxis valueAxis = new NumberAxis(cboField.getText());
         valueAxis.setLabelFont(new Font(fontData.getName(), fontStyle, 12));
         valueAxis.setTickLabelFont(new Font(fontData.getName(), fontStyle, 10));
 
         valueAxis.setAutoRange(false);
         valueAxis.setRange(minMaxVisitor.getMinX(), minMaxVisitor.getMaxX());
 
-        NumberAxis rangeAxis = new NumberAxis("Frequency"); //$NON-NLS-1$
+        String rangeAxisLabel = histogramType == HistogramType.FREQUENCY ? "Frequency" : "Percent"; //$NON-NLS-1$ //$NON-NLS-2$
+        NumberAxis rangeAxis = new NumberAxis(rangeAxisLabel);
         rangeAxis.setLabelFont(new Font(fontData.getName(), fontStyle, 12));
         rangeAxis.setTickLabelFont(new Font(fontData.getName(), fontStyle, 10));
-        rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        if (histogramType == HistogramType.FREQUENCY) {
+            rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        }
 
         XYBarRenderer renderer = (XYBarRenderer) plot.getRenderer();
         renderer.setShadowVisible(false);
@@ -303,7 +342,7 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
         renderer.setAutoPopulateSeriesFillPaint(true);
         renderer.setAutoPopulateSeriesPaint(true);
         renderer.setShadowXOffset(3);
-        renderer.setMargin(0.2);
+        renderer.setMargin(0.01);
         renderer.setBaseItemLabelsVisible(true);
 
         ItemLabelPosition pos = new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.TOP_CENTER);
@@ -324,6 +363,7 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
         // Create the line data, renderer, and axis
         XYItemRenderer lineRenderer = new XYLineAndShapeRenderer(true, false); // Lines only
         lineRenderer.setSeriesPaint(0, java.awt.Color.RED);
+        lineRenderer.setSeriesStroke(0, new BasicStroke(2f));
 
         // Set the line data, renderer, and axis into plot
         NumberAxis xLineAxis = new NumberAxis(EMPTY);
@@ -336,7 +376,20 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
         yLineAxis.setTickLabelsVisible(false);
         yLineAxis.setAutoRange(false);
 
-        plot.setDataset(1, getLinePlotData(dataset.getYValue(0, dataset.getItemCount(0) - 1)));
+        double maxYValue = Double.MIN_VALUE;
+        for (int i = 0; i < dataset.getItemCount(0); i++) {
+            maxYValue = Math.max(maxYValue, dataset.getYValue(0, i));
+        }
+
+        XYSeriesCollection lineDatset = new XYSeriesCollection();
+
+        // Vertical Average
+        XYSeries vertical = new XYSeries("Average"); //$NON-NLS-1$
+        vertical.add(minMaxVisitor.getAverageX(), 0);
+        vertical.add(minMaxVisitor.getAverageX(), maxYValue);
+        lineDatset.addSeries(vertical);
+
+        plot.setDataset(1, lineDatset);
         plot.setRenderer(1, lineRenderer);
         plot.setDomainAxis(1, xLineAxis);
         plot.setRangeAxis(1, yLineAxis);
@@ -347,18 +400,6 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
 
         chartComposite.setChart(chart);
         chartComposite.forceRedraw();
-    }
-
-    private XYDataset getLinePlotData(double maxCount) {
-        XYSeriesCollection dataset = new XYSeriesCollection();
-
-        // Vertical Average
-        XYSeries vertical = new XYSeries("Average"); //$NON-NLS-1$
-        vertical.add(minMaxVisitor.getAverageX(), 0);
-        vertical.add(minMaxVisitor.getAverageX(), maxCount + 1);
-        dataset.addSeries(vertical);
-
-        return dataset;
     }
 
     private double[] getValues(SimpleFeatureCollection features, String field) {

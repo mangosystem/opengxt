@@ -126,12 +126,6 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         // 1. Input Tab
         createInputTab(parentTabFolder);
 
-        // 2. Graph Tab
-        // createGraphTab(parentTabFolder);
-
-        // 3. Output Tab
-        // createOutputTab(parentTabFolder);
-
         parentTabFolder.setSelection(inputTab);
         parentTabFolder.pack();
         area.pack(true);
@@ -297,12 +291,27 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         // Set the scatter data, renderer, and axis into plot
         plot.setDataset(0, getScatterPlotData(features, xField, yField));
 
+        xPlotAxis.setAutoRangeIncludesZero(false);
         xPlotAxis.setAutoRange(false);
-        xPlotAxis.setRange(minMaxVisitor.getMinX(), minMaxVisitor.getMaxX());
+        double differUpper = minMaxVisitor.getMaxX() - minMaxVisitor.getAverageX();
+        double differLower = minMaxVisitor.getAverageX() - minMaxVisitor.getMinX();
+        double gap = Math.abs(differUpper - differLower);
+        if (differUpper > differLower) {
+            xPlotAxis.setRange(minMaxVisitor.getMinX() - gap, minMaxVisitor.getMaxX());
+        } else {
+            xPlotAxis.setRange(minMaxVisitor.getMinX(), minMaxVisitor.getMaxX() + gap);
+        }
 
-        //yPlotAxis.setAutoRange(false);
-        //yPlotAxis.setRange(minMaxVisitor.getMinY(), minMaxVisitor.getMaxY());
         yPlotAxis.setAutoRangeIncludesZero(false);
+        yPlotAxis.setAutoRange(false);
+        differUpper = minMaxVisitor.getMaxY() - minMaxVisitor.getAverageY();
+        differLower = minMaxVisitor.getAverageY() - minMaxVisitor.getMinY();
+        gap = Math.abs(differUpper - differLower);
+        if (differUpper > differLower) {
+            yPlotAxis.setRange(minMaxVisitor.getMinY() - gap, minMaxVisitor.getMaxY());
+        } else {
+            yPlotAxis.setRange(minMaxVisitor.getMinY(), minMaxVisitor.getMaxY() + gap);
+        }
 
         plot.setRenderer(0, plotRenderer);
         plot.setDomainAxis(0, xPlotAxis);
@@ -317,7 +326,7 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         XYItemRenderer lineRenderer = new XYLineAndShapeRenderer(true, false); // Lines only
         lineRenderer.setSeriesPaint(0, java.awt.Color.GRAY);
         lineRenderer.setSeriesPaint(1, java.awt.Color.GRAY);
-        lineRenderer.setSeriesPaint(2, java.awt.Color.RED);
+        lineRenderer.setSeriesPaint(2, java.awt.Color.GRAY);
 
         // Set the line data, renderer, and axis into plot
         NumberAxis xLineAxis = new NumberAxis(EMPTY);
@@ -327,8 +336,28 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         NumberAxis yLineAxis = new NumberAxis(EMPTY);
         yLineAxis.setTickMarksVisible(false);
         yLineAxis.setTickLabelsVisible(false);
+        
+        XYSeriesCollection lineDataset = new XYSeriesCollection();
 
-        plot.setDataset(1, getLinePlotData());
+        // AverageY
+        XYSeries horizontal = new XYSeries("AverageY"); //$NON-NLS-1$
+        horizontal.add(xPlotAxis.getRange().getLowerBound(), minMaxVisitor.getAverageY());
+        horizontal.add(xPlotAxis.getRange().getUpperBound(), minMaxVisitor.getAverageY());
+        lineDataset.addSeries(horizontal);
+
+        // AverageX
+        XYSeries vertical = new XYSeries("AverageX"); //$NON-NLS-1$
+        vertical.add(minMaxVisitor.getAverageX(), yPlotAxis.getRange().getLowerBound());
+        vertical.add(minMaxVisitor.getAverageX(), yPlotAxis.getRange().getUpperBound());
+        lineDataset.addSeries(vertical);
+
+        // Degree
+        XYSeries degree = new XYSeries("Deegree"); //$NON-NLS-1$
+        degree.add(xPlotAxis.getRange().getLowerBound(), yPlotAxis.getRange().getLowerBound());
+        degree.add(xPlotAxis.getRange().getUpperBound(), yPlotAxis.getRange().getUpperBound());
+        lineDataset.addSeries(degree);
+
+        plot.setDataset(1, lineDataset);
         plot.setRenderer(1, lineRenderer);
         plot.setDomainAxis(1, xLineAxis);
         plot.setRangeAxis(1, yLineAxis);
@@ -367,30 +396,6 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
 
         chartComposite.setChart(chart);
         chartComposite.forceRedraw();
-    }
-
-    private XYDataset getLinePlotData() {
-        XYSeriesCollection dataset = new XYSeriesCollection();
-
-        // Horizontal
-        XYSeries horizontal = new XYSeries("Horizontal"); //$NON-NLS-1$
-        horizontal.add(minMaxVisitor.getMinX(), minMaxVisitor.getAverageY());
-        horizontal.add(minMaxVisitor.getMaxX(), minMaxVisitor.getAverageY());
-        dataset.addSeries(horizontal);
-
-        // Vertical
-        XYSeries vertical = new XYSeries("Vertical"); //$NON-NLS-1$
-        vertical.add(minMaxVisitor.getAverageX(), minMaxVisitor.getMinY());
-        vertical.add(minMaxVisitor.getAverageX(), minMaxVisitor.getMaxY());
-        dataset.addSeries(vertical);
-
-        // Deegree
-        XYSeries deegree = new XYSeries("Deegree"); //$NON-NLS-1$
-        deegree.add(minMaxVisitor.getMinX(), minMaxVisitor.getMinY());
-        deegree.add(minMaxVisitor.getMaxX(), minMaxVisitor.getMaxY());
-        dataset.addSeries(deegree);
-
-        return dataset;
     }
 
     private XYDataset getScatterPlotData(SimpleFeatureCollection features, String xField,

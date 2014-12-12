@@ -18,9 +18,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -28,9 +34,12 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.PlatformUI;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.process.spatialstatistics.core.StringHelper;
 import org.geotools.process.spatialstatistics.storage.ShapeExportOperation;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
@@ -59,6 +68,14 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
     private Table inputTable;
 
     private Combo cboOption;
+
+    private String splitter = ","; //$NON-NLS-1$
+
+    private Text txtSplit;
+
+    private Group grpOption;
+
+    private Button optTab, optColon, optComma, optSpace, optEtc;
 
     public FormatConversionDialog(Shell parentShell, IMap map) {
         super(parentShell, map);
@@ -91,11 +108,49 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
 
         uiBuilder.createLabel(container, Messages.FormatConversionDialog_Format, null, 1);
         cboOption = uiBuilder.createCombo(container, 1);
-        cboOption.setItems(new String[] { "Geography Markup Language (GML2.1.2)",
-                "Geography Markup Language (GML3.1.1)", "Geography Markup Language (GML3.2)",
-                "GeoJSON", "Keyhole Markup Language (KML 2.1)",
-                "Keyhole Markup Language (KML 2.2)", "Comma separated CSV files", "ESRI Shapefiles" });
+        cboOption
+                .setItems(new String[] { "Geography Markup Language (GML2.1.2)",
+                        "Geography Markup Language (GML3.1.1)",
+                        "Geography Markup Language (GML3.2)", "GeoJSON",
+                        "Keyhole Markup Language (KML 2.1)", "Keyhole Markup Language (KML 2.2)",
+                        "Comma separated CSV files", "ESRI Shapefiles" });
+        cboOption.addSelectionListener(selectionListener);
         cboOption.select(1);
+
+        grpOption = new Group(container, SWT.SHADOW_ETCHED_IN);
+        grpOption.setText(Messages.TextfileToPointDialog_Delimiters);
+        grpOption.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+        grpOption.setLayout(new GridLayout(6, false));
+        grpOption.setEnabled(false);
+
+        optTab = uiBuilder
+                .createRadioButton(grpOption, Messages.TextfileToPointDialog_Tab, null, 1);
+        optTab.setData("\t"); //$NON-NLS-1$
+        optTab.addSelectionListener(selectionListener);
+
+        optColon = uiBuilder.createRadioButton(grpOption, Messages.TextfileToPointDialog_Semicolon,
+                null, 1);
+        optColon.setData(";"); //$NON-NLS-1$
+        optColon.addSelectionListener(selectionListener);
+
+        optComma = uiBuilder.createRadioButton(grpOption, Messages.TextfileToPointDialog_Colon,
+                null, 1);
+        optComma.setData(","); //$NON-NLS-1$
+        optComma.setSelection(true);
+        optComma.addSelectionListener(selectionListener);
+
+        optSpace = uiBuilder.createRadioButton(grpOption, Messages.TextfileToPointDialog_Space,
+                null, 1);
+        optSpace.setData(" "); //$NON-NLS-1$
+        optSpace.addSelectionListener(selectionListener);
+
+        optEtc = uiBuilder.createRadioButton(grpOption, Messages.TextfileToPointDialog_Custom,
+                null, 1);
+        optEtc.addSelectionListener(selectionListener);
+
+        txtSplit = uiBuilder.createText(grpOption, EMPTY, 1);
+        txtSplit.addModifyListener(modifyListener);
+        txtSplit.setEnabled(false);
 
         locationView = new OutputDataWidget(FileDataType.FOLDER, SWT.OPEN);
         locationView.create(container, SWT.BORDER, 2, 1);
@@ -107,6 +162,34 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
         area.pack(true);
         return area;
     }
+
+    SelectionListener selectionListener = new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent event) {
+            Widget widget = event.widget;
+            if (widget.equals(optTab) || widget.equals(optColon) || widget.equals(optComma)
+                    || widget.equals(optSpace)) {
+                splitter = widget.getData().toString();
+            } else if (widget.equals(optEtc)) {
+                txtSplit.setEnabled(optEtc.getSelection());
+                txtSplit.setFocus();
+                if (!StringHelper.isNullOrEmpty(txtSplit.getText())) {
+                    splitter = txtSplit.getText();
+                }
+            } else if (widget.equals(cboOption)) {
+                grpOption.setEnabled(cboOption.getSelectionIndex() == 6);
+            }
+        }
+    };
+
+    ModifyListener modifyListener = new ModifyListener() {
+        @Override
+        public void modifyText(ModifyEvent e) {
+            if (optEtc.getSelection()) {
+                splitter = txtSplit.getText();
+            }
+        }
+    };
 
     private void loadlayers(Table table) {
         table.removeAll();
@@ -172,7 +255,6 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
                         Charset charset = Charset.forName(ToolboxPlugin.defaultCharset());
                         File outputFile = new File(outputFolder, layer.getName()
                                 + ftrans.getExtension());
-                        String splitter = ","; //$NON-NLS-1$
                         ftrans.encodeCSV(features, outputFile, charset, splitter);
                     } else {
                         File outputFile = new File(outputFolder, layer.getName()

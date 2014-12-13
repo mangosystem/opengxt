@@ -47,7 +47,9 @@ import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.GlobalMoransIProcess;
 import org.geotools.process.spatialstatistics.GlobalMoransIProcess.MoransIProcessResult;
 import org.geotools.process.spatialstatistics.GlobalMoransIProcessFactory;
-import org.geotools.process.spatialstatistics.LocalMoransIProcess;
+import org.geotools.process.spatialstatistics.autocorrelation.LocalMoranIStatisticOperation;
+import org.geotools.process.spatialstatistics.core.SpatialEvent;
+import org.geotools.process.spatialstatistics.core.SpatialWeightMatrix;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -84,6 +86,9 @@ import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.util.ProgressListener;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+
 /**
  * Moran Scatter Plot Dialog
  * 
@@ -109,7 +114,19 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
 
     private CTabItem inputTab, plotTab, outputTab;
 
-    private boolean crossCenter = false;
+    private boolean crossCenter = true;
+
+    private SpatialWeightMatrix swMatrix;
+
+    private double[] zScore;
+
+    private SpatialConcept spatialConcept = SpatialConcept.INVERSEDISTANCE;
+
+    private DistanceMethod distanceMethod = DistanceMethod.Euclidean;
+
+    private StandardizationMethod standardization = StandardizationMethod.NONE;
+
+    private Double searchDistance = Double.valueOf(0d);
 
     private XYMinMaxVisitor minMaxVisitor = new XYMinMaxVisitor();
 
@@ -345,11 +362,12 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
         // Create the scatter data, renderer, and axis
         int fontStyle = java.awt.Font.BOLD;
         FontData fontData = getShell().getDisplay().getSystemFont().getFontData()[0];
+
         NumberAxis xPlotAxis = new NumberAxis(propertyName); // ZScore
         xPlotAxis.setLabelFont(new Font(fontData.getName(), fontStyle, 12));
         xPlotAxis.setTickLabelFont(new Font(fontData.getName(), fontStyle, 10));
 
-        NumberAxis yPlotAxis = new NumberAxis("Moran index"); //$NON-NLS-1$ LMiIndex
+        NumberAxis yPlotAxis = new NumberAxis("lagged " + propertyName); //$NON-NLS-1$
         yPlotAxis.setLabelFont(new Font(fontData.getName(), fontStyle, 12));
         yPlotAxis.setTickLabelFont(new Font(fontData.getName(), fontStyle, 10));
 
@@ -373,7 +391,7 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
         // 3. Setup line
         // Create the line data, renderer, and axis
         XYItemRenderer lineRenderer = new XYLineAndShapeRenderer(true, false); // Lines only
-        lineRenderer.setSeriesPaint(0, java.awt.Color.RED); // dot
+        lineRenderer.setSeriesPaint(0, java.awt.Color.GRAY); // dot
 
         // Set the line data, renderer, and axis into plot
         NumberAxis xLineAxis = new NumberAxis(EMPTY);
@@ -463,22 +481,51 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
             featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
-                // TODO: recalculate local moran's i
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                Coordinate coordinate = geometry.getCentroid().getCoordinate();
+
                 // The X axis of the scatter plot represents the standardised Z values of your
                 // variable (that is, they’ve been standardised to their Z scores, with a mean of
                 // zero, and a standard deviation of 1.)
+                Double x = Converters.convert(feature.getAttribute("LMiZScore"), Double.class);
+                if (x == null) {
+                    continue;
+                }
+
+                // TODO: recalculate local moran's i
                 // The Y axis represents the standardised values of the neighbouring values around
                 // your point of interest, that is the lagged values. These are calculated according
                 // to the spatial weights matrix that you specify. So, for instance, if you specify
                 // a contiguous spatial weights matrix, with a first order queen contiguity, the
                 // value of the y axis represents the mean value of the variable for all of the
                 // areas that share a border with the area of interest.
-                Double x = Converters.convert(feature.getAttribute("LMiZScore"), Double.class);
-                Double y = Converters.convert(feature.getAttribute("LMiIndex"), Double.class);
-                if (x != null && y != null) {
-                    minMaxVisitor.visit(x, y);
-                    xySeries.add(new XYDataItem2(feature, x, y));
+                // Double y = Converters.convert(feature.getAttribute("LMiIndex"), Double.class);
+
+                SpatialEvent curE = new SpatialEvent(0, coordinate);
+                int neighborCount = 0;
+                double zScoreSum = 0d;
+                for (int j = 0; j < swMatrix.Events.size(); j++) {
+                    SpatialEvent destE = swMatrix.Events.get(j);
+                    Coordinate destCoord = new Coordinate(destE.x, destE.y);
+                    if (destCoord.equals(coordinate))
+                        continue;
+
+                    if (spatialConcept == SpatialConcept.FIXEDDISTANCEBAND) {
+                        if (destE.getDistance(curE) > searchDistance) {
+                            continue;
+                        }
+                    }
+
+                    double dWeight = swMatrix.getWeight(curE, destE);
+                    if (dWeight > 0) {
+                        neighborCount++;
+                        zScoreSum += zScore[j];
+                    }
                 }
+
+                double y = neighborCount == 0 ? 0d : zScoreSum / neighborCount;
+                minMaxVisitor.visit(x, y);
+                xySeries.add(new XYDataItem2(feature, x, y));
             }
         } finally {
             featureIter.close();
@@ -491,6 +538,20 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
     protected void okPressed() {
         if (invalidWidgetValue(cboLayer, cboField)) {
             openInformation(getShell(), Messages.Task_ParameterRequired);
+            return;
+        }
+
+        spatialConcept = (SpatialConcept) params
+                .get(GlobalMoransIProcessFactory.spatialConcept.key);
+        distanceMethod = (DistanceMethod) params
+                .get(GlobalMoransIProcessFactory.distanceMethod.key);
+        standardization = (StandardizationMethod) params
+                .get(GlobalMoransIProcessFactory.standardization.key);
+        searchDistance = (Double) params.get(GlobalMoransIProcessFactory.searchDistance.key);
+
+        if (spatialConcept == SpatialConcept.FIXEDDISTANCEBAND
+                && (searchDistance == null || searchDistance == 0)) {
+            openInformation(getShell(), "FIXEDDISTANCEBAND option requires Distance Band"); //$NON-NLS-1$
             return;
         }
 
@@ -538,16 +599,30 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
             monitor.subTask("Analyzing local moran...");
             subMonitor = GeoToolsAdapters.progress(SubMonitor.convert(monitor,
                     Messages.Task_Internal, increment));
-            process = new LocalMoransIProcess(null);
-            result = process.execute(params, subMonitor);
 
-            SimpleFeatureCollection features = (SimpleFeatureCollection) result
-                    .get(GlobalMoransIProcessFactory.RESULT.key);
+            LocalMoranIStatisticOperation opertor = new LocalMoranIStatisticOperation();
+            opertor.setSpatialConceptType(spatialConcept);
+            opertor.setDistanceType(distanceMethod);
+            opertor.setStandardizationType(standardization);
 
+            if (searchDistance != null && searchDistance > 0 && !Double.isNaN(searchDistance)) {
+                spatialConcept = SpatialConcept.FIXEDDISTANCEBAND;
+                opertor.setDistanceBand(searchDistance);
+                opertor.setSpatialConceptType(spatialConcept);
+            }
+
+            SimpleFeatureCollection features = opertor.execute((SimpleFeatureCollection) params
+                    .get(GlobalMoransIProcessFactory.inputFeatures.key), (String) params
+                    .get(GlobalMoransIProcessFactory.inputField.key));
+
+            swMatrix = opertor.getSpatialWeightMatrix();
+            zScore = opertor.getZScore();
+
+            subMonitor.complete();
             monitor.subTask(Messages.Task_AddingLayer);
 
             SSStyleBuilder ssBuilder = new SSStyleBuilder(features.getSchema());
-            ssBuilder.setOpacity(0.85f);
+            ssBuilder.setOpacity(0.95f);
             Style style = ssBuilder.getLISAStyle("COType"); //$NON-NLS-1$
 
             outputLayer = MapUtils.addFeaturesToMap(map, features, "Local Moran's I", style);

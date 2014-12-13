@@ -107,6 +107,9 @@ public class TextfileToPointOperation extends GeneralOperation {
         MathTransform transform = null;
         if (sourceCRS != null && targetCRS != null) {
             transform = getMathTransform(sourceCRS, targetCRS);
+            if (transform != null) {
+                schema = buildSchema(columns, targetCRS);
+            }
         }
 
         // prepare transactional feature store

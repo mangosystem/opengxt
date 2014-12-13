@@ -275,10 +275,11 @@ public class BoxPlotDialog extends AbstractGeoProcessingDialog implements IRunna
         yPlotAxis.setAutoRangeIncludesZero(false);
 
         BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-        renderer.setAutoPopulateSeriesFillPaint(true);
-        renderer.setAutoPopulateSeriesShape(true);
         renderer.setMedianVisible(true);
+        renderer.setMeanVisible(false);
         renderer.setFillBox(true);
+        renderer.setSeriesFillPaint(0, java.awt.Color.CYAN);
+        renderer.setBaseFillPaint(java.awt.Color.CYAN);
         renderer.setBaseToolTipGenerator(new BoxAndWhiskerToolTipGenerator());
 
         // Set the scatter data, renderer, and axis into plot

@@ -219,6 +219,7 @@ public class Messages extends NLS {
     public static String TextfileToPointDialog_FieldRow2;
     public static String TextfileToPointDialog_FieldRow3;
     public static String TextfileToPointDialog_FieldRow4;
+    public static String TextfileToPointDialog_XYRequired;
     
     public static String ThematicMapDialog_title;
     public static String ThematicMapDialog_description;

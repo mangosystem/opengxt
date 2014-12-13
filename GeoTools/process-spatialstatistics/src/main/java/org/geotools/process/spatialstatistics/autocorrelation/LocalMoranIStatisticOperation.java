@@ -71,6 +71,14 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
         this.setStandardizationType(StandardizationMethod.NONE);
     }
 
+    public double[] getZScore() {
+        return dcZScore;
+    }
+
+    public SpatialWeightMatrix getSpatialWeightMatrix() {
+        return swMatrix;
+    }
+
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, String inputField)
             throws IOException {
         swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
@@ -134,13 +142,10 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
                     dWeight = 0.0;
                     // if (destE is neighbor ) dWeight = 1.0;
                 } else {
-                    // # calculate distance between i and j
                     dWeight = swMatrix.getWeight(curE, destE);
                 }
 
                 if (getStandardizationType() == StandardizationMethod.ROW) {
-                    // dWeight = standardize_weight (dWeight, inputs, dcRowSum, iKey, dcID,
-                    // dDistAllSum)
                     dWeight = swMatrix.standardizeWeight(curE, dWeight);
                 }
 

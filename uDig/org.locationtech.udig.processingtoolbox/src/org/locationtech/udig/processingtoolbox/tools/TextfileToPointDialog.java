@@ -341,6 +341,22 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
             return;
         }
 
+        // check geometry columns
+        List<TextColumn> schema = getTextColumns();
+        boolean containsX = false, containsY = false;
+        for (TextColumn column : schema) {
+            if (column.isX()) {
+                containsX = true;
+            } else if (column.isY()) {
+                containsY = true;
+            }
+        }
+
+        if (containsX == false || containsY == false) {
+            openInformation(getShell(), Messages.TextfileToPointDialog_XYRequired);
+            return;
+        }
+
         try {
             PlatformUI.getWorkbench().getProgressService().run(false, true, this);
             openInformation(getShell(),

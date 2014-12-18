@@ -55,7 +55,7 @@ public class FormatTransformer {
     final static Logger LOGGER = Logging.getLogger(FormatTransformer.class);
 
     public enum EncodeType {
-        GML212(0), GML311(1), GML32(2), GEOJSON(3), KML21(4), KML22(5), CSV(6);
+        GML212(0), GML311(1), GML32(2), GEOJSON(3), KML21(4), KML22(5), CSV(6), WKT(7);
 
         private final int value;
 
@@ -98,29 +98,36 @@ public class FormatTransformer {
             return ".json";
         case CSV:
             return ".csv";
+        case WKT:
+            return ".wkt";
         default:
             return ".gml";
         }
     }
 
     public void encode(SimpleFeatureCollection features, File outputFile) throws IOException {
-        if (encodeType == EncodeType.GEOJSON) {
+        switch (encodeType) {
+        case CSV:
+            encodeCSV(features, outputFile, Charset.defaultCharset(), "|");
+            break;
+        case WKT:
+            encodeWKT(features, outputFile, Charset.defaultCharset(), "|");
+            break;
+        case GEOJSON:
             encodeGeoJSON(features, outputFile);
-        } else {
-            switch (encodeType) {
-            case GML212:
-            case GML311:
-            case GML32:
-                encodeGML(features, outputFile);
-                break;
-            case KML21:
-            case KML22:
-                encodeKML(features, outputFile);
-                break;
-            default:
-                encodeGML(features, outputFile);
-                break;
-            }
+            break;
+        case GML212:
+        case GML311:
+        case GML32:
+            encodeGML(features, outputFile);
+            break;
+        case KML21:
+        case KML22:
+            encodeKML(features, outputFile);
+            break;
+        default:
+            encodeGML(features, outputFile);
+            break;
         }
     }
 
@@ -177,8 +184,24 @@ public class FormatTransformer {
         write(config, qName, features, outputFile);
     }
 
+    private void write(Configuration config, QName qName, SimpleFeatureCollection features,
+            File outputFile) throws IOException {
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(outputFile);
+            org.geotools.xml.Encoder encoder = new org.geotools.xml.Encoder(config);
+            encoder.setIndenting(true);
+            encoder.setIndentSize(2);
+            encoder.encode(features, qName, fos);
+        } catch (FileNotFoundException e) {
+            ToolboxPlugin.log(e.getMessage());
+        } finally {
+            closeQuietly(fos);
+        }
+    }
+
     public void encodeCSV(SimpleFeatureCollection features, File outputFile, Charset charset,
-            String splitter) throws IOException {
+            String delimeter) throws IOException {
         BufferedWriter writer = null;
         try {
             String newLine = System.getProperty("line.separator"); //$NON-NLS-1$
@@ -193,11 +216,12 @@ public class FormatTransformer {
                     continue;
                 }
                 if (sb.length() > 0) {
-                    sb.append(splitter);
+                    sb.append(delimeter);
                 }
                 sb.append(descriptor.getLocalName());
             }
-            sb.append(splitter).append("xcoord").append(splitter).append("ycoord").append(newLine);
+            sb.append(delimeter).append("xcoord").append(delimeter).append("ycoord")
+                    .append(newLine);
             writer.write(sb.toString());
 
             // write contents
@@ -215,12 +239,12 @@ public class FormatTransformer {
                             continue;
                         }
                         if (sb.length() > 0) {
-                            sb.append(splitter);
+                            sb.append(delimeter);
                         }
                         sb.append(value == null ? "" : value.toString());
                     }
-                    sb.append(splitter).append(coordinate.x);
-                    sb.append(splitter).append(coordinate.y).append(newLine);
+                    sb.append(delimeter).append(coordinate.x);
+                    sb.append(delimeter).append(coordinate.y).append(newLine);
                     writer.write(sb.toString());
                 }
             } finally {
@@ -235,19 +259,61 @@ public class FormatTransformer {
         }
     }
 
-    private void write(Configuration config, QName qName, SimpleFeatureCollection features,
-            File outputFile) throws IOException {
-        FileOutputStream fos = null;
+    public void encodeWKT(SimpleFeatureCollection features, File outputFile, Charset charset,
+            String delimeter) throws IOException {
+        BufferedWriter writer = null;
         try {
-            fos = new FileOutputStream(outputFile);
-            org.geotools.xml.Encoder encoder = new org.geotools.xml.Encoder(config);
-            encoder.setIndenting(true);
-            encoder.setIndentSize(2);
-            encoder.encode(features, qName, fos);
+            String newLine = System.getProperty("line.separator"); //$NON-NLS-1$
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            writer = new BufferedWriter(new OutputStreamWriter(fos, charset));
+
+            boolean isComma = delimeter.equals(",");
+
+            // write fields
+            SimpleFeatureType schema = features.getSchema();
+            StringBuffer sb = new StringBuffer();
+            for (AttributeDescriptor descriptor : schema.getAttributeDescriptors()) {
+                if (sb.length() > 0) {
+                    sb.append(delimeter);
+                }
+                sb.append(descriptor.getLocalName());
+            }
+            writer.write(sb.append(newLine).toString());
+
+            // write contents
+            SimpleFeatureIterator featureIter = null;
+            try {
+                featureIter = features.features();
+                while (featureIter.hasNext()) {
+                    SimpleFeature feature = featureIter.next();
+                    Geometry origGeom = (Geometry) feature.getDefaultGeometry();
+
+                    sb.setLength(0);
+                    for (Object value : feature.getAttributes()) {
+                        if (sb.length() > 0) {
+                            sb.append(delimeter);
+                        }
+                        if (value instanceof Geometry) {
+                            if (isComma) {
+                                sb.append("\"").append(origGeom.toText()).append("\"");
+                            } else {
+                                sb.append(origGeom.toText());
+                            }
+                        } else {
+                            sb.append(value == null ? "" : value.toString());
+                        }
+                    }
+                    writer.write(sb.append(newLine).toString());
+                }
+            } finally {
+                featureIter.close();
+            }
+            writer.flush();
+            writer.close();
         } catch (FileNotFoundException e) {
             ToolboxPlugin.log(e.getMessage());
         } finally {
-            closeQuietly(fos);
+            closeQuietly(writer);
         }
     }
 

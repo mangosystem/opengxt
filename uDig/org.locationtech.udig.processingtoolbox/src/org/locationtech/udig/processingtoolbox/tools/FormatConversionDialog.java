@@ -69,9 +69,9 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
 
     private Combo cboOption;
 
-    private String splitter = ","; //$NON-NLS-1$
+    private String delimiter = "|"; //$NON-NLS-1$
 
-    private Text txtSplit;
+    private Text txtDelimiter;
 
     private Group grpOption;
 
@@ -108,12 +108,11 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
 
         uiBuilder.createLabel(container, Messages.FormatConversionDialog_Format, null, 1);
         cboOption = uiBuilder.createCombo(container, 1);
-        cboOption
-                .setItems(new String[] { "Geography Markup Language (GML2.1.2)",
-                        "Geography Markup Language (GML3.1.1)",
-                        "Geography Markup Language (GML3.2)", "GeoJSON",
-                        "Keyhole Markup Language (KML 2.1)", "Keyhole Markup Language (KML 2.2)",
-                        "Comma separated CSV files", "ESRI Shapefiles" });
+        cboOption.setItems(new String[] { "Geography Markup Language (GML2.1.2)",
+                "Geography Markup Language (GML3.1.1)", "Geography Markup Language (GML3.2)",
+                "GeoJSON", "Keyhole Markup Language (KML 2.1)",
+                "Keyhole Markup Language (KML 2.2)", "Delimiter separated Text files",
+                "Delimiter separated WKT files", "ESRI Shapefiles" });
         cboOption.addSelectionListener(selectionListener);
         cboOption.select(1);
 
@@ -136,7 +135,6 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
         optComma = uiBuilder.createRadioButton(grpOption, Messages.TextfileToPointDialog_Colon,
                 null, 1);
         optComma.setData(","); //$NON-NLS-1$
-        optComma.setSelection(true);
         optComma.addSelectionListener(selectionListener);
 
         optSpace = uiBuilder.createRadioButton(grpOption, Messages.TextfileToPointDialog_Space,
@@ -148,9 +146,12 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
                 null, 1);
         optEtc.addSelectionListener(selectionListener);
 
-        txtSplit = uiBuilder.createText(grpOption, EMPTY, 1);
-        txtSplit.addModifyListener(modifyListener);
-        txtSplit.setEnabled(false);
+        txtDelimiter = uiBuilder.createText(grpOption, EMPTY, 1);
+        txtDelimiter.addModifyListener(modifyListener);
+
+        // default value
+        optEtc.setSelection(true);
+        txtDelimiter.setText("|");
 
         locationView = new OutputDataWidget(FileDataType.FOLDER, SWT.OPEN);
         locationView.create(container, SWT.BORDER, 2, 1);
@@ -169,15 +170,22 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
             Widget widget = event.widget;
             if (widget.equals(optTab) || widget.equals(optColon) || widget.equals(optComma)
                     || widget.equals(optSpace)) {
-                splitter = widget.getData().toString();
+                delimiter = widget.getData().toString();
             } else if (widget.equals(optEtc)) {
-                txtSplit.setEnabled(optEtc.getSelection());
-                txtSplit.setFocus();
-                if (!StringHelper.isNullOrEmpty(txtSplit.getText())) {
-                    splitter = txtSplit.getText();
+                txtDelimiter.setEnabled(optEtc.getSelection());
+                txtDelimiter.setFocus();
+                if (!StringHelper.isNullOrEmpty(txtDelimiter.getText())) {
+                    delimiter = txtDelimiter.getText();
                 }
             } else if (widget.equals(cboOption)) {
-                grpOption.setEnabled(cboOption.getSelectionIndex() == 6);
+                int selection = cboOption.getSelectionIndex();
+                grpOption.setEnabled(selection == 6 || selection == 7);
+                if (selection == 7) {
+                    optEtc.setSelection(true);
+                    txtDelimiter.setEnabled(true);
+                    txtDelimiter.setText("|"); //$NON-NLS-1$
+                    txtDelimiter.setFocus();
+                }
             }
         }
     };
@@ -186,7 +194,7 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
         @Override
         public void modifyText(ModifyEvent e) {
             if (optEtc.getSelection()) {
-                splitter = txtSplit.getText();
+                delimiter = txtDelimiter.getText();
             }
         }
     };
@@ -236,7 +244,7 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
 
             FormatTransformer ftrans = null;
             ShapeExportOperation export = null;
-            if (selectionIdx == 7) {
+            if (selectionIdx == 8) {
                 export = new ShapeExportOperation();
                 export.setOutputDataStore(locationView.getDataStore());
             } else {
@@ -248,14 +256,19 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
                 if (item.getChecked()) {
                     ILayer layer = (ILayer) item.getData();
                     SimpleFeatureCollection features = MapUtils.getFeatures(layer);
-                    if (selectionIdx == 7) {
-                        export.setOutputTypeName(layer.getName());
-                        export.execute(features);
-                    } else if (selectionIdx == 6) {
+                    if (selectionIdx == 6) {         // CSV
                         Charset charset = Charset.forName(ToolboxPlugin.defaultCharset());
                         File outputFile = new File(outputFolder, layer.getName()
                                 + ftrans.getExtension());
-                        ftrans.encodeCSV(features, outputFile, charset, splitter);
+                        ftrans.encodeCSV(features, outputFile, charset, delimiter);
+                    } else if (selectionIdx == 7) { // WKT
+                        Charset charset = Charset.forName(ToolboxPlugin.defaultCharset());
+                        File outputFile = new File(outputFolder, layer.getName()
+                                + ftrans.getExtension());
+                        ftrans.encodeWKT(features, outputFile, charset, delimiter);
+                    } else if (selectionIdx == 8) { // Shape file
+                        export.setOutputTypeName(layer.getName());
+                        export.execute(features);
                     } else {
                         File outputFile = new File(outputFolder, layer.getName()
                                 + ftrans.getExtension());

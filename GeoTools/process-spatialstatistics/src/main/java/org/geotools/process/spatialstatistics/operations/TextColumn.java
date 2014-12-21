@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics.operations;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -72,7 +73,7 @@ public class TextColumn {
 
     private static final String[] spatialTypes = new String[] { "String", "Short", "Integer",
             "Long", "Float", "Double", "BigDecimal", "Date", "Boolean", "X Coordinate",
-            "Y Coordinate" };
+            "Y Coordinate", "Point", "MultiPoint", "MultiLineString", "MultiPolygon" };
 
     public static String[] getFieldTypes(boolean isSpatial) {
         if (isSpatial) {
@@ -131,6 +132,10 @@ public class TextColumn {
 
     public boolean isY() {
         return type.equalsIgnoreCase("Y Coordinate");
+    }
+
+    public boolean isGeometry() {
+        return Geometry.class.isAssignableFrom(getBinding());
     }
 
     public int getLength() {
@@ -304,13 +309,7 @@ public class TextColumn {
         } catch (IOException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         } finally {
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException ioe) {
-                // ignore
-            }
+            closeQuietly(reader);
         }
 
         return columns;
@@ -326,6 +325,16 @@ public class TextColumn {
             return matcher.replaceAll("").trim();
         } else {
             return value.trim();
+        }
+    }
+
+    private static void closeQuietly(Closeable io) {
+        try {
+            if (io != null) {
+                io.close();
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.FINER, e.getMessage(), e);
         }
     }
 }

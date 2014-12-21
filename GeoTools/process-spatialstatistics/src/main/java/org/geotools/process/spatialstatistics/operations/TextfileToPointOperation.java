@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics.operations;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -44,6 +45,7 @@ import org.opengis.referencing.operation.TransformException;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.io.WKTReader;
 
 /**
  * Textfile to point features operation
@@ -58,30 +60,44 @@ public class TextfileToPointOperation extends GeneralOperation {
 
     private StringBuffer errorBuffer = new StringBuffer();
 
+    private WKTReader wktReader;
+
     public String getError() {
         return errorBuffer.toString();
     }
 
     private SimpleFeatureType buildSchema(List<TextColumn> columns, CoordinateReferenceSystem crs)
             throws Exception {
-        // check x, y column
-        TextColumn xColumn = null, yColomn = null;
+        // check x, y or geometry column
+        TextColumn xColumn = null, yColumn = null, geomColumn = null;
         for (TextColumn col : columns) {
             if (col.isX()) {
                 xColumn = col;
             } else if (col.isY()) {
-                yColomn = col;
+                yColumn = col;
+            } else if (col.isGeometry()) {
+                geomColumn = col;
+                wktReader = new WKTReader();
             }
-        }
-
-        if (xColumn == null || yColomn == null) {
-            throw new Exception("X or Y Column does not exist!");
         }
 
         // build schema
         SimpleFeatureType schema = null;
-        schema = FeatureTypes.getDefaultType(getOutputTypeName(), Point.class, crs);
+        if (geomColumn == null) {
+            if (xColumn == null || yColumn == null) {
+                throw new Exception("X or Y Column does not exist!");
+            } else {
+                schema = FeatureTypes.getDefaultType(getOutputTypeName(), Point.class, crs);
+            }
+        } else {
+            schema = FeatureTypes.getDefaultType(getOutputTypeName(), geomColumn.getBinding(), crs);
+        }
+
         for (TextColumn col : columns) {
+            if (col.isGeometry()) {
+                continue;
+            }
+
             if (col.getBinding().isAssignableFrom(String.class)) {
                 schema = FeatureTypes.add(schema, col.getName(), col.getBinding(), col.getLength());
             } else {
@@ -135,45 +151,55 @@ public class TextfileToPointOperation extends GeneralOperation {
 
             while (line != null) {
                 if (line.isEmpty()) {
+                    line = reader.readLine();
+                    lineNumber++;
                     continue;
                 }
 
                 String[] values = line.split(splitter);
                 int splitSize = values.length;
 
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
                 Double x = null;
                 Double y = null;
+                Geometry geometry = null;
+                SimpleFeature newFeature = featureWriter.buildFeature(null);
+
                 for (TextColumn col : columns) {
                     Object value = null;
                     if (splitSize > col.getColumnIndex()) {
                         value = TextColumn.removeDoubleQuote(values[col.getColumnIndex()]);
-                        value = Converters.convert(value, col.getBinding());
-                        newFeature.setAttribute(col.getName(), value);
+                        if (col.isGeometry()) {
+                            geometry = wktReader.read(value.toString());
+                        } else {
+                            value = Converters.convert(value, col.getBinding());
+                            newFeature.setAttribute(col.getName(), value);
 
-                        if (value != null && col.isX()) {
-                            x = (Double) value;
-                        } else if (value != null && col.isY()) {
-                            y = (Double) value;
+                            if (value != null && col.isX()) {
+                                x = (Double) value;
+                            } else if (value != null && col.isY()) {
+                                y = (Double) value;
+                            }
                         }
                     } else {
-                        newFeature.setAttribute(col.getName(), value);
+                        newFeature.setAttribute(col.getName(), null);
                     }
                 }
 
-                if (x != null && y != null) {
-                    Geometry point = gf.createPoint(new Coordinate(x, y));
+                if (geometry == null && x != null && y != null) {
+                    geometry = gf.createPoint(new Coordinate(x, y));
                     if (transform != null) {
                         try {
-                            point = JTS.transform(point, transform);
+                            geometry = JTS.transform(geometry, transform);
                         } catch (MismatchedDimensionException e) {
                             LOGGER.log(Level.FINER, e.getMessage(), e);
                         } catch (TransformException e) {
                             LOGGER.log(Level.FINER, e.getMessage(), e);
                         }
                     }
+                }
 
-                    newFeature.setDefaultGeometry(point);
+                if (geometry != null) {
+                    newFeature.setDefaultGeometry(geometry);
                     try {
                         featureWriter.write(newFeature);
                     } catch (Exception e) {
@@ -190,14 +216,8 @@ public class TextfileToPointOperation extends GeneralOperation {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
             throw new Exception(e.getMessage());
         } finally {
+            closeQuietly(reader);
             featureWriter.close();
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException ioe) {
-                // ignore
-            }
         }
 
         return featureWriter.getFeatureCollection();
@@ -224,5 +244,15 @@ public class TextfileToPointOperation extends GeneralOperation {
         }
 
         return transform;
+    }
+
+    private void closeQuietly(Closeable io) {
+        try {
+            if (io != null) {
+                io.close();
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.FINER, e.getMessage(), e);
+        }
     }
 }

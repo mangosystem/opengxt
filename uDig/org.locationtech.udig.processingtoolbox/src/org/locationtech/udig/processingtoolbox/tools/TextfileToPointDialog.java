@@ -74,13 +74,13 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
 
     private Combo cboSource, cboEncoding;
 
-    private Text txtSourceCrs, txtTargetCrs, txtSplit;
+    private Text txtSourceCrs, txtTargetCrs, txtDelimiter;
 
     private Button btnSource, chkHeader, optTab, optColon, optComma, optSpace, optEtc;
 
     private Button btnSourceCrs, btnTargetCrs;
 
-    private String splitter = ","; //$NON-NLS-1$
+    private String delimiter = ","; //$NON-NLS-1$
 
     private File textFile;
 
@@ -185,9 +185,9 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
                 1);
         optEtc.addSelectionListener(selectionListener);
 
-        txtSplit = uiBuilder.createText(grpField, EMPTY, 1);
-        txtSplit.addModifyListener(modifyListener);
-        txtSplit.setEnabled(false);
+        txtDelimiter = uiBuilder.createText(grpField, EMPTY, 1);
+        txtDelimiter.addModifyListener(modifyListener);
+        txtDelimiter.setEnabled(false);
 
         String[] header = new String[] { Messages.TextfileToPointDialog_FieldName,
                 Messages.TextfileToPointDialog_FieldType,
@@ -216,8 +216,9 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
             if (widget.equals(btnSource)) {
                 FileDialog fileDialog = new FileDialog(activeShell, SWT.SINGLE);
                 fileDialog
-                        .setFilterNames(new String[] { "Text file (*.txt, *.csv, *.tab, *.asc, *.dat)" });
-                fileDialog.setFilterExtensions(new String[] { "*.txt;*.csv;*.tab;*.asc;*.dat" });
+                        .setFilterNames(new String[] { "Text file (*.txt, *.csv, *.tab, *.asc, *.dat, *.wkt)" });
+                fileDialog
+                        .setFilterExtensions(new String[] { "*.txt;*.csv;*.tab;*.asc;*.dat;*.wkt" });
                 String selectedFile = fileDialog.open();
                 if (selectedFile != null) {
                     cboSource.add(selectedFile);
@@ -227,13 +228,13 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
                 loadTables();
             } else if (widget.equals(optTab) || widget.equals(optColon) || widget.equals(optComma)
                     || widget.equals(optSpace)) {
-                splitter = widget.getData().toString();
+                delimiter = widget.getData().toString();
                 loadTables();
             } else if (widget.equals(optEtc)) {
-                txtSplit.setEnabled(optEtc.getSelection());
-                txtSplit.setFocus();
-                if (!StringHelper.isNullOrEmpty(txtSplit.getText())) {
-                    splitter = txtSplit.getText();
+                txtDelimiter.setEnabled(optEtc.getSelection());
+                txtDelimiter.setFocus();
+                if (!StringHelper.isNullOrEmpty(txtDelimiter.getText())) {
+                    delimiter = txtDelimiter.getText();
                     loadTables();
                 }
             } else if (widget.equals(btnSourceCrs)) {
@@ -280,9 +281,9 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
             } else if (widget.equals(cboEncoding)) {
                 charset = Charset.forName(cboEncoding.getText());
                 loadTables();
-            } else if (widget.equals(txtSplit)) {
+            } else if (widget.equals(txtDelimiter)) {
                 if (optEtc.getSelection()) {
-                    splitter = txtSplit.getText();
+                    delimiter = txtDelimiter.getText();
                     loadTables();
                 }
             }
@@ -296,7 +297,7 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
 
         inputTable.removeAll();
 
-        TextColumn[] columns = TextColumn.getColumns(textFile, charset, splitter,
+        TextColumn[] columns = TextColumn.getColumns(textFile, charset, delimiter,
                 chkHeader.getSelection());
         if (columns != null) {
             for (TextColumn column : columns) {
@@ -315,19 +316,21 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
         for (int index = 0; index < inputTable.getItemCount(); index++) {
             TableItem item = inputTable.getItem(index);
             if (item.getChecked()) {
-                TextColumn col = (TextColumn) item.getData();
-                col.setName(item.getText(0));
-                col.setType(item.getText(1));
-
-                if (col.getType().equalsIgnoreCase("String")) {
-                    if (item.getText(2).isEmpty()) {
-                        col.setLength(255);
-                    } else {
-                        col.setLength(Integer.parseInt(item.getText(2)));
-                    }
-                }
-                columns.add(col);
+                continue;
             }
+
+            TextColumn col = (TextColumn) item.getData();
+            col.setName(item.getText(0));
+            col.setType(item.getText(1));
+
+            if (col.getType().equalsIgnoreCase("String")) {
+                if (item.getText(2).isEmpty()) {
+                    col.setLength(255);
+                } else {
+                    col.setLength(Integer.parseInt(item.getText(2)));
+                }
+            }
+            columns.add(col);
         }
 
         return columns;
@@ -343,18 +346,22 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
 
         // check geometry columns
         List<TextColumn> schema = getTextColumns();
-        boolean containsX = false, containsY = false;
+        boolean containsX = false, containsY = false, containsGeometry = false;
         for (TextColumn column : schema) {
             if (column.isX()) {
                 containsX = true;
             } else if (column.isY()) {
                 containsY = true;
+            } else if (column.isGeometry()) {
+                containsGeometry = true;
             }
         }
 
-        if (containsX == false || containsY == false) {
-            openInformation(getShell(), Messages.TextfileToPointDialog_XYRequired);
-            return;
+        if (containsGeometry == false) {
+            if (containsX == false || containsY == false) {
+                openInformation(getShell(), Messages.TextfileToPointDialog_XYRequired);
+                return;
+            }
         }
 
         try {
@@ -409,7 +416,7 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
             process.setOutputDataStore(locationView.getDataStore());
             process.setOutputTypeName(outputName);
 
-            SimpleFeatureCollection features = process.execute(textFile, charset, splitter,
+            SimpleFeatureCollection features = process.execute(textFile, charset, delimiter,
                     headerFirst, schema, sourceCRS, targetCRS);
             error = process.getError();
             monitor.worked(increment);

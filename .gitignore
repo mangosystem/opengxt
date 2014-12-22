@@ -6,6 +6,8 @@ target
 *.txt
 nb-configuration.xml
 *.*~
+*.ucls
+*.png
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

@@ -315,7 +315,7 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
 
         for (int index = 0; index < inputTable.getItemCount(); index++) {
             TableItem item = inputTable.getItem(index);
-            if (item.getChecked()) {
+            if (item.getChecked() == false) {
                 continue;
             }
 

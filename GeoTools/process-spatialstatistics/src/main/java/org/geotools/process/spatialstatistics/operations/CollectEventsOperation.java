@@ -32,8 +32,6 @@ import org.opengis.feature.simple.SimpleFeatureType;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.index.kdtree.KdNode;
-import com.vividsolutions.jts.index.kdtree.KdTree;
 
 /**
  * Collect Event combines coincident points.
@@ -68,9 +66,9 @@ public class CollectEventsOperation extends GeneralOperation {
         schema = FeatureTypes.add(schema, countField, Integer.class);
         Class<?> outputBinding = schema.getDescriptor(countField).getType().getBinding();
 
-        KdTree kdTree = buildIndex(points);
+        List<Event> events = buildIndex(points);
+        List<Event> coincidentEvents = new ArrayList<Event>();
         List<String> processedMap = new ArrayList<String>();
-        List<KdNode> queryNodes = new ArrayList<KdNode>();
 
         IFeatureInserter featureWriter = getFeatureWriter(schema);
         SimpleFeatureIterator featureIter = points.features();
@@ -83,26 +81,25 @@ public class CollectEventsOperation extends GeneralOperation {
                 }
 
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                Geometry buffered = geometry.buffer(tolerance);
+                Coordinate coordinate = geometry.getCoordinate();
 
+                // count coincident events
                 int featureCount = 1;
-                queryNodes.clear();
-                kdTree.query(buffered.getEnvelopeInternal(), queryNodes);
-                if (queryNodes.size() > 0) {
-                    Coordinate coordinate = geometry.getCoordinate();
-                    for (KdNode node : queryNodes) {
-                        String fid = node.getData().toString();
-                        if (processedMap.contains(fid) || fid.equals(featureID)) {
-                            continue;
-                        }
-
-                        double dist = coordinate.distance(node.getCoordinate());
-                        if (dist > tolerance) {
-                            continue;
-                        }
-                        featureCount++;
-                        processedMap.add(fid);
+                for (Event event : events) {
+                    if (processedMap.contains(event.getFID()) || event.equalsFID(featureID)
+                            || event.distance(coordinate) > tolerance) {
+                        continue;
                     }
+
+                    featureCount++;
+                    processedMap.add(event.getFID());
+                    coincidentEvents.add(event);
+                }
+
+                // remove coincident events
+                if (coincidentEvents.size() > 0) {
+                    events.removeAll(coincidentEvents);
+                    coincidentEvents.clear();
                 }
 
                 // create & insert feature
@@ -123,19 +120,43 @@ public class CollectEventsOperation extends GeneralOperation {
         return featureWriter.getFeatureCollection();
     }
 
-    private KdTree buildIndex(SimpleFeatureCollection points) {
-        KdTree spatialIndex = new KdTree(0.0d);
+    private List<Event> buildIndex(SimpleFeatureCollection points) {
+        List<Event> events = new ArrayList<Event>();
         SimpleFeatureIterator featureIter = points.features();
         try {
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                spatialIndex.insert(geometry.getCoordinate(), feature.getID());
+                events.add(new Event(feature.getID(), geometry.getCoordinate()));
             }
         } finally {
             featureIter.close();
         }
-        return spatialIndex;
+        return events;
+    }
+
+    final class Event {
+
+        private String fid;
+
+        private Coordinate coordinate;
+
+        public Event(String fid, Coordinate coordinate) {
+            this.fid = fid;
+            this.coordinate = coordinate;
+        }
+
+        public String getFID() {
+            return this.fid;
+        }
+
+        public boolean equalsFID(String fid) {
+            return this.fid.equals(fid);
+        }
+
+        public double distance(Coordinate coordinate) {
+            return this.coordinate.distance(coordinate);
+        }
     }
 
 }

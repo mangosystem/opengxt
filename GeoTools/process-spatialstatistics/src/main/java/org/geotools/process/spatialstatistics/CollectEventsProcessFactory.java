@@ -77,11 +77,18 @@ public class CollectEventsProcessFactory extends SpatialStatisticsProcessFactory
             getResource("CollectEvents.countField.description"), false, 0, 1, "icount", new KVP(
                     Parameter.OPTIONS, "inputFeatures.Number"));
 
+    /** tolerance */
+    public static final Parameter<Double> tolerance = new Parameter<Double>("tolerance",
+            Double.class, getResource("CollectEvents.tolerance.title"),
+            getResource("CollectEvents.tolerance.description"), false, 0, 1, Double.valueOf(0.1d),
+            null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(countField.key, countField);
+        parameterInfo.put(tolerance.key, tolerance);
         return parameterInfo;
     }
 

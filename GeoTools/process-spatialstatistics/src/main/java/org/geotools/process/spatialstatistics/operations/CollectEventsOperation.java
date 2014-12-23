@@ -48,7 +48,15 @@ public class CollectEventsOperation extends GeneralOperation {
 
     static final String COUNT_FIELD = "icount";
 
-    private double XY_TOL = 0.1;
+    private double tolerance = 0.1d;
+
+    public double getTolerance() {
+        return tolerance;
+    }
+
+    public void setTolerance(double tolerance) {
+        this.tolerance = tolerance;
+    }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection points, String countField)
             throws IOException {
@@ -62,6 +70,7 @@ public class CollectEventsOperation extends GeneralOperation {
 
         KdTree kdTree = buildIndex(points);
         List<String> processedMap = new ArrayList<String>();
+        List<KdNode> queryNodes = new ArrayList<KdNode>();
 
         IFeatureInserter featureWriter = getFeatureWriter(schema);
         SimpleFeatureIterator featureIter = points.features();
@@ -74,21 +83,21 @@ public class CollectEventsOperation extends GeneralOperation {
                 }
 
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                Geometry buffered = geometry.buffer(XY_TOL);
+                Geometry buffered = geometry.buffer(tolerance);
 
                 int featureCount = 1;
-                @SuppressWarnings("unchecked")
-                List<KdNode> nodes = kdTree.query(buffered.getEnvelopeInternal());
-                if (nodes.size() > 0) {
+                queryNodes.clear();
+                kdTree.query(buffered.getEnvelopeInternal(), queryNodes);
+                if (queryNodes.size() > 0) {
                     Coordinate coordinate = geometry.getCoordinate();
-                    for (KdNode node : nodes) {
+                    for (KdNode node : queryNodes) {
                         String fid = node.getData().toString();
                         if (processedMap.contains(fid) || fid.equals(featureID)) {
                             continue;
                         }
 
                         double dist = coordinate.distance(node.getCoordinate());
-                        if (dist > XY_TOL) {
+                        if (dist > tolerance) {
                             continue;
                         }
                         featureCount++;

@@ -53,10 +53,11 @@ public class CollectEventsProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            String countField, ProgressListener monitor) {
+            String countField, Double tolerance, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(CollectEventsProcessFactory.inputFeatures.key, inputFeatures);
         map.put(CollectEventsProcessFactory.countField.key, countField);
+        map.put(CollectEventsProcessFactory.tolerance.key, tolerance);
 
         Process process = new CollectEventsProcess(null);
         Map<String, Object> resultMap;
@@ -95,6 +96,10 @@ public class CollectEventsProcess extends AbstractStatisticsProcess {
                     CollectEventsProcessFactory.countField,
                     CollectEventsProcessFactory.countField.sample);
 
+            Double tolerance = (Double) Params.getValue(input,
+                    CollectEventsProcessFactory.tolerance,
+                    CollectEventsProcessFactory.tolerance.sample);
+
             monitor.setTask(Text.text("Processing ..."));
             monitor.progress(25.0f);
 
@@ -104,6 +109,9 @@ public class CollectEventsProcess extends AbstractStatisticsProcess {
 
             // start process
             CollectEventsOperation operation = new CollectEventsOperation();
+            if (tolerance != null && tolerance > 0) {
+                operation.setTolerance(tolerance);
+            }
             SimpleFeatureCollection resultFc = operation.execute(inputFeatures, countField);
             // end process
 

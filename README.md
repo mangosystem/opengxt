@@ -15,13 +15,18 @@ any major spatial data source using open standards.
 * GeoServer licensed under the [GPL](http://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
 * uDig licensed under the [EPL](http://www.eclipse.org/legal/epl-v10.html) + [BSD](http://udig.refractions.net/files/bsd3-v10.html).
 
+## Download
+* Visit [SourceForge](https://sourceforge.net/projects/mango-spatialstatistics/)
+* Download jar files
+
 ## uDig Plugin Installation
 * Download and install uDig 2.0, [download here](http://udig.refractions.net/download/unstable)
+* Start uDig application
 * Choose Help -> Find and Install... from the menu bar to open up the Install/Update window
 * Select Search for new features to install option and press Next.
 * Click on the New Remote Site button and enter the location and name for the site
-    Name: Spatial Statistics Toolbox
-    URL : http://www.mangosystem.com:8080/s2toolbox_updates
+>>Name: Spatial Statistics Toolbox
+>>URL : http://www.mangosystem.com:8080/s2toolbox_updates
 * Press OK and Finish
 * Install and restart uDig application
 * Enjoy!

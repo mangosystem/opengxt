@@ -150,7 +150,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
         area.pack();
         parentTabFolder.pack();
 
-        height = parentTabFolder.computeSize(SWT.DEFAULT, SWT.DEFAULT).y + 145;
+        height = parentTabFolder.computeSize(SWT.DEFAULT, SWT.DEFAULT).y + 165;
         height = height > 650 ? 650 : height;
 
         return area;

@@ -361,6 +361,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                 "org.geotools.process.spatialstatistics.RandomPointsPerFeaturesProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.FishnetProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.HexagonProcessFactory");
+        buildTool(createTool,
+                "org.geotools.process.spatialstatistics.ThiessenPolygonProcessFactory");
 
         // Graph
         TreeParent graphTool = new TreeParent(Messages.ToolboxView_Graph, null, null);

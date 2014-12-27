@@ -12,6 +12,7 @@ package org.locationtech.udig.processingtoolbox.internal.ui;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -36,6 +37,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
+import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -47,7 +49,7 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * Geometry control
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -142,14 +144,37 @@ public class GeometryWidget extends AbstractToolboxWidget {
                     }
                 });
 
-                // 3. GeometryViewer_GeometryFromFeatures = Geometry From Layers...
+                // 3. Extent from current map's layers
+                MenuItem layerMenuItem = new MenuItem(popupMenu, SWT.CASCADE);
+                layerMenuItem.setText(Messages.BoundingBoxViewer_LayerExtent);
+                Menu subMenu = new Menu(parent.getShell(), SWT.DROP_DOWN);
+                layerMenuItem.setMenu(subMenu);
+
+                for (ILayer layer : map.getMapLayers()) {
+                    MenuItem mnuLayer = new MenuItem(subMenu, SWT.PUSH);
+                    mnuLayer.setText(layer.getName());
+                    mnuLayer.setData(layer);
+                    mnuLayer.addSelectionListener(new SelectionAdapter() {
+                        @Override
+                        public void widgetSelected(SelectionEvent event) {
+                            ILayer layer = (ILayer) event.widget.getData();
+                            ReferencedEnvelope extent = layer.getBounds(new NullProgressMonitor(),
+                                    null);
+                            Geometry polygon = JTS.toGeometry(extent);
+                            txtGeometry.setText(polygon.toText());
+                        }
+                    });
+                }
+
+                // 4. GeometryViewer_GeometryFromFeatures = Geometry From Layers...
                 MenuItem mnuFeature = new MenuItem(popupMenu, SWT.PUSH);
                 mnuFeature.setText(Messages.GeometryViewer_GeometryFromFeatures);
                 mnuFeature.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
                         // Geometry picker dialog
-                        GeometryPickerDialog dialog = new GeometryPickerDialog(parent.getShell(), map);
+                        GeometryPickerDialog dialog = new GeometryPickerDialog(parent.getShell(),
+                                map);
                         dialog.setBlockOnOpen(true);
                         if (dialog.open() == Window.OK) {
                             txtGeometry.setText(dialog.getWKT());
@@ -162,7 +187,8 @@ public class GeometryWidget extends AbstractToolboxWidget {
                 Rectangle rect = btnOpen.getBounds();
 
                 Point pos = new Point(loc.x - 1, loc.y + rect.height);
-                popupMenu.setLocation(parent.getShell().getDisplay().map(btnOpen.getParent(), null, pos));
+                popupMenu.setLocation(parent.getShell().getDisplay()
+                        .map(btnOpen.getParent(), null, pos));
                 popupMenu.setVisible(true);
             }
         });

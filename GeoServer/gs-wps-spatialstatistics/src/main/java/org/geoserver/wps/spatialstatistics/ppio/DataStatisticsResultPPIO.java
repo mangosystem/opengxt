@@ -30,7 +30,7 @@ public class DataStatisticsResultPPIO extends XStreamPPIO {
 
     final XmlFriendlyNameCoder nameCoder = new XmlFriendlyNameCoder("__", "_");
 
-    static final QName PPIO_NAME = new QName("http://www.opengis.net/sld", "DataStatistics");
+    static final QName PPIO_NAME = new QName("http://www.opengis.net/statistics", "DataStatistics");
 
     protected DataStatisticsResultPPIO() {
         super(DataStatisticsResult.class, PPIO_NAME);

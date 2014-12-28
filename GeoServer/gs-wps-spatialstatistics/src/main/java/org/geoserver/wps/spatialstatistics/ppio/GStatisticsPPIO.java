@@ -1,3 +1,8 @@
+/* (c) 2014 Open Source Geospatial Foundation - all rights reserved
+ * (c) 2014 MangoSystem
+ * This code is licensed under the GPL 2.0 license, available at the root
+ * application directory.
+ */
 package org.geoserver.wps.spatialstatistics.ppio;
 
 import java.io.InputStream;
@@ -24,7 +29,7 @@ import com.thoughtworks.xstream.mapper.MapperWrapper;
 public class GStatisticsPPIO extends XStreamPPIO {
     final XmlFriendlyNameCoder nameCoder = new XmlFriendlyNameCoder("__", "_");
 
-    static final QName PPIO_NAME = new QName("http://www.opengis.net/sld", "GStatistics");
+    static final QName PPIO_NAME = new QName("http://www.opengis.net/statistics", "GStatistics");
 
     protected GStatisticsPPIO() {
         super(GStatisticsProcessResult.class, PPIO_NAME);

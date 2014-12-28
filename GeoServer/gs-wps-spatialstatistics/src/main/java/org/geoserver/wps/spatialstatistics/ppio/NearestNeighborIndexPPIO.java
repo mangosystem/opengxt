@@ -29,7 +29,8 @@ import com.thoughtworks.xstream.mapper.MapperWrapper;
 public class NearestNeighborIndexPPIO extends XStreamPPIO {
     final XmlFriendlyNameCoder nameCoder = new XmlFriendlyNameCoder("__", "_");
 
-    static final QName PPIO_NAME = new QName("http://www.opengis.net/sld", "Pearson");
+    static final QName PPIO_NAME = new QName("http://www.opengis.net/statistics",
+            "NearestNeighborIndex");
 
     protected NearestNeighborIndexPPIO() {
         super(NearestNeighborResult.class, PPIO_NAME);

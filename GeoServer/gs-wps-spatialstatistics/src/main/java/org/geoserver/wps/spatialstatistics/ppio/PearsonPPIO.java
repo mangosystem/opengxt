@@ -32,7 +32,7 @@ public class PearsonPPIO extends XStreamPPIO {
 
     final XmlFriendlyNameCoder nameCoder = new XmlFriendlyNameCoder("__", "_");
 
-    static final QName PPIO_NAME = new QName("http://www.opengis.net/sld", "Pearson");
+    static final QName PPIO_NAME = new QName("http://www.opengis.net/statistics", "Pearson");
 
     protected PearsonPPIO() {
         super(PearsonResult.class, PPIO_NAME);

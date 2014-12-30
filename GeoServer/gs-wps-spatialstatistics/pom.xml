@@ -50,6 +50,11 @@
         <version>11.2</version>
     </dependency>
     <dependency>
+        <groupId>org.geotools.xsd</groupId>
+        <artifactId>gt-xsd-kml</artifactId>
+        <version>11.2</version>
+    </dependency>
+    <dependency>
         <groupId>org.geotools</groupId>
         <artifactId>gt-process-spatialstatistics</artifactId>
         <version>11.2</version>

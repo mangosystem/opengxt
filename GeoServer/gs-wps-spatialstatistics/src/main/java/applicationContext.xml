@@ -12,6 +12,5 @@
 
 	<!-- native format support -->
 	<bean id="FeatureCollectionGML311PPIO" class="org.geoserver.wps.spatialstatistics.ppio.FeatureCollectionGML311PPIO" />
-	<bean id="FeatureCollectionKML21PPIO" class="org.geoserver.wps.spatialstatistics.ppio.FeatureCollectionKML21PPIO" />
 
 </beans>

@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.process.spatialstatistics.SumLineLengthProcessFactory;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.Converters;
@@ -47,8 +48,12 @@ import com.vividsolutions.jts.geom.Polygon;
 public class CalculateSumLineLengthOpration extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(CalculateSumLineLengthOpration.class);
 
+    static final String LENGTH = (String) SumLineLengthProcessFactory.lengthField.sample;
+
+    static final String COUNT = (String) SumLineLengthProcessFactory.countField.sample;
+
     public SimpleFeatureCollection execute(SimpleFeatureCollection polygons, String lengthField,
-            SimpleFeatureCollection lines) throws IOException {
+            String countField, SimpleFeatureCollection lines) throws IOException {
         Class<?> binding = polygons.getSchema().getGeometryDescriptor().getType().getBinding();
         if (!binding.isAssignableFrom(Polygon.class)
                 && !binding.isAssignableFrom(MultiPolygon.class)) {
@@ -63,13 +68,26 @@ public class CalculateSumLineLengthOpration extends GeneralOperation {
         }
 
         // prepare feature type
+        if (lengthField == null || lengthField.length() == 0) {
+            lengthField = LENGTH;
+        }
+        if (countField == null || countField.length() == 0) {
+            countField = COUNT;
+        }
+
         SimpleFeatureType featureType = FeatureTypes.build(polygons, getOutputTypeName());
         featureType = FeatureTypes.add(featureType, lengthField, Double.class, 38);
-        
+        featureType = FeatureTypes.add(featureType, countField, Integer.class, 38);
+
         // number, string, int, long, float, double....
-        AttributeDescriptor lengthDesc = featureType.getDescriptor(lengthField);
-        binding = lengthDesc.getType().getBinding();
-        
+        AttributeDescriptor lenDsc = featureType.getDescriptor(lengthField);
+        Class<?> lengthBinding = lenDsc.getType().getBinding();
+
+        AttributeDescriptor cntDsc = featureType.getDescriptor(lengthField);
+        Class<?> countBinding = cntDsc.getType().getBinding();
+
+        String the_geom = lines.getSchema().getGeometryDescriptor().getLocalName();
+
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
         SimpleFeatureIterator featureIter = null;
@@ -82,11 +100,31 @@ public class CalculateSumLineLengthOpration extends GeneralOperation {
                     continue;
                 }
 
-                double sumLength = getLineLength(clipGeometry, lines);
+                Filter filter = ff.intersects(ff.property(the_geom), ff.literal(clipGeometry));
+
+                double sumLength = 0d;
+                int lineCount = 0;
+                SimpleFeatureIterator lineIter = null;
+                try {
+                    lineIter = lines.subCollection(filter).features();
+                    while (lineIter.hasNext()) {
+                        SimpleFeature lineFeature = lineIter.next();
+                        Geometry lineStrings = (Geometry) lineFeature.getDefaultGeometry();
+                        Geometry clipedGeometry = lineStrings.intersection(clipGeometry);
+                        if (clipedGeometry != null) {
+                            sumLength += clipedGeometry.getLength();
+                            lineCount++;
+                        }
+                    }
+                } finally {
+                    if (lineIter != null)
+                        lineIter.close();
+                }
 
                 SimpleFeature newFeature = featureWriter.buildFeature(null);
                 featureWriter.copyAttributes(feature, newFeature, true);
-                newFeature.setAttribute(lengthField, Converters.convert(sumLength, binding));
+                newFeature.setAttribute(lengthField, Converters.convert(sumLength, lengthBinding));
+                newFeature.setAttribute(countField, Converters.convert(lineCount, countBinding));
                 featureWriter.write(newFeature);
             }
         } catch (Exception e) {
@@ -97,29 +135,4 @@ public class CalculateSumLineLengthOpration extends GeneralOperation {
 
         return featureWriter.getFeatureCollection();
     }
-
-    private double getLineLength(Geometry clipGeometry, SimpleFeatureCollection lineFeatures) {
-        double sumLength = 0d;
-
-        String the_geom = lineFeatures.getSchema().getGeometryDescriptor().getLocalName();
-        Filter filter = ff.intersects(ff.property(the_geom), ff.literal(clipGeometry));
-
-        SimpleFeatureIterator featureIter = null;
-        try {
-            featureIter = lineFeatures.subCollection(filter).features();
-            while (featureIter.hasNext()) {
-                SimpleFeature feature = featureIter.next();
-                Geometry lineStrings = (Geometry) feature.getDefaultGeometry();
-                Geometry clipedGeometry = lineStrings.intersection(clipGeometry);
-                if (clipedGeometry != null) {
-                    sumLength += clipedGeometry.getLength();
-                }
-            }
-        } finally {
-            featureIter.close();
-        }
-
-        return sumLength;
-    }
-
 }

@@ -53,10 +53,12 @@ public class SumLineLengthProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection polygons,
-            String lengthField, SimpleFeatureCollection lines, ProgressListener monitor) {
+            String lengthField, String countField, SimpleFeatureCollection lines,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(SumLineLengthProcessFactory.polygons.key, polygons);
         map.put(SumLineLengthProcessFactory.lengthField.key, lengthField);
+        map.put(SumLineLengthProcessFactory.countField.key, countField);
         map.put(SumLineLengthProcessFactory.lines.key, lines);
 
         Process process = new SumLineLengthProcess(null);
@@ -90,6 +92,9 @@ public class SumLineLengthProcess extends AbstractStatisticsProcess {
             String lengthField = (String) Params.getValue(input,
                     SumLineLengthProcessFactory.lengthField,
                     SumLineLengthProcessFactory.lengthField.sample);
+            String countField = (String) Params.getValue(input,
+                    SumLineLengthProcessFactory.countField,
+                    SumLineLengthProcessFactory.countField.sample);
             SimpleFeatureCollection lines = (SimpleFeatureCollection) Params.getValue(input,
                     SumLineLengthProcessFactory.lines, null);
             if (polygons == null || lengthField == null || lines == null) {
@@ -105,7 +110,8 @@ public class SumLineLengthProcess extends AbstractStatisticsProcess {
 
             // start process
             CalculateSumLineLengthOpration process = new CalculateSumLineLengthOpration();
-            SimpleFeatureCollection resultFc = process.execute(polygons, lengthField, lines);
+            SimpleFeatureCollection resultFc = process.execute(polygons, lengthField, countField,
+                    lines);
             // end process
 
             monitor.setTask(Text.text("Encoding result"));

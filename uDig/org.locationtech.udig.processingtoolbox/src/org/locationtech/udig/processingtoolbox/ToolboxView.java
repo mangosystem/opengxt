@@ -207,13 +207,12 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
             actionEnv = new Action() {
                 @Override
                 public void run() {
-                    SettingsDialog dialog = new SettingsDialog(Display.getCurrent()
-                            .getActiveShell());
+                    Shell parentShell = Display.getCurrent().getActiveShell();
+                    SettingsDialog dialog = new SettingsDialog(parentShell);
                     dialog.setBlockOnOpen(true);
                     if (dialog.open() == Window.OK) {
                         return;
                     }
-
                 }
             };
 

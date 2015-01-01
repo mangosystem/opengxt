@@ -78,10 +78,16 @@ public class SumLineLengthProcessFactory extends SpatialStatisticsProcessFactory
             getResource("SumLineLength.lengthField.description"), true, 1, 1, "sum_len", new KVP(
                     Parameter.OPTIONS, "polygons.All"));
 
+    /** countField */
+    public static final Parameter<String> countField = new Parameter<String>("countField",
+            String.class, getResource("SumLineLength.countField.title"),
+            getResource("SumLineLength.countField.description"), false, 0, 1, "line_cnt", new KVP(
+                    Parameter.OPTIONS, "polygons.All"));
+
     /** lines */
     public static final Parameter<SimpleFeatureCollection> lines = new Parameter<SimpleFeatureCollection>(
             "lines", SimpleFeatureCollection.class, getResource("SumLineLength.lines.title"),
-            getResource("SumLineLength.lines.description"), true, 1, 1, null,  new KVP(
+            getResource("SumLineLength.lines.description"), true, 1, 1, null, new KVP(
                     Parameter.FEATURE_TYPE, "LineString"));
 
     @Override
@@ -89,6 +95,7 @@ public class SumLineLengthProcessFactory extends SpatialStatisticsProcessFactory
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(polygons.key, polygons);
         parameterInfo.put(lengthField.key, lengthField);
+        parameterInfo.put(countField.key, countField);
         parameterInfo.put(lines.key, lines);
         return parameterInfo;
     }

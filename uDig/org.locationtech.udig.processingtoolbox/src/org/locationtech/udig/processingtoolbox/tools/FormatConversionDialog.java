@@ -121,6 +121,7 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
         grpOption.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
         grpOption.setLayout(new GridLayout(6, false));
         grpOption.setEnabled(false);
+        grpOption.setVisible(false);
 
         optTab = uiBuilder
                 .createRadioButton(grpOption, Messages.TextfileToPointDialog_Tab, null, 1);
@@ -180,6 +181,7 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
             } else if (widget.equals(cboOption)) {
                 int selection = cboOption.getSelectionIndex();
                 grpOption.setEnabled(selection == 6 || selection == 7);
+                grpOption.setVisible(selection == 6 || selection == 7);
                 if (selection == 7) {
                     optEtc.setSelection(true);
                     txtDelimiter.setEnabled(true);

@@ -12,6 +12,7 @@ org.geotools.process.spatialstatistics.LocalMoransIProcessFactory
 org.geotools.process.spatialstatistics.LocalGStatisticsProcessFactory
 
 org.geotools.process.spatialstatistics.MeanCenterProcessFactory
+org.geotools.process.spatialstatistics.CentralFeatureFactory
 org.geotools.process.spatialstatistics.SDEProcessFactory
 org.geotools.process.spatialstatistics.SDProcessFactory
 

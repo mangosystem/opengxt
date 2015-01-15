@@ -26,7 +26,7 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.distribution.StandardDistanceEllipseOperation;
+import org.geotools.process.spatialstatistics.distribution.StandardDeviationalEllipseOperation;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
@@ -116,7 +116,7 @@ public class SDEProcess extends AbstractStatisticsProcess {
                 stdDeviation = 3.0;
             }
 
-            StandardDistanceEllipseOperation process = new StandardDistanceEllipseOperation();
+            StandardDeviationalEllipseOperation process = new StandardDeviationalEllipseOperation();
             process.setStdDeviation(stdDeviation);
             process.setOutputTypeName("StandardDistanceEllipse");
 

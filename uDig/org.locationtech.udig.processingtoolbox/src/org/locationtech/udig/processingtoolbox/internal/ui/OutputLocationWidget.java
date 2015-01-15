@@ -49,6 +49,8 @@ public class OutputLocationWidget extends AbstractToolboxWidget {
     private FileDataType fileDataType = FileDataType.RASTER;
 
     private int fileDialogStyle = SWT.SAVE;
+    
+    private Text txtPath;
 
     private String[] fileNames;
 
@@ -85,6 +87,11 @@ public class OutputLocationWidget extends AbstractToolboxWidget {
             break;
         }
     }
+    
+    public void setOutputName(String name) {
+        File file = new File(ToolboxView.getWorkspace(), name + fileExtension);
+        txtPath.setText(file.getPath());
+    }
 
     public void create(final Composite parent, final int style,
             final Map<String, Object> processParams, final Parameter<?> param) {
@@ -113,7 +120,7 @@ public class OutputLocationWidget extends AbstractToolboxWidget {
         lblName.setToolTipText(param.description.toString());
 
         // 2. file path
-        final Text txtPath = new Text(composite, SWT.BORDER);
+        txtPath = new Text(composite, SWT.BORDER);
         txtPath.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         txtPath.setData(param.key);
 

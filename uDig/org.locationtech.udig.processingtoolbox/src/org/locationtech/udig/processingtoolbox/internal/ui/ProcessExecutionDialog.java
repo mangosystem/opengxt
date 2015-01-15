@@ -240,6 +240,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
                 outputParams.put(entrySet.getValue().key, entrySet.getValue().sample);
                 OutputLocationWidget view = new OutputLocationWidget(fileDataType, SWT.SAVE);
                 view.create(container, SWT.BORDER, outputParams, entrySet.getValue());
+                view.setOutputName(processName.getLocalPart().toLowerCase());
             }
         }
 

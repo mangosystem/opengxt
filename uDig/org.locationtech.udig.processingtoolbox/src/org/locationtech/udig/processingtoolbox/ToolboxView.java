@@ -291,6 +291,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.CentralFeatureFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.SDProcessFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.SDEProcessFactory");
+        buildTool(distributionTools, "org.geotools.process.spatialstatistics.DirectionalMeanProcessFactory");
     }
 
     private void buildTool(TreeParent ssTools, String className) {

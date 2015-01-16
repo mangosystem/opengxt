@@ -15,6 +15,7 @@ org.geotools.process.spatialstatistics.MeanCenterProcessFactory
 org.geotools.process.spatialstatistics.CentralFeatureFactory
 org.geotools.process.spatialstatistics.SDEProcessFactory
 org.geotools.process.spatialstatistics.SDProcessFactory
+org.geotools.process.spatialstatistics.DirectionalMeanProcessFactory
 
 org.geotools.process.spatialstatistics.RandomPointsProcessFactory
 org.geotools.process.spatialstatistics.RandomPointsPerFeaturesProcessFactory

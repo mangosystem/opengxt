@@ -10,7 +10,8 @@
 	<bean id="DataStatisticsResultPPIO" class="org.geoserver.wps.spatialstatistics.ppio.DataStatisticsResultPPIO" />
 	<bean id="NearestNeighborIndexPPIO" class="org.geoserver.wps.spatialstatistics.ppio.NearestNeighborIndexPPIO" />
 
-	<!-- native format support -->
+	<!-- native format support --> 
 	<bean id="FeatureCollectionGML311PPIO" class="org.geoserver.wps.spatialstatistics.ppio.FeatureCollectionGML311PPIO" />
+    <bean id="GeometryGeoJSONPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GeometryGeoJSONPPIO" />
 
 </beans>

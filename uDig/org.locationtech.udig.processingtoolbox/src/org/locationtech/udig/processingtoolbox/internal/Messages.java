@@ -78,6 +78,11 @@ public class Messages extends NLS {
     public static String GeometryPickerDialog_Clipboard;
     public static String GeometryPickerDialog_AddLayer;
     
+    public static String GeometryToFeaturesDialog_title;
+    public static String GeometryToFeaturesDialog_description;
+    public static String GeometryToFeaturesDialog_WKT;
+    public static String GeometryToFeaturesDialog_CRS;
+    
     public static String GeometryViewer_MapCenter;
     public static String GeometryViewer_MapExtent;
     public static String GeometryViewer_GeometryFromFeatures;

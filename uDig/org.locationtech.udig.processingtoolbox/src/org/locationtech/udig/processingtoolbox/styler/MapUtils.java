@@ -145,11 +145,16 @@ public class MapUtils {
     public static ILayer addGeometryToMap(IMap map, Geometry source, CoordinateReferenceSystem crs,
             String layerName) {
         SimpleFeatureType schema = FeatureTypes.getDefaultType(layerName, source.getClass(), crs);
+        schema = FeatureTypes.add(schema, "name", String.class, 20);
+        schema = FeatureTypes.add(schema, "weight", Integer.class, 19);
 
         ListFeatureCollection features = new ListFeatureCollection(schema);
         SimpleFeatureBuilder typeBuilder = new SimpleFeatureBuilder(schema);
 
         SimpleFeature feature = typeBuilder.buildFeature(null);
+        feature.setAttribute("name", source.getGeometryType());
+        feature.setAttribute("weight", 1);
+
         feature.setDefaultGeometry(source);
         features.add(feature);
 

@@ -52,6 +52,7 @@ import org.locationtech.udig.processingtoolbox.internal.ui.SettingsDialog;
 import org.locationtech.udig.processingtoolbox.tools.BoxPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.BubbleChartDialog;
 import org.locationtech.udig.processingtoolbox.tools.FormatConversionDialog;
+import org.locationtech.udig.processingtoolbox.tools.GeometryToFeaturesDialog;
 import org.locationtech.udig.processingtoolbox.tools.HistogramDialog;
 import org.locationtech.udig.processingtoolbox.tools.MoranScatterPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.ScatterPlotDialog;
@@ -178,6 +179,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                     dialog = new TextfileToPointDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("ThematicMapDialog")) {
                                     dialog = new ThematicMapDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("GeometryToFeaturesDialog")) {
+                                    dialog = new GeometryToFeaturesDialog(shell, map);
                                 }
                             } else {
                                 dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
@@ -291,7 +294,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.CentralFeatureFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.SDProcessFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.SDEProcessFactory");
-        buildTool(distributionTools, "org.geotools.process.spatialstatistics.DirectionalMeanProcessFactory");
+        buildTool(distributionTools,
+                "org.geotools.process.spatialstatistics.DirectionalMeanProcessFactory");
     }
 
     private void buildTool(TreeParent ssTools, String className) {
@@ -349,6 +353,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent importTool = new TreeParent(Messages.ToolboxView_Import, null, null);
         generalTool.addChild(importTool);
         buildTool(importTool, Messages.TextfileToPointDialog_title, "TextfileToPointDialog");
+        buildTool(importTool, Messages.GeometryToFeaturesDialog_title, "GeometryToFeaturesDialog");
 
         // export
         TreeParent exportTool = new TreeParent(Messages.ToolboxView_Export, null, null);

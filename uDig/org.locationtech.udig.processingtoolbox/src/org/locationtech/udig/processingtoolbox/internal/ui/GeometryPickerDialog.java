@@ -47,6 +47,7 @@ import org.locationtech.udig.processingtoolbox.styler.MapUtils;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -79,6 +80,8 @@ public class GeometryPickerDialog extends Dialog {
 
     private Text txtGeometry;
 
+    private CoordinateReferenceSystem crs = null;
+
     public GeometryPickerDialog(Shell parentShell, IMap map) {
         super(parentShell);
 
@@ -96,6 +99,10 @@ public class GeometryPickerDialog extends Dialog {
 
     public String getWKT() {
         return this.wktGeometry;
+    }
+
+    public CoordinateReferenceSystem getCRS() {
+        return this.crs;
     }
 
     @Override
@@ -136,6 +143,7 @@ public class GeometryPickerDialog extends Dialog {
             @Override
             public void modifyText(ModifyEvent e) {
                 SimpleFeatureCollection source = MapUtils.getFeatures(map, cboLayer.getText());
+                crs = source.getSchema().getCoordinateReferenceSystem();
                 updateFeatures(source);
             }
         });

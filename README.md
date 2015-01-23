@@ -47,3 +47,6 @@ any major spatial data source using open standards.
 
 
 ![screenshot](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/images/geoserver_wps_request.png?width=800)
+
+
+![screenshot](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/images/geoserver_wps_client.png?width=800)

@@ -6,8 +6,10 @@ target
 *.txt
 nb-configuration.xml
 *.*~
+
+# ObjectAid Files #
 *.ucls
-*.png
+model_*.png
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

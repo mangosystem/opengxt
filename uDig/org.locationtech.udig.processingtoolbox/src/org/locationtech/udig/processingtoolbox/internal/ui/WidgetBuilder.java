@@ -199,6 +199,11 @@ public class WidgetBuilder {
     }
 
     public Group createGroup(Composite parent, String text, boolean titleBold, int colspan) {
+        return createGroup(parent, text, titleBold, colspan, 0);
+    }
+
+    public Group createGroup(Composite parent, String text, boolean titleBold, int colspan,
+            int heightHint) {
         Group group = new Group(parent, SWT.SHADOW_ETCHED_IN);
 
         if (titleBold) {
@@ -209,7 +214,12 @@ public class WidgetBuilder {
             group.setText(text);
         }
 
-        group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, colspan, 1));
+        GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true, colspan, 1);
+        if (heightHint > 0) {
+            gridData.heightHint = heightHint;
+        }
+
+        group.setLayoutData(gridData);
         group.setLayout(new GridLayout(2, false));
 
         return group;
@@ -245,11 +255,15 @@ public class WidgetBuilder {
     }
 
     public Table createTable(Composite composite, String[] columns, int colspan) {
+        return createTable(composite, columns, colspan, 200);
+    }
+
+    public Table createTable(Composite composite, String[] columns, int colspan, int heightHint) {
         Table table = new Table(composite, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL
                 | SWT.MULTI | SWT.FULL_SELECTION);
 
         GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true, colspan, 1);
-        gridData.heightHint = 200;
+        gridData.heightHint = heightHint == 0 ? 250 : heightHint;
 
         table.setLayoutData(gridData);
         table.setHeaderVisible(true);

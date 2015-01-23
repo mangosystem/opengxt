@@ -85,7 +85,7 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
 
         this.windowTitle = Messages.FormatConversionDialog_title;
         this.windowDesc = Messages.FormatConversionDialog_description;
-        this.windowSize = new Point(650, 450);
+        this.windowSize = new Point(650, 500);
     }
 
     @SuppressWarnings("nls")
@@ -258,7 +258,7 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
                 if (item.getChecked()) {
                     ILayer layer = (ILayer) item.getData();
                     SimpleFeatureCollection features = MapUtils.getFeatures(layer);
-                    if (selectionIdx == 6) {         // CSV
+                    if (selectionIdx == 6) { // CSV
                         Charset charset = Charset.forName(ToolboxPlugin.defaultCharset());
                         File outputFile = new File(outputFolder, layer.getName()
                                 + ftrans.getExtension());

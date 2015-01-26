@@ -56,6 +56,9 @@ import com.vividsolutions.jts.geom.Polygon;
 public class TextColumn {
     protected static final Logger LOGGER = Logging.getLogger(TextColumn.class);
 
+    // Unicode char represented by the UTF-8 byte order mark (EF BB BF)
+    private static final String UTF8_BOM = "\uFEFF";
+
     private static final String prefix = "col_";
 
     public static final Map<String, String> reservedMap = new HashMap<String, String>();
@@ -275,13 +278,18 @@ public class TextColumn {
             String[] values = line.split(splitter);
 
             // build header
+            boolean isUTF8 = charset.equals(Charset.forName("UTF-8"));
             columns = new TextColumn[values.length];
             for (int index = 0; index < values.length; index++) {
                 columns[index] = new TextColumn();
                 columns[index].setType("String");
                 columns[index].setColumnIndex(index);
 
-                String value = removeDoubleQuote(values[index]);
+                String value = removeDoubleQuote(values[index]).trim();
+                if (index == 0 && isUTF8 && value.startsWith(UTF8_BOM)) {
+                    value = value.substring(1);
+                }
+
                 if (headerFirst) {
                     columns[index].setName(value);
                 } else {
@@ -291,12 +299,16 @@ public class TextColumn {
             }
 
             // build sample value
+            int limitLength = columns.length - 1;
             while (line != null) {
                 line = reader.readLine();
                 sampleSize++;
                 values = line.split(splitter);
 
-                for (int index = 0; index < columns.length; index++) {
+                for (int index = 0; index < values.length; index++) {
+                    if (index > limitLength) {
+                        break;
+                    }
                     columns[index].getSampleValues().add(removeDoubleQuote(values[index]));
                 }
 

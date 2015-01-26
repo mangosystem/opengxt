@@ -233,10 +233,8 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
             } else if (widget.equals(optEtc)) {
                 txtDelimiter.setEnabled(optEtc.getSelection());
                 txtDelimiter.setFocus();
-                if (!StringHelper.isNullOrEmpty(txtDelimiter.getText())) {
-                    delimiter = txtDelimiter.getText();
-                    loadTables();
-                }
+                delimiter = txtDelimiter.getText();
+                loadTables();
             } else if (widget.equals(btnSourceCrs)) {
                 CRSChooserDialog dialog = new CRSChooserDialog(activeShell, null);
                 if (dialog.open() == Window.OK) {
@@ -292,6 +290,10 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
 
     private void loadTables() {
         if (cboSource.getSelectionIndex() == -1) {
+            return;
+        }
+        
+        if (StringHelper.isNullOrEmpty(delimiter)) {
             return;
         }
 

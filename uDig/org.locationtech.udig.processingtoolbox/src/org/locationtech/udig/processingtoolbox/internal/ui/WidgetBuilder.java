@@ -62,8 +62,8 @@ public class WidgetBuilder {
     public GridLayout createGridLayout(int numColumns, boolean makeColumnsEqualWidth,
             int marginWidth, int marginHeight) {
         GridLayout layout = new GridLayout(numColumns, makeColumnsEqualWidth);
-        layout.marginWidth = 0;
-        layout.marginHeight = 0;
+        layout.marginWidth = marginWidth;
+        layout.marginHeight = marginHeight;
 
         return layout;
     }
@@ -234,11 +234,15 @@ public class WidgetBuilder {
     }
 
     public Table createListTable(Composite composite, String[] columns, int colspan) {
+        return createListTable(composite, columns, colspan, 200);
+    }
+
+    public Table createListTable(Composite composite, String[] columns, int colspan, int heightHint) {
         Table table = new Table(composite, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL
                 | SWT.FULL_SELECTION);
 
         GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true, colspan, 1);
-        gridData.heightHint = 200;
+        gridData.heightHint = heightHint == 0 ? 200 : heightHint;
 
         table.setLayoutData(gridData);
         table.setHeaderVisible(false);

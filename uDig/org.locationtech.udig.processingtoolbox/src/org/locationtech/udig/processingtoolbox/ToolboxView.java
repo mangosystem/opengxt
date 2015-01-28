@@ -51,6 +51,7 @@ import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialo
 import org.locationtech.udig.processingtoolbox.internal.ui.SettingsDialog;
 import org.locationtech.udig.processingtoolbox.tools.BoxPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.BubbleChartDialog;
+import org.locationtech.udig.processingtoolbox.tools.FieldCalculatorDialog;
 import org.locationtech.udig.processingtoolbox.tools.FormatConversionDialog;
 import org.locationtech.udig.processingtoolbox.tools.GeometryToFeaturesDialog;
 import org.locationtech.udig.processingtoolbox.tools.HistogramDialog;
@@ -167,6 +168,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                     dialog = new BoxPlotDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("BubbleChartDialog")) {
                                     dialog = new BubbleChartDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("FieldCalculatorDialog")) {
+                                    dialog = new FieldCalculatorDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("FormatConversionDialog")) {
                                     dialog = new FormatConversionDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("HistogramDialog")) {
@@ -348,6 +351,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         root.addChild(generalTool);
 
         buildTool(generalTool, Messages.ThematicMapDialog_title, "ThematicMapDialog");
+        buildTool(generalTool, Messages.FieldCalculatorDialog_title, "FieldCalculatorDialog");
 
         // import
         TreeParent importTool = new TreeParent(Messages.ToolboxView_Import, null, null);

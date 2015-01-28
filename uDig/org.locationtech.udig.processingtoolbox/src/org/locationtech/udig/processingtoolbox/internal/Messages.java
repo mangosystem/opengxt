@@ -56,6 +56,20 @@ public class Messages extends NLS {
     public static String ExtentSelection_message;
     public static String ExtentSelection_title;
     
+    public static String FieldCalculatorDialog_title;
+    public static String FieldCalculatorDialog_description;
+    public static String FieldCalculatorDialog_Layer_Group;
+    public static String FieldCalculatorDialog_Layer;
+    public static String FieldCalculatorDialog_Selected;
+    public static String FieldCalculatorDialog_Field;
+    public static String FieldCalculatorDialog_Fields;
+    public static String FieldCalculatorDialog_Functions;
+    public static String FieldCalculatorDialog_Operators;
+    public static String FieldCalculatorDialog_Warning;
+    public static String FieldCalculatorDialog_FieldType;
+    public static String FieldCalculatorDialog_FieldLen;
+    public static String FieldCalculatorDialog_Failed;
+    
     public static String FormatConversionDialog_title;
     public static String FormatConversionDialog_description;
     public static String FormatConversionDialog_SelectLayers;

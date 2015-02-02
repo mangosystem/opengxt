@@ -76,6 +76,7 @@ import org.geotools.util.logging.Logging;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.ICatalog;
 import org.locationtech.udig.catalog.ID;
+import org.locationtech.udig.catalog.IResolve.Status;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceFactory;
 import org.locationtech.udig.catalog.internal.shp.ShpGeoResourceImpl;
@@ -525,23 +526,24 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
 
             // post process
             if (features != null) {
-                monitor.setTaskName(Messages.Task_AddingLayer);
-                File newFile = new File(folder, process.getOutputTypeName() + ".dbf");
+                Date now = Calendar.getInstance().getTime();
 
                 // remove service
                 IService service = layer.getGeoResource().service(progress.newChild(5));
                 final ID id = service.getID();
-                Map<java.lang.String, Serializable> params = service.getConnectionParams();
+                final Map<java.lang.String, Serializable> params = service.getConnectionParams();
                 service.dispose(progress.newChild(10));
-                Thread.sleep(100);
+                while (service.getStatus() == Status.CONNECTED) {
+                    Thread.sleep(100);
+                }
 
                 // replace dbf file
-                String shpPath = DataUtilities.urlToFile(service.getIdentifier()).getPath(); // .shp
+                String shpPath = DataUtilities.urlToFile(id.toURL()).getPath(); // .shp
                 File dbfFile = new File(FilenameUtils.removeExtension(shpPath) + ".dbf");
 
-                Date now = Calendar.getInstance().getTime();
-                File tempFile = new File(folder, "fc_" + df.format(now) + ".dbf");
+                File tempFile = new File(dbfFile.getParent(), "fc_" + df.format(now) + ".dbf");
                 if (dbfFile.renameTo(tempFile)) {
+                    File newFile = new File(folder, process.getOutputTypeName() + ".dbf");
                     org.apache.commons.io.FileUtils.copyFile(newFile, dbfFile);
                     tempFile.delete();
                     updateFields(layer.getSchema());

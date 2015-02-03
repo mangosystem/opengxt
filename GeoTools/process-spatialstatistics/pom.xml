@@ -33,6 +33,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jt.version>1.3.1</jt.version>
   </properties>
 
 
@@ -83,6 +84,33 @@
             <artifactId>gt-geotiff</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+          <groupId>org.jaitools</groupId>
+          <artifactId>jt-zonalstats</artifactId>
+          <version>${jt.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.jaitools</groupId>
+          <artifactId>jt-rangelookup</artifactId>
+          <version>${jt.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.jaitools</groupId>
+          <artifactId>jt-contour</artifactId>
+          <version>${jt.version}</version>
+        </dependency>    
+        <dependency>
+          <groupId>org.jaitools</groupId>
+          <artifactId>jt-vectorize</artifactId>
+          <version>${jt.version}</version>
+        </dependency>            
+        <dependency>
+          <groupId>org.jaitools</groupId>
+          <artifactId>jt-utils</artifactId>
+          <version>${jt.version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>

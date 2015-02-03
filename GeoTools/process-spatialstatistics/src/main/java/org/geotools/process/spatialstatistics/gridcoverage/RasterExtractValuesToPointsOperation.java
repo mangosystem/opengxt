@@ -11,6 +11,7 @@ import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.SlopeType;
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.util.Converters;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -44,7 +45,13 @@ public class RasterExtractValuesToPointsOperation extends GeneralOperation {
 
         // prepare feature type
         SimpleFeatureType featureType = FeatureTypes.build(inputSchema, getOutputTypeName());
-        featureType = FeatureTypes.add(featureType, valueField, Double.class);
+        
+        Class<?> fieldBinding = Double.class; // default
+        if (FeatureTypes.existProeprty(inputSchema, valueField)) {
+            fieldBinding = featureType.getDescriptor(valueField).getType().getBinding();
+        } else {
+            featureType = FeatureTypes.add(featureType, valueField, Double.class);
+        }
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
@@ -56,8 +63,8 @@ public class RasterExtractValuesToPointsOperation extends GeneralOperation {
         try {
             featureIter = inputFeatures.features();
             while (featureIter.hasNext()) {
-                final SimpleFeature feature = featureIter.next();
-                final Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                SimpleFeature feature = featureIter.next();
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
                 if (geometry == null || geometry.isEmpty()) {
                     continue;
                 }
@@ -82,8 +89,11 @@ public class RasterExtractValuesToPointsOperation extends GeneralOperation {
                 // copy feature and set value
                 SimpleFeature newFeature = featureWriter.buildFeature(null);
                 featureWriter.copyAttributes(feature, newFeature, true);
-                if (!SSUtils.compareDouble(val, noData)) {
-                    newFeature.setAttribute(valueField, val);
+                if (SSUtils.compareDouble(val, noData)) {
+                    newFeature.setAttribute(valueField, null);
+                } else {
+                    newFeature.setAttribute(valueField,
+                            Converters.convert(Double.valueOf(val), fieldBinding));
                 }
 
                 featureWriter.write(newFeature);

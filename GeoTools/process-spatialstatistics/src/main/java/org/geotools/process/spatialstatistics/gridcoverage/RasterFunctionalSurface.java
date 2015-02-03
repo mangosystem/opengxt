@@ -1,19 +1,12 @@
 package org.geotools.process.spatialstatistics.gridcoverage;
 
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.media.jai.JAI;
-import javax.media.jai.ParameterBlockJAI;
-import javax.media.jai.RenderedOp;
 
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -25,9 +18,7 @@ import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.SlopeType;
 import org.geotools.util.logging.Logging;
-import org.jaitools.media.jai.contour.ContourDescriptor;
 import org.opengis.geometry.DirectPosition;
-import org.opengis.metadata.spatial.PixelOrientation;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
@@ -38,8 +29,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.util.AffineTransformation;
-import com.vividsolutions.jts.operation.linemerge.LineMerger;
 
 /**
  * Quantify and visualize a terrain landform represented by a digital elevation model.
@@ -71,80 +60,6 @@ public class RasterFunctionalSurface {
         this.grid2D = srcCoverage;
         this.cellSize = RasterHelper.getCellSize(srcCoverage);
         this.noData = RasterHelper.getNoDataValue(srcCoverage);
-    }
-
-    public Geometry getContour(Point position) {
-        Geometry contour = null;
-
-        // get elevation
-        double elevation = this.getElevation(position);
-        if (elevation == this.noData) {
-            return contour;
-        }
-
-        List<Double> elevationLevels = Arrays.asList(new Double[] { elevation });
-
-        ParameterBlockJAI pb = new ParameterBlockJAI("Contour");
-        pb.setSource("source0", grid2D.getRenderedImage());
-        // pb.setParameter("roi", null); // (ROI) null,
-        pb.setParameter("band", Integer.valueOf(0));
-        pb.setParameter("levels", elevationLevels);
-        // pb.setParameter("interval", null);
-        pb.setParameter("nodata", Arrays.asList(Double.NaN, Double.POSITIVE_INFINITY,
-                Double.NEGATIVE_INFINITY, Double.MAX_VALUE));
-        pb.setParameter("simplify", Boolean.TRUE);
-        pb.setParameter("smooth", Boolean.FALSE);
-
-        RenderedOp renderedOp = JAI.create("Contour", pb);
-
-        @SuppressWarnings("unchecked")
-        List<LineString> contours = (List<LineString>) renderedOp
-                .getProperty(ContourDescriptor.CONTOUR_PROPERTY_NAME);
-
-        AffineTransform mt2D = (AffineTransform) grid2D.getGridGeometry().getGridToCRS2D(
-                PixelOrientation.CENTER);
-        AffineTransformation jtsTransformation = new AffineTransformation(mt2D.getScaleX(),
-                mt2D.getShearX(), mt2D.getTranslateX(), mt2D.getShearY(), mt2D.getScaleY(),
-                mt2D.getTranslateY());
-
-        if (contours == null || contours.size() == 0) {
-            return contour;
-        } else {
-            if (contours.size() == 1) {
-                contour = contours.get(0);
-                contour.apply(jtsTransformation);
-
-                // return LineString
-                return contour;
-            } else {
-                // transform linestring
-                double minDist = Double.MAX_VALUE;
-                for (LineString lineString : contours) {
-                    lineString.apply(jtsTransformation);
-
-                    double dist = lineString.distance(position);
-                    if (dist == 0) {
-                        contour = lineString;
-                        break;
-                    } else if (minDist > dist) {
-                        minDist = dist;
-                        contour = lineString;
-                    }
-                }
-
-                // merge linestring
-                LineMerger lineMerger = new LineMerger();
-                lineMerger.add(contours);
-
-                @SuppressWarnings("rawtypes")
-                Collection linestrings = lineMerger.getMergedLineStrings();
-
-                // return MultiLineString
-                GeometryFactory fGf = JTSFactoryFinder.getGeometryFactory(GeoTools
-                        .getDefaultHints());
-                return fGf.createMultiLineString(GeometryFactory.toLineStringArray(linestrings));
-            }
-        }
     }
 
     public LineString getLineOfSight(Coordinate observer, Coordinate target, double observerOffset,
@@ -479,7 +394,7 @@ public class RasterFunctionalSurface {
         // (Oxford University Press, New York), p. 190.
         // [dz/dx] = ((c + 2f + i) - (a + 2d + g) / (8 * x_cell_size)
         // [dz/dy] = ((g + 2h + i) - (a + 2b + c)) / (8 * y_cell_size)
-        // slope_degrees = ATAN ( �� ( [dz/dx]2 + [dz/dy]2 ) ) * 57.29578
+        // slope_degrees = ATAN ( SQRT ( [dz/dx]2 + [dz/dy]2 ) ) * 57.29578
 
         // +-------+ +-------+
         // | 0 1 2 | | a b c |
@@ -534,8 +449,7 @@ public class RasterFunctionalSurface {
 
         // http://help.arcgis.com/en/arcgisdesktop/10.0/help/index.html#/How_Slope_works/009z000000vz000000/
         // If any neighborhood cells are NoData, they are assigned the value of the center cell;
-        // then the slope is computed.they are assigned the value of the center cell; then the slope
-        // is computed.
+        // then the slope is computed.
         if (hasNAN) {
             for (int dcol = 0; dcol < width; dcol++) {
                 for (int drow = 0; drow < height; drow++) {

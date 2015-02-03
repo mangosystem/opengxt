@@ -396,6 +396,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(utilTool, "org.geotools.process.spatialstatistics.PointStatisticsProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.BufferStatisticsProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SumLineLengthProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory");
     }
 
     private void buildTool(TreeParent parent, String title, String dialogName) {

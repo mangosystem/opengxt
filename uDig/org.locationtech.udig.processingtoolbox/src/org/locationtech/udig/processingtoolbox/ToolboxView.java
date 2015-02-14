@@ -294,6 +294,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         ssTools.addChild(distributionTools);
         buildTool(distributionTools,
                 "org.geotools.process.spatialstatistics.MeanCenterProcessFactory");
+        buildTool(distributionTools,
+                "org.geotools.process.spatialstatistics.MedianCenterProcessFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.CentralFeatureFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.SDProcessFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.SDEProcessFactory");
@@ -396,7 +398,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(utilTool, "org.geotools.process.spatialstatistics.PointStatisticsProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.BufferStatisticsProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SumLineLengthProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory");
+        buildTool(utilTool,
+                "org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory");
     }
 
     private void buildTool(TreeParent parent, String title, String dialogName) {

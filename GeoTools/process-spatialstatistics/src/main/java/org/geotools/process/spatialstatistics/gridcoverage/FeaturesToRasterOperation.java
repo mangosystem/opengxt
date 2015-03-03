@@ -141,7 +141,7 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
     }
 
     public GridCoverage2D execute(SimpleFeatureCollection inputFeatures) {
-        // FID 사용
+        // use feature id
         return execute(inputFeatures, "");
     }
 
@@ -206,7 +206,7 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
 
         RasterPixelType transferType = RasterPixelType.SHORT;
         Map<Object, Integer> uvMap = new TreeMap<Object, Integer>();
-        ;
+
         if (isNuemricField) {
             transferType = RasterHelper.getTransferType(schema, valueField);
         } else {
@@ -383,13 +383,11 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
         double yOffset = 0;
 
         // **************************************************************************
-        // ArcGIS offset issue 2011/02/16
         if (shapeType == SimpleShapeType.POLYGON) {
             xOffset = CellSize / 2.0;
             yOffset = CellSize / 2.0;
         }
         // **************************************************************************
-        // final double offset = 0;
 
         for (int i = 0; i < cs.length; i++) {
             if (i == 0) {

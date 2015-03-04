@@ -32,3 +32,4 @@ org.geotools.process.spatialstatistics.FishnetProcessFactory
 org.geotools.process.spatialstatistics.ThiessenPolygonProcessFactory
 
 org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory
+org.geotools.process.spatialstatistics.KernelDensityProcessFactory

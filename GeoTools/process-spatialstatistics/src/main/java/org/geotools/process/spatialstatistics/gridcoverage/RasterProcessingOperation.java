@@ -390,14 +390,7 @@ public abstract class RasterProcessingOperation {
         }
 
         if (boundUpdated) {
-            final String className = getClass().getSimpleName();
-            if (className.equalsIgnoreCase(FeaturesToRasterOperation.class.getSimpleName())
-                    || className.equalsIgnoreCase(GeometryToRasterOp.class.getSimpleName())) {
-                // skip ====>
-            } else {
-                // Density, IDW ...expand by 2.0
-                Extent.expandBy(CellSize / 2.0);
-            }
+            Extent.expandBy(CellSize / 2.0);
         }
     }
 

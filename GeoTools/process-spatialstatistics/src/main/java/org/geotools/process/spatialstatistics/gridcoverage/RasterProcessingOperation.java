@@ -18,11 +18,16 @@ package org.geotools.process.spatialstatistics.gridcoverage;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferByte;
+import java.awt.image.DataBufferInt;
+import java.awt.image.DataBufferUShort;
+import java.awt.image.MultiPixelPackedSampleModel;
 import java.awt.image.RenderedImage;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
@@ -34,8 +39,10 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.media.jai.PixelAccessor;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.RasterFactory;
+import javax.media.jai.UnpackedImageData;
 
 import org.geotools.coverage.Category;
 import org.geotools.coverage.CoverageFactoryFinder;
@@ -159,9 +166,205 @@ public abstract class RasterProcessingOperation {
 
         // raw level
         WritableRaster raster = (WritableRaster) writableImage.getData();
-        com.sun.media.jai.util.ImageUtil.fillBackground(raster, raster.getBounds(),
-                backgroundValues);
+        // ImageUtil.fillBackground(raster, raster.getBounds(), backgroundValues);
+        this.fillBackground(raster, raster.getBounds(), backgroundValues);
         writableImage.setData(raster);
+    }
+
+    private boolean isBinary(SampleModel sm) {
+        return sm instanceof MultiPixelPackedSampleModel
+                && ((MultiPixelPackedSampleModel) sm).getPixelBitStride() == 1
+                && sm.getNumBands() == 1;
+    }
+
+    /**
+     * Fill the specified rectangle of <code>raster</code> with the provided background values. Suppose the raster is initialized to 0. Thus, for
+     * binary data, if the provided background values are 0, do nothing.
+     */
+    private void fillBackground(WritableRaster raster, Rectangle rect, double[] backgroundValues) {
+        rect = rect.intersection(raster.getBounds());
+        SampleModel sm = raster.getSampleModel();
+        PixelAccessor accessor = new PixelAccessor(sm, null);
+        if (isBinary(sm)) {
+            // fill binary data
+            byte value = (byte) (((int) backgroundValues[0]) & 1);
+            if (value == 0)
+                return;
+            int rectX = rect.x;
+            int rectY = rect.y;
+            int rectWidth = rect.width;
+            int rectHeight = rect.height;
+            int dx = rectX - raster.getSampleModelTranslateX();
+            int dy = rectY - raster.getSampleModelTranslateY();
+            DataBuffer dataBuffer = raster.getDataBuffer();
+            MultiPixelPackedSampleModel mpp = (MultiPixelPackedSampleModel) sm;
+            int lineStride = mpp.getScanlineStride();
+            int eltOffset = dataBuffer.getOffset() + mpp.getOffset(dx, dy);
+            int bitOffset = mpp.getBitOffset(dx);
+            switch (sm.getDataType()) {
+            case DataBuffer.TYPE_BYTE: {
+                byte[] data = ((DataBufferByte) dataBuffer).getData();
+                int bits = bitOffset & 7;
+                int otherBits = (bits == 0) ? 0 : 8 - bits;
+                byte mask = (byte) (255 >> bits);
+                int lineLength = (rectWidth - otherBits) / 8;
+                int bits1 = (rectWidth - otherBits) & 7;
+                byte mask1 = (byte) (255 << (8 - bits1));
+                // If operating within a single byte, merge masks into one
+                // and don't apply second mask after while loop
+                if (lineLength == 0) {
+                    mask &= mask1;
+                    bits1 = 0;
+                }
+                for (int y = 0; y < rectHeight; y++) {
+                    int start = eltOffset;
+                    int end = start + lineLength;
+                    if (bits != 0)
+                        data[start++] |= mask;
+                    while (start < end)
+                        data[start++] = (byte) 255;
+                    if (bits1 != 0)
+                        data[start] |= mask1;
+                    eltOffset += lineStride;
+                }
+                break;
+            }
+            case DataBuffer.TYPE_USHORT: {
+                short[] data = ((DataBufferUShort) dataBuffer).getData();
+                int bits = bitOffset & 15;
+                int otherBits = (bits == 0) ? 0 : 16 - bits;
+                short mask = (short) (65535 >> bits);
+                int lineLength = (rectWidth - otherBits) / 16;
+                int bits1 = (rectWidth - otherBits) & 15;
+                short mask1 = (short) (65535 << (16 - bits1));
+                // If operating within a single byte, merge masks into one
+                // and don't apply second mask after while loop
+                if (lineLength == 0) {
+                    mask &= mask1;
+                    bits1 = 0;
+                }
+                for (int y = 0; y < rectHeight; y++) {
+                    int start = eltOffset;
+                    int end = start + lineLength;
+                    if (bits != 0)
+                        data[start++] |= mask;
+                    while (start < end)
+                        data[start++] = (short) 0xFFFF;
+                    if (bits1 != 0)
+                        data[start++] |= mask1;
+                    eltOffset += lineStride;
+                }
+                break;
+            }
+            case DataBuffer.TYPE_INT: {
+                int[] data = ((DataBufferInt) dataBuffer).getData();
+                int bits = bitOffset & 31;
+                int otherBits = (bits == 0) ? 0 : 32 - bits;
+                int mask = 0xFFFFFFFF >> bits;
+                int lineLength = (rectWidth - otherBits) / 32;
+                int bits1 = (rectWidth - otherBits) & 31;
+                int mask1 = 0xFFFFFFFF << (32 - bits1);
+                // If operating within a single byte, merge masks into one
+                // and don't apply second mask after while loop
+                if (lineLength == 0) {
+                    mask &= mask1;
+                    bits1 = 0;
+                }
+                for (int y = 0; y < rectHeight; y++) {
+                    int start = eltOffset;
+                    int end = start + lineLength;
+                    if (bits != 0)
+                        data[start++] |= mask;
+                    while (start < end)
+                        data[start++] = 0xFFFFFFFF;
+                    if (bits1 != 0)
+                        data[start++] |= mask1;
+                    eltOffset += lineStride;
+                }
+                break;
+            }
+            }
+        } else {
+            int srcSampleType = accessor.sampleType == PixelAccessor.TYPE_BIT ? DataBuffer.TYPE_BYTE
+                    : accessor.sampleType;
+            UnpackedImageData uid = accessor.getPixels(raster, rect, srcSampleType, false);
+            rect = uid.rect;
+            int lineStride = uid.lineStride;
+            int pixelStride = uid.pixelStride;
+            switch (uid.type) {
+            case DataBuffer.TYPE_BYTE:
+                byte[][] bdata = uid.getByteData();
+                for (int b = 0; b < accessor.numBands; b++) {
+                    byte value = (byte) backgroundValues[b];
+                    byte[] bd = bdata[b];
+                    int lastLine = uid.bandOffsets[b] + rect.height * lineStride;
+                    for (int lo = uid.bandOffsets[b]; lo < lastLine; lo += lineStride) {
+                        int lastPixel = lo + rect.width * pixelStride;
+                        for (int po = lo; po < lastPixel; po += pixelStride) {
+                            bd[po] = value;
+                        }
+                    }
+                }
+                break;
+            case DataBuffer.TYPE_USHORT:
+            case DataBuffer.TYPE_SHORT:
+                short[][] sdata = uid.getShortData();
+                for (int b = 0; b < accessor.numBands; b++) {
+                    short value = (short) backgroundValues[b];
+                    short[] sd = sdata[b];
+                    int lastLine = uid.bandOffsets[b] + rect.height * lineStride;
+                    for (int lo = uid.bandOffsets[b]; lo < lastLine; lo += lineStride) {
+                        int lastPixel = lo + rect.width * pixelStride;
+                        for (int po = lo; po < lastPixel; po += pixelStride) {
+                            sd[po] = value;
+                        }
+                    }
+                }
+                break;
+            case DataBuffer.TYPE_INT:
+                int[][] idata = uid.getIntData();
+                for (int b = 0; b < accessor.numBands; b++) {
+                    int value = (int) backgroundValues[b];
+                    int[] id = idata[b];
+                    int lastLine = uid.bandOffsets[b] + rect.height * lineStride;
+                    for (int lo = uid.bandOffsets[b]; lo < lastLine; lo += lineStride) {
+                        int lastPixel = lo + rect.width * pixelStride;
+                        for (int po = lo; po < lastPixel; po += pixelStride) {
+                            id[po] = value;
+                        }
+                    }
+                }
+                break;
+            case DataBuffer.TYPE_FLOAT:
+                float[][] fdata = uid.getFloatData();
+                for (int b = 0; b < accessor.numBands; b++) {
+                    float value = (float) backgroundValues[b];
+                    float[] fd = fdata[b];
+                    int lastLine = uid.bandOffsets[b] + rect.height * lineStride;
+                    for (int lo = uid.bandOffsets[b]; lo < lastLine; lo += lineStride) {
+                        int lastPixel = lo + rect.width * pixelStride;
+                        for (int po = lo; po < lastPixel; po += pixelStride) {
+                            fd[po] = value;
+                        }
+                    }
+                }
+                break;
+            case DataBuffer.TYPE_DOUBLE:
+                double[][] ddata = uid.getDoubleData();
+                for (int b = 0; b < accessor.numBands; b++) {
+                    double value = backgroundValues[b];
+                    double[] dd = ddata[b];
+                    int lastLine = uid.bandOffsets[b] + rect.height * lineStride;
+                    for (int lo = uid.bandOffsets[b]; lo < lastLine; lo += lineStride) {
+                        int lastPixel = lo + rect.width * pixelStride;
+                        for (int po = lo; po < lastPixel; po += pixelStride) {
+                            dd[po] = value;
+                        }
+                    }
+                }
+                break;
+            }
+        }
     }
 
     protected void calculateExtentAndCellSize(SimpleFeatureCollection srcSfs, Object noDataValue) {
@@ -192,11 +395,8 @@ public abstract class RasterProcessingOperation {
                     || className.equalsIgnoreCase(GeometryToRasterOp.class.getSimpleName())) {
                 // skip ====>
             } else {
-                // Density, IDW ...expand by 0.5
+                // Density, IDW ...expand by 2.0
                 Extent.expandBy(CellSize / 2.0);
-
-                // for kernel density + ArcGIS
-                // Extent.expandBy(CellSize * 2.0);
             }
         }
     }
@@ -207,7 +407,6 @@ public abstract class RasterProcessingOperation {
         NoData = RasterHelper.getNoDataValue(srcCoverage);
         CellSize = RasterHelper.getCellSize(srcCoverage);
 
-        // 원본 이미지와 타일의 갯수를 같게 생성한다.
         final RenderedImage img = srcCoverage.getRenderedImage();
         return createDiskMemImage(Extent, transferType, img.getTileWidth(), img.getTileHeight());
     }

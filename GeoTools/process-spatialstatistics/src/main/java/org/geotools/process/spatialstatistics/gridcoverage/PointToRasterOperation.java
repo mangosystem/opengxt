@@ -116,11 +116,11 @@ public class PointToRasterOperation extends RasterProcessingOperation {
         COUNT, CONSTANT, FIELD
     }
 
-    DiskMemImage outputImage = null;
+    private DiskMemImage outputImage = null;
 
-    AssignmentType assignType = AssignmentType.COUNT;
+    private AssignmentType assignType = AssignmentType.COUNT;
 
-    ValueType valueType = ValueType.COUNT;
+    private ValueType valueType = ValueType.COUNT;
 
     public GridCoverage2D executePointCount(SimpleFeatureCollection pointFeatures) {
         return executePointCount(pointFeatures, Short.MIN_VALUE);

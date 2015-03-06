@@ -152,8 +152,7 @@ public class RasterFunctionalSurface {
                 // clear
                 // sky for locations whose elevation varies between 40 and 100 meters
 
-                final double D = SSUtils.getEuclideanDistance(from.x, from.y, current.x, current.y);
-
+                final double D = from.distance(current);
                 if (useRefraction) {
                     current.z = current.z + (D * 2) * (refractionFactor - 1) / 12740000.0;
                 } else {

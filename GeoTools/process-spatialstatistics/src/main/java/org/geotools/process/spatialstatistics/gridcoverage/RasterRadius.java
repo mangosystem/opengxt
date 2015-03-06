@@ -62,12 +62,13 @@ public final class RasterRadius {
     public int numberOfPoints = 12;
 
     public RasterRadius() {
-        // set default environment
-        setVariable(12, Double.NaN);
+        // default environment
+        setVariable(12);
     }
 
     public void setVariable(int numberOfPoints) {
-        setVariable(numberOfPoints, Double.NaN);
+        // The default maximumDistance value is the length of the extent's diagonal.
+        setVariable(numberOfPoints, Double.MAX_VALUE);
     }
 
     public void setVariable(int numberOfPoints, double maximumDistance) {

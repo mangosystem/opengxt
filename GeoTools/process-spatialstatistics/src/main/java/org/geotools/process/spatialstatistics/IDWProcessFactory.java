@@ -79,7 +79,7 @@ public class IDWProcessFactory extends SpatialStatisticsProcessFactory {
     /** inputField */
     public static final Parameter<String> inputField = new Parameter<String>("inputField",
             String.class, getResource("IDW.inputField.title"),
-            getResource("IDW.inputField.description"), false, 0, 1, null, new KVP(
+            getResource("IDW.inputField.description"), true, 1, 1, null, new KVP(
                     Parameter.OPTIONS, "inputFeatures.Number"));
 
     /** power */

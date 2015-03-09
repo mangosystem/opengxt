@@ -143,12 +143,12 @@ public class RasterInterpolationIDWOperation extends RasterInterpolationOperator
 
         private java.awt.Rectangle rect;
 
-        private IDWInterpolator interpolator;
+        private AbstractInterpolator interpolator;
 
         private GridTransformer trans;
 
-        public PartialInterpolator(DiskMemImage oi, Rectangle rect, IDWInterpolator interpolator,
-                GridTransformer trans) {
+        public PartialInterpolator(DiskMemImage oi, Rectangle rect,
+                AbstractInterpolator interpolator, GridTransformer trans) {
             this.oi = oi;
             this.rect = rect;
             this.interpolator = interpolator;

@@ -34,3 +34,4 @@ org.geotools.process.spatialstatistics.ThiessenPolygonProcessFactory
 org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory
 org.geotools.process.spatialstatistics.KernelDensityProcessFactory
 org.geotools.process.spatialstatistics.IDWProcessFactory
+org.geotools.process.spatialstatistics.TPSProcessFactory

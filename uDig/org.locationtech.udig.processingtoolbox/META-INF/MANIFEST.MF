@@ -29,4 +29,11 @@ Export-Package: org.locationtech.udig.processingtoolbox;
    org.opengis.feature.type"
 Bundle-ClassPath: .,
  libs/gt-process-spatialstatistics-11.2.jar
+Import-Package: javax.media.jai,
+ javax.media.jai.iterator,
+ javax.media.jai.operator,
+ javax.media.jai.registry,
+ javax.media.jai.remote,
+ javax.media.jai.tilecodec,
+ javax.media.jai.util
 

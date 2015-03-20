@@ -327,7 +327,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
                 NumberDataWidget numberView = new NumberDataWidget(map);
                 numberView.create(container, SWT.NONE, inputParams, param);
             } else {
-                IntegerDataWidget integerView = new IntegerDataWidget();
+                IntegerDataWidget integerView = new IntegerDataWidget(map);
                 integerView.create(container, SWT.NONE, inputParams, param);
             }
         } else if (Boolean.class.isAssignableFrom(param.type)

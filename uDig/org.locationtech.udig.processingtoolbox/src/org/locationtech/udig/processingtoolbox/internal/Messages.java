@@ -111,6 +111,8 @@ public class Messages extends NLS {
     public static String HistogramDialog_Ratio;
     public static String HistogramDialog_Value;
     
+    public static String IntegerDataViewer_FeatureCount;
+    
     public static String LiteralDataViewer_ExpressionBuilder;
     public static String LiteralDataViewer_MultipleFieldsSelection;
     public static String LiteralDataViewer_StatisticsFieldsSelection;
@@ -264,10 +266,13 @@ public class Messages extends NLS {
     public static String ToolboxView_GeneralTools;
     public static String ToolboxView_DataCreation;
     public static String ToolboxView_Graph;
+    public static String ToolboxView_RasterTools;
     public static String ToolboxView_Utilities;
     public static String ToolboxView_NoActiveMap;
     public static String ToolboxView_Import;
     public static String ToolboxView_Export;
+    public static String ToolboxView_Density;
+    public static String ToolboxView_Interpolation;
 
     static {
         // initialize resource bundle

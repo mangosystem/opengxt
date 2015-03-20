@@ -36,6 +36,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.JTS;
+import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.GlobalGStatisticsProcess.GStatisticsProcessResult;
 import org.geotools.process.spatialstatistics.GlobalMoransIProcess.MoransIProcessResult;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
@@ -169,7 +170,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                 }
             }
             monitor.worked(increment);
-        } catch (Exception e) {
+        } catch (ProcessException e) {
             ToolboxPlugin.log(e.getMessage());
         } finally {
             ToolboxPlugin.log(String.format(Messages.Task_Completed, windowTitle));

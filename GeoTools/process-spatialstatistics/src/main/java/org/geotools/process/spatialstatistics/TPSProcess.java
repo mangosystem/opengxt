@@ -151,7 +151,7 @@ public class TPSProcess extends AbstractStatisticsProcess {
             return resultMap;
         } catch (Exception eek) {
             monitor.exceptionOccurred(eek);
-            return null;
+            throw new ProcessException(eek);
         } finally {
             monitor.dispose();
         }

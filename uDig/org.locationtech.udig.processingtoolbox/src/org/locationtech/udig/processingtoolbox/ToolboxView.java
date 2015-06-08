@@ -264,6 +264,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(desTools, "org.geotools.process.spatialstatistics.AreaProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.StatisticsFeaturesProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.PearsonCorrelationProcessFactory");
+        buildTool(desTools, "org.geotools.process.spatialstatistics.StandardizedScoresProcessFactory");
         buildTool(desTools, Messages.HistogramDialog_title, "HistogramDialog");
         buildTool(desTools, Messages.BoxPlotDialog_title, "BoxPlotDialog");
         buildTool(desTools, Messages.ScatterPlotDialog_title, "ScatterPlotDialog");

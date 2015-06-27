@@ -52,6 +52,7 @@ import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget.File
 import org.locationtech.udig.processingtoolbox.styler.ProcessExecutorOperation;
 import org.locationtech.udig.processingtoolbox.tools.HtmlWriter;
 import org.locationtech.udig.project.IMap;
+import org.locationtech.udig.project.ui.internal.LayersView;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.geometry.BoundingBox;
@@ -452,6 +453,8 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
             }
         } else {
             super.okPressed();
+            // update LayersView(TOC)
+            LayersView.getViewPart().setCurrentMap((org.locationtech.udig.project.internal.Map) map);
         }
     }
 }

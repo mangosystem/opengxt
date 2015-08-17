@@ -41,7 +41,7 @@ public class OutputDataWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(OutputDataWidget.class);
 
     public enum FileDataType {
-        PGDB, SHAPEFILE, RASTER, EXCEL, FOLDER
+        PGDB, SHAPEFILE, RASTER, EXCEL, FOLDER, WEIGHT_MATRIX
     }
 
     private Text txtPath;
@@ -75,6 +75,10 @@ public class OutputDataWidget extends AbstractToolboxWidget {
         case SHAPEFILE:
             fileNames = new String[] { "ESRI Shapefile (*.shp)" };
             fileExtensions = new String[] { "*.shp" };
+            break;
+        case WEIGHT_MATRIX:
+            fileNames = new String[] { "Spatial Weight Matrix Files (*.gal, *.gwt)" };
+            fileExtensions = new String[] { "*.gal;*.gwt" };
             break;
         case FOLDER:
             break;

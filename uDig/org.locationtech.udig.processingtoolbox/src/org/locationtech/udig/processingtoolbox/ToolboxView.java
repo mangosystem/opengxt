@@ -57,6 +57,7 @@ import org.locationtech.udig.processingtoolbox.tools.GeometryToFeaturesDialog;
 import org.locationtech.udig.processingtoolbox.tools.HistogramDialog;
 import org.locationtech.udig.processingtoolbox.tools.MoranScatterPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.ScatterPlotDialog;
+import org.locationtech.udig.processingtoolbox.tools.SpatialWeightsMatrixDialog;
 import org.locationtech.udig.processingtoolbox.tools.TextfileToPointDialog;
 import org.locationtech.udig.processingtoolbox.tools.ThematicMapDialog;
 import org.locationtech.udig.project.IMap;
@@ -184,6 +185,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                     dialog = new ThematicMapDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("GeometryToFeaturesDialog")) {
                                     dialog = new GeometryToFeaturesDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("SpatialWeightsMatrixDialog")) {
+                                    dialog = new SpatialWeightsMatrixDialog(shell, map);
                                 }
                             } else {
                                 dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
@@ -232,9 +235,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
     }
 
     private TreeObject buildTree() {
-        // find all the process factories and print out their names
+        // find all the process factories and print out their name
         TreeParent root = new TreeParent(Messages.ToolboxView_Title, null, null);
-
+        
         // 1. build general tools
         buildGeneralTools(root);
 
@@ -256,6 +259,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
     private void buildStatisticsTools(TreeParent root) {
         TreeParent ssTools = new TreeParent(Messages.ToolboxView_SpatialStatistics, null, null);
         root.addChild(ssTools);
+        
+        buildTool(ssTools, Messages.SpatialWeightsMatrixDialog_title, "SpatialWeightsMatrixDialog");
 
         // Descriptive Statistics
         TreeParent desTools = new TreeParent(Messages.ToolboxView_DescriptiveStatistics, null, null);
@@ -350,7 +355,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
 
         buildTool(generalTool, Messages.ThematicMapDialog_title, "ThematicMapDialog");
         buildTool(generalTool, Messages.FieldCalculatorDialog_title, "FieldCalculatorDialog");
-
+        
         // import
         TreeParent importTool = new TreeParent(Messages.ToolboxView_Import, null, null);
         generalTool.addChild(importTool);

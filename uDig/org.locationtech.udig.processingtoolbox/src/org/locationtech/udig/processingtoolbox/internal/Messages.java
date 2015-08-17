@@ -195,6 +195,27 @@ public class Messages extends NLS {
     public static String SettingsDialog_UseLog;
     public static String SettingsDialog_advanced; 
     
+    public static String SpatialWeightsMatrixDialog_title;
+    public static String SpatialWeightsMatrixDialog_description;
+    public static String SpatialWeightsMatrixDialog_InputLayer;
+    public static String SpatialWeightsMatrixDialog_UniqueField;
+    public static String SpatialWeightsMatrixDialog_WeightType;
+    public static String SpatialWeightsMatrixDialog_WeightTypeDistance;
+    public static String SpatialWeightsMatrixDialog_WeightTypeContiguity;
+    public static String SpatialWeightsMatrixDialog_DistanceMethod;
+    public static String SpatialWeightsMatrixDialog_Euclidean;
+    public static String SpatialWeightsMatrixDialog_Manhattan;
+    public static String SpatialWeightsMatrixDialog_ThresholdDistance;
+    public static String SpatialWeightsMatrixDialog_Calculate;
+    public static String SpatialWeightsMatrixDialog_kNearestNeighbors;
+    public static String SpatialWeightsMatrixDialog_Numberofneighbors;
+    public static String SpatialWeightsMatrixDialog_RowStandardization;
+    public static String SpatialWeightsMatrixDialog_Exponent;
+    public static String SpatialWeightsMatrixDialog_Queen;
+    public static String SpatialWeightsMatrixDialog_OrderofContiguity;
+    public static String SpatialWeightsMatrixDialog_Rook;
+    public static String SpatialWeightsMatrixDialog_Bishops;
+    
     public static String StatisticsFieldsSelectionDialog_title;
     public static String StatisticsFieldsSelectionDialog_Layer;
     public static String StatisticsFieldsSelectionDialog_Fields;

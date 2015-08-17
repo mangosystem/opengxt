@@ -89,7 +89,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
 
         this.windowTitle = Messages.ThematicMapDialog_title;
         this.windowDesc = Messages.ThematicMapDialog_description;
-        this.windowSize = new Point(500, 330);
+        this.windowSize = new Point(550, 340);
         this.brewer = ColorBrewer.instance();
     }
 

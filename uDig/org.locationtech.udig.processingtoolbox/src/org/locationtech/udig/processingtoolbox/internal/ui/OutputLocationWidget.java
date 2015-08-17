@@ -83,6 +83,11 @@ public class OutputLocationWidget extends AbstractToolboxWidget {
             fileExtensions = new String[] { "*.shp" };
             fileExtension = ".shp";
             break;
+        case WEIGHT_MATRIX:
+            fileNames = new String[] { "Spatial Weight Matrix Files (*.gal, *.gwt)" };
+            fileExtensions = new String[] { "*.gal;*.gwt" };
+            fileExtension = ".gal";
+            break;
         case FOLDER:
             break;
         }

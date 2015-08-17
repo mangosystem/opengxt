@@ -536,4 +536,13 @@ public class WidgetBuilder {
 
         return table;
     }
+
+    // Utility for widget
+    public int toSpinnerValue(Spinner spinner, double value) {
+        return (int) (value * Math.pow(10, spinner.getDigits()));
+    }
+
+    public double fromSpinnerValue(Spinner spinner, int value) {
+        return value / Math.pow(10, spinner.getDigits());
+    }    
 }

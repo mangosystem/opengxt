@@ -125,23 +125,23 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
         cmpDist.setLayout(uiBuilder.createGridLayout(3, false, 0, 5));
         cmpDist.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-        uiBuilder.createLabel(cmpDist, Messages.SpatialWeightsMatrixDialog_DistanceMethod, EMPTY, 1);
-        cboDistMethod = uiBuilder.createCombo(cmpDist, 2, true);
-        cboDistMethod.setItems(new String[] { Messages.SpatialWeightsMatrixDialog_Euclidean, Messages.SpatialWeightsMatrixDialog_Manhattan });
-        cboDistMethod.select(0);
-
         optDistance = uiBuilder.createRadioButton(cmpDist,  Messages.SpatialWeightsMatrixDialog_ThresholdDistance, EMPTY, 1);
         optDistance.addSelectionListener(selectionListener);
         btnThresh = uiBuilder.createButton(cmpDist,  Messages.SpatialWeightsMatrixDialog_Calculate, EMPTY, 1);
         btnThresh.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
         spnDistacne = uiBuilder.createSpinner(cmpDist, 0, 0, Integer.MAX_VALUE, 2, 10000, 100000, 1);
+
+        uiBuilder.createLabel(cmpDist, Messages.SpatialWeightsMatrixDialog_DistanceMethod, EMPTY, 1);
+        cboDistMethod = uiBuilder.createCombo(cmpDist, 2, true);
+        cboDistMethod.setItems(new String[] { Messages.SpatialWeightsMatrixDialog_Euclidean, Messages.SpatialWeightsMatrixDialog_Manhattan });
+        cboDistMethod.select(0);
         
-        // advanced options
         uiBuilder.createLabel(cmpDist, Messages.SpatialWeightsMatrixDialog_RowStandardization, EMPTY, 1);
         cboRowStd = uiBuilder.createCombo(cmpDist, 2, true);
         cboRowStd.setItems(new String[] { "True", "False" });  //$NON-NLS-1$//$NON-NLS-2$
         cboRowStd.select(0);
         
+        // advanced options
         chkExponent = uiBuilder.createCheckbox(cmpDist, Messages.SpatialWeightsMatrixDialog_Exponent, EMPTY, 1);
         spnExponent = uiBuilder.createSpinner(cmpDist, 1, 1, 2, 0, 1, 1, 2);
 
@@ -202,17 +202,12 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
                         SimpleFeatureCollection features = MapUtils.getFeatures(activeLayer);
                         List<SpatialEvent> events = DistanceFactory.loadEvents(features, null);
 
-                        double sumDistance = 0.0;
-                        double minDistance = Double.MAX_VALUE;
-                        double maxDistance = Double.MIN_VALUE;
-
                         DistanceFactory factory = DistanceFactory.newInstance();
                         factory.DistanceType = cboDistMethod.getSelectionIndex() == 0 ? DistanceMethod.Euclidean
                                 : DistanceMethod.Manhattan;
+                        double sumDistance = 0.0;
                         for (SpatialEvent curEvent : events) {
                             double nnDist = factory.getMinimumDistance(events, curEvent);
-                            minDistance = Math.min(minDistance, nnDist);
-                            maxDistance = Math.max(maxDistance, nnDist);
                             sumDistance += nnDist;
                         }
 
@@ -250,6 +245,7 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
                 spnExponent.setEnabled(optDistance.getSelection());
                 chkExponent.setEnabled(optDistance.getSelection());
                 cboDistMethod.setEnabled(optDistance.getSelection());
+                cboRowStd.setEnabled(optDistance.getSelection());
             } else if (widget.equals(optKNearest)) {
                 spnNeighbors.setEnabled(optKNearest.getSelection());
             } else if (widget.equals(optDistanceBased)) {

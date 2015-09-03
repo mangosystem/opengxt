@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Widget;
@@ -82,7 +83,7 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
 
         this.windowTitle = Messages.SpatialWeightsMatrixDialog_title;
         this.windowDesc = Messages.SpatialWeightsMatrixDialog_description;
-        this.windowSize = new Point(650, 475);
+        this.windowSize = new Point(650, 485);
     }
 
     @Override
@@ -145,6 +146,9 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
         chkExponent = uiBuilder.createCheckbox(cmpDist, Messages.SpatialWeightsMatrixDialog_Exponent, EMPTY, 1);
         spnExponent = uiBuilder.createSpinner(cmpDist, 1, 1, 2, 0, 1, 1, 2);
 
+        Label separator = new Label(cmpDist, SWT.SEPARATOR | SWT.HORIZONTAL);
+        separator.setLayoutData(new GridData(GridData.FILL, SWT.CENTER, true, false, 3, 1));
+        
         optKNearest = uiBuilder.createRadioButton(cmpDist,  Messages.SpatialWeightsMatrixDialog_kNearestNeighbors, EMPTY, 1);
         optKNearest.addSelectionListener(selectionListener);
         uiBuilder.createLabel(cmpDist,  Messages.SpatialWeightsMatrixDialog_Numberofneighbors, EMPTY, 1);
@@ -271,6 +275,12 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
             public void run() {
                 SimpleFeatureCollection features = MapUtils.getFeatures(activeLayer);
                 String fieldName = cboField.getText();
+                
+                // TODO: code here!
+                
+                
+                
+                
                 
                 openInformation(getShell(), "implementing...");
             }

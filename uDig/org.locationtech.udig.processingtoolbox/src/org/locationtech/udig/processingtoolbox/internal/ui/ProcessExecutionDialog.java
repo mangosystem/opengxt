@@ -358,7 +358,11 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
                     cboField.addModifyListener(new ModifyListener() {
                         @Override
                         public void modifyText(ModifyEvent e) {
-                            inputParams.put(param.key, cboField.getText());
+                            if (cboField.getText().length() == 0) {
+                                inputParams.put(param.key, null);
+                            } else {
+                                inputParams.put(param.key, cboField.getText());
+                            }
                         }
                     });
 
@@ -453,7 +457,6 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
             }
         } else {
             super.okPressed();
-            // update LayersView(TOC)
             LayersView.getViewPart().setCurrentMap((org.locationtech.udig.project.internal.Map) map);
         }
     }

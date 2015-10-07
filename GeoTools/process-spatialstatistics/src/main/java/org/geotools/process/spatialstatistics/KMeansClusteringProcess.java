@@ -22,30 +22,30 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.operations.RandomPointsOperation;
+import org.geotools.process.spatialstatistics.pattern.KMeansClusterOperation;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
 /**
- * Generate random points in as extent or polygon features.
+ * k-means clustering is a method of cluster analysis which aims to partition n observations into k clusters in which each observation belongs to the
+ * cluster with the nearest mean
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class RandomPointsProcess extends AbstractStatisticsProcess {
-    protected static final Logger LOGGER = Logging.getLogger(RandomPointsProcess.class);
+public class KMeansClusteringProcess extends AbstractStatisticsProcess {
+    protected static final Logger LOGGER = Logging.getLogger(KMeansClusteringProcess.class);
 
     private boolean started = false;
 
-    public RandomPointsProcess(ProcessFactory factory) {
+    public KMeansClusteringProcess(ProcessFactory factory) {
         super(factory);
     }
 
@@ -53,35 +53,18 @@ public class RandomPointsProcess extends AbstractStatisticsProcess {
         return factory;
     }
 
-    public static SimpleFeatureCollection process(Integer pointCount, ReferencedEnvelope extent,
-            ProgressListener monitor) {
+    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+            Integer numberOfClusters, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(RandomPointsProcessFactory.pointCount.key, pointCount);
-        map.put(RandomPointsProcessFactory.extent.key, extent);
+        map.put(KMeansClusteringProcessFactory.inputFeatures.key, inputFeatures);
+        map.put(KMeansClusteringProcessFactory.numberOfClusters.key, numberOfClusters);
 
-        Process process = new RandomPointsProcess(null);
+        Process process = new KMeansClusteringProcess(null);
         Map<String, Object> resultMap;
         try {
             resultMap = process.execute(map, monitor);
-            return (SimpleFeatureCollection) resultMap.get(RandomPointsProcessFactory.RESULT.key);
-        } catch (ProcessException e) {
-            LOGGER.log(Level.FINER, e.getMessage(), e);
-        }
-
-        return null;
-    }
-
-    public static SimpleFeatureCollection process(Integer pointCount,
-            SimpleFeatureCollection inputFeatures, ProgressListener monitor) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put(RandomPointsProcessFactory.pointCount.key, pointCount);
-        map.put(RandomPointsProcessFactory.polygonFeatures.key, inputFeatures);
-
-        Process process = new RandomPointsProcess(null);
-        Map<String, Object> resultMap;
-        try {
-            resultMap = process.execute(map, monitor);
-            return (SimpleFeatureCollection) resultMap.get(RandomPointsProcessFactory.RESULT.key);
+            return (SimpleFeatureCollection) resultMap
+                    .get(KMeansClusteringProcessFactory.RESULT.key);
         } catch (ProcessException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
@@ -103,19 +86,17 @@ public class RandomPointsProcess extends AbstractStatisticsProcess {
             monitor.setTask(Text.text("Grabbing arguments"));
             monitor.progress(10.0f);
 
-            int pointCount = (Integer) Params.getValue(input,
-                    RandomPointsProcessFactory.pointCount,
-                    RandomPointsProcessFactory.pointCount.sample);
-            if (pointCount < 1) {
-                throw new NullPointerException("Point count must be greater than 1");
+            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
+                    input, KMeansClusteringProcessFactory.inputFeatures, null);
+            if (inputFeatures == null) {
+                throw new NullPointerException("inputFeatures parameters required");
             }
 
-            SimpleFeatureCollection polygonFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, RandomPointsProcessFactory.polygonFeatures, null);
-            ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
-                    RandomPointsProcessFactory.extent, null);
-            if (polygonFeatures == null && extent == null) {
-                throw new NullPointerException("extent or polygonFeatures parameters required");
+            int numberOfClusters = (Integer) Params.getValue(input,
+                    KMeansClusteringProcessFactory.numberOfClusters,
+                    KMeansClusteringProcessFactory.numberOfClusters.sample);
+            if (numberOfClusters < 1) {
+                throw new NullPointerException("Number of clusters must be greater than 1");
             }
 
             monitor.setTask(Text.text("Processing ..."));
@@ -126,21 +107,16 @@ public class RandomPointsProcess extends AbstractStatisticsProcess {
             }
 
             // start process
-            RandomPointsOperation operator = new RandomPointsOperation();
-            SimpleFeatureCollection randomPoints = null;
-
-            if (polygonFeatures == null) {
-                randomPoints = operator.execute(extent, pointCount);
-            } else {
-                randomPoints = operator.execute(polygonFeatures, pointCount);
-            }
+            KMeansClusterOperation operator = new KMeansClusterOperation();
+            SimpleFeatureCollection resultFc = null;
+            resultFc = operator.execute(inputFeatures, numberOfClusters);
             // end process
 
             monitor.setTask(Text.text("Encoding result"));
             monitor.progress(90.0f);
 
             Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(AreaProcessFactory.RESULT.key, randomPoints);
+            resultMap.put(AreaProcessFactory.RESULT.key, resultFc);
             monitor.complete(); // same as 100.0f
 
             return resultMap;

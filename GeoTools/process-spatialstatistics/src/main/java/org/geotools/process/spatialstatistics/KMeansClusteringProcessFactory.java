@@ -68,8 +68,13 @@ public class KMeansClusteringProcessFactory extends SpatialStatisticsProcessFact
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("KMeansClustering.inputFeatures.title"),
-            getResource("KMeansClustering.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Point"));
+            getResource("KMeansClustering.inputFeatures.description"), true, 1, 1, null, null);
+
+    /** targetField */
+    public static final Parameter<String> targetField = new Parameter<String>("targetField",
+            String.class, getResource("KMeansClustering.targetField.title"),
+            getResource("KMeansClustering.targetField.description"), true, 1, 1, "cluster",
+            new KVP(Parameter.OPTIONS, "inputFeatures.Number"));
 
     /** numberOfClusters */
     public static final Parameter<Integer> numberOfClusters = new Parameter<Integer>(
@@ -81,6 +86,7 @@ public class KMeansClusteringProcessFactory extends SpatialStatisticsProcessFact
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
+        parameterInfo.put(targetField.key, targetField);
         parameterInfo.put(numberOfClusters.key, numberOfClusters);
         return parameterInfo;
     }

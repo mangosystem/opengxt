@@ -25,8 +25,6 @@ import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.process.spatialstatistics.pattern.Cluster.PointEvent;
@@ -34,17 +32,13 @@ import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.algorithm.MinimumBoundingCircle;
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
@@ -57,33 +51,22 @@ import com.vividsolutions.jts.geom.Polygon;
 public class KMeansClusterOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(KMeansClusterOperation.class);
 
-    public static final String CLUSTER = "cluster";
-
-    public SimpleFeatureCollection execute(SimpleFeatureSource pointsource, Filter filter,
+    public SimpleFeatureCollection execute(SimpleFeatureCollection features, String targetField,
             int numClusters) throws IOException {
-        filter = filter == null ? Filter.INCLUDE : filter;
-        return execute(pointsource.getFeatures(filter), numClusters);
-    }
-
-    public SimpleFeatureCollection execute(SimpleFeatureCollection pointFeatures, int numClusters)
-            throws IOException {
-        KMeansCluster cluster = new KMeansCluster(pointFeatures);
+        KMeansCluster cluster = new KMeansCluster(features);
         cluster.cluster(numClusters);
         PointEvent[] originPoints = cluster.getPoints();
 
-        SimpleFeatureType featureType = FeatureTypes.build(pointFeatures, this.getOutputTypeName());
-        featureType = FeatureTypes.add(featureType, CLUSTER, Integer.class, 16);
+        SimpleFeatureType featureType = FeatureTypes.build(features, this.getOutputTypeName());
+        featureType = FeatureTypes.add(featureType, targetField, Integer.class, 10);
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
         try {
             for (PointEvent cp : originPoints) {
-                Point curPoint = gf.createPoint(new Coordinate(cp.x, cp.y));
-
                 SimpleFeature newFeature = featureWriter.buildFeature(null);
-                featureWriter.copyAttributes(cp.feature, newFeature, false);
-                newFeature.setDefaultGeometry(curPoint);
-                newFeature.setAttribute(CLUSTER, cp.cluster);
+                featureWriter.copyAttributes(cp.feature, newFeature, true);
+                newFeature.setAttribute(targetField, cp.cluster);
                 featureWriter.write(newFeature);
             }
         } catch (IOException e) {
@@ -95,9 +78,9 @@ public class KMeansClusterOperation extends GeneralOperation {
         return featureWriter.getFeatureCollection();
     }
 
-    public SimpleFeatureCollection executeAsCircle(SimpleFeatureCollection pointFeatures,
-            int numClusters) throws IOException {
-        KMeansCluster cluster = new KMeansCluster(pointFeatures);
+    public SimpleFeatureCollection executeAsCircle(SimpleFeatureCollection features,
+            String targetField, int numClusters) throws IOException {
+        KMeansCluster cluster = new KMeansCluster(features);
         cluster.cluster(numClusters);
         PointEvent[] originPoints = cluster.getPoints();
 
@@ -110,11 +93,11 @@ public class KMeansClusterOperation extends GeneralOperation {
             clusters.get(clusterID).add((Geometry) cp.feature.getDefaultGeometry());
         }
 
-        CoordinateReferenceSystem crs = pointFeatures.getSchema().getCoordinateReferenceSystem();
-        String the_geom = pointFeatures.getSchema().getGeometryDescriptor().getLocalName();
+        CoordinateReferenceSystem crs = features.getSchema().getCoordinateReferenceSystem();
+        String the_geom = features.getSchema().getGeometryDescriptor().getLocalName();
         SimpleFeatureType featureType = FeatureTypes.getDefaultType(this.getOutputTypeName(),
                 the_geom, Polygon.class, crs);
-        featureType = FeatureTypes.add(featureType, CLUSTER, Integer.class, 38);
+        featureType = FeatureTypes.add(featureType, targetField, Integer.class, 10);
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
@@ -129,7 +112,7 @@ public class KMeansClusterOperation extends GeneralOperation {
 
                 SimpleFeature newFeature = featureWriter.buildFeature(null);
                 newFeature.setDefaultGeometry(circle);
-                newFeature.setAttribute(CLUSTER, entry.getKey());
+                newFeature.setAttribute(targetField, entry.getKey());
                 featureWriter.write(newFeature);
             }
         } catch (IOException e) {
@@ -144,15 +127,16 @@ public class KMeansClusterOperation extends GeneralOperation {
     public SimpleFeatureCollection makeCircle(SimpleFeatureCollection clusterFeatures,
             String clusterField) throws IOException {
         Hashtable<Integer, List<Geometry>> clusters = new Hashtable<Integer, List<Geometry>>();
-
-        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
-        Expression exp = ff.property(clusterField);
+        final Expression exp = ff.property(clusterField);
 
         SimpleFeatureIterator featureIter = clusterFeatures.features();
         try {
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Integer clusterID = exp.evaluate(feature, Integer.class);
+                if (clusterID == null) {
+                    continue;
+                }
                 if (!clusters.containsKey(clusterID)) {
                     clusters.put(clusterID, new ArrayList<Geometry>());
                 }
@@ -166,7 +150,7 @@ public class KMeansClusterOperation extends GeneralOperation {
         String the_geom = clusterFeatures.getSchema().getGeometryDescriptor().getLocalName();
         SimpleFeatureType featureType = FeatureTypes.getDefaultType(this.getOutputTypeName(),
                 the_geom, Polygon.class, crs);
-        featureType = FeatureTypes.add(featureType, CLUSTER, Integer.class, 38);
+        featureType = FeatureTypes.add(featureType, clusterField, Integer.class, 10);
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
@@ -181,7 +165,7 @@ public class KMeansClusterOperation extends GeneralOperation {
 
                 SimpleFeature newFeature = featureWriter.buildFeature(null);
                 newFeature.setDefaultGeometry(circle);
-                newFeature.setAttribute(CLUSTER, entry.getKey());
+                newFeature.setAttribute(clusterField, entry.getKey());
                 featureWriter.write(newFeature);
             }
         } catch (IOException e) {

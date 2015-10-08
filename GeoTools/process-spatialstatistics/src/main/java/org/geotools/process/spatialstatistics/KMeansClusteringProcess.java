@@ -54,9 +54,10 @@ public class KMeansClusteringProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            Integer numberOfClusters, ProgressListener monitor) {
+            String targetField, Integer numberOfClusters, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(KMeansClusteringProcessFactory.inputFeatures.key, inputFeatures);
+        map.put(KMeansClusteringProcessFactory.targetField.key, targetField);
         map.put(KMeansClusteringProcessFactory.numberOfClusters.key, numberOfClusters);
 
         Process process = new KMeansClusteringProcess(null);
@@ -92,6 +93,13 @@ public class KMeansClusteringProcess extends AbstractStatisticsProcess {
                 throw new NullPointerException("inputFeatures parameters required");
             }
 
+            String targetField = (String) Params.getValue(input,
+                    KMeansClusteringProcessFactory.targetField,
+                    KMeansClusteringProcessFactory.targetField.sample);
+            if (targetField == null) {
+                throw new NullPointerException("targetField parameters required");
+            }
+
             int numberOfClusters = (Integer) Params.getValue(input,
                     KMeansClusteringProcessFactory.numberOfClusters,
                     KMeansClusteringProcessFactory.numberOfClusters.sample);
@@ -109,7 +117,7 @@ public class KMeansClusteringProcess extends AbstractStatisticsProcess {
             // start process
             KMeansClusterOperation operator = new KMeansClusterOperation();
             SimpleFeatureCollection resultFc = null;
-            resultFc = operator.execute(inputFeatures, numberOfClusters);
+            resultFc = operator.execute(inputFeatures, targetField, numberOfClusters);
             // end process
 
             monitor.setTask(Text.text("Encoding result"));

@@ -280,7 +280,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent patternTools = new TreeParent(Messages.ToolboxView_PointPattern, null, null);
         ssTools.addChild(patternTools);
         buildTool(patternTools, "org.geotools.process.spatialstatistics.NearestNeighborProcessFactory");
-
+        buildTool(patternTools, "org.geotools.process.spatialstatistics.KMeansClusteringProcessFactory");
+        
         // Spatial Autocorrelation
         TreeParent autoTools = new TreeParent(Messages.ToolboxView_Autocorrelation, null, null);
         ssTools.addChild(autoTools);

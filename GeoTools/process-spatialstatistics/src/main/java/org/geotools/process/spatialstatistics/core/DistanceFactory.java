@@ -55,15 +55,33 @@ public class DistanceFactory {
         return new DistanceFactory();
     }
 
-    public double GetMeanDistance(List<SpatialEvent> spatialEventSet, SpatialEvent curEvent) {
+    public double getMeanDistance(List<SpatialEvent> spatialEventSet, SpatialEvent curEvent) {
         double sumDistance = 0.0;
-
         for (SpatialEvent destEvent : spatialEventSet) {
             if (destEvent.oid != curEvent.oid) {
                 sumDistance += getDistance(curEvent, destEvent, DistanceType);
             }
         }
         return sumDistance / spatialEventSet.size();
+    }
+
+    public double getThresholDistance(List<SpatialEvent> spatialEventSet) {
+        double threshold = Double.MIN_VALUE;
+        for (SpatialEvent curEvent : spatialEventSet) {
+            double nnDist = getMinimumDistance(spatialEventSet, curEvent);
+            threshold = Math.max(nnDist, threshold);
+        }
+        return threshold * 1.0001;
+    }
+
+    public double getThresholDistance(SimpleFeatureCollection features) {
+        List<SpatialEvent> spatialEventSet = DistanceFactory.loadEvents(features, null);
+        double threshold = Double.MIN_VALUE;
+        for (SpatialEvent curEvent : spatialEventSet) {
+            double nnDist = getMinimumDistance(spatialEventSet, curEvent);
+            threshold = Math.max(nnDist, threshold);
+        }
+        return threshold * 1.0001;
     }
 
     public double getMinimumDistance(List<SpatialEvent> srcEvents, SpatialEvent curEvent) {
@@ -223,9 +241,8 @@ public class DistanceFactory {
             idxField = features.getSchema().indexOf(propertyName);
         }
 
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry origGeom = (Geometry) feature.getDefaultGeometry();

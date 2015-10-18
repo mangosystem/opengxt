@@ -10,7 +10,8 @@
 package org.locationtech.udig.processingtoolbox.tools;
 
 import java.io.File;
-import java.util.List;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -38,7 +39,11 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Widget;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.spatialstatistics.core.DistanceFactory;
-import org.geotools.process.spatialstatistics.core.SpatialEvent;
+import org.geotools.process.spatialstatistics.core.SpatialWeightMatrixContiguity;
+import org.geotools.process.spatialstatistics.core.SpatialWeightMatrixContiguity.ContiguityType;
+import org.geotools.process.spatialstatistics.core.SpatialWeightMatrixDistance;
+import org.geotools.process.spatialstatistics.core.SpatialWeightMatrixKNearestNeighbors;
+import org.geotools.process.spatialstatistics.core.SpatialWeightMatrixResult;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
@@ -64,18 +69,19 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
 
     private ILayer activeLayer;
 
-    private Combo cboLayer, cboField, cboWeightType, cboDistMethod, cboRowStd;
+    private Combo cboLayer, cboField, cboDistMethod, cboRowStd;
 
-    private Button optDistanceBased, optContiguitybased, optQueen, optRook, optBishops, optDistance, optKNearest, btnThresh, chkExponent;
+    private Button optDistanceBased, optContiguitybased, optQueen, optRook, optBishops,
+            optDistance, optKNearest, btnThresh, chkExponent;
 
     private Spinner spnContiguity, spnDistacne, spnNeighbors, spnExponent;
-    
+
     private Group grpDist, grpCont;
-    
+
     private StackLayout stackLayout;
-    
+
     private Composite cmpStack;
-        
+
     public SpatialWeightsMatrixDialog(Shell parentShell, IMap map) {
         super(parentShell, map);
 
@@ -97,77 +103,97 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
         Image image = ToolboxPlugin.getImageDescriptor("icons/public_co.gif").createImage(); //$NON-NLS-1$
 
         // Layer
-        uiBuilder.createLabel(container, Messages.SpatialWeightsMatrixDialog_InputLayer, EMPTY, image, 1);
+        uiBuilder.createLabel(container, Messages.SpatialWeightsMatrixDialog_InputLayer, EMPTY,
+                image, 1);
         cboLayer = uiBuilder.createCombo(container, 2, true);
         fillLayers(map, cboLayer, VectorLayerType.ALL);
 
         // Unique ID Field
-        uiBuilder.createLabel(container, Messages.SpatialWeightsMatrixDialog_UniqueField, EMPTY, image, 1);
+        uiBuilder.createLabel(container, Messages.SpatialWeightsMatrixDialog_UniqueField, EMPTY,
+                image, 1);
         cboField = uiBuilder.createCombo(container, 2, true);
 
         // Spatial Weight Types
-        uiBuilder.createLabel(container, Messages.SpatialWeightsMatrixDialog_WeightType, EMPTY, image, 1);
-        optDistanceBased = uiBuilder.createRadioButton(container, Messages.SpatialWeightsMatrixDialog_WeightTypeDistance, EMPTY, 1);
-        optContiguitybased = uiBuilder.createRadioButton(container, Messages.SpatialWeightsMatrixDialog_WeightTypeContiguity, EMPTY, 1);
+        uiBuilder.createLabel(container, Messages.SpatialWeightsMatrixDialog_WeightType, EMPTY,
+                image, 1);
+        optDistanceBased = uiBuilder.createRadioButton(container,
+                Messages.SpatialWeightsMatrixDialog_WeightTypeDistance, EMPTY, 1);
+        optContiguitybased = uiBuilder.createRadioButton(container,
+                Messages.SpatialWeightsMatrixDialog_WeightTypeContiguity, EMPTY, 1);
         optDistanceBased.addSelectionListener(selectionListener);
         optContiguitybased.addSelectionListener(selectionListener);
-        
+
         // StackLayout
         uiBuilder.createLabel(container, EMPTY, EMPTY, 3);
-        
+
         stackLayout = new StackLayout();
         cmpStack = new Composite(container, SWT.NONE);
         cmpStack.setLayout(stackLayout);
         cmpStack.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 
         // 1. Distance Based Weights
-        grpDist = uiBuilder.createGroup(cmpStack, Messages.SpatialWeightsMatrixDialog_WeightTypeDistance, true, 2);
+        grpDist = uiBuilder.createGroup(cmpStack,
+                Messages.SpatialWeightsMatrixDialog_WeightTypeDistance, true, 2);
         Composite cmpDist = new Composite(grpDist, SWT.NONE);
         cmpDist.setLayout(uiBuilder.createGridLayout(3, false, 0, 5));
         cmpDist.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-        optDistance = uiBuilder.createRadioButton(cmpDist,  Messages.SpatialWeightsMatrixDialog_ThresholdDistance, EMPTY, 1);
+        optDistance = uiBuilder.createRadioButton(cmpDist,
+                Messages.SpatialWeightsMatrixDialog_ThresholdDistance, EMPTY, 1);
         optDistance.addSelectionListener(selectionListener);
-        btnThresh = uiBuilder.createButton(cmpDist,  Messages.SpatialWeightsMatrixDialog_Calculate, EMPTY, 1);
+        btnThresh = uiBuilder.createButton(cmpDist, Messages.SpatialWeightsMatrixDialog_Calculate,
+                EMPTY, 1);
         btnThresh.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
-        spnDistacne = uiBuilder.createSpinner(cmpDist, 0, 0, Integer.MAX_VALUE, 2, 10000, 100000, 1);
+        spnDistacne = uiBuilder
+                .createSpinner(cmpDist, 0, 0, Integer.MAX_VALUE, 2, 10000, 100000, 1);
 
-        uiBuilder.createLabel(cmpDist, Messages.SpatialWeightsMatrixDialog_DistanceMethod, EMPTY, 1);
+        uiBuilder
+                .createLabel(cmpDist, Messages.SpatialWeightsMatrixDialog_DistanceMethod, EMPTY, 1);
         cboDistMethod = uiBuilder.createCombo(cmpDist, 2, true);
-        cboDistMethod.setItems(new String[] { Messages.SpatialWeightsMatrixDialog_Euclidean, Messages.SpatialWeightsMatrixDialog_Manhattan });
+        cboDistMethod.setItems(new String[] { Messages.SpatialWeightsMatrixDialog_Euclidean,
+                Messages.SpatialWeightsMatrixDialog_Manhattan });
         cboDistMethod.select(0);
-        
-        uiBuilder.createLabel(cmpDist, Messages.SpatialWeightsMatrixDialog_RowStandardization, EMPTY, 1);
+
+        uiBuilder.createLabel(cmpDist, Messages.SpatialWeightsMatrixDialog_RowStandardization,
+                EMPTY, 1);
         cboRowStd = uiBuilder.createCombo(cmpDist, 2, true);
-        cboRowStd.setItems(new String[] { "True", "False" });  //$NON-NLS-1$//$NON-NLS-2$
+        cboRowStd.setItems(new String[] { "True", "False" }); //$NON-NLS-1$//$NON-NLS-2$
         cboRowStd.select(0);
-        
+
         // advanced options
-        chkExponent = uiBuilder.createCheckbox(cmpDist, Messages.SpatialWeightsMatrixDialog_Exponent, EMPTY, 1);
+        chkExponent = uiBuilder.createCheckbox(cmpDist,
+                Messages.SpatialWeightsMatrixDialog_Exponent, EMPTY, 1);
         spnExponent = uiBuilder.createSpinner(cmpDist, 1, 1, 2, 0, 1, 1, 2);
 
         Label separator = new Label(cmpDist, SWT.SEPARATOR | SWT.HORIZONTAL);
         separator.setLayoutData(new GridData(GridData.FILL, SWT.CENTER, true, false, 3, 1));
-        
-        optKNearest = uiBuilder.createRadioButton(cmpDist,  Messages.SpatialWeightsMatrixDialog_kNearestNeighbors, EMPTY, 1);
+
+        optKNearest = uiBuilder.createRadioButton(cmpDist,
+                Messages.SpatialWeightsMatrixDialog_kNearestNeighbors, EMPTY, 1);
         optKNearest.addSelectionListener(selectionListener);
-        uiBuilder.createLabel(cmpDist,  Messages.SpatialWeightsMatrixDialog_Numberofneighbors, EMPTY, 1);
+        uiBuilder.createLabel(cmpDist, Messages.SpatialWeightsMatrixDialog_Numberofneighbors,
+                EMPTY, 1);
         spnNeighbors = uiBuilder.createSpinner(cmpDist, 4, 1, 24, 0, 1, 2, 1);
 
         // 2. Contiguity Based Weights
-        grpCont = uiBuilder.createGroup(cmpStack, Messages.SpatialWeightsMatrixDialog_WeightTypeContiguity, true, 2);
+        grpCont = uiBuilder.createGroup(cmpStack,
+                Messages.SpatialWeightsMatrixDialog_WeightTypeContiguity, true, 2);
         Composite cmpCont = new Composite(grpCont, SWT.NONE);
         cmpCont.setLayout(uiBuilder.createGridLayout(3, false, 0, 5));
         cmpCont.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
-        optQueen = uiBuilder.createRadioButton(cmpCont, Messages.SpatialWeightsMatrixDialog_Queen, EMPTY, 1);
+        optQueen = uiBuilder.createRadioButton(cmpCont, Messages.SpatialWeightsMatrixDialog_Queen,
+                EMPTY, 1);
         optQueen.addSelectionListener(selectionListener);
-        uiBuilder.createLabel(cmpCont, Messages.SpatialWeightsMatrixDialog_OrderofContiguity, EMPTY, 1);
+        uiBuilder.createLabel(cmpCont, Messages.SpatialWeightsMatrixDialog_OrderofContiguity,
+                EMPTY, 1);
         spnContiguity = uiBuilder.createSpinner(cmpCont, 1, 1, 12, 0, 1, 10, 1);
 
-        optRook = uiBuilder.createRadioButton(cmpCont, Messages.SpatialWeightsMatrixDialog_Rook, EMPTY, 3);
-        optBishops = uiBuilder.createRadioButton(cmpCont, Messages.SpatialWeightsMatrixDialog_Bishops, EMPTY, 3);
-        
+        optRook = uiBuilder.createRadioButton(cmpCont, Messages.SpatialWeightsMatrixDialog_Rook,
+                EMPTY, 3);
+        optBishops = uiBuilder.createRadioButton(cmpCont,
+                Messages.SpatialWeightsMatrixDialog_Bishops, EMPTY, 3);
+
         stackLayout.topControl = grpDist;
         cmpStack.layout();
 
@@ -175,7 +201,7 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
         locationView = new OutputDataWidget(FileDataType.WEIGHT_MATRIX, SWT.SAVE);
         locationView.create(container, SWT.BORDER, 3, 1);
 
-        File file = new File(ToolboxView.getWorkspace(), "weight_matrix.gal"); //$NON-NLS-1$
+        File file = new File(ToolboxView.getWorkspace(), "weight_matrix.gwt"); //$NON-NLS-1$
         locationView.setFile(file.getPath());
 
         // Listener
@@ -191,7 +217,7 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
                 }
             }
         });
-        
+
         btnThresh.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
@@ -202,21 +228,11 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
                             openInformation(getShell(), Messages.Task_ParameterRequired);
                             return;
                         }
-                        
+
                         SimpleFeatureCollection features = MapUtils.getFeatures(activeLayer);
-                        List<SpatialEvent> events = DistanceFactory.loadEvents(features, null);
-
-                        DistanceFactory factory = DistanceFactory.newInstance();
-                        factory.DistanceType = cboDistMethod.getSelectionIndex() == 0 ? DistanceMethod.Euclidean
-                                : DistanceMethod.Manhattan;
-                        double sumDistance = 0.0;
-                        for (SpatialEvent curEvent : events) {
-                            double nnDist = factory.getMinimumDistance(events, curEvent);
-                            sumDistance += nnDist;
-                        }
-
-                        double averageDistance = sumDistance / (events.size() * 1.0);
-                        spnDistacne.setSelection(uiBuilder.toSpinnerValue(spnDistacne, averageDistance));
+                        double thresholdDistance = calculateThresholdDistance(features);
+                        spnDistacne.setSelection(uiBuilder.toSpinnerValue(spnDistacne,
+                                thresholdDistance));
                     }
                 };
 
@@ -227,7 +243,7 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
                 }
             }
         });
-        
+
         optDistanceBased.setSelection(true);
         optQueen.setSelection(true);
         optDistance.setSelection(true);
@@ -255,13 +271,39 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
             } else if (widget.equals(optDistanceBased)) {
                 stackLayout.topControl = grpDist;
                 cmpStack.layout();
+                changeExtension(true);
             } else if (widget.equals(optContiguitybased)) {
                 stackLayout.topControl = grpCont;
                 cmpStack.layout();
+                changeExtension(false);
             }
         }
     };
+    
+    private void changeExtension(boolean optionDistance) {
+        String ext = optionDistance ? ".gwt" : ".gal";  //$NON-NLS-1$//$NON-NLS-2$
+        
+        File file = new File(locationView.getFile());
+        String outputFile = file.getParent() + File.separator;
+        int pos = file.getName().lastIndexOf("."); //$NON-NLS-1$
+        if (pos > 0) {
+            outputFile += file.getName().substring(0, pos) + ext;
+        } else {
+            outputFile += file.getName() + ext;
+        }
+        locationView.setFile(outputFile);
+    }
 
+    private Double calculateThresholdDistance(SimpleFeatureCollection features) {
+        DistanceFactory factory = DistanceFactory.newInstance();
+        DistanceMethod distanceType = DistanceMethod.Euclidean;
+        if (cboDistMethod.getSelectionIndex() == 1) {
+            distanceType = DistanceMethod.Manhattan;
+        }
+        factory.DistanceType = distanceType;
+        return factory.getThresholDistance(features);
+    }
+    
     @Override
     protected void okPressed() {
         if (invalidWidgetValue(cboLayer, cboField)) {
@@ -274,20 +316,73 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
             @SuppressWarnings({})
             public void run() {
                 SimpleFeatureCollection features = MapUtils.getFeatures(activeLayer);
-                String fieldName = cboField.getText();
-                
-                // TODO: code here!
-                
-                
-                
-                
-                
-                openInformation(getShell(), "implementing...");
+                String uniqueField = cboField.getText();
+
+                SpatialWeightMatrixResult result = null;
+                if (optContiguitybased.getSelection()) {
+                    // Contiguity-Based Spatial Weights
+                    SpatialWeightMatrixContiguity contOp = new SpatialWeightMatrixContiguity();
+                    if (optQueen.getSelection()) {
+                        contOp.setContiguityType(ContiguityType.Queen);
+                        contOp.setOrderOfContiguity(spnContiguity.getSelection());
+                    } else if (optRook.getSelection()) {
+                        contOp.setContiguityType(ContiguityType.Rook);
+                    } else if (optBishops.getSelection()) {
+                        contOp.setContiguityType(ContiguityType.Bishops);
+                    }
+                    result = contOp.execute(features, uniqueField);
+                } else {
+                    // Distance-Based Spatial Weights
+                    if (optKNearest.getSelection()) {
+                        SpatialWeightMatrixKNearestNeighbors knnOp = new SpatialWeightMatrixKNearestNeighbors();
+                        knnOp.setNumberOfNeighbors(spnNeighbors.getSelection());
+                        result = knnOp.execute(features, uniqueField);
+                    } else {
+                        SpatialWeightMatrixDistance distOp = new SpatialWeightMatrixDistance();
+
+                        DistanceMethod distanceMethod = DistanceMethod.Euclidean;
+                        if (cboDistMethod.getSelectionIndex() == 1) {
+                            distanceMethod = DistanceMethod.Manhattan;
+                        }
+                        distOp.setDistanceMethod(distanceMethod);
+
+                        double thresholdDistance = uiBuilder.fromSpinnerValue(spnDistacne,
+                                spnDistacne.getSelection());
+                        if (thresholdDistance == 0) {
+                            thresholdDistance = calculateThresholdDistance(features);
+                            ToolboxPlugin.log("The default threshold was " + thresholdDistance); //$NON-NLS-1$
+                        }
+                        distOp.setThresholdDistance(thresholdDistance);
+
+                        boolean rowStandardization = true;
+                        if (cboRowStd.getSelectionIndex() == 1) {
+                            rowStandardization = false;
+                        }
+                        distOp.setRowStandardization(rowStandardization);
+
+                        boolean useExponent = chkExponent.getSelection();
+                        if (useExponent) {
+                            distOp.setUseExponent(useExponent);
+                            distOp.setExponent(spnExponent.getSelection());
+                        }
+
+                        result = distOp.execute(features, uniqueField);
+                    }
+                }
+
+                // save as file
+                File file = new File(locationView.getFile());
+                try {
+                    result.save(file, Charset.forName(ToolboxPlugin.defaultCharset()));
+                } catch (IOException e) {
+                    ToolboxPlugin.log(e);
+                }
             }
         };
 
         try {
             BusyIndicator.showWhile(Display.getCurrent(), runnable);
+            openInformation(getShell(), Messages.General_Completed);
         } catch (Exception e) {
             ToolboxPlugin.log(e);
             MessageDialog.openError(getParentShell(), Messages.General_Error, e.getMessage());

@@ -148,6 +148,9 @@ public class CrsWidget extends AbstractToolboxWidget {
                 layerMenuItem.setMenu(subMenu);
 
                 for (ILayer layer : map.getMapLayers()) {
+                    if (layer.getName() == null) {
+                        continue;
+                    }
                     MenuItem mnuLayer = new MenuItem(subMenu, SWT.PUSH);
                     mnuLayer.setText(layer.getName());
                     mnuLayer.setData(layer);

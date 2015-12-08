@@ -17,11 +17,9 @@
 package org.geotools.process.spatialstatistics;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -31,13 +29,12 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.transformation.GXTSimpleFeatureCollection;
+import org.geotools.process.spatialstatistics.transformation.MultipleBufferFeatureCollection;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
@@ -143,7 +140,7 @@ public class MultipleRingBufferProcess extends AbstractStatisticsProcess {
                 }
             }
 
-            SimpleFeatureCollection resultFc = new MultipleBufferedFeatureCollection(inputFeatures,
+            SimpleFeatureCollection resultFc = new MultipleBufferFeatureCollection(inputFeatures,
                     bufferDistance, outsideOnly);
 
             if (dissolve) {
@@ -204,128 +201,6 @@ public class MultipleRingBufferProcess extends AbstractStatisticsProcess {
             throw new ProcessException(eek);
         } finally {
             monitor.dispose();
-        }
-    }
-
-    /**
-     * Wrapper that will trigger the buffer computation as features are requested
-     */
-    static class MultipleBufferedFeatureCollection extends GXTSimpleFeatureCollection {
-
-        private double[] distances;
-
-        private Boolean outsideOnly = Boolean.TRUE;
-
-        private SimpleFeatureType schema;
-
-        public MultipleBufferedFeatureCollection(SimpleFeatureCollection delegate,
-                double[] distances, Boolean outsideOnly) {
-            super(delegate);
-
-            Arrays.sort(distances);
-            this.distances = distances;
-            this.outsideOnly = outsideOnly;
-
-            String typeName = delegate.getSchema().getTypeName();
-            this.schema = FeatureTypes.build(delegate.getSchema(), typeName, Polygon.class);
-            this.schema = FeatureTypes.add(schema, bufferField, Double.class, 19);
-        }
-
-        @Override
-        public SimpleFeatureIterator features() {
-            return new BufferedFeatureIterator(delegate, getSchema(), distances, outsideOnly);
-        }
-
-        @Override
-        public SimpleFeatureType getSchema() {
-            return schema;
-        }
-
-        @Override
-        public ReferencedEnvelope getBounds() {
-            ReferencedEnvelope bounds = delegate.getBounds();
-            bounds.expandBy(distances[distances.length - 1]);
-            return bounds;
-        }
-
-        @Override
-        public int size() {
-            return delegate.size() * distances.length;
-        }
-
-        /**
-         * Buffers each feature as we scroll over the collection
-         */
-        static class BufferedFeatureIterator implements SimpleFeatureIterator {
-            private SimpleFeatureIterator delegate;
-
-            private double[] distances;
-
-            private Boolean outsideOnly = Boolean.TRUE;
-
-            private int bufferIndex = 0;
-
-            private int featureID = 0;
-
-            private SimpleFeatureBuilder builder;
-
-            private SimpleFeature nextFeature = null;
-
-            private SimpleFeature origFeature = null;
-
-            public BufferedFeatureIterator(SimpleFeatureCollection delegate,
-                    SimpleFeatureType schema, double[] distances, Boolean outsideOnly) {
-                this.delegate = delegate.features();
-
-                this.bufferIndex = 0;
-                this.distances = distances;
-                this.outsideOnly = outsideOnly;
-                this.builder = new SimpleFeatureBuilder(schema);
-            }
-
-            public void close() {
-                delegate.close();
-            }
-
-            public boolean hasNext() {
-                while ((nextFeature == null && delegate.hasNext())
-                        || (nextFeature == null && !delegate.hasNext() && bufferIndex > 0)) {
-                    if (bufferIndex == 0) {
-                        origFeature = delegate.next();
-                    }
-
-                    // buffer geometry
-                    Geometry orig = (Geometry) origFeature.getDefaultGeometry();
-                    Geometry buff = orig.buffer(distances[bufferIndex], 24);
-                    if (outsideOnly && bufferIndex > 0) {
-                        buff = buff.difference(orig.buffer(distances[bufferIndex - 1], 24));
-                    }
-
-                    // create feature
-                    nextFeature = builder.buildFeature(Integer.toString(++featureID));
-                    transferAttribute(origFeature, nextFeature);
-                    nextFeature.setDefaultGeometry(buff);
-                    nextFeature.setAttribute(bufferField, distances[bufferIndex]);
-
-                    builder.reset();
-                    bufferIndex++;
-
-                    if (bufferIndex >= distances.length) {
-                        bufferIndex = 0;
-                        origFeature = null;
-                    }
-                }
-                return nextFeature != null;
-            }
-
-            public SimpleFeature next() throws NoSuchElementException {
-                if (!hasNext()) {
-                    throw new NoSuchElementException("hasNext() returned false!");
-                }
-                SimpleFeature result = nextFeature;
-                nextFeature = null;
-                return result;
-            }
         }
     }
 }

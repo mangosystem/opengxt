@@ -282,19 +282,23 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(patternTools, "org.geotools.process.spatialstatistics.NearestNeighborProcessFactory");
         buildTool(patternTools, "org.geotools.process.spatialstatistics.KMeansClusteringProcessFactory");
         
-        // Spatial Autocorrelation
+        // Global Spatial Autocorrelation
         TreeParent autoTools = new TreeParent(Messages.ToolboxView_Autocorrelation, null, null);
         ssTools.addChild(autoTools);
         buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalMoransIProcessFactory");
         buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalGStatisticsProcessFactory");
+        buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalGearysCProcessFactory");
+        buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalLeesSProcessFactory");
 
-        // Spatial Cluster and Outlier
+        // Local Spatial Autocorrelation: Spatial Cluster and Outlier
         TreeParent clusterTools = new TreeParent(Messages.ToolboxView_Cluster, null, null);
         ssTools.addChild(clusterTools);
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalMoransIProcessFactory");
         buildTool(clusterTools, Messages.MoranScatterPlotDialog_title, "MoranScatterPlotDialog");
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalGStatisticsProcessFactory");
-
+        buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalLeesSProcessFactory");
+        buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalGearysCProcessFactory");
+        
         // Spatial Distribution
         TreeParent distributionTools = new TreeParent(Messages.ToolboxView_Distribution, null, null);
         ssTools.addChild(distributionTools);
@@ -374,10 +378,13 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(createTool);
         buildTool(createTool, "org.geotools.process.spatialstatistics.RandomPointsProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.RandomPointsPerFeaturesProcessFactory");
+        buildTool(createTool, "org.geotools.process.spatialstatistics.MultipleRingBufferProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.FishnetProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.HexagonProcessFactory");
+        buildTool(createTool, "org.geotools.process.spatialstatistics.TriangularGridProcessFactory");
+        buildTool(createTool, "org.geotools.process.spatialstatistics.CircularGridProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.ThiessenPolygonProcessFactory");
-
+        
         // Graph
         TreeParent graphTool = new TreeParent(Messages.ToolboxView_Graph, null, null);
         generalTool.addChild(graphTool);
@@ -392,14 +399,23 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent utilTool = new TreeParent(Messages.ToolboxView_Utilities, null, null);
         generalTool.addChild(utilTool);
 
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.CalculateFieldProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.CalculateAreaProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.CalculateLengthProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.CalculateXYCoordinateProcessFactory");
+        
         buildTool(utilTool, "org.geotools.process.spatialstatistics.CollectEventsProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.UnionPolygonProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.CalculateFieldProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SpatialJoinProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.PointStatisticsProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.BufferStatisticsProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SumLineLengthProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory");
+
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.MultipartToSinglepartProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToPointProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureEnvelopeToPolygonProcessFactory");
+        
     }
 
     @SuppressWarnings("nls")

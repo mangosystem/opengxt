@@ -65,7 +65,35 @@ public class MapUtils {
     protected static final Logger LOGGER = Logging.getLogger(MapUtils.class);
 
     public enum VectorLayerType {
-        ALL, POINT, LINESTRING, POLYGON
+        /**
+         * all feature type.
+         */
+        ALL,
+
+        /**
+         * point, multipoint.
+         */
+        POINT,
+
+        /**
+         * linestring, multilinestring.
+         */
+        LINESTRING,
+
+        /**
+         * polygon, multipolygon.
+         */
+        POLYGON,
+
+        /**
+         * linestring, multilinestring, polygon, multipolygon.
+         */
+        POLYLINE,
+
+        /**
+         * multipoint, multilinestring, multipolygon.
+         */
+        MULTIPART
     }
 
     public enum FieldType {

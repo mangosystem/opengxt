@@ -45,7 +45,7 @@ import com.vividsolutions.jts.geom.Polygon;
 /**
  * FeatureCollection Layer Data control
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -92,6 +92,10 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
                     fillLayers(map, cboSfLayer, VectorLayerType.LINESTRING);
                 } else if (val.equalsIgnoreCase(VectorLayerType.POLYGON.toString())) {
                     fillLayers(map, cboSfLayer, VectorLayerType.POLYGON);
+                } else if (val.equalsIgnoreCase(VectorLayerType.POLYLINE.toString())) {
+                    fillLayers(map, cboSfLayer, VectorLayerType.POLYLINE);
+                } else if (val.equalsIgnoreCase(VectorLayerType.MULTIPART.toString())) {
+                    fillLayers(map, cboSfLayer, VectorLayerType.MULTIPART);
                 }
             } else {
                 fillLayers(map, cboSfLayer, VectorLayerType.ALL);
@@ -145,15 +149,15 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
                 case ALL:
                     combo.add(layer.getName());
                     break;
-                case LINESTRING:
-                    if (geometryBinding.isAssignableFrom(LineString.class)
-                            || geometryBinding.isAssignableFrom(MultiLineString.class)) {
-                        combo.add(layer.getName());
-                    }
-                    break;
                 case POINT:
                     if (geometryBinding.isAssignableFrom(Point.class)
                             || geometryBinding.isAssignableFrom(MultiPoint.class)) {
+                        combo.add(layer.getName());
+                    }
+                    break;
+                case LINESTRING:
+                    if (geometryBinding.isAssignableFrom(LineString.class)
+                            || geometryBinding.isAssignableFrom(MultiLineString.class)) {
                         combo.add(layer.getName());
                     }
                     break;
@@ -162,6 +166,23 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
                             || geometryBinding.isAssignableFrom(MultiPolygon.class)) {
                         combo.add(layer.getName());
                     }
+                    break;
+                case POLYLINE:
+                    if (geometryBinding.isAssignableFrom(Polygon.class)
+                            || geometryBinding.isAssignableFrom(MultiPolygon.class)
+                            || geometryBinding.isAssignableFrom(LineString.class)
+                            || geometryBinding.isAssignableFrom(MultiLineString.class)) {
+                        combo.add(layer.getName());
+                    }
+                    break;
+                case MULTIPART:
+                    if (geometryBinding.isAssignableFrom(MultiPoint.class)
+                            || geometryBinding.isAssignableFrom(MultiLineString.class)
+                            || geometryBinding.isAssignableFrom(MultiPolygon.class)) {
+                        combo.add(layer.getName());
+                    }
+                    break;
+                default:
                     break;
                 }
             }

@@ -65,7 +65,7 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
 
     @Override
     public SimpleFeatureIterator features() {
-        return new BufferedFeatureIterator(delegate, getSchema(), distances, outsideOnly);
+        return new BufferedFeatureIterator(delegate.features(), getSchema(), distances, outsideOnly);
     }
 
     @Override
@@ -85,9 +85,6 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
         return delegate.size() * distances.length;
     }
 
-    /**
-     * Buffers each feature as we scroll over the collection
-     */
     static class BufferedFeatureIterator implements SimpleFeatureIterator {
         private SimpleFeatureIterator delegate;
 
@@ -105,9 +102,9 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
 
         private SimpleFeature origFeature = null;
 
-        public BufferedFeatureIterator(SimpleFeatureCollection delegate, SimpleFeatureType schema,
+        public BufferedFeatureIterator(SimpleFeatureIterator delegate, SimpleFeatureType schema,
                 double[] distances, Boolean outsideOnly) {
-            this.delegate = delegate.features();
+            this.delegate = delegate;
 
             this.bufferIndex = 0;
             this.distances = distances;

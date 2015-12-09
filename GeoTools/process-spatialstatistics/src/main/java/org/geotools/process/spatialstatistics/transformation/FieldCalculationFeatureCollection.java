@@ -100,14 +100,14 @@ public class FieldCalculationFeatureCollection extends GXTSimpleFeatureCollectio
     }
 
     @Override
-    public SimpleFeatureType getSchema() {
-        return schema;
-    }
-
-    @Override
     public SimpleFeatureIterator features() {
         return new FieldCalculationFeatureIterator(delegate.features(), getSchema(), fieldName,
                 expression);
+    }
+
+    @Override
+    public SimpleFeatureType getSchema() {
+        return schema;
     }
 
     static class FieldCalculationFeatureIterator implements SimpleFeatureIterator {

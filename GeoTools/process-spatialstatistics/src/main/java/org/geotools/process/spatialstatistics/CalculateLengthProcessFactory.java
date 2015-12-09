@@ -32,56 +32,65 @@ import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
 
 /**
- * AreaProcessFactory
+ * CalculateLengthProcessFactory
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class AreaProcessFactory extends SpatialStatisticsProcessFactory {
-    protected static final Logger LOGGER = Logging.getLogger(AreaProcessFactory.class);
+public class CalculateLengthProcessFactory extends SpatialStatisticsProcessFactory {
+    protected static final Logger LOGGER = Logging.getLogger(CalculateLengthProcessFactory.class);
 
-    private static final String PROCESS_NAME = "SumAreas";
+    private static final String PROCESS_NAME = "CalculateLength";
 
     /*
-     * SumAreas(SimpleFeatureCollection inputFeatures): double
+     * CalculateLength(SimpleFeatureCollection inputFeatures, String lengthField): SimpleFeatureCollection
      */
 
-    public AreaProcessFactory() {
+    public CalculateLengthProcessFactory() {
         super(new NameImpl(NAMESPACE, PROCESS_NAME));
     }
 
     @Override
     public Process create() {
-        return new AreaProcess(this);
+        return new CalculateLengthProcess(this);
     }
 
     @Override
     public InternationalString getTitle() {
-        return getResource("Area.title");
+        return getResource("CalculateLength.title");
     }
 
     @Override
     public InternationalString getDescription() {
-        return getResource("Area.description");
+        return getResource("CalculateLength.description");
     }
 
     /** inputFeatures */
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
-            getResource("Area.inputFeatures.title"), getResource("Area.inputFeatures.description"),
-            true, 1, 1, null, new KVP(Parameter.FEATURE_TYPE, "Polygon"));
+            getResource("CalculateLength.inputFeatures.title"),
+            getResource("CalculateLength.inputFeatures.description"), true, 1, 1, null, new KVP(
+                    Parameter.FEATURE_TYPE, "Polyline"));
+
+    /** lengthField */
+    public static final Parameter<String> lengthField = new Parameter<String>("lengthField",
+            String.class, getResource("CalculateLength.lengthField.title"),
+            getResource("CalculateLength.lengthField.description"), false, 0, 1, "geom_len",
+            new KVP(Parameter.OPTIONS, "inputFeatures.All"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
+        parameterInfo.put(lengthField.key, lengthField);
         return parameterInfo;
     }
 
     /** result */
-    public static final Parameter<Double> RESULT = new Parameter<Double>("result", Double.class,
-            getResource("Area.result.title"), getResource("Area.result.description"));
+    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
+            "result", SimpleFeatureCollection.class, getResource("CalculateLength.result.title"),
+            getResource("CalculateLength.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

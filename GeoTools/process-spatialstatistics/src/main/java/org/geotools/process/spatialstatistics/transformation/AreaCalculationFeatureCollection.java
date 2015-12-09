@@ -69,14 +69,14 @@ public class AreaCalculationFeatureCollection extends GXTSimpleFeatureCollection
     }
 
     @Override
-    public SimpleFeatureType getSchema() {
-        return schema;
-    }
-
-    @Override
     public SimpleFeatureIterator features() {
         return new AreaCalculationFeatureIterator(delegate.features(), getSchema(), areaField,
                 perimeterField);
+    }
+
+    @Override
+    public SimpleFeatureType getSchema() {
+        return schema;
     }
 
     static class AreaCalculationFeatureIterator implements SimpleFeatureIterator {

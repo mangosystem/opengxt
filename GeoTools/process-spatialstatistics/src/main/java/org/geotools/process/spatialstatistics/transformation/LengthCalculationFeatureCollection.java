@@ -58,13 +58,13 @@ public class LengthCalculationFeatureCollection extends GXTSimpleFeatureCollecti
     }
 
     @Override
-    public SimpleFeatureType getSchema() {
-        return schema;
+    public SimpleFeatureIterator features() {
+        return new LengthCalculationFeatureIterator(delegate.features(), getSchema(), lengthField);
     }
 
     @Override
-    public SimpleFeatureIterator features() {
-        return new LengthCalculationFeatureIterator(delegate.features(), getSchema(), lengthField);
+    public SimpleFeatureType getSchema() {
+        return schema;
     }
 
     static class LengthCalculationFeatureIterator implements SimpleFeatureIterator {

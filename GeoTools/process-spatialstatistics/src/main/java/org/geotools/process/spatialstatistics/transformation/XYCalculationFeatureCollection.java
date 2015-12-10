@@ -74,14 +74,14 @@ public class XYCalculationFeatureCollection extends GXTSimpleFeatureCollection {
     }
 
     @Override
-    public SimpleFeatureType getSchema() {
-        return schema;
-    }
-
-    @Override
     public SimpleFeatureIterator features() {
         return new XYCalculationFeatureIterator(delegate.features(), getSchema(), xField, yField,
                 useInside);
+    }
+
+    @Override
+    public SimpleFeatureType getSchema() {
+        return schema;
     }
 
     static class XYCalculationFeatureIterator implements SimpleFeatureIterator {

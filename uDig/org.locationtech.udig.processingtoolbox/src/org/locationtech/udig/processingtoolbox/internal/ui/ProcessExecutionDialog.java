@@ -181,7 +181,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
             Browser browser = new Browser(parentTabFolder, SWT.NONE);
             GridData layoutData = new GridData(GridData.FILL_BOTH);
             browser.setLayoutData(layoutData);
-            
+
             HtmlWriter writer = new HtmlWriter(windowTitle);
             writer.writeProcessMetadata(factory, processName);
             browser.setText(writer.getHTML());
@@ -214,6 +214,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
 
         // output location
         Map<String, Parameter<?>> resultInfo = factory.getResultInfo(processName, null);
+        final int outputCnt = resultInfo.size();
         for (Entry<String, Parameter<?>> entrySet : resultInfo.entrySet()) {
             Class<?> binding = entrySet.getValue().type;
             boolean outputWidgetRequired = false;
@@ -241,7 +242,12 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
                 outputParams.put(entrySet.getValue().key, entrySet.getValue().sample);
                 OutputLocationWidget view = new OutputLocationWidget(fileDataType, SWT.SAVE);
                 view.create(container, SWT.BORDER, outputParams, entrySet.getValue());
-                view.setOutputName(processName.getLocalPart().toLowerCase());
+
+                if (outputCnt > 1) {
+                    view.setOutputName(entrySet.getKey());
+                } else {
+                    view.setOutputName(processName.getLocalPart().toLowerCase());
+                }
             }
         }
 
@@ -457,7 +463,8 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
             }
         } else {
             super.okPressed();
-            LayersView.getViewPart().setCurrentMap((org.locationtech.udig.project.internal.Map) map);
+            LayersView.getViewPart()
+                    .setCurrentMap((org.locationtech.udig.project.internal.Map) map);
         }
     }
 }

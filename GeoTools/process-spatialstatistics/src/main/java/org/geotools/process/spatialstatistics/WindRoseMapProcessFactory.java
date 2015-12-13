@@ -98,7 +98,8 @@ public class WindRoseMapProcessFactory extends SpatialStatisticsProcessFactory {
     /** windRose */
     public static final Parameter<SimpleFeatureCollection> windRose = new Parameter<SimpleFeatureCollection>(
             "windRose", SimpleFeatureCollection.class, getResource("WindRoseMap.windRose.title"),
-            getResource("WindRoseMap.windRose.description"), true, 1, 1, null, null);
+            getResource("WindRoseMap.windRose.description"), true, 1, 1, null, new KVP(
+                    Parameter.OPTIONS, "Quantile.sum"));
 
     /** anchor */
     public static final Parameter<SimpleFeatureCollection> anchor = new Parameter<SimpleFeatureCollection>(
@@ -107,8 +108,8 @@ public class WindRoseMapProcessFactory extends SpatialStatisticsProcessFactory {
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {
-        resultInfo.put(windRose.key, windRose);
         resultInfo.put(anchor.key, anchor);
+        resultInfo.put(windRose.key, windRose);
     }
 
     @Override

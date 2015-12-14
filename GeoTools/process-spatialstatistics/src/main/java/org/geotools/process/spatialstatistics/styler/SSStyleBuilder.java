@@ -210,9 +210,9 @@ public class SSStyleBuilder {
         } else if (origBinding.isAssignableFrom(MultiPoint.class)) {
             defaultStyle = SLD.createPointStyle("Circle", Color.GRAY, randomColor, 1.0f, 4);
         } else if (origBinding.isAssignableFrom(LineString.class)) {
-            defaultStyle = SLD.createLineStyle(randomColor, 2f);
+            defaultStyle = SLD.createLineStyle(randomColor, 1f);
         } else if (origBinding.isAssignableFrom(MultiLineString.class)) {
-            defaultStyle = SLD.createLineStyle(randomColor, 2f);
+            defaultStyle = SLD.createLineStyle(randomColor, 1f);
         } else if (origBinding.isAssignableFrom(Polygon.class)) {
             defaultStyle = SLD.createPolygonStyle(Color.GRAY, randomColor, 0.5f);
         } else if (origBinding.isAssignableFrom(MultiPolygon.class)) {

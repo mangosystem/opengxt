@@ -26,7 +26,7 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.operations.CalculateSumLineLengthOpration;
+import org.geotools.process.spatialstatistics.operations.CalculateSumLineLengthOperation;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
@@ -109,7 +109,7 @@ public class SumLineLengthProcess extends AbstractStatisticsProcess {
             }
 
             // start process
-            CalculateSumLineLengthOpration process = new CalculateSumLineLengthOpration();
+            CalculateSumLineLengthOperation process = new CalculateSumLineLengthOperation();
             SimpleFeatureCollection resultFc = process.execute(polygons, lengthField, countField,
                     lines);
             // end process

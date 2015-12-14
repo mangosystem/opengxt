@@ -56,6 +56,12 @@ public class StatisticsVisitor {
         init(schema, schema.getDescriptor(attrIndex));
     }
 
+    public StatisticsVisitor(Expression expression, StatisticsStrategy strategy)
+            throws IllegalFilterException {
+        this.expression = expression;
+        this.strategy = strategy;
+    }
+
     private void init(SimpleFeatureType schema, AttributeDescriptor attributeType) {
         expression = ff.property(attributeType.getLocalName());
         strategy = createStrategy(attributeType.getType().getBinding());
@@ -87,9 +93,8 @@ public class StatisticsVisitor {
     public void visit(SimpleFeatureCollection features) {
         reset();
 
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 visit(featureIter.next());
             }
@@ -105,9 +110,9 @@ public class StatisticsVisitor {
         }
         strategy.add(value);
     }
-    
+
     public StatisticsVisitorResult getResult() {
-        return strategy == null ? null : strategy.getResult();
+        return strategy == null ? new StatisticsVisitorResult() : strategy.getResult();
     }
 
     interface StatisticsStrategy {
@@ -116,7 +121,7 @@ public class StatisticsVisitor {
         public StatisticsVisitorResult getResult();
 
         public void setNoData(Number noData);
-        
+
         public void reset();
     }
 

@@ -70,4 +70,8 @@ public class SpatialEvent {
     public double getDistance(Coordinate other) {
         return other.distance(new Coordinate(this.x, this.y));
     }
+
+    public Coordinate getCoordinate() {
+        return new Coordinate(x, y);
+    }
 }

@@ -23,6 +23,7 @@ import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor;
@@ -35,6 +36,7 @@ import org.opengis.filter.expression.Expression;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateList;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
@@ -53,6 +55,8 @@ public class WindroseFeatureCollection extends GXTSimpleFeatureCollection {
     static final int SEG = 32;
 
     static String[] FIELDS = { "uid", "count", "min", "max", "sum", "mean", "std_dev", "var" };
+
+    final static GeometryFactory gf = JTSFactoryFinder.getGeometryFactory(null);
 
     private Expression weightExp;
 
@@ -117,7 +121,7 @@ public class WindroseFeatureCollection extends GXTSimpleFeatureCollection {
 
         private Expression weightExp;
 
-        private Point center;
+        private Coordinate center;
 
         private double radius;
 
@@ -128,7 +132,7 @@ public class WindroseFeatureCollection extends GXTSimpleFeatureCollection {
             this.delegate = delegate;
 
             this.weightExp = weightExp;
-            this.center = center;
+            this.center = center.getCoordinate();
             this.radius = radius;
 
             this.init(new SimpleFeatureBuilder(schema));
@@ -211,17 +215,18 @@ public class WindroseFeatureCollection extends GXTSimpleFeatureCollection {
             return this.iter.next();
         }
 
-        private Geometry createCell(Point centroid, double from_deg, double to_deg, double radius) {
-            Coordinate[] coordinates = new Coordinate[SEG + 3];
-            coordinates[0] = centroid.getCoordinate();
+        private Geometry createCell(Coordinate centroid, double from_deg, double to_deg,
+                double radius) {
+            CoordinateList coordinates = new CoordinateList();
+            coordinates.add(centroid, false);
 
             double step = Math.abs(to_deg - from_deg) / SEG;
             for (int i = 0; i <= SEG; i++) {
                 double radian = Math.toRadians(from_deg + (i * step));
-                coordinates[i + 1] = createPoint(coordinates[0], radian, radius);
+                coordinates.add(createPoint(centroid, radian, radius), false);
             }
-            coordinates[coordinates.length - 1] = coordinates[0];
-            return centroid.getFactory().createPolygon(coordinates);
+            coordinates.add(centroid, false);
+            return gf.createPolygon(coordinates.toCoordinateArray());
         }
 
         private Coordinate createPoint(Coordinate centroid, double radian, double radius) {

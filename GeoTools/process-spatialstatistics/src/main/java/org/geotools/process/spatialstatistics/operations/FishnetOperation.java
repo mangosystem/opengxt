@@ -97,17 +97,16 @@ public class FishnetOperation extends GeneralOperation {
 
         final double minX = bbox.getMinX();
         final double minY = bbox.getMinY();
-        ReferencedEnvelope bounds = new ReferencedEnvelope(crs);
 
         // insert features
         IFeatureInserter featureWriter = getFeatureWriter(schema);
-
         try {
             int featureID = 0;
+            ReferencedEnvelope bounds = new ReferencedEnvelope(crs);
+            double ypos = minY;
             for (int row = 0; row < rows; row++) {
-                final double ypos = minY + (height * row);
+                double xpos = minX;
                 for (int col = 0; col < columns; col++) {
-                    final double xpos = minX + (width * col);
                     bounds.init(xpos, xpos + width, ypos, ypos + height);
 
                     Geometry cellGeom = null;
@@ -116,7 +115,7 @@ public class FishnetOperation extends GeneralOperation {
                         cellGeom = gf.toGeometry(bounds);
                         break;
                     case Circle:
-                        final double radius = bounds.getWidth() / 2.0;
+                        double radius = bounds.getWidth() / 2.0;
                         cellGeom = gf.createPoint(bounds.centre()).buffer(radius);
                         break;
                     }
@@ -139,7 +138,9 @@ public class FishnetOperation extends GeneralOperation {
                     newFeature.setDefaultGeometry(cellGeom);
 
                     featureWriter.write(newFeature);
+                    xpos += width;
                 }
+                ypos += height;
             }
         } catch (Exception e) {
             featureWriter.rollback(e);

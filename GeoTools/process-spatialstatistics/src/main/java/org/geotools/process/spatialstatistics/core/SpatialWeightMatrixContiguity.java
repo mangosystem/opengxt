@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.process.spatialstatistics.enumeration.ContiguityType;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
@@ -38,21 +39,6 @@ import com.vividsolutions.jts.geom.Point;
 public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
     protected static final Logger LOGGER = Logging
             .getLogger(SpatialWeightMatrixKNearestNeighbors.class);
-
-    /**
-     * Contiguity-Based Spatial Weights Types
-     */
-    public enum ContiguityType {
-        // Polygon Contiguity (Edges and Corners)—A queen weights matrix defines a location's
-        // neighbors as those with either a shared border or vertex
-        Queen,
-        // Polygon Contiguity (Edges Only)—A rook weights matrix defines a location's neighbors as
-        // those areas with shared borders
-        Rook,
-        // Polygon Contiguity (Corners Only)—A rook weights matrix defines a location's neighbors as
-        // those areas with shared vertex
-        Bishops
-    }
 
     private int orderOfContiguity = 1; // Queen's default order
 
@@ -109,7 +95,7 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
                 Geometry primaryGeometry = (Geometry) primaryFeature.getDefaultGeometry();
                 Object primaryID = primaryFeature.getAttribute(uniqueField);
 
-                // spatial query 
+                // spatial query
                 // TODO orderOfContiguity
                 Filter filter = ff.intersects(ff.property(the_geom), ff.literal(primaryGeometry));
                 SimpleFeatureIterator subIter = features.subCollection(filter).features();

@@ -137,9 +137,10 @@ public class RingMapsOperation extends GeneralOperation {
                         }
 
                         // create line
+                        double radian = Math.toRadians(fromDeg + (Math.abs(toDeg - fromDeg) / 2));
                         Geometry nearestGeom = (Geometry) nearestFeature.getDefaultGeometry();
                         Geometry line = gf.createLineString(new Coordinate[] {
-                                cellCenter.getCoordinate(),
+                                createPoint(center, radian, defaultRadius),
                                 nearestGeom.getCentroid().getCoordinate() });
 
                         SimpleFeature newFeature = anchorWriter.buildFeature();
@@ -182,20 +183,20 @@ public class RingMapsOperation extends GeneralOperation {
         return true;
     }
 
-    private Geometry createCell(Coordinate centroid, double from_deg, double to_deg,
+    private Geometry createCell(Coordinate centroid, double fromDeg, double toDeg,
             double from_radius, double to_radius) {
         CoordinateList coordinates = new CoordinateList();
-        double step = Math.abs(to_deg - from_deg) / DEFAULT_SEGS;
+        double step = Math.abs(toDeg - fromDeg) / DEFAULT_SEGS;
 
         // first inner
         for (int index = 0; index < (DEFAULT_SEGS + 1 - GAPS); index++) {
-            double radian = Math.toRadians(from_deg + (index * step));
+            double radian = Math.toRadians(fromDeg + (index * step));
             coordinates.add(createPoint(centroid, radian, from_radius), false);
         }
 
         // second outer
         for (int index = (DEFAULT_SEGS - GAPS); index >= 0; index--) {
-            double radian = Math.toRadians(from_deg + (index * step));
+            double radian = Math.toRadians(fromDeg + (index * step));
             coordinates.add(createPoint(centroid, radian, to_radius), false);
         }
 

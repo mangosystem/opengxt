@@ -280,11 +280,13 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent patternTools = new TreeParent(Messages.ToolboxView_PointPattern, null, null);
         ssTools.addChild(patternTools);
         buildTool(patternTools, "org.geotools.process.spatialstatistics.NearestNeighborProcessFactory");
+        buildTool(patternTools, "org.geotools.process.spatialstatistics.KNearestNeighborMapProcessFactory");
         buildTool(patternTools, "org.geotools.process.spatialstatistics.KMeansClusteringProcessFactory");
         
         // Global Spatial Autocorrelation
         TreeParent autoTools = new TreeParent(Messages.ToolboxView_Autocorrelation, null, null);
-        ssTools.addChild(autoTools);
+        ssTools.addChild(autoTools); 
+        buildTool(autoTools, "org.geotools.process.spatialstatistics.JoinCountStatisticsProcessFactory");
         buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalMoransIProcessFactory");
         buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalGStatisticsProcessFactory");
         buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalGearysCProcessFactory");
@@ -384,6 +386,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(createTool, "org.geotools.process.spatialstatistics.TriangularGridProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.CircularGridProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.ThiessenPolygonProcessFactory");
+        buildTool(createTool, "org.geotools.process.spatialstatistics.RingMapProcessFactory");
+        buildTool(createTool, "org.geotools.process.spatialstatistics.WindRoseMapProcessFactory");
         
         // Graph
         TreeParent graphTool = new TreeParent(Messages.ToolboxView_Graph, null, null);
@@ -413,7 +417,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(utilTool, "org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory");
 
         buildTool(utilTool, "org.geotools.process.spatialstatistics.MultipartToSinglepartProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.SinglepartToMultipartProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToPointProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.PointsToLineProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureEnvelopeToPolygonProcessFactory");
         
     }

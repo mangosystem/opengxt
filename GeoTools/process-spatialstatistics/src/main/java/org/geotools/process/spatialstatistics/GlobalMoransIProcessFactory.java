@@ -49,7 +49,7 @@ public class GlobalMoransIProcessFactory extends SpatialStatisticsProcessFactory
 
     /*
      * GlobalMoransI(SimpleFeatureCollection inputFeatures, String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-     * StandardizationMethod standardization, Double searchDistance) : SimpleFeatureCollection
+     * StandardizationMethod standardization, Double searchDistance) : MoransI
      */
 
     public GlobalMoransIProcessFactory() {

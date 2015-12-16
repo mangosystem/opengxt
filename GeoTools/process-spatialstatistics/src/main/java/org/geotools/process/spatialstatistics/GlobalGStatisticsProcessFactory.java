@@ -49,7 +49,7 @@ public class GlobalGStatisticsProcessFactory extends SpatialStatisticsProcessFac
 
     /*
      * GlobalGStatistics(SimpleFeatureCollection inputFeatures, String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-     * StandardizationMethod standardization, Double searchDistance) : SimpleFeatureCollection
+     * StandardizationMethod standardization, Double searchDistance) : GeneralG
      */
 
     public GlobalGStatisticsProcessFactory() {

@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
-	<!-- The PPIO that need to be registered into SPI because of their dependencies -->
+    <!-- The PPIO that need to be registered into SPI because of their dependencies -->
 
     <!-- custom class support -->
-	<bean id="MoransIPPIO" class="org.geoserver.wps.spatialstatistics.ppio.MoransIPPIO" />
-	<bean id="GStatisticsPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GStatisticsPPIO" />
-	<bean id="PearsonPPIO" class="org.geoserver.wps.spatialstatistics.ppio.PearsonPPIO" />
-	<bean id="DataStatisticsResultPPIO" class="org.geoserver.wps.spatialstatistics.ppio.DataStatisticsResultPPIO" />
-	<bean id="NearestNeighborIndexPPIO" class="org.geoserver.wps.spatialstatistics.ppio.NearestNeighborIndexPPIO" />
+    <bean id="MoransIPPIO" class="org.geoserver.wps.spatialstatistics.ppio.MoransIPPIO" />
+    <bean id="GStatisticsPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GStatisticsPPIO" />
+    <bean id="PearsonPPIO" class="org.geoserver.wps.spatialstatistics.ppio.PearsonPPIO" />
+    <bean id="DataStatisticsResultPPIO" class="org.geoserver.wps.spatialstatistics.ppio.DataStatisticsResultPPIO" />
+    <bean id="NearestNeighborIndexPPIO" class="org.geoserver.wps.spatialstatistics.ppio.NearestNeighborIndexPPIO" />
     <bean id="JoinCountStatisticsPPIO" class="org.geoserver.wps.spatialstatistics.ppio.JoinCountStatisticsPPIO" />
+    <bean id="LeesSPPIO" class="org.geoserver.wps.spatialstatistics.ppio.LeesSPPIO" />
+    <bean id="GearysCPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GearysCPPIO" />
 
-	<!-- native format support --> 
-	<bean id="FeatureCollectionGML311PPIO" class="org.geoserver.wps.spatialstatistics.ppio.FeatureCollectionGML311PPIO" />
+    <!-- native format support --> 
+    <bean id="FeatureCollectionGML311PPIO" class="org.geoserver.wps.spatialstatistics.ppio.FeatureCollectionGML311PPIO" />
     <bean id="GeometryGeoJSONPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GeometryGeoJSONPPIO" />
 
 </beans>

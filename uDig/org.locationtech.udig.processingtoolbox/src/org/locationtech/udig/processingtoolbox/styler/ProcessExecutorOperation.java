@@ -39,6 +39,7 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.GlobalGStatisticsProcess.GStatisticsProcessResult;
 import org.geotools.process.spatialstatistics.GlobalMoransIProcess.MoransIProcessResult;
+import org.geotools.process.spatialstatistics.JoinCountStatisticsProcess.JoinCountProcessResult;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
@@ -190,6 +191,8 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
             writer.writeNearestNeighbor((NearestNeighborResult) value);
         } else if (value instanceof PearsonResult) {
             writer.writePearson((PearsonResult) value);
+        } else if (value instanceof JoinCountProcessResult) {
+            writer.writeJoinCount((JoinCountProcessResult) value);
         } else if (Number.class.isAssignableFrom(value.getClass())) {
             writer.writeH2(FormatUtils.format(Double.parseDouble(value.toString())));
         } else {

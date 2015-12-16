@@ -33,6 +33,8 @@ import com.vividsolutions.jts.geom.Point;
 /**
  * Spatial autocorrelation for binary attributes.
  * 
+ * @reference http://www.gis.ttu.edu/gist4302/documents/lectures/Spring%202014/lecture6.pdf
+ * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
@@ -43,24 +45,31 @@ public class JoinCountStatisticsOperation extends AbstractStatisticsOperation {
     public JoinCountStatisticsOperation() {
     }
 
-    public JoinCountResult execute(SimpleFeatureCollection features, Filter trueExpression,
+    public JoinCount execute(SimpleFeatureCollection features, Filter blackExpression,
             ContiguityType contiguityType) throws IOException {
         String typeName = features.getSchema().getTypeName();
         String the_geom = features.getSchema().getGeometryDescriptor().getLocalName();
 
-        JoinCountResult joinCounts = new JoinCountResult(typeName, contiguityType);
-        int featureCount = 0;
+        int blackCount = 0;
+        int whiteCount = 0;
+        int m = 0;
 
+        JoinCount joinCounts = new JoinCount(typeName, contiguityType);
         SimpleFeatureIterator featureIter = features.features();
         try {
             while (featureIter.hasNext()) {
                 SimpleFeature pFeature = featureIter.next();
                 Geometry pGeometry = (Geometry) pFeature.getDefaultGeometry();
-                boolean primary = trueExpression.evaluate(pFeature);
-                featureCount++;
+                boolean primary = blackExpression.evaluate(pFeature);
+                if (primary) {
+                    blackCount++;
+                } else {
+                    whiteCount++;
+                }
 
                 Filter filter = ff.intersects(ff.property(the_geom), ff.literal(pGeometry));
                 SimpleFeatureIterator subIter = features.subCollection(filter).features();
+                int neighborCount = 0;
                 try {
                     while (subIter.hasNext()) {
                         SimpleFeature sFeature = subIter.next();
@@ -83,22 +92,29 @@ public class JoinCountStatisticsOperation extends AbstractStatisticsOperation {
                         }
 
                         // evaluate
-                        boolean secondary = trueExpression.evaluate(sFeature);
+                        boolean secondary = blackExpression.evaluate(sFeature);
                         joinCounts.visit(primary, secondary);
+                        neighborCount++;
                     }
                 } finally {
                     subIter.close();
                 }
+
+                m += neighborCount * (neighborCount - 1);
             }
         } finally {
             featureIter.close();
         }
 
-        joinCounts.setFeatureCount(featureCount);
+        // post process
+        joinCounts.setFeatureCount(blackCount + whiteCount);
+        joinCounts.setBlackCount(blackCount);
+        joinCounts.setWhiteCount(whiteCount);
+        joinCounts.postProcess(m / 2.0);
         return joinCounts;
     }
 
-    public static class JoinCountResult {
+    public static class JoinCount {
 
         private String typeName;
 
@@ -106,25 +122,71 @@ public class JoinCountStatisticsOperation extends AbstractStatisticsOperation {
 
         private int featureCount = 0;
 
-        private int BBJoins = 0;
+        private int blackCount = 0;
 
-        private int WWJoins = 0;
+        private int whiteCount = 0;
 
-        private int BWJoins = 0;
+        private int observedBB = 0;
 
-        public JoinCountResult(String typeName, ContiguityType contiguityType) {
+        private int observedWW = 0;
+
+        private int observedBW = 0;
+
+        private double expectedBB = 0;
+
+        private double expectedWW = 0;
+
+        private double expectedBW = 0;
+
+        private double stdDevBB = 0;
+
+        private double stdDevWW = 0;
+
+        private double stdDevBW = 0;
+
+        private double zScoreBB = 0;
+
+        private double zScoreWW = 0;
+
+        private double zScoreBW = 0;
+
+        public JoinCount(String typeName, ContiguityType contiguityType) {
             this.typeName = typeName;
             this.contiguityType = contiguityType;
         }
 
         public void visit(boolean primary, boolean secondary) {
             if (primary && secondary) {
-                BBJoins++;
+                observedBB++;
             } else if (!primary && !secondary) {
-                WWJoins++;
+                observedWW++;
             } else {
-                BWJoins++;
+                observedBW++;
             }
+        }
+
+        public void postProcess(double m) {
+            // Expected
+            final double pB = (double) blackCount / featureCount;
+            final double pW = 1 - pB;
+            final double k = getNumberOfJoins();
+
+            expectedBB = k * pB * pB;
+            expectedWW = k * pW * pW;
+            expectedBW = 2.0f * k * pB * pW;
+
+            // Standard Deviation of Expected (standard error)
+            stdDevBB = Math.sqrt((k * Math.pow(pB, 2)) + (2 * m * Math.pow(pB, 3))
+                    - ((k + (2 * m)) * Math.pow(pB, 4)));
+            stdDevWW = Math.sqrt((k * Math.pow(pW, 2)) + (2 * m * Math.pow(pW, 3))
+                    - ((k + (2 * m)) * Math.pow(pW, 4)));
+            stdDevBW = Math.sqrt((2 * (k + m) * pB * pW)
+                    - (4 * (k + 2 * m) * Math.pow(pB, 2) * Math.pow(pW, 2)));
+
+            // Test statistic z-score
+            zScoreBB = (getObservedBB() - expectedBB) / stdDevBB;
+            zScoreWW = (getObservedWW() - expectedWW) / stdDevWW;
+            zScoreBW = (getObservedBW() - expectedBW) / stdDevBW;
         }
 
         public String getTypeName() {
@@ -139,20 +201,8 @@ public class JoinCountStatisticsOperation extends AbstractStatisticsOperation {
             this.featureCount = featureCount;
         }
 
-        public int getBBJoins() {
-            return BBJoins / 2;
-        }
-
-        public int getWWJoins() {
-            return WWJoins / 2;
-        }
-
-        public int getBWJoins() {
-            return BWJoins / 2;
-        }
-
         public int getNumberOfJoins() {
-            return getBBJoins() + getWWJoins() + getBWJoins();
+            return getObservedBB() + getObservedWW() + getObservedBW();
         }
 
         public ContiguityType getContiguityType() {
@@ -163,43 +213,68 @@ public class JoinCountStatisticsOperation extends AbstractStatisticsOperation {
             this.contiguityType = contiguityType;
         }
 
-        @Override
-        public String toString() {
-            final String separator = System.getProperty("line.separator");
+        public int getBlackCount() {
+            return blackCount;
+        }
 
-            // 1. The total number of areas,
-            // 2. The total number of black areas,
-            // 3. The total number of white areas,
-            // 4. The observed number of BB, BW and WW joins,
-            // 5. The expected number of BB, BW, and WW joins,
-            // 6. The variance of BB, BW joins,
-            // 7. The z-statistics of BB, BW joins.
+        public void setBlackCount(int blackCount) {
+            this.blackCount = blackCount;
+        }
 
-            StringBuffer sb = new StringBuffer();
-            sb.append("Type Name: ").append(getTypeName()).append(separator);
-            sb.append("Number of Features: ").append(getFeatureCount()).append(separator);
-            sb.append("Contiguity Type: ").append(getContiguityType().toString()).append(separator);
-            sb.append("Number of Joins: ").append(getNumberOfJoins()).append(separator);
+        public int getWhiteCount() {
+            return whiteCount;
+        }
 
-            sb.append("The observed number of BB, BW and WW joins").append(separator);
-            sb.append("BB Joins: ").append(getBBJoins()).append(separator);
-            sb.append("WW Joins: ").append(getWWJoins()).append(separator);
-            sb.append("BW Joins: ").append(getBWJoins()).append(separator);
+        public void setWhiteCount(int whiteCount) {
+            this.whiteCount = whiteCount;
+        }
 
-            sb.append("The expected number of BB, BW and WW joins").append(separator);
-            sb.append("BB Joins: ").append(getBBJoins()).append(separator);
-            sb.append("WW Joins: ").append(getWWJoins()).append(separator);
-            sb.append("BW Joins: ").append(getBWJoins()).append(separator);
+        public int getObservedBB() {
+            return observedBB / 2;
+        }
 
-            sb.append("The variance of BB, BW joins").append(separator);
-            sb.append("BB Joins: ").append(getBBJoins()).append(separator);
-            sb.append("WW Joins: ").append(getWWJoins()).append(separator);
+        public int getObservedWW() {
+            return observedWW / 2;
+        }
 
-            sb.append("The z-statistics of BB, BW joins").append(separator);
-            sb.append("BB Joins: ").append(getBBJoins()).append(separator);
-            sb.append("WW Joins: ").append(getWWJoins()).append(separator);
+        public int getObservedBW() {
+            return observedBW / 2;
+        }
 
-            return sb.toString();
+        public double getExpectedBB() {
+            return expectedBB;
+        }
+
+        public double getExpectedWW() {
+            return expectedWW;
+        }
+
+        public double getExpectedBW() {
+            return expectedBW;
+        }
+
+        public double getStdDevBB() {
+            return stdDevBB;
+        }
+
+        public double getStdDevWW() {
+            return stdDevWW;
+        }
+
+        public double getStdDevBW() {
+            return stdDevBW;
+        }
+
+        public double getzScoreBB() {
+            return zScoreBB;
+        }
+
+        public double getzScoreWW() {
+            return zScoreWW;
+        }
+
+        public double getzScoreBW() {
+            return zScoreBW;
         }
     }
 }

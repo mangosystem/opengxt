@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 import org.geotools.data.Parameter;
 import org.geotools.process.spatialstatistics.GlobalGStatisticsProcess.GStatisticsProcessResult;
 import org.geotools.process.spatialstatistics.GlobalMoransIProcess.MoransIProcessResult;
+import org.geotools.process.spatialstatistics.JoinCountStatisticsProcess.JoinCountProcessResult;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult.DataStatisticsItem;
@@ -293,6 +294,77 @@ public class HtmlWriter {
         write("<tr><td>Distance Method</td><td>" + value.getDistanceMethod() + "</td></tr>");
         write("<tr><td>Row Standardization</td><td>" + value.getRowStandardization() + "</td></tr>");
         write("<tr><td>Distance Threshold</td><td>" + value.getDistanceThreshold() + "</td></tr>");
+
+        write("</table>");
+    }
+
+    // JoinCountProcessResult
+    public void writeJoinCount(JoinCountProcessResult value) {
+        writeH1("Join Count Statistics: " + value.getTypeName());
+
+        // 1. general
+        writeH2("General");
+        write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+        // header
+        write("<colgroup>");
+        write("<col width=\"60%\" />");
+        write("<col width=\"40%\" />");
+        write("</colgroup>");
+
+        write("<tr bgcolor=\"#cccccc\">");
+        write("<td><strong>Category</strong></td>");
+        write("<td><strong>Value</strong></td>");
+        write("</tr>");
+
+        // body
+        write("<tr><td>Contiguity Type</td><td>" + value.getContiguityType() + "</td></tr>");
+        write("<tr><td>Feature Count</td><td>" + value.getFeatureCount() + "</td></tr>");
+        write("<tr><td>Black : White Count</td><td>" + value.getBlackCount() + " : "
+                + value.getWhiteCount() + "</td></tr>");
+        write("<tr><td>Number Of Joins</td><td>" + value.getNumberOfJoins() + "</td></tr>");
+
+        write("</table>");
+
+        // 2. summary
+        writeH2("Summary");
+        write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+        // header
+        write("<colgroup>");
+        write("<col width=\"20%\" />");
+        write("<col width=\"20%\" />");
+        write("<col width=\"20%\" />");
+        write("<col width=\"20%\" />");
+        write("<col width=\"20%\" />");
+        write("</colgroup>");
+
+        write("<tr bgcolor=\"#cccccc\">");
+        write("<td><strong>Type</strong></td>");
+        write("<td><strong>Observed</strong></td>");
+        write("<td><strong>Expected</strong></td>");
+        write("<td><strong>Std Dev</strong></td>");
+        write("<td><strong>z-Score</strong></td>");
+        write("</tr>");
+
+        // body
+        write("<tr><td>BB</td>");
+        write("<td>" + value.getObservedBB() + "</td>");
+        write("<td>" + value.getExpectedBB() + "</td>");
+        write("<td>" + format(value.getStdDevBB()) + "</td>");
+        write("<td>" + format(value.getzScoreBB()) + "</td></tr>");
+
+        write("<tr><td>WW</td>");
+        write("<td>" + value.getObservedWW() + "</td>");
+        write("<td>" + value.getExpectedWW() + "</td>");
+        write("<td>" + format(value.getStdDevWW()) + "</td>");
+        write("<td>" + format(value.getzScoreWW()) + "</td></tr>");
+
+        write("<tr><td>BW</td>");
+        write("<td>" + value.getObservedBW() + "</td>");
+        write("<td>" + value.getExpectedBW() + "</td>");
+        write("<td>" + format(value.getStdDevBW()) + "</td>");
+        write("<td>" + format(value.getzScoreBW()) + "</td></tr>");
 
         write("</table>");
     }

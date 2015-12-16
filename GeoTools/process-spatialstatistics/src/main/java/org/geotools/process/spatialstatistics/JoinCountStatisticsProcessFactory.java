@@ -27,7 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
-import org.geotools.process.spatialstatistics.autocorrelation.JoinCountStatisticsOperation.JoinCountResult;
+import org.geotools.process.spatialstatistics.JoinCountStatisticsProcess.JoinCountProcessResult;
 import org.geotools.process.spatialstatistics.enumeration.ContiguityType;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
@@ -48,7 +48,7 @@ public class JoinCountStatisticsProcessFactory extends SpatialStatisticsProcessF
     private static final String PROCESS_NAME = "JoinCount";
 
     /*
-     * JoinCount(SimpleFeatureCollection inputFeatures, Filter trueExpression, ContiguityType contiguityType): JoinCountResult
+     * JoinCount(SimpleFeatureCollection inputFeatures, Filter blackExpression, ContiguityType contiguityType): JoinCountProcessResult
      */
 
     public JoinCountStatisticsProcessFactory() {
@@ -77,10 +77,10 @@ public class JoinCountStatisticsProcessFactory extends SpatialStatisticsProcessF
             getResource("JoinCount.inputFeatures.description"), true, 1, 1, null, new KVP(
                     Parameter.FEATURE_TYPE, "Polygon"));
 
-    /** trueExpression */
-    public static final Parameter<Filter> trueExpression = new Parameter<Filter>("trueExpression",
-            Filter.class, getResource("JoinCount.trueExpression.title"),
-            getResource("JoinCount.trueExpression.description"), true, 1, 1, null, null);
+    /** blackExpression */
+    public static final Parameter<Filter> blackExpression = new Parameter<Filter>(
+            "blackExpression", Filter.class, getResource("JoinCount.blackExpression.title"),
+            getResource("JoinCount.blackExpression.description"), true, 1, 1, null, null);
 
     /** contiguityType */
     public static final Parameter<ContiguityType> contiguityType = new Parameter<ContiguityType>(
@@ -92,14 +92,14 @@ public class JoinCountStatisticsProcessFactory extends SpatialStatisticsProcessF
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
-        parameterInfo.put(trueExpression.key, trueExpression);
+        parameterInfo.put(blackExpression.key, blackExpression);
         parameterInfo.put(contiguityType.key, contiguityType);
         return parameterInfo;
     }
 
     /** result */
-    public static final Parameter<JoinCountResult> RESULT = new Parameter<JoinCountResult>(
-            "result", JoinCountResult.class, getResource("JoinCount.result.title"),
+    public static final Parameter<JoinCountProcessResult> RESULT = new Parameter<JoinCountProcessResult>(
+            "result", JoinCountProcessResult.class, getResource("JoinCount.result.title"),
             getResource("JoinCount.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();

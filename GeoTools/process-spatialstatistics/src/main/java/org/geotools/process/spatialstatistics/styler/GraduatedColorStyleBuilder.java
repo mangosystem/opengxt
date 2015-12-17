@@ -17,6 +17,8 @@
 package org.geotools.process.spatialstatistics.styler;
 
 import java.awt.Color;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,7 +67,7 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
     // Sequential: YlGn, YlGnBu, GnBu, BuGn, PuBuGn, PuBu, BuPu, RdPu, PuRd, OrRd, YlOrRd, YlOrBr,
     // Purples, Blues, Greens, Oranges, Reds, Grays,
     public Style createStyle(SimpleFeatureCollection inputFeatures, String propertyName,
-            String methodName, int numClasses, String brewerPaletteName) {
+            String methodName, int numClasses, String brewerPaletteName, boolean reverse) {
         numClasses = numClasses < 3 ? 3 : numClasses;
         if (numClasses > 12) {
             numClasses = numClasses > 12 ? 12 : numClasses;
@@ -92,8 +94,17 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
         BrewerPalette brewerPalette = brewer.getPalette(brewerPaletteName);
 
         Color[] colors = brewerPalette.getColors(classBreaks.length - 1);
+        if (reverse) {
+            Collections.reverse(Arrays.asList(colors));
+        }
 
         return createStyle(inputFeatures.getSchema(), propertyName, classBreaks, colors);
+    }
+
+    public Style createStyle(SimpleFeatureCollection inputFeatures, String propertyName,
+            String methodName, int numClasses, String brewerPaletteName) {
+        return createStyle(inputFeatures, propertyName, methodName, numClasses, brewerPaletteName,
+                false);
     }
 
     public Style createStyle(SimpleFeatureType inputFeatureType, String propertyName,

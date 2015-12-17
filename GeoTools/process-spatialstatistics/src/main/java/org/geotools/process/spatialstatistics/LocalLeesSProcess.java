@@ -25,6 +25,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
+import org.geotools.process.spatialstatistics.autocorrelation.LocalLeesSOperation;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
@@ -137,8 +138,22 @@ public class LocalLeesSProcess extends AbstractStatisticsProcess {
             }
 
             // start process
-            // TODO code here
-            SimpleFeatureCollection resultFc = inputFeatures;
+            SimpleFeatureCollection resultFc = null;
+            try {
+                LocalLeesSOperation process = new LocalLeesSOperation();
+                process.setSpatialConceptType(spatialConcept);
+                process.setDistanceType(distanceMethod);
+                process.setStandardizationType(standardization);
+
+                // searchDistance
+                if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
+                    process.setDistanceBand(searchDistance);
+                }
+
+                resultFc = process.execute(inputFeatures, inputField);
+            } catch (Exception ee) {
+                monitor.exceptionOccurred(ee);
+            }
             // end process
 
             monitor.setTask(Text.text("Encoding result"));

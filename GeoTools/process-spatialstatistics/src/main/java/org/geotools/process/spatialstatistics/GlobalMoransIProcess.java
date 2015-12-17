@@ -78,7 +78,8 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
 
-        return null;
+        return new MoransIProcessResult(inputFeatures.getSchema().getTypeName(), inputField,
+                new MoransI());
     }
 
     @Override
@@ -146,18 +147,9 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
                 }
 
                 MoransI ret = process.execute(inputFeatures, inputField);
-
-                processResult = new MoransIProcessResult(typeName, inputField,
-                        ret.getObservedIndex(), ret.getExpectedIndex(), ret.getZVariance(),
-                        ret.getZScore(), ret.getPValue());
-
-                processResult.setConceptualization(ret.getConceptualization().toString());
-                processResult.setDistanceMethod(ret.getDistanceMethod().toString());
-                processResult.setDistanceThreshold(String.valueOf(ret.getDistanceThreshold()));
-                processResult.setRowStandardization(ret.getRowStandardization().toString());
-
+                processResult = new MoransIProcessResult(typeName, inputField, ret);
             } catch (Exception e) {
-                processResult = new MoransIProcessResult(typeName, inputField, 0, 0, 0, 0, 0);
+                processResult = new MoransIProcessResult(typeName, inputField, new MoransI());
             }
             // end process
 
@@ -183,7 +175,7 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
 
         String propertyName;
 
-        String moran_Index;
+        String observed_Index;
 
         String expected_Index;
 
@@ -201,6 +193,21 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
 
         String distanceThreshold;
 
+        public MoransIProcessResult(String typeName, String propertyName, MoransI ret) {
+            this.typeName = typeName;
+            this.propertyName = propertyName;
+
+            this.observed_Index = FormatUtils.format(ret.getObservedIndex());
+            this.expected_Index = FormatUtils.format(ret.getExpectedIndex());
+            this.variance = FormatUtils.format(ret.getZVariance());
+            this.z_Score = FormatUtils.format(ret.getZScore());
+            this.p_Value = FormatUtils.format(ret.getPValue());
+            this.conceptualization = ret.getConceptualization().toString();
+            this.distanceMethod = ret.getDistanceMethod().toString();
+            this.rowStandardization = ret.getRowStandardization().toString();
+            this.distanceThreshold = FormatUtils.format(ret.getDistanceThreshold());
+        }
+
         public String getTypeName() {
             return typeName;
         }
@@ -217,12 +224,12 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
             this.propertyName = propertyName;
         }
 
-        public String getMoran_Index() {
-            return moran_Index;
+        public String getObserved_Index() {
+            return observed_Index;
         }
 
-        public void setMoran_Index(String moran_Index) {
-            this.moran_Index = moran_Index;
+        public void setObserved_Index(String observed_Index) {
+            this.observed_Index = observed_Index;
         }
 
         public String getExpected_Index() {
@@ -289,18 +296,6 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
             this.distanceThreshold = distanceThreshold;
         }
 
-        public MoransIProcessResult(String typeName, String propertyName, double moran_index,
-                double expected_index, double variance, double z_score, double pValue) {
-            this.typeName = typeName;
-            this.propertyName = propertyName;
-
-            this.moran_Index = FormatUtils.format(moran_index);
-            this.expected_Index = FormatUtils.format(expected_index);
-            this.variance = FormatUtils.format(variance);
-            this.z_Score = FormatUtils.format(z_score);
-            this.p_Value = FormatUtils.format(pValue);
-        }
-
         @Override
         public String toString() {
             final String separator = System.getProperty("line.separator");
@@ -308,7 +303,7 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
             StringBuffer sb = new StringBuffer();
             sb.append("TypeName: ").append(typeName).append(separator);
             sb.append("PropertyName: ").append(propertyName).append(separator);
-            sb.append("Moran Index: ").append(moran_Index).append(separator);
+            sb.append("Moran Index: ").append(observed_Index).append(separator);
             sb.append("Expected Index: ").append(expected_Index).append(separator);
             sb.append("Variance: ").append(variance).append(separator);
             sb.append("z Score: ").append(z_Score).append(separator);

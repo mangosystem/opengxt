@@ -52,14 +52,6 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
         swMatrix.distanceBandWidth = this.getDistanceBand();
         swMatrix.buildWeightMatrix(inputFeatures, inputField, this.getDistanceType());
 
-        int featureCount = swMatrix.Events.size();
-        if (featureCount < 3) {
-            LOGGER.warning("inputFeatures's feature count < " + featureCount);
-            return null;
-        } else if (featureCount < 30) {
-            LOGGER.warning("inputFeatures's feature count < " + featureCount);
-        }
-
         // """Calculate Moran's Index and Z Score."""
         double dSumWC = 0.0; // # summation of weighted co-variance (dWij * dCij)
         double dSumW = 0.0; // # summation of all weights (dWij)
@@ -67,15 +59,10 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
         double dM4 = 0.0;
         double dSumS1 = 0.0;
         double dSumS2 = 0.0;
-        int lNumObs = swMatrix.Events.size();
 
-        // # Calculate sample mean.
-        double rN = lNumObs * 1.0;
-        double dZMean = swMatrix.dZSum / rN;
-        double dZVar = Math.pow((swMatrix.dZ2Sum / rN) - Math.pow(dZMean, 2), 0.5);
-        if (Math.abs(dZVar) <= 0.0) {
-            LOGGER.warning("ERROR Zero variance:  all of the values for your input field are likely the same.");
-        }
+        // Calculate sample mean.
+        double n = swMatrix.Events.size() * 1.0;
+        double dZMean = swMatrix.dZSum / n;
 
         for (SpatialEvent curE : swMatrix.Events) {
             double dWijS2Sum = 0.0;
@@ -106,8 +93,6 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
                 }
 
                 if (getStandardizationType() == StandardizationMethod.ROW) {
-                    // dWij = standardize_weight (dWij, inputs, dcRowSum, iKey, dcID, dDistAllSum)
-                    // dWji = standardize_weight (dWji, inputs, dcRowSum, jKey, dcID, dDistAllSum)
                     dWij = swMatrix.standardizeWeight(curE, dWij);
                     dWji = swMatrix.standardizeWeight(destE, dWji);
                 }
@@ -125,29 +110,25 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
         dSumS1 = 0.5 * dSumS1;
 
         // # we need a few more working variables:
-        dM2 = (dM2 * 1.0) / rN; // # standard deviation
-        dM4 = (dM4 * 1.0) / rN;
+        dM2 = (dM2 * 1.0) / n; // # standard deviation
+        dM4 = (dM4 * 1.0) / n;
 
         double dB2 = dM4 / (dM2 * dM2); // # sample kurtosis
-        double dExpected = -1.0 / (rN - 1.0); // # Expected Moran's I
+        double dExpected = -1.0 / (n - 1.0); // # Expected Moran's I
 
-        // #### Report if All Features Have No Neighbors ####
         if (dSumW <= 0.0)
             return new MoransI();
 
-        // #### Report on Features with No Neighbors ####
-
-        // # Finally, we can calculate Moran's I and its significance (Z Score).
-        // # This Z Score is based on the calculated RANDOMIZATION null hypothesis.
-
+        // Finally, we can calculate Moran's I and its significance (Z Score).
+        // This Z Score is based on the calculated RANDOMIZATION null hypothesis.
         double dMoranI = dSumWC / (dM2 * dSumW);
 
-        double dDiv = ((rN - 1.0) * (rN - 2.0) * (rN - 3.0) * (Math.pow(dSumW, 2.0)));
-        double dTmp1 = rN
-                * ((Math.pow(rN, 2.0) - (3.0 * rN) + 3.0) * dSumS1 - (rN * dSumS2) + 3.0 * (Math
-                        .pow(dSumW, 2.0)));
+        double dDiv = ((n - 1.0) * (n - 2.0) * (n - 3.0) * (Math.pow(dSumW, 2.0)));
+        double dTmp1 = n
+                * ((Math.pow(n, 2.0) - (3.0 * n) + 3.0) * dSumS1 - (n * dSumS2) + 3.0 * (Math.pow(
+                        dSumW, 2.0)));
         double dTmp2 = dB2
-                * ((Math.pow(rN, 2.0) - rN) * dSumS1 - (2.0 * rN * dSumS2) + 6.0 * (Math.pow(dSumW,
+                * ((Math.pow(n, 2.0) - n) * dSumS1 - (2.0 * n * dSumS2) + 6.0 * (Math.pow(dSumW,
                         2.0)));
 
         double rVariance = (dTmp1 / dDiv) - (dTmp2 / dDiv) - (Math.pow(dExpected, 2.0));
@@ -162,15 +143,9 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
         return moransI;
     }
 
-    public final class MoransI {
-        // Global Moran's I Summary
-        // Moran's Index: 0.260865
-        // Expected Index: -0.002288
-        // Variance: 0.000353
-        // Z Score: 14.008921
-        // p-value: 0.000000
+    public static final class MoransI {
 
-        double moransIndex = 0.0;
+        double observedIndex = 0.0;
 
         double expectedIndex = 0.0;
 
@@ -187,18 +162,18 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
         public MoransI() {
         }
 
-        public MoransI(double moransIndex, double expectedIndex, double zVariance) {
-            setObservedIndex(moransIndex);
+        public MoransI(double observedIndex, double expectedIndex, double zVariance) {
+            setObservedIndex(observedIndex);
             setExpectedIndex(expectedIndex);
             setZVariance(zVariance);
         }
 
-        public void setObservedIndex(double moransIndex) {
-            this.moransIndex = moransIndex;
+        public void setObservedIndex(double observedIndex) {
+            this.observedIndex = observedIndex;
         }
 
         public double getObservedIndex() {
-            return moransIndex;
+            return observedIndex;
         }
 
         public void setExpectedIndex(double expectedIndex) {
@@ -219,7 +194,7 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
 
         public double getZScore() {
             // dMoranZScore = (dMoranI - dExpected) / (rVariance**0.5)
-            double dX = moransIndex - expectedIndex;
+            double dX = observedIndex - expectedIndex;
             double dY = Math.pow(getZVariance(), 0.5);
             if (dY == 0)
                 return 0.0;

@@ -79,7 +79,8 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
 
-        return null;
+        return new GStatisticsProcessResult(inputFeatures.getSchema().getTypeName(), inputField,
+                new GeneralG());
     }
 
     @Override
@@ -147,18 +148,9 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
                 }
 
                 GeneralG ret = process.execute(inputFeatures, inputField);
-
-                processResult = new GStatisticsProcessResult(typeName, inputField,
-                        ret.getObservedIndex(), ret.getExpectedIndex(), ret.getZVariance(),
-                        ret.getZScore(), ret.getPValue());
-
-                processResult.setConceptualization(ret.getConceptualization().toString());
-                processResult.setDistanceMethod(ret.getDistanceMethod().toString());
-                processResult.setDistanceThreshold(String.valueOf(ret.getDistanceThreshold()));
-                processResult.setRowStandardization(ret.getRowStandardization().toString());
-
+                processResult = new GStatisticsProcessResult(typeName, inputField, ret);
             } catch (Exception e) {
-                processResult = new GStatisticsProcessResult(typeName, inputField, 0, 0, 0, 0, 0);
+                processResult = new GStatisticsProcessResult(typeName, inputField, new GeneralG());
             }
             // end process
 
@@ -184,9 +176,9 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
 
         String propertyName;
 
-        String Observed_General_G;
+        String observed_Index;
 
-        String Expected_General_G;
+        String expected_Index;
 
         String Variance;
 
@@ -201,6 +193,21 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
         String rowStandardization;
 
         String distanceThreshold;
+
+        public GStatisticsProcessResult(String typeName, String propertyName, GeneralG ret) {
+            this.typeName = typeName;
+            this.propertyName = propertyName;
+
+            this.observed_Index = FormatUtils.format(ret.getObservedIndex());
+            this.expected_Index = FormatUtils.format(ret.getExpectedIndex());
+            this.Variance = FormatUtils.format(ret.getZVariance());
+            this.Z_Score = FormatUtils.format(ret.getZScore());
+            this.p_Value = FormatUtils.format(ret.getPValue());
+            this.conceptualization = ret.getConceptualization().toString();
+            this.distanceMethod = ret.getDistanceMethod().toString();
+            this.rowStandardization = ret.getRowStandardization().toString();
+            this.distanceThreshold = FormatUtils.format(ret.getDistanceThreshold());
+        }
 
         public String getTypeName() {
             return typeName;
@@ -218,20 +225,20 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
             this.propertyName = propertyName;
         }
 
-        public String getObserved_General_G() {
-            return Observed_General_G;
+        public String getObserved_Index() {
+            return observed_Index;
         }
 
-        public void setObserved_General_G(String observed_General_G) {
-            Observed_General_G = observed_General_G;
+        public void setObserved_Index(String observed_Index) {
+            this.observed_Index = observed_Index;
         }
 
-        public String getExpected_General_G() {
-            return Expected_General_G;
+        public String getExpected_Index() {
+            return expected_Index;
         }
 
-        public void setExpected_General_G(String expected_General_G) {
-            Expected_General_G = expected_General_G;
+        public void setExpected_Index(String expected_Index) {
+            this.expected_Index = expected_Index;
         }
 
         public String getVariance() {
@@ -290,18 +297,6 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
             this.distanceThreshold = distanceThreshold;
         }
 
-        public GStatisticsProcessResult(String typeName, String propertyName, double obsGeneralG,
-                double expGeneralG, double variance, double z_score, double pValue) {
-            this.typeName = typeName;
-            this.propertyName = propertyName;
-
-            this.Observed_General_G = FormatUtils.format(obsGeneralG);
-            this.Expected_General_G = FormatUtils.format(expGeneralG);
-            this.Variance = FormatUtils.format(variance);
-            this.Z_Score = FormatUtils.format(z_score);
-            this.p_Value = FormatUtils.format(pValue);
-        }
-
         @Override
         public String toString() {
             final String separator = System.getProperty("line.separator");
@@ -309,8 +304,8 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
             StringBuffer sb = new StringBuffer();
             sb.append("TypeName: ").append(typeName).append(separator);
             sb.append("PropertyName: ").append(propertyName).append(separator);
-            sb.append("Observed_General_G: ").append(Observed_General_G).append(separator);
-            sb.append("Expected_General_G: ").append(Expected_General_G).append(separator);
+            sb.append("Observed_General_G: ").append(observed_Index).append(separator);
+            sb.append("Expected_General_G: ").append(expected_Index).append(separator);
             sb.append("Variance: ").append(Variance).append(separator);
             sb.append("Z_Score: ").append(Z_Score).append(separator);
             sb.append("P_Value: ").append(p_Value).append(separator);

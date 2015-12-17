@@ -16,7 +16,6 @@
  */
 package org.geotools.process.spatialstatistics.autocorrelation;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -55,27 +54,16 @@ public class GlobalGStatisticOperation extends AbstractStatisticsOperation {
         swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
         swMatrix.distanceBandWidth = this.getDistanceBand();
         swMatrix.buildWeightMatrix(inputFeatures, inputField, this.getDistanceType());
-        int featureCount = swMatrix.Events.size();
-        if (featureCount < 3) {
-            LOGGER.warning("inputFeatures's feature count < " + featureCount);
-            return null;
-        } else if (featureCount < 30) {
-            LOGGER.warning("inputFeatures's feature count < " + featureCount);
-        }
 
         // """Calculate General G and Z Score."""
         double dZSum = swMatrix.dZSum;
         double dZ2Sum = swMatrix.dZ2Sum;
         double dZ3Sum = swMatrix.dZ3Sum;
         double dZ4Sum = swMatrix.dZ4Sum;
-        int lNumObs = swMatrix.Events.size();
-        double rN = lNumObs * 1.0;
+        double n = swMatrix.Events.size() * 1.0;
 
-        double dZMean = swMatrix.dZSum / rN;
-        double dZVar = Math.pow((swMatrix.dZ2Sum / rN) - Math.pow(dZMean, 2), 0.5);
-        if (Math.abs(dZVar) <= 0.0) {
-            LOGGER.warning("ERROR Zero variance:  all of the values for your input field are likely the same.");
-        }
+        double dZMean = swMatrix.dZSum / n;
+        double dZVar = Math.pow((swMatrix.dZ2Sum / n) - Math.pow(dZMean, 2), 0.5);
 
         // # Loop for each Z value.
         // int iNeighborCnt = 0;
@@ -97,6 +85,7 @@ public class GlobalGStatisticOperation extends AbstractStatisticsOperation {
                     continue; // # i may not equal j
 
                 dTotalProductSum += curE.weight * destE.weight;
+                
                 // # Calculate the weight (dWij)
                 double dWij = 0.0;
                 double dWji = 0.0;
@@ -111,13 +100,11 @@ public class GlobalGStatisticOperation extends AbstractStatisticsOperation {
                 }
 
                 if (getStandardizationType() == StandardizationMethod.ROW) {
-                    // dWij = standardize_weight (dWij, inputs, dcRowSum, iKey, dcID, dDistAllSum)
-                    // dWji = standardize_weight (dWji, inputs, dcRowSum, jKey, dcID, dDistAllSum)
                     dWij = swMatrix.standardizeWeight(curE, dWij);
                     dWji = swMatrix.standardizeWeight(destE, dWji);
                 }
 
-                dNeighborProductSum += dWij * curE.weight * destE.weight;
+                dNeighborProductSum += dWij * (curE.weight * destE.weight);
                 dWijSum += dWij;
                 dWijWji2Sum += Math.pow(dWij + dWji, 2.0);
                 dWijS2Sum += dWij;
@@ -127,32 +114,24 @@ public class GlobalGStatisticOperation extends AbstractStatisticsOperation {
             dS2 += Math.pow(dWijS2Sum + dWjiS2Sum, 2.0);
         }
 
-        // #### Report if All Features Have No Neighbors ####
-        if (Math.abs(dWijSum) <= 0) {
-            LOGGER.log(Level.WARNING, "All features have no neighbors");
-        }
-
-        // #### Report on Features with No Neighbors ####
-
         // # Calculate B and S working variables needed to calculate variance.
         dS1 = 0.5 * dWijWji2Sum;
-        double B0 = ((Math.pow(rN, 2.0) + (-3.0 * rN) + 3.0) * dS1) - (rN * dS2)
+        double B0 = ((Math.pow(n, 2.0) + (-3.0 * n) + 3.0) * dS1) - (n * dS2)
                 + (3.0 * Math.pow(dWijSum, 2.0));
         double B1 = -1.0
-                * (((Math.pow(rN, 2.0) - rN) * dS1) - (2.0 * rN * dS2) + (6.0 * Math.pow(dWijSum,
-                        2.0)));
-        double B2 = -1.0 * ((2.0 * rN * dS1) - ((rN + 3.0) * dS2) + (6.0 * Math.pow(dWijSum, 2.0)));
-        double B3 = (4.0 * (rN - 1.0) * dS1) - (2.0 * (rN + 1.0) * dS2)
+                * (((Math.pow(n, 2.0) - n) * dS1) - (2.0 * n * dS2) + (6.0 * Math.pow(dWijSum, 2.0)));
+        double B2 = -1.0 * ((2.0 * n * dS1) - ((n + 3.0) * dS2) + (6.0 * Math.pow(dWijSum, 2.0)));
+        double B3 = (4.0 * (n - 1.0) * dS1) - (2.0 * (n + 1.0) * dS2)
                 + (8.0 * Math.pow(dWijSum, 2.0));
         double B4 = dS1 - dS2 + Math.pow(dWijSum, 2.0);
 
         // # Calculate Observed G, Expected G and Z Score.
         double dGObs = dNeighborProductSum / dTotalProductSum;
-        double dGExp = dWijSum / (rN * (rN - 1.0));
+        double dGExp = dWijSum / (n * (n - 1.0));
         dZVar = ((((B0 * Math.pow(dZ2Sum, 2.0)) + (B1 * dZ4Sum)
                 + (B2 * Math.pow(dZSum, 2.0) * dZ2Sum) + (B3 * dZSum * dZ3Sum) + (B4 * Math.pow(
-                dZSum, 4.0))) / (Math.pow((Math.pow(dZSum, 2.0) - dZ2Sum), 2.0) * (rN * (rN - 1.0)
-                * (rN - 2.0) * (rN - 3.0)))) - Math.pow(dGExp, 2.0));
+                dZSum, 4.0))) / (Math.pow((Math.pow(dZSum, 2.0) - dZ2Sum), 2.0) * (n * (n - 1.0)
+                * (n - 2.0) * (n - 3.0)))) - Math.pow(dGExp, 2.0));
 
         GeneralG generalG = new GeneralG(dGObs, dGExp, dZVar);
         generalG.setConceptualization(getSpatialConceptType());
@@ -163,13 +142,7 @@ public class GlobalGStatisticOperation extends AbstractStatisticsOperation {
         return generalG;
     }
 
-    public class GeneralG {
-        // General G Summary
-        // Observed General G: 0.000023
-        // Expected General G: 0.000023
-        // Variance: 0.000000
-        // Z Score: -0.476909
-        // p-value: 0.633427
+    public static final class GeneralG {
 
         double observedGeneralG = 0.0;
 

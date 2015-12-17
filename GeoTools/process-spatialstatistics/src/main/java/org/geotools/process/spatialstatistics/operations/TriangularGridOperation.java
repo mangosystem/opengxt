@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.grid.hexagon.HexagonOrientation;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
@@ -30,6 +31,7 @@ import org.opengis.filter.Filter;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateList;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 
@@ -56,6 +58,12 @@ public class TriangularGridOperation extends GeneralOperation {
 
     private int featureID = 0;
 
+    private HexagonOrientation orientation = HexagonOrientation.FLAT;
+
+    public void setOrientation(HexagonOrientation orientation) {
+        this.orientation = orientation;
+    }
+
     public void setBoundsGeometry(Geometry geometryBoundary) {
         this.boundsGeometry = geometryBoundary;
     }
@@ -74,13 +82,77 @@ public class TriangularGridOperation extends GeneralOperation {
         SimpleFeatureType schema = FeatureTypes.getDefaultType(TYPE_NAME, Polygon.class, crs);
         schema = FeatureTypes.add(schema, UID, Integer.class, 19);
 
-        final double cellWidth = size;
-        final double cellHeight = size;
+        if (orientation == HexagonOrientation.ANGLED) {
+            return executeAngled(schema, bbox, size);
+        } else {
+            return executeNormal(schema, bbox, size);
+        }
+    }
 
-        IFeatureInserter featureWriter = getFeatureWriter(schema);
+    private SimpleFeatureCollection executeNormal(SimpleFeatureType schema,
+            ReferencedEnvelope bbox, Double size) throws IOException {
+        IFeatureInserter writer = getFeatureWriter(schema);
         try {
             featureID = 0;
-            Coordinate[] coords = new Coordinate[4];
+            final double half = size / 2.0;
+            final double h = Math.sqrt(Math.pow(size, 2.0) - Math.pow(half, 2.0));
+            CoordinateList list = new CoordinateList();
+
+            int yi = 0;
+            double currentY = bbox.getMinY();
+            while (currentY <= bbox.getMaxY()) {
+                int xi = 0;
+                double currentX = bbox.getMinX();
+                while (currentX <= bbox.getMaxX()) {
+                    if (yi % 2 == 0) {
+                        list.clear();
+                        list.add(new Coordinate(currentX, currentY), false);
+                        list.add(new Coordinate(currentX + half, currentY + h), false);
+                        list.add(new Coordinate(currentX + size, currentY), false);
+                        list.closeRing();
+                        this.writeFeature(writer, gf.createPolygon(list.toCoordinateArray()));
+
+                        list.clear();
+                        list.add(new Coordinate(currentX + half, currentY + h), false);
+                        list.add(new Coordinate(currentX + size + half, currentY + h), false);
+                        list.add(new Coordinate(currentX + size, currentY), false);
+                        list.closeRing();
+                        this.writeFeature(writer, gf.createPolygon(list.toCoordinateArray()));
+                    } else {
+                        list.clear();
+                        list.add(new Coordinate(currentX - half, currentY), false);
+                        list.add(new Coordinate(currentX, currentY + h), false);
+                        list.add(new Coordinate(currentX + half, currentY), false);
+                        list.closeRing();
+                        this.writeFeature(writer, gf.createPolygon(list.toCoordinateArray()));
+
+                        list.clear();
+                        list.add(new Coordinate(currentX, currentY + h), false);
+                        list.add(new Coordinate(currentX + size, currentY + h), false);
+                        list.add(new Coordinate(currentX + half, currentY), false);
+                        list.closeRing();
+                        this.writeFeature(writer, gf.createPolygon(list.toCoordinateArray()));
+                    }
+                    xi++;
+                    currentX += size;
+                }
+                yi++;
+                currentY += h;
+            }
+        } catch (Exception e) {
+            writer.rollback(e);
+        } finally {
+            writer.close();
+        }
+        return writer.getFeatureCollection();
+    }
+
+    private SimpleFeatureCollection executeAngled(SimpleFeatureType schema,
+            ReferencedEnvelope bbox, Double size) throws IOException {
+        IFeatureInserter writer = getFeatureWriter(schema);
+        try {
+            featureID = 0;
+            Coordinate[] list = new Coordinate[4];
 
             int yi = 0;
             double currentY = bbox.getMinY();
@@ -91,75 +163,74 @@ public class TriangularGridOperation extends GeneralOperation {
 
                 while (currentX <= bbox.getMaxX()) {
                     if (xi % 2 == 0 && yi % 2 == 0) {
-                        coords = new Coordinate[4];
-                        coords[0] = new Coordinate(currentX, currentY);
-                        coords[1] = new Coordinate(currentX, currentY + cellHeight);
-                        coords[2] = new Coordinate(currentX + cellWidth, currentY);
-                        coords[3] = new Coordinate(coords[0]);
-                        this.writeFeature(featureWriter, gf.createPolygon(coords));
+                        list = new Coordinate[4];
+                        list[0] = new Coordinate(currentX, currentY);
+                        list[1] = new Coordinate(currentX, currentY + size);
+                        list[2] = new Coordinate(currentX + size, currentY);
+                        list[3] = new Coordinate(list[0]);
+                        this.writeFeature(writer, gf.createPolygon(list));
 
-                        coords = new Coordinate[4];
-                        coords[0] = new Coordinate(currentX, currentY + cellHeight);
-                        coords[1] = new Coordinate(currentX + cellWidth, currentY + cellHeight);
-                        coords[2] = new Coordinate(currentX + cellWidth, currentY);
-                        coords[3] = new Coordinate(coords[0]);
-                        this.writeFeature(featureWriter, gf.createPolygon(coords));
+                        list = new Coordinate[4];
+                        list[0] = new Coordinate(currentX, currentY + size);
+                        list[1] = new Coordinate(currentX + size, currentY + size);
+                        list[2] = new Coordinate(currentX + size, currentY);
+                        list[3] = new Coordinate(list[0]);
+                        this.writeFeature(writer, gf.createPolygon(list));
                     } else if (xi % 2 == 0 && yi % 2 == 1) {
-                        coords = new Coordinate[4];
-                        coords[0] = new Coordinate(currentX, currentY);
-                        coords[1] = new Coordinate(currentX + cellWidth, currentY + cellHeight);
-                        coords[2] = new Coordinate(currentX + cellWidth, currentY);
-                        coords[3] = new Coordinate(coords[0]);
-                        this.writeFeature(featureWriter, gf.createPolygon(coords));
+                        list = new Coordinate[4];
+                        list[0] = new Coordinate(currentX, currentY);
+                        list[1] = new Coordinate(currentX + size, currentY + size);
+                        list[2] = new Coordinate(currentX + size, currentY);
+                        list[3] = new Coordinate(list[0]);
+                        this.writeFeature(writer, gf.createPolygon(list));
 
-                        coords = new Coordinate[4];
-                        coords[0] = new Coordinate(currentX, currentY);
-                        coords[1] = new Coordinate(currentX, currentY + cellHeight);
-                        coords[2] = new Coordinate(currentX + cellWidth, currentY + cellHeight);
-                        coords[3] = new Coordinate(coords[0]);
-                        this.writeFeature(featureWriter, gf.createPolygon(coords));
+                        list = new Coordinate[4];
+                        list[0] = new Coordinate(currentX, currentY);
+                        list[1] = new Coordinate(currentX, currentY + size);
+                        list[2] = new Coordinate(currentX + size, currentY + size);
+                        list[3] = new Coordinate(list[0]);
+                        this.writeFeature(writer, gf.createPolygon(list));
                     } else if (yi % 2 == 0 && xi % 2 == 1) {
-                        coords = new Coordinate[4];
-                        coords[0] = new Coordinate(currentX, currentY);
-                        coords[1] = new Coordinate(currentX, currentY + cellHeight);
-                        coords[2] = new Coordinate(currentX + cellWidth, currentY + cellHeight);
-                        coords[3] = new Coordinate(coords[0]);
-                        this.writeFeature(featureWriter, gf.createPolygon(coords));
+                        list = new Coordinate[4];
+                        list[0] = new Coordinate(currentX, currentY);
+                        list[1] = new Coordinate(currentX, currentY + size);
+                        list[2] = new Coordinate(currentX + size, currentY + size);
+                        list[3] = new Coordinate(list[0]);
+                        this.writeFeature(writer, gf.createPolygon(list));
 
-                        coords = new Coordinate[4];
-                        coords[0] = new Coordinate(currentX, currentY);
-                        coords[1] = new Coordinate(currentX + cellWidth, currentY + cellHeight);
-                        coords[2] = new Coordinate(currentX + cellWidth, currentY);
-                        coords[3] = new Coordinate(coords[0]);
-                        this.writeFeature(featureWriter, gf.createPolygon(coords));
+                        list = new Coordinate[4];
+                        list[0] = new Coordinate(currentX, currentY);
+                        list[1] = new Coordinate(currentX + size, currentY + size);
+                        list[2] = new Coordinate(currentX + size, currentY);
+                        list[3] = new Coordinate(list[0]);
+                        this.writeFeature(writer, gf.createPolygon(list));
                     } else if (yi % 2 == 1 && xi % 2 == 1) {
-                        coords = new Coordinate[4];
-                        coords[0] = new Coordinate(currentX, currentY);
-                        coords[1] = new Coordinate(currentX, currentY + cellHeight);
-                        coords[2] = new Coordinate(currentX + cellWidth, currentY);
-                        coords[3] = new Coordinate(coords[0]);
-                        this.writeFeature(featureWriter, gf.createPolygon(coords));
+                        list = new Coordinate[4];
+                        list[0] = new Coordinate(currentX, currentY);
+                        list[1] = new Coordinate(currentX, currentY + size);
+                        list[2] = new Coordinate(currentX + size, currentY);
+                        list[3] = new Coordinate(list[0]);
+                        this.writeFeature(writer, gf.createPolygon(list));
 
-                        coords = new Coordinate[4];
-                        coords[0] = new Coordinate(currentX, currentY + cellHeight);
-                        coords[1] = new Coordinate(currentX + cellWidth, currentY + cellHeight);
-                        coords[2] = new Coordinate(currentX + cellWidth, currentY);
-                        coords[3] = new Coordinate(coords[0]);
-                        this.writeFeature(featureWriter, gf.createPolygon(coords));
+                        list = new Coordinate[4];
+                        list[0] = new Coordinate(currentX, currentY + size);
+                        list[1] = new Coordinate(currentX + size, currentY + size);
+                        list[2] = new Coordinate(currentX + size, currentY);
+                        list[3] = new Coordinate(list[0]);
+                        this.writeFeature(writer, gf.createPolygon(list));
                     }
-                    currentX += cellWidth;
+                    currentX += size;
                     xi++;
                 }
-                currentY += cellHeight;
+                currentY += size;
                 yi++;
             }
         } catch (Exception e) {
-            featureWriter.rollback(e);
+            writer.rollback(e);
         } finally {
-            featureWriter.close();
+            writer.close();
         }
-
-        return featureWriter.getFeatureCollection();
+        return writer.getFeatureCollection();
     }
 
     private void writeFeature(IFeatureInserter featureWriter, Geometry geometry) throws IOException {

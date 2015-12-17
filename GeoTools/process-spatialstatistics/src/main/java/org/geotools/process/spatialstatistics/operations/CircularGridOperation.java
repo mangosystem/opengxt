@@ -88,13 +88,18 @@ public class CircularGridOperation extends GeneralOperation {
 
     public SimpleFeatureCollection execute(ReferencedEnvelope bbox, Double radius)
             throws IOException {
+        // expand bbox
+        bbox.expandBy(radius);
+
         if (circularType == CircularType.Hex) {
             HexagonOperation operation = new HexagonOperation();
             operation.setOrientation(HexagonOrientation.FLAT);
             operation.setBoundsSource(boundsSource);
             operation.setGeometryBoundary(boundsGeometry);
 
-            return new CircularFeatureCollection(operation.execute(bbox, radius), radius);
+            // adjust side length of hexagonal grids
+            final double sideLen = Math.pow(Math.pow(radius, 2.0) * (4.0 / 3.0), 0.5);
+            return new CircularFeatureCollection(operation.execute(bbox, sideLen), radius);
         } else {
             CoordinateReferenceSystem crs = bbox.getCoordinateReferenceSystem();
             SimpleFeatureType schema = FeatureTypes.getDefaultType(TYPE_NAME, Polygon.class, crs);
@@ -184,7 +189,7 @@ public class CircularGridOperation extends GeneralOperation {
                     SimpleFeatureType schema, Double radius) {
                 this.delegate = delegate;
                 this.builder = new SimpleFeatureBuilder(schema);
-                this.radius = radius * (Math.sqrt(3) / 2);
+                this.radius = radius;
             }
 
             @Override

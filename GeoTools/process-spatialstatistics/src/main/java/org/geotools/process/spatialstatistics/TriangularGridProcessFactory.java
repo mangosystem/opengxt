@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.grid.hexagon.HexagonOrientation;
 import org.geotools.process.Process;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
@@ -45,7 +46,8 @@ public class TriangularGridProcessFactory extends SpatialStatisticsProcessFactor
     private static final String PROCESS_NAME = "TriangularGrid";
 
     /*
-     * TriangularGrid(ReferencedEnvelope extent, SimpleFeatureCollection boundsSource, Double size) : SimpleFeatureCollection
+     * TriangularGrid(ReferencedEnvelope extent, SimpleFeatureCollection boundsSource, Double size, HexagonOrientation orientation) :
+     * SimpleFeatureCollection
      */
 
     public TriangularGridProcessFactory() {
@@ -84,12 +86,20 @@ public class TriangularGridProcessFactory extends SpatialStatisticsProcessFactor
             getResource("TriangularGrid.size.title"),
             getResource("TriangularGrid.size.description"), true, 1, 1, null, null);
 
+    /** orientation */
+    public static final Parameter<HexagonOrientation> orientation = new Parameter<HexagonOrientation>(
+            "orientation", HexagonOrientation.class,
+            getResource("TriangularGrid.orientation.title"),
+            getResource("TriangularGrid.orientation.description"), false, 0, 1,
+            HexagonOrientation.FLAT, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(extent.key, extent);
         parameterInfo.put(boundsSource.key, boundsSource);
         parameterInfo.put(size.key, size);
+        parameterInfo.put(orientation.key, orientation);
         return parameterInfo;
     }
 

@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.grid.hexagon.HexagonOrientation;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
@@ -54,11 +55,13 @@ public class TriangularGridProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(ReferencedEnvelope extent,
-            SimpleFeatureCollection boundsSource, Double size, ProgressListener monitor) {
+            SimpleFeatureCollection boundsSource, Double size, HexagonOrientation orientation,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(TriangularGridProcessFactory.extent.key, extent);
         map.put(TriangularGridProcessFactory.boundsSource.key, boundsSource);
         map.put(TriangularGridProcessFactory.size.key, size);
+        map.put(TriangularGridProcessFactory.orientation.key, orientation);
 
         Process process = new TriangularGridProcess(null);
         Map<String, Object> resultMap;
@@ -98,6 +101,9 @@ public class TriangularGridProcess extends AbstractStatisticsProcess {
             if (size == null || size == 0) {
                 throw new NullPointerException("sideLen parameter should be grater than 0");
             }
+            HexagonOrientation orientation = (HexagonOrientation) Params.getValue(input,
+                    TriangularGridProcessFactory.orientation,
+                    TriangularGridProcessFactory.orientation.sample);
 
             monitor.setTask(Text.text("Processing ..."));
             monitor.progress(25.0f);
@@ -108,6 +114,7 @@ public class TriangularGridProcess extends AbstractStatisticsProcess {
 
             // start process
             TriangularGridOperation operation = new TriangularGridOperation();
+            operation.setOrientation(orientation);
             operation.setBoundsSource(boundsSource);
             if (gridBounds == null) {
                 gridBounds = boundsSource.getBounds();

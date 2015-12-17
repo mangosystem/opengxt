@@ -271,6 +271,7 @@ public class Messages extends NLS {
     public static String ThematicMapDialog_Mode;
     public static String ThematicMapDialog_Classes;
     public static String ThematicMapDialog_ColorRamp;
+    public static String ThematicMapDialog_Reverse;
     public static String ThematicMapDialog_Transparency;
     public static String ThematicMapDialog_OutlineColor;
     public static String ThematicMapDialog_OutlineWidth;

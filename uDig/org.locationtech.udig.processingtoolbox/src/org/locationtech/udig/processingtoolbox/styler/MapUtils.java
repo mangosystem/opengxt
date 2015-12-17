@@ -125,7 +125,8 @@ public class MapUtils {
 
     public static SimpleFeatureCollection getFeatures(IMap map, String layerName) {
         for (ILayer layer : map.getMapLayers()) {
-            if (layer.getName().equals(layerName) && layer.hasResource(FeatureSource.class)) {
+            if (layer.getName() != null && layer.getName().equals(layerName)
+                    && layer.hasResource(FeatureSource.class)) {
                 return getFeatures(layer);
             }
         }
@@ -134,7 +135,7 @@ public class MapUtils {
 
     public static GridCoverage2D getGridCoverage(IMap map, String layerName) {
         for (ILayer layer : map.getMapLayers()) {
-            if (layer.getName().equals(layerName)) {
+            if (layer.getName() != null && layer.getName().equals(layerName)) {
                 try {
                     if (layer.hasResource(GridCoverage2D.class)) {
                         return layer.getResource(GridCoverage2D.class, new NullProgressMonitor());
@@ -153,7 +154,7 @@ public class MapUtils {
 
     public static ILayer getLayer(IMap map, String layerName) {
         for (ILayer layer : map.getMapLayers()) {
-            if (layer.getName().equals(layerName)) {
+            if (layer.getName() != null && layer.getName().equals(layerName)) {
                 return layer;
             }
         }

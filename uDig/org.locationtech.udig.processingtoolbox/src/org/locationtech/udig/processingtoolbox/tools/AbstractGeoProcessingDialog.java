@@ -250,6 +250,23 @@ public abstract class AbstractGeoProcessingDialog extends TitleAreaDialog {
                         combo.add(layer.getName());
                     }
                     break;
+                case MULTIPART:
+                    if (geometryBinding.isAssignableFrom(MultiPolygon.class)
+                            || geometryBinding.isAssignableFrom(MultiLineString.class)
+                            || geometryBinding.isAssignableFrom(MultiPoint.class)) {
+                        combo.add(layer.getName());
+                    }
+                    break;
+                case POLYLINE:
+                    if (geometryBinding.isAssignableFrom(Point.class)
+                            || geometryBinding.isAssignableFrom(MultiPoint.class)
+                            || geometryBinding.isAssignableFrom(Polygon.class)
+                            || geometryBinding.isAssignableFrom(MultiPolygon.class)) {
+                        combo.add(layer.getName());
+                    }
+                    break;
+                default:
+                    break;
                 }
             }
         }

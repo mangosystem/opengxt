@@ -22,6 +22,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -74,6 +75,8 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
 
     private ILayer activeLayer;
 
+    private Button chkReverse;
+
     private Combo cboLayer, cboField, cboMethod, cboNormal, cboOutline;
 
     private ImageCombo cboColorRamp;
@@ -89,7 +92,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
 
         this.windowTitle = Messages.ThematicMapDialog_title;
         this.windowDesc = Messages.ThematicMapDialog_description;
-        this.windowSize = new Point(550, 340);
+        this.windowSize = new Point(600, 370);
         this.brewer = ColorBrewer.instance();
     }
 
@@ -127,9 +130,12 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
         cboColorRamp = new ImageCombo(container, SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
         cboColorRamp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5, 1));
 
+        // Reverse color ramp
+        uiBuilder.createLabel(container, EMPTY, EMPTY, null, 1);
+        chkReverse = uiBuilder.createCheckbox(container, Messages.ThematicMapDialog_Reverse, EMPTY, 5);
+        
         // transparency
         uiBuilder.createLabel(container, Messages.ThematicMapDialog_Transparency, EMPTY, image, 1);
-
         Composite subCon = new Composite(container, SWT.NONE);
         subCon.setLayout(uiBuilder.createGridLayout(5, false, 0, 5));
         subCon.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5, 1));
@@ -274,6 +280,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
                 String normalProperty = cboNormal.getText();
                 String palette = cboColorRamp.getItem(cboColorRamp.getSelectionIndex());
                 String paletteName = palette.split("\\(")[0]; //$NON-NLS-1$
+                boolean reverse = chkReverse.getSelection();
 
                 java.awt.Color outlineColor = (java.awt.Color) cboOutline.getData();
                 float outlineWidth = spnLineWidth.getSelection() / (10f * spnLineWidth.getDigits());
@@ -292,8 +299,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
                 Style style = ssBuilder.getDefaultFeatureStyle();
 
                 // crate thematic style
-                SimpleShapeType shapeType = FeatureTypes
-                        .getSimpleShapeType(activeLayer.getSchema());
+                SimpleShapeType shapeType = FeatureTypes.getSimpleShapeType(activeLayer.getSchema());
                 if (shapeType == SimpleShapeType.POINT) {
                     GraduatedSymbolStyleBuilder builder = new GraduatedSymbolStyleBuilder();
                     builder.setFillOpacity(opacity);
@@ -304,7 +310,6 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
                     }
                     builder.setNormalProperty(normalProperty);
                     builder.setMethodName(functionName);
-
                     style = builder.createStyle(features, fieldName);
                 } else {
                     GraduatedColorStyleBuilder builder = new GraduatedColorStyleBuilder();
@@ -317,7 +322,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
                     builder.setNormalProperty(normalProperty);
 
                     style = builder.createStyle(features, fieldName, functionName, numClasses,
-                            paletteName);
+                            paletteName, reverse);
                 }
 
                 if (style != null) {

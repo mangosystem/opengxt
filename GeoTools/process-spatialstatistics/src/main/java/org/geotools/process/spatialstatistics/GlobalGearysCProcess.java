@@ -25,7 +25,10 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
+import org.geotools.process.spatialstatistics.autocorrelation.GlobalGearysCOperation;
+import org.geotools.process.spatialstatistics.autocorrelation.GlobalGearysCOperation.GearysC;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
@@ -75,7 +78,8 @@ public class GlobalGearysCProcess extends AbstractStatisticsProcess {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
 
-        return null;
+        return new GearysCProcessResult(inputFeatures.getSchema().getTypeName(), inputField,
+                new GearysC());
     }
 
     @Override
@@ -129,8 +133,24 @@ public class GlobalGearysCProcess extends AbstractStatisticsProcess {
             }
 
             // start process
-            // TODO code here
-            GearysCProcessResult processResult = new GearysCProcessResult();
+            String typeName = inputFeatures.getSchema().getTypeName();
+            GearysCProcessResult processResult = null;
+            try {
+                GlobalGearysCOperation process = new GlobalGearysCOperation();
+                process.setSpatialConceptType(spatialConcept);
+                process.setDistanceType(distanceMethod);
+                process.setStandardizationType(standardization);
+
+                // searchDistance
+                if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
+                    process.setDistanceBand(searchDistance);
+                }
+
+                GearysC ret = process.execute(inputFeatures, inputField);
+                processResult = new GearysCProcessResult(typeName, inputField, ret);
+            } catch (Exception e) {
+                processResult = new GearysCProcessResult(typeName, inputField, new GearysC());
+            }
             // end process
 
             monitor.setTask(Text.text("Encoding result"));
@@ -155,7 +175,7 @@ public class GlobalGearysCProcess extends AbstractStatisticsProcess {
 
         String propertyName;
 
-        String moran_Index;
+        String observed_Index;
 
         String expected_Index;
 
@@ -172,5 +192,108 @@ public class GlobalGearysCProcess extends AbstractStatisticsProcess {
         String rowStandardization;
 
         String distanceThreshold;
+
+        public GearysCProcessResult(String typeName, String propertyName, GearysC ret) {
+            this.typeName = typeName;
+            this.propertyName = propertyName;
+
+            this.observed_Index = FormatUtils.format(ret.getObservedIndex());
+            this.expected_Index = FormatUtils.format(ret.getExpectedIndex());
+            this.variance = FormatUtils.format(ret.getZVariance());
+            this.z_Score = FormatUtils.format(ret.getZScore());
+            this.p_Value = FormatUtils.format(ret.getPValue());
+            this.conceptualization = ret.getConceptualization().toString();
+            this.distanceMethod = ret.getDistanceMethod().toString();
+            this.rowStandardization = ret.getRowStandardization().toString();
+            this.distanceThreshold = FormatUtils.format(ret.getDistanceThreshold());
+        }
+
+        public String getTypeName() {
+            return typeName;
+        }
+
+        public void setTypeName(String typeName) {
+            this.typeName = typeName;
+        }
+
+        public String getPropertyName() {
+            return propertyName;
+        }
+
+        public void setPropertyName(String propertyName) {
+            this.propertyName = propertyName;
+        }
+
+        public String getObserved_Index() {
+            return observed_Index;
+        }
+
+        public void setObserved_Index(String observed_Index) {
+            this.observed_Index = observed_Index;
+        }
+
+        public String getExpected_Index() {
+            return expected_Index;
+        }
+
+        public void setExpected_Index(String expected_Index) {
+            this.expected_Index = expected_Index;
+        }
+
+        public String getVariance() {
+            return variance;
+        }
+
+        public void setVariance(String variance) {
+            this.variance = variance;
+        }
+
+        public String getZ_Score() {
+            return z_Score;
+        }
+
+        public void setZ_Score(String z_Score) {
+            this.z_Score = z_Score;
+        }
+
+        public String getP_Value() {
+            return p_Value;
+        }
+
+        public void setP_Value(String p_Value) {
+            this.p_Value = p_Value;
+        }
+
+        public String getConceptualization() {
+            return conceptualization;
+        }
+
+        public void setConceptualization(String conceptualization) {
+            this.conceptualization = conceptualization;
+        }
+
+        public String getDistanceMethod() {
+            return distanceMethod;
+        }
+
+        public void setDistanceMethod(String distanceMethod) {
+            this.distanceMethod = distanceMethod;
+        }
+
+        public String getRowStandardization() {
+            return rowStandardization;
+        }
+
+        public void setRowStandardization(String rowStandardization) {
+            this.rowStandardization = rowStandardization;
+        }
+
+        public String getDistanceThreshold() {
+            return distanceThreshold;
+        }
+
+        public void setDistanceThreshold(String distanceThreshold) {
+            this.distanceThreshold = distanceThreshold;
+        }
     }
 }

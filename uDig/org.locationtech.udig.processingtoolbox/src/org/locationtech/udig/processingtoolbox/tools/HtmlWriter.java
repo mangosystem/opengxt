@@ -14,6 +14,8 @@ import java.util.Map.Entry;
 
 import org.geotools.data.Parameter;
 import org.geotools.process.spatialstatistics.GlobalGStatisticsProcess.GStatisticsProcessResult;
+import org.geotools.process.spatialstatistics.GlobalGearysCProcess.GearysCProcessResult;
+import org.geotools.process.spatialstatistics.GlobalLeesSProcess.LeesSProcessResult;
 import org.geotools.process.spatialstatistics.GlobalMoransIProcess.MoransIProcessResult;
 import org.geotools.process.spatialstatistics.JoinCountStatisticsProcess.JoinCountProcessResult;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
@@ -254,8 +256,70 @@ public class HtmlWriter {
         write("</tr>");
 
         // body
-        write("<tr><td>Moran Index</td><td>" + value.getMoran_Index() + "</td></tr>");
+        write("<tr><td>Moran Index</td><td>" + value.getObserved_Index() + "</td></tr>");
         write("<tr><td>Expected Index</td><td>" + value.getExpected_Index() + "</td></tr>");
+        write("<tr><td>Variance</td><td>" + value.getVariance() + "</td></tr>");
+        write("<tr><td>z Score</td><td>" + value.getZ_Score() + "</td></tr>");
+        write("<tr><td>p Value</td><td>" + value.getP_Value() + "</td></tr>");
+        write("<tr><td>Conceptualization</td><td>" + value.getConceptualization() + "</td></tr>");
+        write("<tr><td>Distance Method</td><td>" + value.getDistanceMethod() + "</td></tr>");
+        write("<tr><td>Row Standardization</td><td>" + value.getRowStandardization() + "</td></tr>");
+        write("<tr><td>Distance Threshold</td><td>" + value.getDistanceThreshold() + "</td></tr>");
+
+        write("</table>");
+    }
+
+    // GearysCProcessResult
+    public void writeGearysC(GearysCProcessResult value) {
+        writeH1("Global Geary's C");
+        writeH2(value.getTypeName() + ": " + value.getPropertyName());
+        write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+        // header
+        write("<colgroup>");
+        write("<col width=\"60%\" />");
+        write("<col width=\"40%\" />");
+        write("</colgroup>");
+
+        write("<tr bgcolor=\"#cccccc\">");
+        write("<td><strong>Category</strong></td>");
+        write("<td><strong>Value</strong></td>");
+        write("</tr>");
+
+        // body
+        write("<tr><td>Observed Geary's C</td><td>" + value.getObserved_Index() + "</td></tr>");
+        write("<tr><td>Expected Geary's C</td><td>" + value.getExpected_Index() + "</td></tr>");
+        write("<tr><td>Variance</td><td>" + value.getVariance() + "</td></tr>");
+        write("<tr><td>z Score</td><td>" + value.getZ_Score() + "</td></tr>");
+        write("<tr><td>p Value</td><td>" + value.getP_Value() + "</td></tr>");
+        write("<tr><td>Conceptualization</td><td>" + value.getConceptualization() + "</td></tr>");
+        write("<tr><td>Distance Method</td><td>" + value.getDistanceMethod() + "</td></tr>");
+        write("<tr><td>Row Standardization</td><td>" + value.getRowStandardization() + "</td></tr>");
+        write("<tr><td>Distance Threshold</td><td>" + value.getDistanceThreshold() + "</td></tr>");
+
+        write("</table>");
+    }
+
+    // LeesSProcessResult
+    public void writeLeesS(LeesSProcessResult value) {
+        writeH1("Global Lee's S");
+        writeH2(value.getTypeName() + ": " + value.getPropertyName());
+        write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+        // header
+        write("<colgroup>");
+        write("<col width=\"60%\" />");
+        write("<col width=\"40%\" />");
+        write("</colgroup>");
+
+        write("<tr bgcolor=\"#cccccc\">");
+        write("<td><strong>Category</strong></td>");
+        write("<td><strong>Value</strong></td>");
+        write("</tr>");
+
+        // body
+        write("<tr><td>Observed Lee's S</td><td>" + value.getObserved_Index() + "</td></tr>");
+        write("<tr><td>Expected Lee's S</td><td>" + value.getExpected_Index() + "</td></tr>");
         write("<tr><td>Variance</td><td>" + value.getVariance() + "</td></tr>");
         write("<tr><td>z Score</td><td>" + value.getZ_Score() + "</td></tr>");
         write("<tr><td>p Value</td><td>" + value.getP_Value() + "</td></tr>");
@@ -285,8 +349,8 @@ public class HtmlWriter {
         write("</tr>");
 
         // body
-        write("<tr><td>Observed General G</td><td>" + value.getObserved_General_G() + "</td></tr>");
-        write("<tr><td>Expected General G</td><td>" + value.getExpected_General_G() + "</td></tr>");
+        write("<tr><td>Observed General G</td><td>" + value.getObserved_Index() + "</td></tr>");
+        write("<tr><td>Expected General G</td><td>" + value.getExpected_Index() + "</td></tr>");
         write("<tr><td>Variance</td><td>" + value.getVariance() + "</td></tr>");
         write("<tr><td>z Score</td><td>" + value.getZ_Score() + "</td></tr>");
         write("<tr><td>p Value</td><td>" + value.getP_Value() + "</td></tr>");

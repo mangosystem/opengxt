@@ -632,7 +632,7 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
 
             monitor.subTask("Updating scatter plot...");
             chartComposite.setLayer(outputLayer);
-            updateChart(features, moran.getPropertyName(), moran.getMoran_Index());
+            updateChart(features, moran.getPropertyName(), moran.getExpected_Index());
             plotTab.getParent().setSelection(plotTab);
             monitor.worked(increment);
         } catch (Exception e) {

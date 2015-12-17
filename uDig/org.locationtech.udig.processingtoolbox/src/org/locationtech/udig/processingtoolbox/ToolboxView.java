@@ -271,10 +271,6 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(desTools, "org.geotools.process.spatialstatistics.PearsonCorrelationProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.StandardizedScoresProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.FocalLQProcessFactory");
-        buildTool(desTools, Messages.HistogramDialog_title, "HistogramDialog");
-        buildTool(desTools, Messages.BoxPlotDialog_title, "BoxPlotDialog");
-        buildTool(desTools, Messages.ScatterPlotDialog_title, "ScatterPlotDialog");
-        buildTool(desTools, Messages.BubbleChartDialog_title, "BubbleChartDialog");
 
         // Point Pattern Analysis
         TreeParent patternTools = new TreeParent(Messages.ToolboxView_PointPattern, null, null);

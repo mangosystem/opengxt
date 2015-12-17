@@ -54,15 +54,6 @@ public class LocalLeesSOperation extends AbstractStatisticsOperation {
 
     double[] dcZScore;
 
-    String[] moranBins;
-
-    // gaiyong
-    double[] dczValue;
-
-    double[] dcwzValue;
-
-    // end
-
     public LocalLeesSOperation() {
         // Default Setting
         this.setDistanceType(DistanceMethod.Euclidean);
@@ -83,111 +74,80 @@ public class LocalLeesSOperation extends AbstractStatisticsOperation {
         swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
         swMatrix.distanceBandWidth = this.getDistanceBand();
         swMatrix.buildWeightMatrix(inputFeatures, inputField, this.getDistanceType());
-        int featureCount = swMatrix.Events.size();
-        if (featureCount < 3) {
-            LOGGER.warning("inputFeatures's feature count < " + featureCount);
-            return null;
-        } else if (featureCount < 30) {
-            LOGGER.warning("inputFeatures's feature count < " + featureCount);
-        }
 
-        // # Calculate the mean and standard deviation for this data set.
-        double rN = featureCount * 1.0;
-        double dZMean = swMatrix.dZSum / rN;
-        double dZVar = Math.pow((swMatrix.dZ2Sum / rN) - Math.pow(dZMean, 2.0), 0.5);
-        if (Math.abs(dZVar) <= 0.0) {
-            LOGGER.warning("ERROR Zero variance:  all of the values for your input field are likely the same.");
-        }
+        // calculate the mean and standard deviation for this data set.
+        int featureCount = swMatrix.Events.size();
+        double n = swMatrix.Events.size() * 1.0;
+        double dZMean = swMatrix.dZSum / n;
 
         double dM2 = 0.0;
         double dM4 = 0.0;
-        // int noNeighs = 0;
-        // int[] idsNoNeighs;
 
-        // # Calculate deviation from the mean sums.
+        // calculate deviation from the mean sums.
         for (SpatialEvent curE : swMatrix.Events) {
             dM2 += Math.pow(curE.weight - dZMean, 2.0);
             dM4 += Math.pow(curE.weight - dZMean, 4.0);
         }
 
-        dM2 = dM2 / (rN - 1.0);
-        dM4 = dM4 / (rN - 1.0);
+        dM2 = dM2 / (n - 1.0);
+        dM4 = dM4 / (n - 1.0);
         double dB2 = dM4 / Math.pow(dM2, 2.0);
 
-        // # Calculate Local Index for each feature i.
+        // calculate local index for each feature i.
         dcIndex = new double[featureCount];
         dcZScore = new double[featureCount];
-        moranBins = new String[featureCount];
-        dczValue = new double[featureCount];
-        dcwzValue = new double[featureCount];
         for (int i = 0; i < featureCount; i++) {
             SpatialEvent curE = swMatrix.Events.get(i);
             double dLocalZDevSum = 0.0;
             double dWijSum = 0.0;
             double dWij2Sum = 0.0;
             double dWijWihSum = 0.0;
-            double localBinTotal = 0.0;
-            int numNeighs = 0;
 
-            // # Look for i's local neighbors
+            // look for i's local neighbors
             for (int j = 0; j < featureCount; j++) {
                 SpatialEvent destE = swMatrix.Events.get(j);
                 if (curE.oid == destE.oid)
                     continue;
 
-                // # Calculate the weight (dWij)
-                double dWeight = 0.0;
+                // calculate the weight (dWij)
+                double dWij = 0.0;
                 if (this.getSpatialConceptType() == SpatialConcept.POLYGONCONTIGUITY) {
-                    dWeight = 0.0;
+                    dWij = 0.0;
                     // if (destE is neighbor ) dWeight = 1.0;
                 } else {
-                    dWeight = swMatrix.getWeight(curE, destE);
+                    dWij = swMatrix.getWeight(curE, destE);
                 }
 
                 if (getStandardizationType() == StandardizationMethod.ROW) {
-                    dWeight = swMatrix.standardizeWeight(curE, dWeight);
+                    dWij = swMatrix.standardizeWeight(curE, dWij);
                 }
 
-                double dWij = dWeight;
+                // lee's s
                 dLocalZDevSum += dWij * (destE.weight - dZMean);
-                if (dWeight > 0) {
-                    localBinTotal += dWij * destE.weight;
-                    numNeighs++;
-                }
-
                 dWijSum += dWij;
                 dWij2Sum += Math.pow(dWij, 2.0);
-            } // next j
+            }
 
             dWijWihSum = Math.pow(dWijSum, 2.0) - dWij2Sum;
 
-            // # Calculate Local I
+            // calculate local index
             dcIndex[i] = Double.NaN;
             dcZScore[i] = Double.NaN;
-            moranBins[i] = "";
             try {
-                dcIndex[i] = ((curE.weight - dZMean) / dM2) * dLocalZDevSum;
+                // TODO correct 
+                dcIndex[i] = Math.pow(dLocalZDevSum, 2.0) / dM2;
 
-                // gaiyong
-                dczValue[i] = ((curE.weight - dZMean) / dM2);
-                dcwzValue[i] = dLocalZDevSum;
-                // end
-
-                double dExpected = -1.0 * (dWijSum / (rN - 1.0));
-                double v1 = (dWij2Sum * (rN - dB2)) / (rN - 1.0);
-                double v2 = Math.pow(dWijSum, 2.0) / Math.pow((rN - 1.0), 2.0);
-                double v3 = dWijWihSum * ((2.0 * dB2) - rN);
-                double v4 = (rN - 1.0) * (rN - 2.0);
+                double dExpected = -1.0 * (dWijSum / (n - 1.0));
+                double v1 = (dWij2Sum * (n - dB2)) / (n - 1.0);
+                double v2 = Math.pow(dWijSum, 2.0) / Math.pow((n - 1.0), 2.0);
+                double v3 = dWijWihSum * ((2.0 * dB2) - n);
+                double v4 = (n - 1.0) * (n - 2.0);
                 double dVariance = v1 + v3 / v4 - v2;
                 dcZScore[i] = (dcIndex[i] - dExpected) / Math.pow(dVariance, 0.5);
-                if (numNeighs > 0) {
-                    double localMean = localBinTotal / (dWijSum * 1.0);
-                    moranBins[i] = this.returnMoranBin(dcZScore[i], curE.weight, dZMean, localMean);
-                }
             } catch (Exception e) {
                 LOGGER.log(Level.FINE, e.getMessage(), e);
             }
-        } // next i
+        }
 
         return buildFeatureCollection(inputFeatures);
     }
@@ -198,22 +158,19 @@ public class LocalLeesSOperation extends AbstractStatisticsOperation {
         String typeName = inputFeatures.getSchema().getTypeName();
         SimpleFeatureType featureType = FeatureTypes.build(inputFeatures.getSchema(), typeName);
 
-        // # Build results field name.
-        String[] fieldList = { "LMiIndex", "LMiZScore", "LMiPValue", "LMizValue", "LMiwzValue",
-                "COType" };
-        for (int k = 0; k < fieldList.length - 1; k++) {
+        // build results field name.
+        final String[] fieldList = { "LLsIndex", "LLsZScore", "LLsPValue" };
+        for (int k = 0; k < fieldList.length; k++) {
             featureType = FeatureTypes.add(featureType, fieldList[k], Double.class);
         }
-        featureType = FeatureTypes.add(featureType, fieldList[5], String.class, 10);
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
 
         // insert features
-        int idx = 0;
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = inputFeatures.features();
         try {
-            featureIter = inputFeatures.features();
+            int idx = 0;
             while (featureIter.hasNext()) {
                 final SimpleFeature feature = featureIter.next();
 
@@ -221,30 +178,21 @@ public class LocalLeesSOperation extends AbstractStatisticsOperation {
                 SimpleFeature newFeature = featureWriter.buildFeature(null);
                 featureWriter.copyAttributes(feature, newFeature, true);
 
-                // "LMiIndex", "LMiZScore", "LMiPValue", "COType"
-                double localI = this.dcIndex[idx];
+                double localIndex = this.dcIndex[idx];
                 double zScore = this.dcZScore[idx];
                 double pValue = 0.0;
-                String coType = this.moranBins[idx];
-
-                double dczv = this.dczValue[idx];
-                double dcwv = this.dcwzValue[idx];
 
                 if (Double.isNaN(zScore) || Double.isInfinite(zScore)) {
-                    localI = 0.0;
+                    localIndex = 0.0;
                     zScore = 0.0;
                     pValue = 1.0;
-                    coType = "";
                 } else {
                     pValue = SSUtils.zProb(zScore, StatEnum.BOTH);
                 }
 
-                newFeature.setAttribute(fieldList[0], FormatUtils.round(localI));
+                newFeature.setAttribute(fieldList[0], FormatUtils.round(localIndex));
                 newFeature.setAttribute(fieldList[1], FormatUtils.round(zScore));
                 newFeature.setAttribute(fieldList[2], FormatUtils.round(pValue));
-                newFeature.setAttribute(fieldList[3], FormatUtils.round(dczv));
-                newFeature.setAttribute(fieldList[4], FormatUtils.round(dcwv));
-                newFeature.setAttribute(fieldList[5], coType);
 
                 idx++;
                 featureWriter.write(newFeature);
@@ -257,35 +205,4 @@ public class LocalLeesSOperation extends AbstractStatisticsOperation {
 
         return featureWriter.getFeatureCollection();
     }
-
-    private String returnMoranBin(double zScore, double featureVal, double globalMean,
-            double localMean) {
-        // Returns a string representation of Local Moran's I Cluster-Outlier classification bins.
-
-        // HH = Cluster of Highs, L = Cluster of Lows, HL = High Outlier, LH = Low Outlier.
-        String moranBin = "";
-
-        if (Double.isInfinite(zScore) || Double.isNaN(zScore)) {
-            return moranBin;
-        }
-
-        if (Math.abs(zScore) < 1.96) {
-            return moranBin;
-        } else {
-            if (zScore > 1.96) {
-                moranBin = localMean >= globalMean ? "HH" : "LL";
-            } else {
-                if (featureVal >= globalMean && localMean <= globalMean) {
-                    moranBin = "HL";
-                } else if (featureVal <= globalMean && localMean >= globalMean) {
-                    moranBin = "LH";
-                } else {
-                    moranBin = "";
-                }
-            }
-        }
-
-        return moranBin;
-    }
-
 }

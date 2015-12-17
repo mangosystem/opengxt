@@ -57,12 +57,9 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
 
     String[] moranBins;
 
-    // gaiyong
     double[] dczValue;
 
     double[] dcwzValue;
-
-    // end
 
     public LocalMoranIStatisticOperation() {
         // Default Setting
@@ -84,38 +81,26 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
         swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
         swMatrix.distanceBandWidth = this.getDistanceBand();
         swMatrix.buildWeightMatrix(inputFeatures, inputField, this.getDistanceType());
-        int featureCount = swMatrix.Events.size();
-        if (featureCount < 3) {
-            LOGGER.warning("inputFeatures's feature count < " + featureCount);
-            return null;
-        } else if (featureCount < 30) {
-            LOGGER.warning("inputFeatures's feature count < " + featureCount);
-        }
 
         // # Calculate the mean and standard deviation for this data set.
-        double rN = featureCount * 1.0;
-        double dZMean = swMatrix.dZSum / rN;
-        double dZVar = Math.pow((swMatrix.dZ2Sum / rN) - Math.pow(dZMean, 2.0), 0.5);
-        if (Math.abs(dZVar) <= 0.0) {
-            LOGGER.warning("ERROR Zero variance:  all of the values for your input field are likely the same.");
-        }
+        int featureCount = swMatrix.Events.size();
+        double n = featureCount * 1.0;
+        double dZMean = swMatrix.dZSum / n;
 
         double dM2 = 0.0;
         double dM4 = 0.0;
-        // int noNeighs = 0;
-        // int[] idsNoNeighs;
 
-        // # Calculate deviation from the mean sums.
+        // calculate deviation from the mean sums.
         for (SpatialEvent curE : swMatrix.Events) {
             dM2 += Math.pow(curE.weight - dZMean, 2.0);
             dM4 += Math.pow(curE.weight - dZMean, 4.0);
         }
 
-        dM2 = dM2 / (rN - 1.0);
-        dM4 = dM4 / (rN - 1.0);
+        dM2 = dM2 / (n - 1.0);
+        dM4 = dM4 / (n - 1.0);
         double dB2 = dM4 / Math.pow(dM2, 2.0);
 
-        // # Calculate Local Index for each feature i.
+        // calculate Local Index for each feature i.
         dcIndex = new double[featureCount];
         dcZScore = new double[featureCount];
         moranBins = new String[featureCount];
@@ -137,21 +122,21 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
                     continue;
 
                 // # Calculate the weight (dWij)
-                double dWeight = 0.0;
+                double dWij = 0.0;
                 if (this.getSpatialConceptType() == SpatialConcept.POLYGONCONTIGUITY) {
-                    dWeight = 0.0;
+                    dWij = 0.0;
                     // if (destE is neighbor ) dWeight = 1.0;
                 } else {
-                    dWeight = swMatrix.getWeight(curE, destE);
+                    dWij = swMatrix.getWeight(curE, destE);
                 }
 
                 if (getStandardizationType() == StandardizationMethod.ROW) {
-                    dWeight = swMatrix.standardizeWeight(curE, dWeight);
+                    dWij = swMatrix.standardizeWeight(curE, dWij);
                 }
 
-                double dWij = dWeight;
+                // moran's i
                 dLocalZDevSum += dWij * (destE.weight - dZMean);
-                if (dWeight > 0) {
+                if (dWij > 0) {
                     localBinTotal += dWij * destE.weight;
                     numNeighs++;
                 }
@@ -174,11 +159,11 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
                 dcwzValue[i] = dLocalZDevSum;
                 // end
 
-                double dExpected = -1.0 * (dWijSum / (rN - 1.0));
-                double v1 = (dWij2Sum * (rN - dB2)) / (rN - 1.0);
-                double v2 = Math.pow(dWijSum, 2.0) / Math.pow((rN - 1.0), 2.0);
-                double v3 = dWijWihSum * ((2.0 * dB2) - rN);
-                double v4 = (rN - 1.0) * (rN - 2.0);
+                double dExpected = -1.0 * (dWijSum / (n - 1.0));
+                double v1 = (dWij2Sum * (n - dB2)) / (n - 1.0);
+                double v2 = Math.pow(dWijSum, 2.0) / Math.pow((n - 1.0), 2.0);
+                double v3 = dWijWihSum * ((2.0 * dB2) - n);
+                double v4 = (n - 1.0) * (n - 2.0);
                 double dVariance = v1 + v3 / v4 - v2;
                 dcZScore[i] = (dcIndex[i] - dExpected) / Math.pow(dVariance, 0.5);
                 if (numNeighs > 0) {

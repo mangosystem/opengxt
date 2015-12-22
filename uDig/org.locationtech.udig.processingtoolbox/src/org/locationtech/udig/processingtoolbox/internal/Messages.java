@@ -287,6 +287,8 @@ public class Messages extends NLS {
     public static String ToolboxView_Distribution;
     public static String ToolboxView_GeneralTools;
     public static String ToolboxView_DataCreation;
+    public static String ToolboxView_Calculation;
+    public static String ToolboxView_Proximity;
     public static String ToolboxView_Graph;
     public static String ToolboxView_RasterTools;
     public static String ToolboxView_Utilities;

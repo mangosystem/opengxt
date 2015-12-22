@@ -55,6 +55,7 @@ import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.ui.internal.LayersView;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
+import org.opengis.filter.expression.Expression;
 import org.opengis.geometry.BoundingBox;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -315,6 +316,10 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
             // filter parameters
             FilterWidget filterView = new FilterWidget(map);
             filterView.create(container, SWT.NONE, inputParams, param);
+        } else if (Expression.class.isAssignableFrom(param.type)) {
+            // filter parameters
+            ExpressionWidget expressionView = new ExpressionWidget(map);
+            expressionView.create(container, SWT.NONE, inputParams, param);
         } else if (param.type.isAssignableFrom(CoordinateReferenceSystem.class)) {
             // coordinate reference system parameters
             CrsWidget crsView = new CrsWidget(map);

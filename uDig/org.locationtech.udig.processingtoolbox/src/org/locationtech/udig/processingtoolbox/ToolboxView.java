@@ -376,34 +376,41 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(createTool);
         buildTool(createTool, "org.geotools.process.spatialstatistics.RandomPointsProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.RandomPointsPerFeaturesProcessFactory");
-        buildTool(createTool, "org.geotools.process.spatialstatistics.MultipleRingBufferProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.FishnetProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.HexagonProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.TriangularGridProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.CircularGridProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.ThiessenPolygonProcessFactory");
+        
         buildTool(createTool, "org.geotools.process.spatialstatistics.RingMapProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.WindRoseMapProcessFactory");
+
+        // Calculation
+        TreeParent calcTool = new TreeParent(Messages.ToolboxView_Calculation, null, null);
+        generalTool.addChild(calcTool);
+        buildTool(calcTool, "org.geotools.process.spatialstatistics.CalculateFieldProcessFactory");
+        buildTool(calcTool, "org.geotools.process.spatialstatistics.CalculateAreaProcessFactory");
+        buildTool(calcTool, "org.geotools.process.spatialstatistics.CalculateLengthProcessFactory");
+        buildTool(calcTool, "org.geotools.process.spatialstatistics.CalculateXYCoordinateProcessFactory");
         
         // Graph
         TreeParent graphTool = new TreeParent(Messages.ToolboxView_Graph, null, null);
         generalTool.addChild(graphTool);
-
         buildTool(graphTool, Messages.HistogramDialog_title, "HistogramDialog");
         buildTool(graphTool, Messages.BoxPlotDialog_title, "BoxPlotDialog");
         buildTool(graphTool, Messages.ScatterPlotDialog_title, "ScatterPlotDialog");
         buildTool(graphTool, Messages.BubbleChartDialog_title, "BubbleChartDialog");
         buildTool(graphTool, Messages.MoranScatterPlotDialog_title, "MoranScatterPlotDialog");
 
+        // Proximity
+        TreeParent proxTool = new TreeParent(Messages.ToolboxView_Proximity, null, null);
+        generalTool.addChild(proxTool);
+        buildTool(proxTool, "org.geotools.process.spatialstatistics.BufferExpressionProcessFactory");
+        buildTool(proxTool, "org.geotools.process.spatialstatistics.MultipleRingBufferProcessFactory");
+
         // Utilities
         TreeParent utilTool = new TreeParent(Messages.ToolboxView_Utilities, null, null);
-        generalTool.addChild(utilTool);
-
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.CalculateFieldProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.CalculateAreaProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.CalculateLengthProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.CalculateXYCoordinateProcessFactory");
-        
+        generalTool.addChild(utilTool);        
         buildTool(utilTool, "org.geotools.process.spatialstatistics.CollectEventsProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.UnionPolygonProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SpatialJoinProcessFactory");

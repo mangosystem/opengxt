@@ -86,9 +86,8 @@ public class RasterDensityOperation extends RasterProcessingOperation {
         Filter filter = ff.bbox(ff.property(the_geom), Extent);
 
         GridTransformer trans = new GridTransformer(Extent, CellSize);
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = pointFeatures.subCollection(filter).features();
         try {
-            featureIter = pointFeatures.subCollection(filter).features();
             while (featureIter.hasNext()) {
                 final SimpleFeature feature = featureIter.next();
 

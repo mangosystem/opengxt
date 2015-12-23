@@ -57,19 +57,19 @@ import com.vividsolutions.jts.io.WKTReader;
 /**
  * Geometry Picker Dialog
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
 public class GeometryPickerDialog extends Dialog {
     protected static final Logger LOGGER = Logging.getLogger(GeometryPickerDialog.class);
-    
+
     private IMap map = null;
 
     private GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory(null);
-        
+
     private SimpleFeature feature;
-    
+
     private String wktGeometry;
 
     private Table featureTable;
@@ -127,7 +127,7 @@ public class GeometryPickerDialog extends Dialog {
         container.setLayoutData(new GridData(GridData.FILL_BOTH));
 
         WidgetBuilder widget = WidgetBuilder.newInstance();
-        
+
         // 1. Layer Selection
         Group grpMap = new Group(container, SWT.SHADOW_ETCHED_IN);
         grpMap.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -147,19 +147,21 @@ public class GeometryPickerDialog extends Dialog {
                 updateFeatures(source);
             }
         });
-        
+
         // 1. Features
         Group grpLayer = widget.createGroup(container, null, false, 1);
-        
-        Group grpFeatures = widget.createGroup(grpLayer, Messages.GeometryPickerDialog_Feature, false, 1);
+
+        Group grpFeatures = widget.createGroup(grpLayer, Messages.GeometryPickerDialog_Feature,
+                false, 1);
         grpFeatures.setLayout(new GridLayout(1, true));
-        featureTable = widget.createListTable(grpFeatures, new String[] { Messages.GeometryPickerDialog_Feature }, 1);        
+        featureTable = widget.createListTable(grpFeatures,
+                new String[] { Messages.GeometryPickerDialog_Feature }, 1);
         featureTable.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 if (featureTable.getSelectionCount() > 0) {
                     feature = (SimpleFeature) featureTable.getSelection()[0].getData();
-                    txtGeometry.setText(((Geometry)feature.getDefaultGeometry()).toText());
+                    txtGeometry.setText(((Geometry) feature.getDefaultGeometry()).toText());
                 } else {
                     txtGeometry.setText(""); //$NON-NLS-1$
                 }
@@ -201,18 +203,20 @@ public class GeometryPickerDialog extends Dialog {
         });
 
         GridData btnLayout = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
-        btnClipboard = widget.createButton(grpValues, Messages.GeometryPickerDialog_Clipboard, null, btnLayout);
+        btnClipboard = widget.createButton(grpValues, Messages.GeometryPickerDialog_Clipboard,
+                null, btnLayout);
         btnClipboard.setEnabled(false);
         btnClipboard.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 // copy to clipboard
                 Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                clipboard.setContents(new StringSelection(txtGeometry.getText()), null );
+                clipboard.setContents(new StringSelection(txtGeometry.getText()), null);
             }
         });
 
-        btnAddLayer = widget.createButton(grpValues, Messages.GeometryPickerDialog_AddLayer, null, btnLayout);
+        btnAddLayer = widget.createButton(grpValues, Messages.GeometryPickerDialog_AddLayer, null,
+                btnLayout);
         btnAddLayer.setEnabled(false);
         btnAddLayer.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -253,11 +257,10 @@ public class GeometryPickerDialog extends Dialog {
         featureTable.removeAll();
         Runnable runnable = new Runnable() {
             @Override
-            @SuppressWarnings({ })
+            @SuppressWarnings({})
             public void run() {
-                SimpleFeatureIterator featureIter = null;
+                SimpleFeatureIterator featureIter = source.features();
                 try {
-                    featureIter = source.features();
                     while (featureIter.hasNext()) {
                         SimpleFeature feature = featureIter.next();
                         TableItem item = new TableItem(featureTable, SWT.NULL);

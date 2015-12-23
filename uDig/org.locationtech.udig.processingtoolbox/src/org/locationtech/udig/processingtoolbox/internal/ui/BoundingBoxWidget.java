@@ -49,7 +49,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 /**
  * BoundingBox control
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -179,9 +179,7 @@ public class BoundingBoxWidget extends AbstractToolboxWidget {
         });
 
         // default extent
-        if (param.sample == null) {
-            // updateBoundingBox(map.getViewportModel().getBounds());
-        } else if (param.sample != null
+        if (param.sample != null
                 && param.sample.getClass().isAssignableFrom(ReferencedEnvelope.class)) {
             updateBoundingBox((ReferencedEnvelope) param.sample);
         }

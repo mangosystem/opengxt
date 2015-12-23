@@ -61,10 +61,9 @@ public class FieldCalculationFeatureCollection extends GXTSimpleFeatureCollectio
             fieldBinding = attributeType.getType().getBinding();
         } else {
             // test value type
-            SimpleFeatureIterator featureIter = null;
+            SimpleFeatureIterator featureIter = delegate.features();
             fieldBinding = null;
             try {
-                featureIter = delegate.features();
                 while (featureIter.hasNext()) {
                     SimpleFeature feature = featureIter.next();
                     Object value = this.expression.evaluate(feature);

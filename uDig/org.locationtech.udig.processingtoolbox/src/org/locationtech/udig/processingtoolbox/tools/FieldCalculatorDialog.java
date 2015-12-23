@@ -432,13 +432,15 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
                     Collections.sort(sorted, new Comparator<FunctionName>() {
                         @Override
                         public int compare(FunctionName o1, FunctionName o2) {
-                            if (o1 == null && o2 == null)
+                            if (o1 == null && o2 == null) {
                                 return 0;
-                            if (o1 == null && o2 != null)
+                            } else if (o1 == null && o2 != null) {
                                 return 1;
-                            if (o1 != null && o2 == null)
+                            } else if (o1 != null && o2 == null) {
                                 return -1;
-                            return o1.getName().compareTo(o2.getName());
+                            } else {
+                                return o1.getName().compareTo(o2.getName());
+                            }
                         }
                     });
 

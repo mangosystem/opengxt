@@ -83,9 +83,8 @@ class XYMinMaxVisitor {
         Expression zExpression = ff.property(zField);
 
         reset();
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
 

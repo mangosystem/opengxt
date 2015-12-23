@@ -56,9 +56,8 @@ public class StandardizedScoresOperation extends GeneralOperation {
     private void preCalculate(SimpleFeatureCollection features, Expression xExpression,
             Expression yExpression) {
         int oid = 0;
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();

@@ -437,9 +437,8 @@ public class BubbleChartDialog extends AbstractGeoProcessingDialog implements IR
         Expression sizeExpression = ff.property(sizeField);
 
         int index = 0;
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 featureIDS[index] = feature.getID();

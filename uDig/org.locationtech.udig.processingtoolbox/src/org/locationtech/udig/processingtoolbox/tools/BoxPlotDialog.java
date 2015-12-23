@@ -339,9 +339,8 @@ public class BoxPlotDialog extends AbstractGeoProcessingDialog implements IRunna
             listMap.put(fields[index], new ArrayList<Double>());
         }
 
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 for (int index = 0; index < expression.length; index++) {

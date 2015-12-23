@@ -71,10 +71,9 @@ public class CentralFeatureOperation extends AbstractDisributionOperator {
 
         CentralFeatureVisitor visitor = new CentralFeatureVisitor();
         visitor.setDistanceMethod(distanceMethod);
-        
-        SimpleFeatureIterator featureIter = null;
+
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();

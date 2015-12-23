@@ -223,21 +223,24 @@ public class SSStyleBuilder {
     }
 
     public String toXML(Style style) {
-        if (style != null) {
-            UserLayer layer = sf.createUserLayer();
-            layer.setLayerFeatureConstraints(new FeatureTypeConstraint[] { null });
-            layer.setName(featureType.getTypeName());
-            layer.addUserStyle(style);
-
-            StyledLayerDescriptor sld = sf.createStyledLayerDescriptor();
-            sld.addStyledLayer(layer);
-            try {
-                SLDTransformer styleTransform = new SLDTransformer();
-                return styleTransform.transform(sld);
-            } catch (TransformerException te) {
-                LOGGER.log(Level.FINE, te.getMessage(), te);
-            }
+        if (style == null) {
+            return null;
         }
-        return style.toString();
+
+        UserLayer layer = sf.createUserLayer();
+        layer.setLayerFeatureConstraints(new FeatureTypeConstraint[] { null });
+        layer.setName(featureType.getTypeName());
+        layer.addUserStyle(style);
+
+        StyledLayerDescriptor sld = sf.createStyledLayerDescriptor();
+        sld.addStyledLayer(layer);
+        try {
+            SLDTransformer styleTransform = new SLDTransformer();
+            return styleTransform.transform(sld);
+        } catch (TransformerException te) {
+            LOGGER.log(Level.FINE, te.getMessage(), te);
+        }
+
+        return null;
     }
 }

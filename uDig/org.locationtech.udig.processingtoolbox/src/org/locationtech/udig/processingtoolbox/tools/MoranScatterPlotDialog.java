@@ -476,9 +476,8 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
         XYSeries xySeries = new XYSeries(features.getSchema().getTypeName());
         minMaxVisitor.reset();
 
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();

@@ -275,6 +275,10 @@ public class TextColumn {
 
             int sampleSize = 1;
             String line = reader.readLine();
+            if (line == null) {
+                return columns;
+            }
+            
             String[] values = line.split(splitter);
 
             // build header

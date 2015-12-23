@@ -136,10 +136,9 @@ public class SpatialJoinOperation extends GeneralOperation {
         }
 
         SimpleFeature nearestFeature = null;
-        SimpleFeatureIterator joinIter = null;
+        SimpleFeatureIterator joinIter = joinFeatures.subCollection(filter).features();
         try {
             double minDistance = Double.MAX_VALUE;
-            joinIter = joinFeatures.subCollection(filter).features();
             while (joinIter.hasNext()) {
                 SimpleFeature feature = joinIter.next();
                 if (searchRadius == 0) {

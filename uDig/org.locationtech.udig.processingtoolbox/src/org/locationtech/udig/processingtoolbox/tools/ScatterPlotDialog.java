@@ -336,7 +336,7 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         NumberAxis yLineAxis = new NumberAxis(EMPTY);
         yLineAxis.setTickMarksVisible(false);
         yLineAxis.setTickLabelsVisible(false);
-        
+
         XYSeriesCollection lineDataset = new XYSeriesCollection();
 
         // AverageY
@@ -406,9 +406,8 @@ public class ScatterPlotDialog extends AbstractGeoProcessingDialog implements IR
         Expression xExpression = ff.property(xField);
         Expression yExpression = ff.property(yField);
 
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
 

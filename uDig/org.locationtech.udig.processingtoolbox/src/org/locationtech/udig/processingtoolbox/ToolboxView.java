@@ -381,17 +381,17 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(createTool, "org.geotools.process.spatialstatistics.TriangularGridProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.CircularGridProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.ThiessenPolygonProcessFactory");
-        
-        buildTool(createTool, "org.geotools.process.spatialstatistics.RingMapProcessFactory");
-        buildTool(createTool, "org.geotools.process.spatialstatistics.WindRoseMapProcessFactory");
 
         // Calculation
         TreeParent calcTool = new TreeParent(Messages.ToolboxView_Calculation, null, null);
         generalTool.addChild(calcTool);
+        buildTool(calcTool, "org.geotools.process.spatialstatistics.CountFeaturesProcessFactory");
+        buildTool(calcTool, "org.geotools.process.spatialstatistics.AreaProcessFactory");
         buildTool(calcTool, "org.geotools.process.spatialstatistics.CalculateFieldProcessFactory");
         buildTool(calcTool, "org.geotools.process.spatialstatistics.CalculateAreaProcessFactory");
         buildTool(calcTool, "org.geotools.process.spatialstatistics.CalculateLengthProcessFactory");
         buildTool(calcTool, "org.geotools.process.spatialstatistics.CalculateXYCoordinateProcessFactory");
+        buildTool(calcTool, "org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory");
         
         // Graph
         TreeParent graphTool = new TreeParent(Messages.ToolboxView_Graph, null, null);
@@ -408,17 +408,21 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(proxTool, "org.geotools.process.spatialstatistics.BufferExpressionProcessFactory");
         buildTool(proxTool, "org.geotools.process.spatialstatistics.MultipleRingBufferProcessFactory");
 
+        // Aggregation
+        TreeParent aggreTool = new TreeParent(Messages.ToolboxView_Aggregation, null, null);
+        generalTool.addChild(aggreTool);
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.CollectEventsProcessFactory");
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.UnionPolygonProcessFactory");
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.SpatialJoinProcessFactory");
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.PointStatisticsProcessFactory");
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.BufferStatisticsProcessFactory");
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.SumLineLengthProcessFactory");
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.RingMapProcessFactory");
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.WindRoseMapProcessFactory");
+        
         // Utilities
         TreeParent utilTool = new TreeParent(Messages.ToolboxView_Utilities, null, null);
-        generalTool.addChild(utilTool);        
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.CollectEventsProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.UnionPolygonProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.SpatialJoinProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.PointStatisticsProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.BufferStatisticsProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.SumLineLengthProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory");
-
+        generalTool.addChild(utilTool);
         buildTool(utilTool, "org.geotools.process.spatialstatistics.MultipartToSinglepartProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SinglepartToMultipartProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToPointProcessFactory");

@@ -406,10 +406,9 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
         minMaxVisitor.reset();
 
         double[] values = new double[features.size()];
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
             Expression expression = ff.property(field);
-            featureIter = features.features();
             int index = 0;
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();

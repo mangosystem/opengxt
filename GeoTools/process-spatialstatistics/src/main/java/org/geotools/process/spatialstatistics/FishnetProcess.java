@@ -143,7 +143,7 @@ public class FishnetProcess extends AbstractStatisticsProcess {
             if (extent == null && boundsSource != null) {
                 extent = boundsSource.getBounds();
             }
-            
+
             if (columns == 0 || rows == 0) {
                 resultFc = operation.execute(extent, width, height);
             } else {
@@ -169,9 +169,8 @@ public class FishnetProcess extends AbstractStatisticsProcess {
 
     private Geometry unionPolygonFeatures(SimpleFeatureCollection features) {
         List<Geometry> geometries = new ArrayList<Geometry>();
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();

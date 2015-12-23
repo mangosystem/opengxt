@@ -74,9 +74,8 @@ public class StandardDeviationalEllipseOperation extends AbstractDisributionOper
         Expression weightExpr = ff.property(weightField);
 
         StandardDeviationalEllipseVisitor visitor = new StandardDeviationalEllipseVisitor();
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();

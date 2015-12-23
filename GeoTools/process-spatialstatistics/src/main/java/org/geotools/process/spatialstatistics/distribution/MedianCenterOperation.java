@@ -73,9 +73,8 @@ public class MedianCenterOperation extends AbstractDisributionOperator {
         }
 
         MedianCenterVisitor fVisitor = new MedianCenterVisitor();
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();

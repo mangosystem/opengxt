@@ -64,9 +64,8 @@ public class MeanCenterOperation extends AbstractDisributionOperator {
         Expression dimensionExpr = ff.property(dimensionField);
 
         MeanCenterVisitor visitor = new MeanCenterVisitor();
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();

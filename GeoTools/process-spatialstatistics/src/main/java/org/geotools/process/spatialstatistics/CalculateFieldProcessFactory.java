@@ -29,6 +29,7 @@ import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
+import org.opengis.filter.expression.Expression;
 import org.opengis.util.InternationalString;
 
 /**
@@ -44,7 +45,7 @@ public class CalculateFieldProcessFactory extends SpatialStatisticsProcessFactor
     private static final String PROCESS_NAME = "CalculateField";
 
     /*
-     * CalculateFieldProcess(SimpleFeatureCollection inputFeatures, String fieldName, String expression): SimpleFeatureCollection
+     * CalculateFieldProcess(SimpleFeatureCollection inputFeatures, String fieldName, Expression expression): SimpleFeatureCollection
      */
 
     public CalculateFieldProcessFactory() {
@@ -80,8 +81,8 @@ public class CalculateFieldProcessFactory extends SpatialStatisticsProcessFactor
                     Parameter.OPTIONS, "inputFeatures.All"));
 
     /** expression */
-    public static final Parameter<String> expression = new Parameter<String>("expression",
-            String.class, getResource("CalculateField.expression.title"),
+    public static final Parameter<Expression> expression = new Parameter<Expression>("expression",
+            Expression.class, getResource("CalculateField.expression.title"),
             getResource("CalculateField.expression.description"), true, 1, 1, null, null);
 
     @Override

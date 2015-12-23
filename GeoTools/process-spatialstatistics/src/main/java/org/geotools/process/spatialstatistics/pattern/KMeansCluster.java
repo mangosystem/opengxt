@@ -169,9 +169,8 @@ public class KMeansCluster implements Cluster {
         this.extent = pointFeatures.getBounds();
 
         List<Cluster.PointEvent> ptList = new ArrayList<Cluster.PointEvent>();
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = featureIter = pointFeatures.features();
         try {
-            featureIter = pointFeatures.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();

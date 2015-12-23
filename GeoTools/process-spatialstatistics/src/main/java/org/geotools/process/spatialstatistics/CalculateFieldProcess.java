@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
@@ -56,7 +55,7 @@ public class CalculateFieldProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            String fieldName, String expression, ProgressListener monitor) {
+            String fieldName, Expression expression, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(CalculateFieldProcessFactory.inputFeatures.key, inputFeatures);
         map.put(CalculateFieldProcessFactory.fieldName.key, fieldName);
@@ -92,7 +91,7 @@ public class CalculateFieldProcess extends AbstractStatisticsProcess {
                     input, CalculateFieldProcessFactory.inputFeatures, null);
             String fieldName = (String) Params.getValue(input,
                     CalculateFieldProcessFactory.fieldName, null);
-            String expression = (String) Params.getValue(input,
+            Expression expression = (Expression) Params.getValue(input,
                     CalculateFieldProcessFactory.expression, null);
             if (inputFeatures == null || fieldName == null || expression == null) {
                 throw new NullPointerException("All parameters required");
@@ -106,9 +105,9 @@ public class CalculateFieldProcess extends AbstractStatisticsProcess {
             }
 
             // start process
-            Expression filter = ECQL.toExpression(expression);
             SimpleFeatureCollection resultFc = DataUtilities
-                    .simple(new FieldCalculationFeatureCollection(inputFeatures, fieldName, filter));
+                    .simple(new FieldCalculationFeatureCollection(inputFeatures, fieldName,
+                            expression));
             // end process
 
             monitor.setTask(Text.text("Encoding result"));

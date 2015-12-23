@@ -104,9 +104,8 @@ public class PearsonOperation extends GeneralOperation {
         Expression obsExpression = ff.property(fieldName1);
         Expression popExpression = ff.property(fieldName2);
 
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = inputFeatures.features();
         try {
-            featureIter = inputFeatures.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
 

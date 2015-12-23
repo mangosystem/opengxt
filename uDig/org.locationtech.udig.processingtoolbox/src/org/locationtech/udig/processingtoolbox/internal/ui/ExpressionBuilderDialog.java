@@ -64,16 +64,16 @@ import org.opengis.parameter.Parameter;
 /**
  * Expression Builder Dialog
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
 @SuppressWarnings("nls")
 public class ExpressionBuilderDialog extends Dialog {
     protected static final Logger LOGGER = Logging.getLogger(ExpressionBuilderDialog.class);
-    
+
     private final String space = " ";
-    
+
     private IMap map = null;
 
     private String initSQL = null;
@@ -142,7 +142,7 @@ public class ExpressionBuilderDialog extends Dialog {
                 txtExpression.setText("");
             }
         });
-        
+
         btnTest.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
@@ -150,10 +150,11 @@ public class ExpressionBuilderDialog extends Dialog {
                     Expression expression = ECQL.toExpression(txtExpression.getText());
                     Object evaluated = expression.evaluate(source.features().next());
                     String msg = "Evaluated value: " + evaluated;
-                    MessageDialog.openInformation(getParentShell(), Messages.ExpressionBuilderDialog_Test, msg);
+                    MessageDialog.openInformation(getParentShell(),
+                            Messages.ExpressionBuilderDialog_Test, msg);
                 } catch (CQLException e) {
-                    MessageDialog.openInformation(getParentShell(), Messages.ExpressionBuilderDialog_Test,
-                            e.getLocalizedMessage());
+                    MessageDialog.openInformation(getParentShell(),
+                            Messages.ExpressionBuilderDialog_Test, e.getLocalizedMessage());
                 }
             }
         });
@@ -188,12 +189,14 @@ public class ExpressionBuilderDialog extends Dialog {
         // ========================================================
         // 1. layer
         // ========================================================
-        Group grpLayer = widget.createGroup(container, Messages.ExpressionBuilderDialog_Layer_Functions, false, 1);
+        Group grpLayer = widget.createGroup(container,
+                Messages.ExpressionBuilderDialog_Layer_Functions, false, 1);
         if (map != null) {
             Group grpCombo = new Group(grpLayer, SWT.SHADOW_ETCHED_IN);
             grpCombo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
             grpCombo.setLayout(new GridLayout(2, false));
-            widget.createLabel(grpCombo, Messages.ExpressionBuilderDialog_Layer, Messages.ExpressionBuilderDialog_Layer, 1);
+            widget.createLabel(grpCombo, Messages.ExpressionBuilderDialog_Layer,
+                    Messages.ExpressionBuilderDialog_Layer, 1);
             cboLayer = widget.createCombo(grpCombo, 1, true);
             for (ILayer layer : map.getMapLayers()) {
                 if (layer.hasResource(FeatureSource.class)) {
@@ -213,17 +216,19 @@ public class ExpressionBuilderDialog extends Dialog {
         // 1. fields
         // ========================================================
         final int defaultWidth = 200;
-        Group grpFields = widget.createGroup(grpLayer, Messages.ExpressionBuilderDialog_Fields, false, 1);
+        Group grpFields = widget.createGroup(grpLayer, Messages.ExpressionBuilderDialog_Fields,
+                false, 1);
         GridData gridDataField = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1);
         gridDataField.widthHint = defaultWidth;
         grpFields.setLayoutData(gridDataField);
         grpFields.setLayout(new GridLayout(1, true));
 
-        fieldTable = widget.createListTable(grpFields,  new String[] { Messages.ExpressionBuilderDialog_Fields }, 1);
+        fieldTable = widget.createListTable(grpFields,
+                new String[] { Messages.ExpressionBuilderDialog_Fields }, 1);
         if (source != null) {
             updateFields();
         }
-        fieldTable.getColumns()[0].setWidth(defaultWidth-40);
+        fieldTable.getColumns()[0].setWidth(defaultWidth - 40);
 
         // double click event
         fieldTable.addListener(SWT.MouseDoubleClick, new Listener() {
@@ -238,14 +243,17 @@ public class ExpressionBuilderDialog extends Dialog {
         // 2. filter functions
         // http://docs.geotools.org/latest/userguide/library/main/filter.html
         // ========================================================
-        Group grpValues = widget.createGroup(grpLayer, Messages.ExpressionBuilderDialog_Functions, false, 1);
+        Group grpValues = widget.createGroup(grpLayer, Messages.ExpressionBuilderDialog_Functions,
+                false, 1);
         grpValues.setLayout(new GridLayout(1, true));
 
-        valueTable = widget.createListTable(grpValues,  new String[] { Messages.ExpressionBuilderDialog_Functions }, 1);
+        valueTable = widget.createListTable(grpValues,
+                new String[] { Messages.ExpressionBuilderDialog_Functions }, 1);
         updateFunctions();
         valueTable.getColumns()[0].setWidth(340);
-        grpValues.setText(Messages.ExpressionBuilderDialog_Functions + "(" + valueTable.getItemCount() + ")");
-        
+        grpValues.setText(Messages.ExpressionBuilderDialog_Functions + "("
+                + valueTable.getItemCount() + ")");
+
         // double click event
         valueTable.addListener(SWT.MouseDoubleClick, new Listener() {
             @Override
@@ -313,7 +321,7 @@ public class ExpressionBuilderDialog extends Dialog {
         if (source == null && cboLayer.getItemCount() > 0) {
             cboLayer.select(0);
         }
-        
+
         area.pack();
 
         return area;
@@ -355,30 +363,34 @@ public class ExpressionBuilderDialog extends Dialog {
         }
         txtExpression.setFocus();
     }
-    
+
     private void updateFunctions() {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                Set<FunctionFactory> functionFactories = CommonFactoryFinder.getFunctionFactories(null);
+                Set<FunctionFactory> functionFactories = CommonFactoryFinder
+                        .getFunctionFactories(null);
                 for (FunctionFactory factory : functionFactories) {
                     String factoryName = factory.toString();
-                    if (factoryName.contains("org.geotools.process.function.ProcessFunctionFactory")) {
+                    if (factoryName
+                            .contains("org.geotools.process.function.ProcessFunctionFactory")) {
                         continue;
                     }
-                    
+
                     List<FunctionName> functionNames = factory.getFunctionNames();
                     ArrayList<FunctionName> sorted = new ArrayList<FunctionName>(functionNames);
                     Collections.sort(sorted, new Comparator<FunctionName>() {
                         @Override
                         public int compare(FunctionName o1, FunctionName o2) {
-                            if (o1 == null && o2 == null)
+                            if (o1 == null && o2 == null) {
                                 return 0;
-                            if (o1 == null && o2 != null)
+                            } else if (o1 == null && o2 != null) {
                                 return 1;
-                            if (o1 != null && o2 == null)
+                            } else if (o1 != null && o2 == null) {
                                 return -1;
-                            return o1.getName().compareTo(o2.getName());
+                            } else {
+                                return o1.getName().compareTo(o2.getName());
+                            }
                         }
                     });
 

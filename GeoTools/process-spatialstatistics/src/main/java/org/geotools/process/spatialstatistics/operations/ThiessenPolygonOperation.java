@@ -250,9 +250,8 @@ public class ThiessenPolygonOperation extends GeneralOperation {
     public List<Coordinate> getCoordinateList(SimpleFeatureCollection inputFeatures) {
         List<Coordinate> pointList = new ArrayList<Coordinate>();
 
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = inputFeatures.features();
         try {
-            featureIter = inputFeatures.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();

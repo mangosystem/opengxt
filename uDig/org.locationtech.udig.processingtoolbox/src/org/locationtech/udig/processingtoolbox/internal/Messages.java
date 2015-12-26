@@ -97,8 +97,15 @@ public class Messages extends NLS {
     public static String GeometryToFeaturesDialog_WKT;
     public static String GeometryToFeaturesDialog_CRS;
     
+    public static String GeometryViewer_Point;
+    public static String GeometryViewer_LineString;
+    public static String GeometryViewer_Polygon;
+    public static String GeometryViewer_PointLayer;
+    public static String GeometryViewer_LineStringLayer;
+    public static String GeometryViewer_PolygonLayer;
     public static String GeometryViewer_MapCenter;
     public static String GeometryViewer_MapExtent;
+    public static String GeometryViewer_MapBoundary;
     public static String GeometryViewer_GeometryFromFeatures;
     
     public static String HistogramDialog_title;

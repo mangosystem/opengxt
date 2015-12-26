@@ -308,7 +308,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
             // raster layer parameters
             GridCoverageDataWidget gridCoverageView = new GridCoverageDataWidget(map);
             gridCoverageView.create(container, SWT.NONE, inputParams, param);
-        } else if (param.type.isAssignableFrom(Geometry.class)) {
+        } else if (Geometry.class.isAssignableFrom(param.type)) {
             // wkt geometry parameters
             GeometryWidget geometryView = new GeometryWidget(map);
             geometryView.create(container, SWT.NONE, inputParams, param);
@@ -317,7 +317,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
             FilterWidget filterView = new FilterWidget(map);
             filterView.create(container, SWT.NONE, inputParams, param);
         } else if (Expression.class.isAssignableFrom(param.type)) {
-            // filter parameters
+            // expression parameters
             ExpressionWidget expressionView = new ExpressionWidget(map);
             expressionView.create(container, SWT.NONE, inputParams, param);
         } else if (param.type.isAssignableFrom(CoordinateReferenceSystem.class)) {

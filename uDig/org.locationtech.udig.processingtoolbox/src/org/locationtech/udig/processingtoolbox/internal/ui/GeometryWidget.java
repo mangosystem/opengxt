@@ -43,6 +43,7 @@ import org.locationtech.udig.project.IMap;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
@@ -56,7 +57,7 @@ import com.vividsolutions.jts.io.WKTReader;
 public class GeometryWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(GeometryWidget.class);
 
-    private GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory(null);
+    private GeometryFactory gf = JTSFactoryFinder.getGeometryFactory(null);
 
     private IMap map;
 
@@ -98,7 +99,7 @@ public class GeometryWidget extends AbstractToolboxWidget {
             public void modifyText(ModifyEvent e) {
                 Geometry validGeometry = null;
                 if (txtGeometry.getText().length() > 0) {
-                    WKTReader reader = new WKTReader(geometryFactory);
+                    WKTReader reader = new WKTReader(gf);
                     try {
                         validGeometry = reader.read(txtGeometry.getText());
                     } catch (ParseException e1) {
@@ -120,42 +121,32 @@ public class GeometryWidget extends AbstractToolboxWidget {
                 // create popup menu
                 Menu popupMenu = new Menu(parent.getShell(), SWT.POP_UP);
 
-                // 1. GeometryViewer_MapCenter = Point From Map's Center
-                MenuItem mnuPoint = new MenuItem(popupMenu, SWT.PUSH);
-                mnuPoint.setText(Messages.GeometryViewer_MapCenter);
-                mnuPoint.addSelectionListener(new SelectionAdapter() {
-                    @SuppressWarnings("nls")
+                // 1. Point
+                // - Map's Center
+                // - Layer's Center - layers......
+                MenuItem mnuPoint = new MenuItem(popupMenu, SWT.CASCADE);
+                mnuPoint.setText(Messages.GeometryViewer_Point);
+                Menu subPointMenu = new Menu(parent.getShell(), SWT.DROP_DOWN);
+                mnuPoint.setMenu(subPointMenu);
+
+                // 1. map's center = Point From Map's Center
+                MenuItem mnuPointMap = new MenuItem(subPointMenu, SWT.PUSH);
+                mnuPointMap.setText(Messages.GeometryViewer_MapCenter);
+                mnuPointMap.addSelectionListener(new SelectionAdapter() {
                     @Override
                     public void widgetSelected(SelectionEvent e) {
                         Coordinate center = map.getViewportModel().getCenter();
-                        txtGeometry.setText("POINT(" + center.x + " " + center.y + ")");
+                        txtGeometry.setText(gf.createPoint(center).toText());
                     }
                 });
-
-                // 2. GeometryViewer_MapExtent = Polygon From Map's Extent
-                MenuItem mnuExtent = new MenuItem(popupMenu, SWT.PUSH);
-                mnuExtent.setText(Messages.GeometryViewer_MapExtent);
-                mnuExtent.addSelectionListener(new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent e) {
-                        ReferencedEnvelope extent = map.getViewportModel().getBounds();
-                        Geometry polygon = JTS.toGeometry(extent);
-                        txtGeometry.setText(polygon.toText());
-                    }
-                });
-
-                // 3. Extent from current map's layers
-                MenuItem layerMenuItem = new MenuItem(popupMenu, SWT.CASCADE);
-                layerMenuItem.setText(Messages.BoundingBoxViewer_LayerExtent);
-                Menu subMenu = new Menu(parent.getShell(), SWT.DROP_DOWN);
-                layerMenuItem.setMenu(subMenu);
 
                 for (ILayer layer : map.getMapLayers()) {
                     if (layer.getName() == null) {
                         continue;
                     }
-                    MenuItem mnuLayer = new MenuItem(subMenu, SWT.PUSH);
-                    mnuLayer.setText(layer.getName());
+                    MenuItem mnuLayer = new MenuItem(subPointMenu, SWT.PUSH);
+                    mnuLayer.setText(String.format(Messages.GeometryViewer_PointLayer,
+                            layer.getName()));
                     mnuLayer.setData(layer);
                     mnuLayer.addSelectionListener(new SelectionAdapter() {
                         @Override
@@ -163,8 +154,85 @@ public class GeometryWidget extends AbstractToolboxWidget {
                             ILayer layer = (ILayer) event.widget.getData();
                             ReferencedEnvelope extent = layer.getBounds(new NullProgressMonitor(),
                                     null);
-                            Geometry polygon = JTS.toGeometry(extent);
-                            txtGeometry.setText(polygon.toText());
+                            Geometry point = gf.createPoint(extent.centre());
+                            txtGeometry.setText(point.toText());
+                        }
+                    });
+                }
+
+                //
+                // 2. LineString
+                // - Map's Extent
+                // - Layer's Extent - layers......
+                MenuItem mnuLine = new MenuItem(popupMenu, SWT.CASCADE);
+                mnuLine.setText(Messages.GeometryViewer_LineString);
+                Menu subLineMenu = new Menu(parent.getShell(), SWT.DROP_DOWN);
+                mnuLine.setMenu(subLineMenu);
+
+                // 1. boundary of map's extent
+                MenuItem mnuBoundaryMap = new MenuItem(subLineMenu, SWT.PUSH);
+                mnuBoundaryMap.setText(Messages.GeometryViewer_MapBoundary);
+                mnuBoundaryMap.addSelectionListener(new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        ReferencedEnvelope extent = map.getViewportModel().getBounds();
+                        txtGeometry.setText(toLineString(extent).toText());
+                    }
+                });
+
+                for (ILayer layer : map.getMapLayers()) {
+                    if (layer.getName() == null) {
+                        continue;
+                    }
+                    MenuItem mnuLayer = new MenuItem(subLineMenu, SWT.PUSH);
+                    mnuLayer.setText(String.format(Messages.GeometryViewer_LineStringLayer,
+                            layer.getName()));
+                    mnuLayer.setData(layer);
+                    mnuLayer.addSelectionListener(new SelectionAdapter() {
+                        @Override
+                        public void widgetSelected(SelectionEvent event) {
+                            ILayer layer = (ILayer) event.widget.getData();
+                            ReferencedEnvelope extent = layer.getBounds(new NullProgressMonitor(),
+                                    null);
+                            txtGeometry.setText(toLineString(extent).toText());
+                        }
+                    });
+                }
+
+                // 3. Polygon
+                // - Map's Extent
+                // - Layer's Extent - layers......
+                MenuItem mnuPolygon = new MenuItem(popupMenu, SWT.CASCADE);
+                mnuPolygon.setText(Messages.GeometryViewer_Polygon);
+                Menu subPolygonMenu = new Menu(parent.getShell(), SWT.DROP_DOWN);
+                mnuPolygon.setMenu(subPolygonMenu);
+
+                // 1. map's extent = Polygon From Map's Extent
+                MenuItem mnuExtentMap = new MenuItem(subPolygonMenu, SWT.PUSH);
+                mnuExtentMap.setText(Messages.GeometryViewer_MapExtent);
+                mnuExtentMap.addSelectionListener(new SelectionAdapter() {
+                    @Override
+                    public void widgetSelected(SelectionEvent e) {
+                        ReferencedEnvelope extent = map.getViewportModel().getBounds();
+                        txtGeometry.setText(JTS.toGeometry(extent).toText());
+                    }
+                });
+
+                for (ILayer layer : map.getMapLayers()) {
+                    if (layer.getName() == null) {
+                        continue;
+                    }
+                    MenuItem mnuLayer = new MenuItem(subPolygonMenu, SWT.PUSH);
+                    mnuLayer.setText(String.format(Messages.GeometryViewer_PolygonLayer,
+                            layer.getName()));
+                    mnuLayer.setData(layer);
+                    mnuLayer.addSelectionListener(new SelectionAdapter() {
+                        @Override
+                        public void widgetSelected(SelectionEvent event) {
+                            ILayer layer = (ILayer) event.widget.getData();
+                            ReferencedEnvelope extent = layer.getBounds(new NullProgressMonitor(),
+                                    null);
+                            txtGeometry.setText(JTS.toGeometry(extent).toText());
                         }
                     });
                 }
@@ -197,5 +265,10 @@ public class GeometryWidget extends AbstractToolboxWidget {
         });
 
         composite.pack();
+    }
+
+    private Geometry toLineString(ReferencedEnvelope extent) {
+        LinearRing linearRing = (LinearRing) JTS.toGeometry(extent).getBoundary();
+        return gf.createLineString(linearRing.getCoordinateSequence());
     }
 }

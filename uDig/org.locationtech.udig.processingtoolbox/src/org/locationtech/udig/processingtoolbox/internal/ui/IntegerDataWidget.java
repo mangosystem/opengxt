@@ -110,7 +110,7 @@ public class IntegerDataWidget extends AbstractToolboxWidget {
                 Shell shell = parent.getShell();
                 Menu popupMenu = new Menu(shell, SWT.POP_UP);
 
-                // 1. Get Area
+                // 1. Get Count
                 MenuItem areaMenuItem = new MenuItem(popupMenu, SWT.CASCADE);
                 areaMenuItem.setText(Messages.IntegerDataViewer_FeatureCount);
                 Menu subMenu = new Menu(shell, SWT.DROP_DOWN);

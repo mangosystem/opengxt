@@ -45,7 +45,7 @@ public class CalculateFieldProcessFactory extends SpatialStatisticsProcessFactor
     private static final String PROCESS_NAME = "CalculateField";
 
     /*
-     * CalculateFieldProcess(SimpleFeatureCollection inputFeatures, String fieldName, Expression expression): SimpleFeatureCollection
+     * CalculateFieldProcess(SimpleFeatureCollection inputFeatures, Expression expression, String fieldName): SimpleFeatureCollection
      */
 
     public CalculateFieldProcessFactory() {
@@ -71,26 +71,25 @@ public class CalculateFieldProcessFactory extends SpatialStatisticsProcessFactor
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("CalculateField.inputFeatures.title"),
-            getResource("CalculateField.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "All"));
-
-    /** fieldName */
-    public static final Parameter<String> fieldName = new Parameter<String>("fieldName",
-            String.class, getResource("CalculateField.fieldName.title"),
-            getResource("CalculateField.fieldName.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.All"));
+            getResource("CalculateField.inputFeatures.description"), true, 1, 1, null, null);
 
     /** expression */
     public static final Parameter<Expression> expression = new Parameter<Expression>("expression",
             Expression.class, getResource("CalculateField.expression.title"),
             getResource("CalculateField.expression.description"), true, 1, 1, null, null);
 
+    /** fieldName */
+    public static final Parameter<String> fieldName = new Parameter<String>("fieldName",
+            String.class, getResource("CalculateField.fieldName.title"),
+            getResource("CalculateField.fieldName.description"), false, 0, 1, "evaluated", new KVP(
+                    Parameter.OPTIONS, "inputFeatures.All"));
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
-        parameterInfo.put(fieldName.key, fieldName);
         parameterInfo.put(expression.key, expression);
+        parameterInfo.put(fieldName.key, fieldName);
         return parameterInfo;
     }
 

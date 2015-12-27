@@ -55,11 +55,11 @@ public class CalculateFieldProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            String fieldName, Expression expression, ProgressListener monitor) {
+            Expression expression, String fieldName, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(CalculateFieldProcessFactory.inputFeatures.key, inputFeatures);
-        map.put(CalculateFieldProcessFactory.fieldName.key, fieldName);
         map.put(CalculateFieldProcessFactory.expression.key, expression);
+        map.put(CalculateFieldProcessFactory.fieldName.key, fieldName);
 
         Process process = new CalculateFieldProcess(null);
         Map<String, Object> resultMap;
@@ -89,11 +89,12 @@ public class CalculateFieldProcess extends AbstractStatisticsProcess {
 
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, CalculateFieldProcessFactory.inputFeatures, null);
-            String fieldName = (String) Params.getValue(input,
-                    CalculateFieldProcessFactory.fieldName, null);
             Expression expression = (Expression) Params.getValue(input,
                     CalculateFieldProcessFactory.expression, null);
-            if (inputFeatures == null || fieldName == null || expression == null) {
+            String fieldName = (String) Params.getValue(input,
+                    CalculateFieldProcessFactory.fieldName,
+                    CalculateFieldProcessFactory.fieldName.sample);
+            if (inputFeatures == null || expression == null) {
                 throw new NullPointerException("All parameters required");
             }
 
@@ -106,8 +107,8 @@ public class CalculateFieldProcess extends AbstractStatisticsProcess {
 
             // start process
             SimpleFeatureCollection resultFc = DataUtilities
-                    .simple(new FieldCalculationFeatureCollection(inputFeatures, fieldName,
-                            expression));
+                    .simple(new FieldCalculationFeatureCollection(inputFeatures, expression,
+                            fieldName));
             // end process
 
             monitor.setTask(Text.text("Encoding result"));
@@ -125,5 +126,4 @@ public class CalculateFieldProcess extends AbstractStatisticsProcess {
             monitor.dispose();
         }
     }
-
 }

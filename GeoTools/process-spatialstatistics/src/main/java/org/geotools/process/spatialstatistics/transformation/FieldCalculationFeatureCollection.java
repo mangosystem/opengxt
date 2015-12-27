@@ -16,6 +16,8 @@
  */
 package org.geotools.process.spatialstatistics.transformation;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
@@ -27,7 +29,14 @@ import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.expression.Expression;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+import com.vividsolutions.jts.algorithm.MinimumDiameter;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.LinearRing;
 
 /**
  * FieldCalculation SimpleFeatureCollection Implementation
@@ -44,64 +53,83 @@ public class FieldCalculationFeatureCollection extends GXTSimpleFeatureCollectio
 
     private Expression expression;
 
-    private Class<?> fieldBinding = Double.class; // default
+    private Class<?> fieldBinding = null;
+
+    private boolean isGeometry = false;
 
     private SimpleFeatureType schema;
 
-    public FieldCalculationFeatureCollection(SimpleFeatureCollection delegate, String fieldName,
-            Expression expression) {
+    public FieldCalculationFeatureCollection(SimpleFeatureCollection delegate,
+            Expression expression, String fieldName) {
         super(delegate);
 
         this.schema = FeatureTypes.build(delegate, delegate.getSchema().getTypeName());
-        this.fieldName = FeatureTypes.validateProperty(schema, fieldName);
+        this.fieldName = FeatureTypes.validateProperty(delegate.getSchema(), fieldName);
         this.expression = expression;
 
-        if (FeatureTypes.existProeprty(schema, this.fieldName)) {
-            AttributeDescriptor attributeType = schema.getDescriptor(this.fieldName);
-            fieldBinding = attributeType.getType().getBinding();
-        } else {
-            // test value type
-            SimpleFeatureIterator featureIter = delegate.features();
-            fieldBinding = null;
-            try {
-                while (featureIter.hasNext()) {
-                    SimpleFeature feature = featureIter.next();
-                    Object value = this.expression.evaluate(feature);
-                    if (value != null) {
-                        fieldBinding = value.getClass();
-                        break;
-                    }
+        // test value type
+        SimpleFeatureIterator featureIter = delegate.features();
+        try {
+            while (featureIter.hasNext()) {
+                SimpleFeature feature = featureIter.next();
+                Object value = this.expression.evaluate(feature);
+                if (value != null) {
+                    fieldBinding = value.getClass();
+                    break;
                 }
-            } finally {
-                featureIter.close();
+            }
+        } finally {
+            featureIter.close();
+        }
+
+        if (fieldBinding == null) {
+            fieldBinding = String.class;
+        }
+
+        if (fieldBinding.isAssignableFrom(String.class)) {
+            schema = FeatureTypes.add(schema, this.fieldName, String.class, 150);
+        } else if (fieldBinding.isAssignableFrom(Short.class)) {
+            schema = FeatureTypes.add(schema, this.fieldName, Integer.class, 38);
+        } else if (fieldBinding.isAssignableFrom(Integer.class)) {
+            schema = FeatureTypes.add(schema, this.fieldName, Integer.class, 38);
+        } else if (fieldBinding.isAssignableFrom(Long.class)) {
+            schema = FeatureTypes.add(schema, this.fieldName, Integer.class, 38);
+        } else if (fieldBinding.isAssignableFrom(Float.class)) {
+            schema = FeatureTypes.add(schema, this.fieldName, Double.class, 38);
+        } else if (fieldBinding.isAssignableFrom(Double.class)) {
+            schema = FeatureTypes.add(schema, this.fieldName, Double.class, 38);
+        } else if (fieldBinding.isAssignableFrom(Number.class)) {
+            schema = FeatureTypes.add(schema, this.fieldName, Double.class, 38);
+        } else if (fieldBinding.isAssignableFrom(Boolean.class)) {
+            schema = FeatureTypes.add(schema, this.fieldName, Boolean.class, 4);
+        } else if (fieldBinding.isAssignableFrom(Date.class)) {
+            schema = FeatureTypes.add(schema, this.fieldName, Date.class, 8);
+        } else if (fieldBinding.isAssignableFrom(Timestamp.class)) {
+            schema = FeatureTypes.add(schema, this.fieldName, Timestamp.class, 8);
+        } else if (Geometry.class.isAssignableFrom(fieldBinding)) {
+            isGeometry = true;
+            if (fieldBinding.isAssignableFrom(LinearRing.class)) {
+                fieldBinding = LineString.class;
             }
 
-            if (fieldBinding == null) {
-                fieldBinding = String.class;
+            String typeName = delegate.getSchema().getTypeName();
+            CoordinateReferenceSystem crs = delegate.getSchema().getCoordinateReferenceSystem();
+            schema = FeatureTypes.getDefaultType(typeName, fieldBinding, crs);
+            for (AttributeDescriptor dsc : delegate.getSchema().getAttributeDescriptors()) {
+                if (dsc instanceof GeometryDescriptor) {
+                    continue;
+                }
+                schema = FeatureTypes.add(schema, dsc);
             }
-
-            if (fieldBinding.isAssignableFrom(String.class)) {
-                schema = FeatureTypes.add(schema, fieldName, String.class, 150);
-            } else if (fieldBinding.isAssignableFrom(Integer.class)) {
-                schema = FeatureTypes.add(schema, fieldName, Integer.class, 38);
-            } else if (fieldBinding.isAssignableFrom(Long.class)) {
-                schema = FeatureTypes.add(schema, fieldName, Integer.class, 38);
-            } else if (fieldBinding.isAssignableFrom(Float.class)) {
-                schema = FeatureTypes.add(schema, fieldName, Double.class, 38);
-            } else if (fieldBinding.isAssignableFrom(Double.class)) {
-                schema = FeatureTypes.add(schema, fieldName, Double.class, 38);
-            } else if (fieldBinding.isAssignableFrom(Number.class)) {
-                schema = FeatureTypes.add(schema, fieldName, Double.class, 38);
-            } else {
-                schema = FeatureTypes.add(schema, fieldName, String.class, 150);
-            }
+        } else {
+            schema = FeatureTypes.add(schema, this.fieldName, String.class, 150);
         }
     }
 
     @Override
     public SimpleFeatureIterator features() {
-        return new FieldCalculationFeatureIterator(delegate.features(), getSchema(), fieldName,
-                expression);
+        return new FieldCalculationFeatureIterator(delegate.features(), getSchema(), expression,
+                fieldName, isGeometry);
     }
 
     @Override
@@ -118,12 +146,16 @@ public class FieldCalculationFeatureCollection extends GXTSimpleFeatureCollectio
 
         private Expression expression;
 
+        private boolean isGeometry = false;
+
         public FieldCalculationFeatureIterator(SimpleFeatureIterator delegate,
-                SimpleFeatureType schema, String fieldName, Expression expression) {
+                SimpleFeatureType schema, Expression expression, String fieldName,
+                boolean isGeometry) {
             this.delegate = delegate;
 
-            this.fieldName = fieldName;
             this.expression = expression;
+            this.fieldName = fieldName;
+            this.isGeometry = isGeometry;
             this.builder = new SimpleFeatureBuilder(schema);
         }
 
@@ -146,7 +178,11 @@ public class FieldCalculationFeatureCollection extends GXTSimpleFeatureCollectio
             transferAttribute(sourceFeature, nextFeature);
 
             Object value = expression.evaluate(sourceFeature);
-            nextFeature.setAttribute(fieldName, value);
+            if (isGeometry) {
+                nextFeature.setDefaultGeometry(value);
+            } else {
+                nextFeature.setAttribute(fieldName, value);
+            }
 
             return nextFeature;
         }

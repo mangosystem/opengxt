@@ -445,7 +445,11 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
                     });
 
                     // add table
+                    final String regex = "^[A-Z].*";
                     for (FunctionName functionName : sorted) {
+                        if (functionName.getName().matches(regex)) {
+                            continue;
+                        }
                         TableItem item = new TableItem(valueTable, SWT.NULL);
                         int i = 0;
                         StringBuffer buffer = new StringBuffer(functionName.getName() + "( ");

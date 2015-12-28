@@ -20,6 +20,8 @@ import java.util.logging.Logger;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.ModifyEvent;
@@ -395,7 +397,11 @@ public class ExpressionBuilderDialog extends Dialog {
                     });
 
                     // add table
+                    final String regex = "^[A-Z].*";
                     for (FunctionName functionName : sorted) {
+                        if (functionName.getName().matches(regex)) {
+                            continue;
+                        }
                         TableItem item = new TableItem(valueTable, SWT.NULL);
                         int i = 0;
                         StringBuffer buffer = new StringBuffer(functionName.getName() + "( ");
@@ -419,4 +425,22 @@ public class ExpressionBuilderDialog extends Dialog {
         }
     }
 
+    final class FunctionFilter extends ViewerFilter {
+        private String searchString;
+
+        public void setSearchText(String s) {
+            this.searchString = ".*" + s + ".*";
+        }
+
+        @Override
+        public boolean select(Viewer viewer, Object parentElement, Object element) {
+            if (searchString == null || searchString.length() == 0) {
+                return true;
+            }
+            if (element.toString().matches(searchString)) {
+                return true;
+            }
+            return false;
+        }
+    }
 }

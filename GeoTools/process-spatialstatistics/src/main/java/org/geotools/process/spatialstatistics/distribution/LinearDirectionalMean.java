@@ -99,20 +99,21 @@ public class LinearDirectionalMean {
         double meanY = getMeanY();
         double radianAngle = getRadianAngle();
 
-        double endX = (halfMeanLen * Math.sin(radianAngle)) + meanX;
-        double startX = (2.0 * meanX) - endX;
-        double startZ = 0.0;
+        double fromX = (halfMeanLen * Math.sin(radianAngle)) + meanX;
+        double toX = (2.0 * meanX) - fromX;
 
-        double endY = (halfMeanLen * Math.cos(radianAngle)) + meanY;
-        double startY = (2.0 * meanY) - endY;
-        double endZ = 0.0;
+        double fromY = (halfMeanLen * Math.cos(radianAngle)) + meanY;
+        double toY = (2.0 * meanY) - fromY;
+
+        double fromZ = 0.0;
+        double toZ = 0.0;
 
         GeometryFactory gf = JTSFactoryFinder.getGeometryFactory(GeoTools.getDefaultHints());
 
-        Coordinate startCoord = new Coordinate(startX, startY, startZ);
-        Coordinate endCoord = new Coordinate(endX, endY, endZ);
+        Coordinate toCoord = new Coordinate(toX, toY, toZ);
+        Coordinate fromCoord = new Coordinate(fromX, fromY, fromZ);
 
-        return gf.createLineString(new Coordinate[] { startCoord, endCoord });
+        return gf.createLineString(new Coordinate[] { fromCoord, toCoord });
     }
 
     public double getCirVar() {

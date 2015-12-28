@@ -43,12 +43,15 @@ public class ToPointFeatureCollection extends GXTSimpleFeatureCollection {
 
     private boolean useInside;
 
+    private SimpleShapeType shapeType;
+
     private SimpleFeatureType schema;
 
     public ToPointFeatureCollection(SimpleFeatureCollection delegate, boolean useInside) {
         super(delegate);
 
         this.useInside = useInside;
+        this.shapeType = FeatureTypes.getSimpleShapeType(delegate.getSchema());
 
         String typeName = delegate.getSchema().getTypeName();
         this.schema = FeatureTypes.build(delegate.getSchema(), typeName, Point.class);
@@ -56,7 +59,7 @@ public class ToPointFeatureCollection extends GXTSimpleFeatureCollection {
 
     @Override
     public SimpleFeatureIterator features() {
-        return new ToPointFeatureIterator(delegate.features(), getSchema(), useInside);
+        return new ToPointFeatureIterator(delegate.features(), getSchema(), useInside, shapeType);
     }
 
     @Override
@@ -74,12 +77,12 @@ public class ToPointFeatureCollection extends GXTSimpleFeatureCollection {
         private SimpleShapeType shapeType;
 
         public ToPointFeatureIterator(SimpleFeatureIterator delegate, SimpleFeatureType schema,
-                boolean useInside) {
+                boolean useInside, SimpleShapeType shapeType) {
             this.delegate = delegate;
 
             this.useInside = useInside;
+            this.shapeType = shapeType;
             this.builder = new SimpleFeatureBuilder(schema);
-            this.shapeType = FeatureTypes.getSimpleShapeType(schema);
         }
 
         public void close() {

@@ -43,7 +43,7 @@ public class StatisticsVisitorResult {
 
     double standardDeviation = 0.0;
 
-    double variance = Double.NaN;
+    double variance = 0.0;
 
     int count = 0;
 
@@ -107,11 +107,11 @@ public class StatisticsVisitorResult {
     }
 
     public double getRange() {
-        return maximum - minimum;
+        return count == 0 ? 0.0 : maximum - minimum;
     }
 
     public double getCoefficientOfVariance() {
-        return this.getStandardDeviation() / this.getMean();
+        return count == 0 ? 0.0 : this.getStandardDeviation() / this.getMean();
     }
 
     public double getStandardDeviation() {

@@ -165,12 +165,21 @@ public class WindroseFeatureCollection extends GXTSimpleFeatureCollection {
 
                 feature.setAttribute(FIELDS[0], index);
                 feature.setAttribute(FIELDS[1], ret.getCount());
-                feature.setAttribute(FIELDS[2], ret.getMinimum());
-                feature.setAttribute(FIELDS[3], ret.getMaximum());
-                feature.setAttribute(FIELDS[4], ret.getSum());
-                feature.setAttribute(FIELDS[5], ret.getMean());
-                feature.setAttribute(FIELDS[6], ret.getStandardDeviation());
-                feature.setAttribute(FIELDS[7], ret.getVariance());
+                if (ret.getCount() == 0) {
+                    feature.setAttribute(FIELDS[2], 0.0);
+                    feature.setAttribute(FIELDS[3], 0.0);
+                    feature.setAttribute(FIELDS[4], 0.0);
+                    feature.setAttribute(FIELDS[5], 0.0);
+                    feature.setAttribute(FIELDS[6], 0.0);
+                    feature.setAttribute(FIELDS[7], 0.0);
+                } else {
+                    feature.setAttribute(FIELDS[2], ret.getMinimum());
+                    feature.setAttribute(FIELDS[3], ret.getMaximum());
+                    feature.setAttribute(FIELDS[4], ret.getSum());
+                    feature.setAttribute(FIELDS[5], ret.getMean());
+                    feature.setAttribute(FIELDS[6], ret.getStandardDeviation());
+                    feature.setAttribute(FIELDS[7], ret.getVariance());
+                }
 
                 minValue = Math.min(minValue, ret.getSum());
                 maxValue = Math.max(maxValue, ret.getSum());

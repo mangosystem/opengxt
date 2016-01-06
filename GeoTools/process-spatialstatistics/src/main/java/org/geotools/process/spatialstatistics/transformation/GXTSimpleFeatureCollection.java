@@ -56,6 +56,9 @@ public class GXTSimpleFeatureCollection extends DecoratingSimpleFeatureCollectio
         List<AttributeDescriptor> attributes = source.getFeatureType().getAttributeDescriptors();
         for (AttributeDescriptor attr : attributes) {
             String attributeName = attr.getLocalName();
+            if (target.getFeatureType().indexOf(attributeName) == -1) {
+                continue;
+            }
             target.setAttribute(attributeName, source.getAttribute(attributeName));
         }
     }

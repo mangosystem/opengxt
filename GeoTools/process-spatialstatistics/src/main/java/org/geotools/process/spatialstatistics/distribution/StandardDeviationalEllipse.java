@@ -178,6 +178,11 @@ public class StandardDeviationalEllipse {
             double dXr = dX * cosRadian - dY * sinRadian;
             double dYr = dX * sinRadian + dY * cosRadian;
 
+            if (Double.isNaN(dXr) || Double.isNaN(dYr) || Double.isInfinite(dXr)
+                    || Double.isInfinite(dYr)) {
+                continue;
+            }
+
             // Create Point Shifted to Ellipse Centroid
             coordList.add(new Coordinate(dXr + meanX, dYr + meanY));
         }

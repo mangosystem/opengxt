@@ -17,15 +17,22 @@
 package org.geotools.process.spatialstatistics.transformation;
 
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -48,12 +55,19 @@ public class XYCalculationFeatureCollection extends GXTSimpleFeatureCollection {
 
     private SimpleFeatureType schema;
 
+    private GeometryCoordinateSequenceTransformer transformer = null;
+
     public XYCalculationFeatureCollection(SimpleFeatureCollection delegate, boolean useInside) {
         this(delegate, "xcoord", "ycoord", useInside);
     }
 
     public XYCalculationFeatureCollection(SimpleFeatureCollection delegate, String xField,
             String yField, boolean useInside) {
+        this(delegate, "xcoord", "ycoord", useInside, null);
+    }
+
+    public XYCalculationFeatureCollection(SimpleFeatureCollection delegate, String xField,
+            String yField, boolean useInside, CoordinateReferenceSystem targetCRS) {
         super(delegate);
 
         if (xField == null || xField.isEmpty()) {
@@ -63,7 +77,7 @@ public class XYCalculationFeatureCollection extends GXTSimpleFeatureCollection {
         if (yField == null || yField.isEmpty()) {
             throw new NullPointerException("y field is null");
         }
-        
+
         this.xField = xField;
         this.yField = yField;
         this.useInside = useInside;
@@ -71,12 +85,32 @@ public class XYCalculationFeatureCollection extends GXTSimpleFeatureCollection {
         this.schema = FeatureTypes.build(delegate, delegate.getSchema().getTypeName());
         this.schema = FeatureTypes.add(schema, xField, Double.class, 38);
         this.schema = FeatureTypes.add(schema, yField, Double.class, 38);
+
+        if (targetCRS != null) {
+            CoordinateReferenceSystem forcedCRS = getSchema().getCoordinateReferenceSystem();
+            if (forcedCRS == null) {
+                throw new NullPointerException("source crs is null");
+            }
+
+            transformer = new GeometryCoordinateSequenceTransformer();
+            transformer.setMathTransform(transform(forcedCRS, targetCRS, true));
+            transformer.setCoordinateReferenceSystem(targetCRS);
+        }
+    }
+
+    private MathTransform transform(CoordinateReferenceSystem source,
+            CoordinateReferenceSystem target, boolean lenient) {
+        try {
+            return CRS.findMathTransform(source, target, lenient);
+        } catch (FactoryException e) {
+            throw new IllegalArgumentException("Could not create math transform");
+        }
     }
 
     @Override
     public SimpleFeatureIterator features() {
         return new XYCalculationFeatureIterator(delegate.features(), getSchema(), xField, yField,
-                useInside);
+                useInside, transformer);
     }
 
     @Override
@@ -93,15 +127,19 @@ public class XYCalculationFeatureCollection extends GXTSimpleFeatureCollection {
 
         private boolean useInside = false;
 
+        private GeometryCoordinateSequenceTransformer transformer;
+
         private SimpleFeatureBuilder builder;
 
         public XYCalculationFeatureIterator(SimpleFeatureIterator delegate,
-                SimpleFeatureType schema, String xField, String yField, boolean useInside) {
+                SimpleFeatureType schema, String xField, String yField, boolean useInside,
+                GeometryCoordinateSequenceTransformer transformer) {
             this.delegate = delegate;
 
             this.xField = xField;
             this.yField = yField;
             this.useInside = useInside;
+            this.transformer = transformer;
             this.builder = new SimpleFeatureBuilder(schema);
         }
 
@@ -123,6 +161,17 @@ public class XYCalculationFeatureCollection extends GXTSimpleFeatureCollection {
             // calculate xy coordinates
             Geometry g = (Geometry) sourceFeature.getDefaultGeometry();
             Point center = useInside ? g.getInteriorPoint() : g.getCentroid();
+
+            if (transformer != null) {
+                try {
+                    center.setUserData(sourceFeature.getFeatureType()
+                            .getCoordinateReferenceSystem());
+                    center = (Point) transformer.transform(center);
+                } catch (TransformException e) {
+                    String msg = "Error occured transforming " + center.toString();
+                    LOGGER.log(Level.WARNING, msg);
+                }
+            }
 
             nextFeature.setAttribute(xField, center.getX());
             nextFeature.setAttribute(yField, center.getY());

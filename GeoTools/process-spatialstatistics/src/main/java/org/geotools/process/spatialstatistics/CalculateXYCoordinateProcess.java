@@ -26,7 +26,6 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
 import org.geotools.process.spatialstatistics.transformation.XYCalculationFeatureCollection;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
@@ -123,13 +122,8 @@ public class CalculateXYCoordinateProcess extends AbstractStatisticsProcess {
 
             // start process
             SimpleFeatureCollection resultFc = null;
-            if (targetCRS == null) {
-                resultFc = new XYCalculationFeatureCollection(inputFeatures, xField, yField, inside);
-            } else {
-                SimpleFeatureCollection reprojected = new ReprojectFeatureCollection(inputFeatures,
-                        null, targetCRS, true);
-                resultFc = new XYCalculationFeatureCollection(reprojected, xField, yField, inside);
-            }
+            resultFc = new XYCalculationFeatureCollection(inputFeatures, xField, yField, inside,
+                    targetCRS);
             // end process
 
             monitor.setTask(Text.text("Encoding result"));

@@ -225,6 +225,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
             exportOp.setOutputDataStore(DataStoreFactory.getDataStore(params));
             exportOp.setOutputTypeName(typeName);
             featureSource = exportOp.execute(source);
+            source = featureSource.getFeatures();
         } catch (IOException e) {
             ToolboxPlugin.log(e.getMessage());
         }
@@ -235,8 +236,8 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
 
         monitor.setTaskName(Messages.Task_AddingLayer);
         ToolboxPlugin.log(Messages.Task_AddingLayer);
-
-        SimpleFeatureType schema = source.getSchema();
+        
+        SimpleFeatureType schema = featureSource.getSchema();
         SSStyleBuilder ssBuilder = new SSStyleBuilder(schema);
         ssBuilder.setOpacity(0.8f);
 

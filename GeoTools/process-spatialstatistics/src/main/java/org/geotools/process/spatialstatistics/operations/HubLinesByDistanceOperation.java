@@ -69,8 +69,11 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
             featureType = FeatureTypes.getDefaultType("HubLines", geomName, LineString.class, crs);
         }
 
-        AttributeDescriptor hubIdDesc = hubFeatures.getSchema().getDescriptor(hubIdField);
-        featureType = FeatureTypes.add(featureType, hubIdDesc);
+        boolean hasHubID = hubIdField != null && hubFeatures.getSchema().indexOf(hubIdField) != -1;
+        if (hasHubID) {
+            AttributeDescriptor hubIdDesc = hubFeatures.getSchema().getDescriptor(hubIdField);
+            featureType = FeatureTypes.add(featureType, hubIdDesc);
+        }
         featureType = FeatureTypes.add(featureType, HUB_DIST, Double.class, 38);
 
         // prepare transactional feature store
@@ -111,7 +114,9 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
                 }
 
                 newFeature.setDefaultGeometry(hubLine);
-                newFeature.setAttribute(hubIdField, nearestHub.id);
+                if (hasHubID) {
+                    newFeature.setAttribute(hubIdField, nearestHub.id);
+                }
                 newFeature.setAttribute(HUB_DIST, distance);
                 featureWriter.write(newFeature);
             }
@@ -126,6 +131,10 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
 
     private List<Hub> loadHubs(SimpleFeatureCollection hubFeatures, String hubIdField) {
         List<Hub> hubs = new ArrayList<Hub>();
+
+        boolean hasHubID = hubIdField != null && hubFeatures.getSchema().indexOf(hubIdField) != -1;
+        int serialID = 0;
+
         SimpleFeatureIterator spokeIter = hubFeatures.features();
         try {
             while (spokeIter.hasNext()) {
@@ -134,7 +143,12 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
                 if (useCentroid) {
                     spokeGeom = spokeGeom.getCentroid();
                 }
-                hubs.add(new Hub(spokeGeom, spokebFeature.getAttribute(hubIdField)));
+
+                if (hasHubID) {
+                    hubs.add(new Hub(spokeGeom, spokebFeature.getAttribute(hubIdField)));
+                } else {
+                    hubs.add(new Hub(spokeGeom, Integer.valueOf(++serialID)));
+                }
             }
         } finally {
             spokeIter.close();

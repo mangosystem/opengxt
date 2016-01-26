@@ -380,7 +380,6 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(createTool, "org.geotools.process.spatialstatistics.HexagonProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.TriangularGridProcessFactory");
         buildTool(createTool, "org.geotools.process.spatialstatistics.CircularGridProcessFactory");
-        buildTool(createTool, "org.geotools.process.spatialstatistics.ThiessenPolygonProcessFactory");
 
         // Calculation
         TreeParent calcTool = new TreeParent(Messages.ToolboxView_Calculation, null, null);
@@ -407,6 +406,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(proxTool);
         buildTool(proxTool, "org.geotools.process.spatialstatistics.BufferExpressionProcessFactory");
         buildTool(proxTool, "org.geotools.process.spatialstatistics.MultipleRingBufferProcessFactory");
+        buildTool(proxTool, "org.geotools.process.spatialstatistics.ThiessenPolygonProcessFactory");
+        buildTool(proxTool, "org.geotools.process.spatialstatistics.HubLinesByIDProcessFactory");
+        buildTool(proxTool, "org.geotools.process.spatialstatistics.HubLinesByDistanceProcessFactory");
 
         // Aggregation
         TreeParent aggreTool = new TreeParent(Messages.ToolboxView_Aggregation, null, null);

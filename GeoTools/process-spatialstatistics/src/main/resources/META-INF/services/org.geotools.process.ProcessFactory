@@ -55,6 +55,8 @@ org.geotools.process.spatialstatistics.CircularGridProcessFactory
 org.geotools.process.spatialstatistics.MultipleRingBufferProcessFactory
 org.geotools.process.spatialstatistics.BufferExpressionProcessFactory
 org.geotools.process.spatialstatistics.RingMapProcessFactory
+org.geotools.process.spatialstatistics.HubLinesByDistanceProcessFactory
+org.geotools.process.spatialstatistics.HubLinesByIDProcessFactory
 
 org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory
 org.geotools.process.spatialstatistics.KernelDensityProcessFactory

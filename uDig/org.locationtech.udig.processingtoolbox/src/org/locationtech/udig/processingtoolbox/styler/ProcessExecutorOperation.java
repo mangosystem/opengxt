@@ -54,6 +54,7 @@ import org.geotools.process.spatialstatistics.storage.ShapeExportOperation;
 import org.geotools.process.spatialstatistics.styler.GraduatedColorStyleBuilder;
 import org.geotools.process.spatialstatistics.styler.GraduatedSymbolStyleBuilder;
 import org.geotools.process.spatialstatistics.styler.SSStyleBuilder;
+import org.geotools.process.spatialstatistics.transformation.ForceCRSFeatureCollection;
 import org.geotools.styling.Style;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.catalog.CatalogPlugin;
@@ -209,9 +210,17 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
 
     private void postProcessing(SimpleFeatureCollection source, Object outputPath,
             Map<String, Object> outputMeta, IProgressMonitor monitor) {
-        File filePath = new File(outputPath.toString());
+        // check crs
+        CoordinateReferenceSystem crs = source.getSchema().getCoordinateReferenceSystem();
+        if (crs == null) {
+            ToolboxPlugin
+                    .log("Warning: Output CRS will be used coordinate reference system of the current map"); //$NON-NLS-1$
+            source = new ForceCRSFeatureCollection(source, map.getViewportModel().getCRS());
+        }
 
+        // write shapefile
         monitor.setTaskName(Messages.Task_WritingResult);
+        File filePath = new File(outputPath.toString());
         String typeName = FilenameUtils.removeExtension(FilenameUtils.getName(filePath.getPath()));
         SimpleFeatureSource featureSource = null;
         try {
@@ -243,10 +252,9 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
 
         Style style = ssBuilder.getDefaultFeatureStyle();
         if (outputMeta.containsKey(Parameter.OPTIONS)) {
-            // new KVP(Parameter.OPTIONS, "렌더러유형.필드명")
-            // 렌더러유형 = LISA, UniqueValues, ClassBreaks, Density, Distance, Interpolation
+            // KVP(Parameter.OPTIONS, "renderer.fieldname")
+            // renderer = LISA, UniqueValues, ClassBreaks, Density, Distance, Interpolation
             // ClassBreaks = EqualInterval, Quantile, NaturalBreaks, StdDev
-            // Point, LineString이 ClassBreaks일 경우 크기도 함께 설정
 
             try {
                 String value = outputMeta.get(Parameter.OPTIONS).toString();

@@ -46,7 +46,7 @@ public class CalculateXYCoordinateProcessFactory extends SpatialStatisticsProces
     private static final String PROCESS_NAME = "CalculateXYCoordinate";
 
     /*
-     * CalculateXYCoordinate(SimpleFeatureCollection inputFeatures, String xField, String xField): SimpleFeatureCollection
+     * CalculateXYCoordinate(SimpleFeatureCollection inputFeatures, String xField, String yField, Boolean inside, CoordinateReferenceSystem targetCRS): SimpleFeatureCollection
      */
 
     public CalculateXYCoordinateProcessFactory() {

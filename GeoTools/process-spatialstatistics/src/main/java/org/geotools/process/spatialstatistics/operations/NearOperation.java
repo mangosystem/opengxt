@@ -33,7 +33,7 @@ import org.opengis.feature.type.AttributeDescriptor;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
- * Creates a line features representing the shortest distance between hub and spoke features by nearest distance.
+ * Calculates distance and additional proximity information between the input features and the closest feature in another features.
  * 
  * @author Minpa Lee, MangoSystem
  * 
@@ -84,7 +84,7 @@ public class NearOperation extends GeneralOperation {
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
 
-        List<NearFeature> hubs = loadHubs(nearFeatures, nearIdField);
+        List<NearFeature> hubs = loadNearFeatures(nearFeatures, nearIdField);
         SimpleFeatureIterator featureIter = inputFeatures.features();
         try {
             while (featureIter.hasNext()) {
@@ -130,7 +130,7 @@ public class NearOperation extends GeneralOperation {
         return featureWriter.getFeatureCollection();
     }
 
-    private List<NearFeature> loadHubs(SimpleFeatureCollection features, String idField) {
+    private List<NearFeature> loadNearFeatures(SimpleFeatureCollection features, String idField) {
         List<NearFeature> nears = new ArrayList<NearFeature>();
 
         boolean hasID = idField != null && features.getSchema().indexOf(idField) != -1;

@@ -44,8 +44,7 @@ public class PointStatisticsProcessFactory extends SpatialStatisticsProcessFacto
     private static final String PROCESS_NAME = "PointStatistics";
 
     /*
-     * PointStatistics(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection pointFeatures, statisticsFields String) :
-     * SimpleFeatureCollection
+     * PointStatistics(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection pointFeatures, String countField, String statisticsFields): SimpleFeatureCollection
      */
 
     public PointStatisticsProcessFactory() {

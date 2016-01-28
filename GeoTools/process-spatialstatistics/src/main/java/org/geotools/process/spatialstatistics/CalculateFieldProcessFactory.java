@@ -45,7 +45,7 @@ public class CalculateFieldProcessFactory extends SpatialStatisticsProcessFactor
     private static final String PROCESS_NAME = "CalculateField";
 
     /*
-     * CalculateFieldProcess(SimpleFeatureCollection inputFeatures, Expression expression, String fieldName): SimpleFeatureCollection
+     * CalculateField(SimpleFeatureCollection inputFeatures, Expression expression, String fieldName): SimpleFeatureCollection
      */
 
     public CalculateFieldProcessFactory() {

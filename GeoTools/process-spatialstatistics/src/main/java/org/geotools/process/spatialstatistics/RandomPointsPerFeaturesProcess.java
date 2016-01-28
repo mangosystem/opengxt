@@ -55,7 +55,7 @@ public class RandomPointsPerFeaturesProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection polygonFeatures,
-            String expression, Integer pointCount, ProgressListener monitor) {
+            Expression expression, Integer pointCount, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(RandomPointsPerFeaturesProcessFactory.polygonFeatures.key, polygonFeatures);
         map.put(RandomPointsPerFeaturesProcessFactory.expression.key, expression);
@@ -97,7 +97,7 @@ public class RandomPointsPerFeaturesProcess extends AbstractStatisticsProcess {
             Integer pointCount = (Integer) Params.getValue(input,
                     RandomPointsPerFeaturesProcessFactory.pointCount,
                     RandomPointsPerFeaturesProcessFactory.pointCount.sample);
-            String expression = (String) Params.getValue(input,
+            Expression expression = (Expression) Params.getValue(input,
                     RandomPointsPerFeaturesProcessFactory.expression,
                     RandomPointsPerFeaturesProcessFactory.expression.sample);
             if (pointCount == null && expression == null) {
@@ -118,8 +118,7 @@ public class RandomPointsPerFeaturesProcess extends AbstractStatisticsProcess {
             if (expression == null) {
                 randomPoints = operator.executeperFeatures(polygonFeatures, pointCount);
             } else {
-                Expression exp = ECQL.toExpression(expression);
-                randomPoints = operator.executeperFeatures(polygonFeatures, exp);
+                randomPoints = operator.executeperFeatures(polygonFeatures, expression);
             }
             // end process
 

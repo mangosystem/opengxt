@@ -29,6 +29,7 @@ import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
+import org.opengis.filter.expression.Expression;
 import org.opengis.util.InternationalString;
 
 /**
@@ -44,7 +45,7 @@ public class RandomPointsPerFeaturesProcessFactory extends SpatialStatisticsProc
 
     private static final String PROCESS_NAME = "RandomPointsPerFeatures";
 
-    // RandomPointsPerFeatures(SimpleFeatureCollection polygonFeatures, String expression, Integer pointCount): SimpleFeatureCollection
+    // RandomPointsPerFeatures(SimpleFeatureCollection polygonFeatures, Expression expression, Integer pointCount): SimpleFeatureCollection
 
     public RandomPointsPerFeaturesProcessFactory() {
         super(new NameImpl(NAMESPACE, PROCESS_NAME));
@@ -73,8 +74,8 @@ public class RandomPointsPerFeaturesProcessFactory extends SpatialStatisticsProc
             new KVP(Parameter.FEATURE_TYPE, "Polygon"));
 
     /** expression */
-    public static final Parameter<String> expression = new Parameter<String>("expression",
-            String.class, getResource("RandomPointsPerFeatures.expression.title"),
+    public static final Parameter<Expression> expression = new Parameter<Expression>("expression",
+            Expression.class, getResource("RandomPointsPerFeatures.expression.title"),
             getResource("RandomPointsPerFeatures.expression.description"), false, 0, 1, null, null);
 
     /** pointCount */

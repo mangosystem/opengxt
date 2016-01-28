@@ -38,6 +38,9 @@ org.geotools.process.spatialstatistics.FeatureToPointProcessFactory
 org.geotools.process.spatialstatistics.FeatureEnvelopeToPolygonProcessFactory
 org.geotools.process.spatialstatistics.PointsToLineProcessFactory
 
+org.geotools.process.spatialstatistics.SimplifyProcessFactory
+org.geotools.process.spatialstatistics.DensifyProcessFactory
+
 org.geotools.process.spatialstatistics.CalculateFieldProcessFactory
 org.geotools.process.spatialstatistics.CalculateAreaProcessFactory
 org.geotools.process.spatialstatistics.CalculateLengthProcessFactory
@@ -52,11 +55,14 @@ org.geotools.process.spatialstatistics.FishnetProcessFactory
 org.geotools.process.spatialstatistics.ThiessenPolygonProcessFactory
 org.geotools.process.spatialstatistics.TriangularGridProcessFactory
 org.geotools.process.spatialstatistics.CircularGridProcessFactory
+org.geotools.process.spatialstatistics.PolarGridsFromFeaturesProcessFactory
+org.geotools.process.spatialstatistics.PolarGridsFromGeometryProcessFactory
 org.geotools.process.spatialstatistics.MultipleRingBufferProcessFactory
 org.geotools.process.spatialstatistics.BufferExpressionProcessFactory
 org.geotools.process.spatialstatistics.RingMapProcessFactory
 org.geotools.process.spatialstatistics.HubLinesByDistanceProcessFactory
 org.geotools.process.spatialstatistics.HubLinesByIDProcessFactory
+org.geotools.process.spatialstatistics.NearProcessFactory
 
 org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory
 org.geotools.process.spatialstatistics.KernelDensityProcessFactory

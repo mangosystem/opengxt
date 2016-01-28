@@ -406,9 +406,12 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(proxTool);
         buildTool(proxTool, "org.geotools.process.spatialstatistics.BufferExpressionProcessFactory");
         buildTool(proxTool, "org.geotools.process.spatialstatistics.MultipleRingBufferProcessFactory");
+        buildTool(proxTool, "org.geotools.process.spatialstatistics.PolarGridsFromFeaturesProcessFactory");
+        buildTool(proxTool, "org.geotools.process.spatialstatistics.PolarGridsFromGeometryProcessFactory");
         buildTool(proxTool, "org.geotools.process.spatialstatistics.ThiessenPolygonProcessFactory");
         buildTool(proxTool, "org.geotools.process.spatialstatistics.HubLinesByIDProcessFactory");
         buildTool(proxTool, "org.geotools.process.spatialstatistics.HubLinesByDistanceProcessFactory");
+        buildTool(proxTool, "org.geotools.process.spatialstatistics.NearProcessFactory");
 
         // Aggregation
         TreeParent aggreTool = new TreeParent(Messages.ToolboxView_Aggregation, null, null);
@@ -430,7 +433,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToPointProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.PointsToLineProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureEnvelopeToPolygonProcessFactory");
-        
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.SimplifyProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.DensifyProcessFactory");
     }
 
     @SuppressWarnings("nls")

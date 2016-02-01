@@ -35,6 +35,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.prep.PreparedGeometry;
+import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
 
 /**
  * Creates a fishnet of rectangular cells.
@@ -46,21 +48,25 @@ import com.vividsolutions.jts.geom.Polygon;
  */
 public class HexagonOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(HexagonOperation.class);
-    
+
     static final String UID = "uid";
 
     private HexagonOrientation orientation = HexagonOrientation.FLAT;
 
     private SimpleFeatureCollection boundsSource = null;
 
-    private Geometry geometryBoundary = null;
+    private PreparedGeometry geometryBoundary = null;
 
     public void setOrientation(HexagonOrientation orientation) {
         this.orientation = orientation;
     }
 
     public void setGeometryBoundary(Geometry geometryBoundary) {
-        this.geometryBoundary = geometryBoundary;
+        if (geometryBoundary == null) {
+            this.geometryBoundary = null;
+        } else {
+            this.geometryBoundary = PreparedGeometryFactory.prepare(geometryBoundary);
+        }
     }
 
     public void setBoundsSource(SimpleFeatureCollection boundsSource) {
@@ -108,11 +114,11 @@ public class HexagonOperation extends GeneralOperation {
     }
 
     final class IntersectionGeometryBuilder extends GridFeatureBuilder {
-        Geometry boundary = null;
+        PreparedGeometry boundary = null;
 
         int fID = 0;
 
-        public IntersectionGeometryBuilder(SimpleFeatureType type, Geometry boundary) {
+        public IntersectionGeometryBuilder(SimpleFeatureType type, PreparedGeometry boundary) {
             super(type);
             this.boundary = boundary;
         }

@@ -27,10 +27,13 @@ import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.Filter;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.prep.PreparedGeometry;
+import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
 
 /**
  * Creates a fishnet of rectangular cells.
@@ -43,13 +46,17 @@ import com.vividsolutions.jts.geom.Polygon;
 public class FishnetOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(FishnetOperation.class);
 
-    private final String TYPE_NAME = "fishnet";
+    static final String TYPE_NAME = "fishnet";
 
-    private final String UID = "uid";
+    static final String UID = "uid";
 
     private FishnetType fishnetType = FishnetType.Rectangle;
 
-    private Geometry geometryBoundary = null;
+    private SimpleFeatureCollection boundsSource = null;
+
+    private String the_geom = null;
+
+    private PreparedGeometry boundsGeometry = null;
 
     private boolean boundaryInside = false;
 
@@ -62,7 +69,20 @@ public class FishnetOperation extends GeneralOperation {
     }
 
     public void setGeometryBoundary(Geometry geometryBoundary) {
-        this.geometryBoundary = geometryBoundary;
+        if (geometryBoundary == null) {
+            this.boundsGeometry = null;
+        } else {
+            this.boundsGeometry = PreparedGeometryFactory.prepare(geometryBoundary);
+        }
+    }
+
+    public void setBoundsSource(SimpleFeatureCollection boundsSource) {
+        this.boundsSource = boundsSource;
+        if (boundsSource == null) {
+            this.the_geom = null;
+        } else {
+            this.the_geom = boundsSource.getSchema().getGeometryDescriptor().getLocalName();
+        }
     }
 
     public SimpleFeatureCollection execute(ReferencedEnvelope bbox, Double width, Double height)
@@ -120,15 +140,28 @@ public class FishnetOperation extends GeneralOperation {
                         break;
                     }
 
-                    if (geometryBoundary != null) {
+                    if (boundsGeometry != null) {
                         if (boundaryInside) {
-                            if (!geometryBoundary.contains(cellGeom)) {
+                            if (!boundsGeometry.contains(cellGeom)) {
+                                xpos += width;
                                 continue;
                             }
                         } else {
-                            if (!geometryBoundary.intersects(cellGeom)) {
+                            if (!boundsGeometry.intersects(cellGeom)) {
+                                xpos += width;
                                 continue;
                             }
+                        }
+                    }
+
+                    if (boundsSource != null) {
+                        Filter filter = ff.intersects(ff.property(the_geom), ff.literal(cellGeom));
+                        if (boundaryInside) {
+                            filter = ff.within(ff.property(the_geom), ff.literal(cellGeom));
+                        }
+                        if (boundsSource.subCollection(filter).isEmpty()) {
+                            xpos += width;
+                            continue;
                         }
                     }
 

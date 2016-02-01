@@ -72,7 +72,7 @@ public class HexagonProcessFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<ReferencedEnvelope> extent = new Parameter<ReferencedEnvelope>(
             "extent", ReferencedEnvelope.class,
             getResource("Hexagon.extent.title"),
-            getResource("Hexagon.extent.description"), false, 0, 1, null, null);
+            getResource("Hexagon.extent.description"), true, 1, 1, null, null);
 
 
     /** boundsSource */

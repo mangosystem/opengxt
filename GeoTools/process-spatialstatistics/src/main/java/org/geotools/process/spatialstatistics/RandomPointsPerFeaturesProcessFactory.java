@@ -76,19 +76,13 @@ public class RandomPointsPerFeaturesProcessFactory extends SpatialStatisticsProc
     /** expression */
     public static final Parameter<Expression> expression = new Parameter<Expression>("expression",
             Expression.class, getResource("RandomPointsPerFeatures.expression.title"),
-            getResource("RandomPointsPerFeatures.expression.description"), false, 0, 1, null, null);
-
-    /** pointCount */
-    public static final Parameter<Integer> pointCount = new Parameter<Integer>("pointCount",
-            Integer.class, getResource("RandomPointsPerFeatures.pointCount.title"),
-            getResource("RandomPointsPerFeatures.pointCount.description"), false, 0, 1, null, null);
+            getResource("RandomPointsPerFeatures.expression.description"), true, 1, 1, null, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(polygonFeatures.key, polygonFeatures);
         parameterInfo.put(expression.key, expression);
-        parameterInfo.put(pointCount.key, pointCount);
         return parameterInfo;
     }
 

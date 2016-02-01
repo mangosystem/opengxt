@@ -39,6 +39,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.prep.PreparedGeometry;
+import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
 
 /**
  * Creates circular grids from extent or bounds source features.
@@ -63,7 +65,7 @@ public class CircularGridOperation extends GeneralOperation {
 
     private String the_geom = null;
 
-    private Geometry boundsGeometry = null;
+    private PreparedGeometry boundsGeometry = null;
 
     public CircularType getCircularType() {
         return circularType;
@@ -74,7 +76,11 @@ public class CircularGridOperation extends GeneralOperation {
     }
 
     public void setBoundsGeometry(Geometry geometryBoundary) {
-        this.boundsGeometry = geometryBoundary;
+        if (geometryBoundary == null) {
+            this.boundsGeometry = null;
+        } else {
+            this.boundsGeometry = PreparedGeometryFactory.prepare(geometryBoundary);
+        }
     }
 
     public void setBoundsSource(SimpleFeatureCollection boundsSource) {
@@ -95,7 +101,7 @@ public class CircularGridOperation extends GeneralOperation {
             HexagonOperation operation = new HexagonOperation();
             operation.setOrientation(HexagonOrientation.FLAT);
             operation.setBoundsSource(boundsSource);
-            operation.setGeometryBoundary(boundsGeometry);
+            operation.setGeometryBoundary(boundsGeometry.getGeometry());
 
             // adjust side length of hexagonal grids
             final double sideLen = Math.pow(Math.pow(radius, 2.0) * (4.0 / 3.0), 0.5);
@@ -118,6 +124,7 @@ public class CircularGridOperation extends GeneralOperation {
 
                         if (boundsGeometry != null) {
                             if (!boundsGeometry.intersects(geometry)) {
+                                currentX += diameter;
                                 continue;
                             }
                         }
@@ -126,6 +133,7 @@ public class CircularGridOperation extends GeneralOperation {
                             Filter filter = ff.intersects(ff.property(the_geom),
                                     ff.literal(geometry));
                             if (boundsSource.subCollection(filter).isEmpty()) {
+                                currentX += diameter;
                                 continue;
                             }
                         }

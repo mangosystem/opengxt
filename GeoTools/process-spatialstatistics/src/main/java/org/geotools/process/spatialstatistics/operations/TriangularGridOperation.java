@@ -34,6 +34,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateList;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.prep.PreparedGeometry;
+import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
 
 /**
  * Creates triangular grids from extent or bounds source features.
@@ -54,7 +56,7 @@ public class TriangularGridOperation extends GeneralOperation {
 
     private String the_geom = null;
 
-    private Geometry boundsGeometry = null;
+    private PreparedGeometry boundsGeometry = null;
 
     private int featureID = 0;
 
@@ -65,7 +67,11 @@ public class TriangularGridOperation extends GeneralOperation {
     }
 
     public void setBoundsGeometry(Geometry geometryBoundary) {
-        this.boundsGeometry = geometryBoundary;
+        if (geometryBoundary == null) {
+            this.boundsGeometry = null;
+        } else {
+            this.boundsGeometry = PreparedGeometryFactory.prepare(geometryBoundary);
+        }
     }
 
     public void setBoundsSource(SimpleFeatureCollection boundsSource) {

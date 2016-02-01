@@ -72,7 +72,7 @@ public class TriangularGridProcessFactory extends SpatialStatisticsProcessFactor
     /** extent */
     public static final Parameter<ReferencedEnvelope> extent = new Parameter<ReferencedEnvelope>(
             "extent", ReferencedEnvelope.class, getResource("TriangularGrid.extent.title"),
-            getResource("TriangularGrid.extent.description"), false, 0, 1, null, null);
+            getResource("TriangularGrid.extent.description"), true, 1, 1, null, null);
 
     /** boundsSource */
     public static final Parameter<SimpleFeatureCollection> boundsSource = new Parameter<SimpleFeatureCollection>(

@@ -22,7 +22,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
@@ -55,11 +54,10 @@ public class RandomPointsPerFeaturesProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection polygonFeatures,
-            Expression expression, Integer pointCount, ProgressListener monitor) {
+            Expression expression, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(RandomPointsPerFeaturesProcessFactory.polygonFeatures.key, polygonFeatures);
         map.put(RandomPointsPerFeaturesProcessFactory.expression.key, expression);
-        map.put(RandomPointsPerFeaturesProcessFactory.pointCount.key, pointCount);
 
         Process process = new RandomPointsPerFeaturesProcess(null);
         Map<String, Object> resultMap;
@@ -90,18 +88,11 @@ public class RandomPointsPerFeaturesProcess extends AbstractStatisticsProcess {
 
             SimpleFeatureCollection polygonFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, RandomPointsPerFeaturesProcessFactory.polygonFeatures, null);
-            if (polygonFeatures == null) {
-                throw new NullPointerException("polygonFeatures parameter required");
-            }
-
-            Integer pointCount = (Integer) Params.getValue(input,
-                    RandomPointsPerFeaturesProcessFactory.pointCount,
-                    RandomPointsPerFeaturesProcessFactory.pointCount.sample);
             Expression expression = (Expression) Params.getValue(input,
                     RandomPointsPerFeaturesProcessFactory.expression,
                     RandomPointsPerFeaturesProcessFactory.expression.sample);
-            if (pointCount == null && expression == null) {
-                throw new NullPointerException("pointCount or expression parameters required");
+            if (polygonFeatures == null || expression == null) {
+                throw new NullPointerException("polygonFeatures, expression parameters required");
             }
 
             monitor.setTask(Text.text("Processing ..."));
@@ -114,12 +105,7 @@ public class RandomPointsPerFeaturesProcess extends AbstractStatisticsProcess {
             // start process
             RandomPointsOperation operator = new RandomPointsOperation();
             SimpleFeatureCollection randomPoints = null;
-
-            if (expression == null) {
-                randomPoints = operator.executeperFeatures(polygonFeatures, pointCount);
-            } else {
-                randomPoints = operator.executeperFeatures(polygonFeatures, expression);
-            }
+            randomPoints = operator.executeperFeatures(polygonFeatures, expression);
             // end process
 
             monitor.setTask(Text.text("Encoding result"));

@@ -17,7 +17,6 @@
 package org.geotools.process.spatialstatistics;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +40,6 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.ProgressListener;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
@@ -171,7 +169,6 @@ public class UnionPolygonProcess extends AbstractStatisticsProcess {
 
     private Geometry removeHoles(Geometry inputPolygon) {
         Class<?> geomBinding = inputPolygon.getClass();
-        GeometryFactory factory = inputPolygon.getFactory();
 
         Geometry finalGeom = inputPolygon;
         if (Polygon.class.equals(geomBinding)) {
@@ -182,26 +179,17 @@ public class UnionPolygonProcess extends AbstractStatisticsProcess {
                 Polygon polygon = (Polygon) inputPolygon.getGeometryN(index);
                 polygons.add((Polygon) removeHoles(polygon));
             }
-            finalGeom = factory.createMultiPolygon(GeometryFactory.toPolygonArray(polygons));
-            finalGeom.setUserData(inputPolygon.getUserData());
+
+            finalGeom = inputPolygon.getFactory().createMultiPolygon(
+                    GeometryFactory.toPolygonArray(polygons));
         }
+        finalGeom.setUserData(inputPolygon.getUserData());
         return finalGeom;
     }
 
     private Geometry removeHoles(Polygon polygon) {
         GeometryFactory factory = polygon.getFactory();
         LineString exteriorRing = polygon.getExteriorRing();
-
-        // check exterior ring
-        if (!exteriorRing.isRing()) {
-            List<Coordinate> coordList = Arrays.asList(exteriorRing.getCoordinates());
-            coordList.add(exteriorRing.getStartPoint().getCoordinate());
-
-            Coordinate[] coords = new Coordinate[coordList.size()];
-            coordList.toArray(coords);
-            exteriorRing = factory.createLinearRing(coords);
-        }
-
         Geometry finalGeom = factory.createPolygon((LinearRing) exteriorRing, null);
         finalGeom.setUserData(polygon.getUserData());
         return finalGeom;

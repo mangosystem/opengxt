@@ -234,8 +234,7 @@ public class MapUtils {
     }
 
     public static ILayer addFeaturesToMap(IMap map, File shapefile) {
-        String name = FilenameUtils.removeExtension(FilenameUtils.getName(shapefile.getPath()));
-        return addFeaturesToMap(map, shapefile, name);
+        return addFeaturesToMap(map, shapefile, FilenameUtils.getBaseName(shapefile.getPath()));
     }
 
     public static ILayer addFeaturesToMap(IMap map, File shapefile, String layerName) {
@@ -335,5 +334,27 @@ public class MapUtils {
             }
         }
         return pos;
+    }
+
+    @SuppressWarnings("nls")
+    public static boolean confirmSpatialFile(File outputFile) {
+        // single file or multiple files
+        if (outputFile.getName().toLowerCase().endsWith(".shp")) {
+            String[] extensions = new String[] { "shp", "shx", "dbf", "prj", "sbn", "sbx", "qix",
+                    "fix", "lyr", "cpg", "qpj", "qml" };
+            String fileName = FilenameUtils.getBaseName(outputFile.getPath());
+            for (String ext : extensions) {
+                File file = new File(outputFile.getParent(), fileName + "." + ext);
+                if (file.exists()) {
+                    file.delete();
+                }
+            }
+        } else {
+            // .tif, .gml, .kml ...
+            if (!outputFile.delete()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -221,7 +221,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
         // write shapefile
         monitor.setTaskName(Messages.Task_WritingResult);
         File filePath = new File(outputPath.toString());
-        String typeName = FilenameUtils.removeExtension(FilenameUtils.getName(filePath.getPath()));
+        String typeName = FilenameUtils.getBaseName(filePath.getPath());
         SimpleFeatureSource featureSource = null;
         try {
             Map<String, Object> params = new HashMap<String, Object>();

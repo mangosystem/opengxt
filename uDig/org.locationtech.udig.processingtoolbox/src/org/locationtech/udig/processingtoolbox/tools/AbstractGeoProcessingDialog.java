@@ -29,7 +29,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Shell;
@@ -65,6 +64,7 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
@@ -87,7 +87,7 @@ public abstract class AbstractGeoProcessingDialog extends TitleAreaDialog {
 
     protected String windowDesc = EMPTY;
 
-    protected Point windowSize = new Point(650, 400);
+    protected org.eclipse.swt.graphics.Point windowSize = new org.eclipse.swt.graphics.Point(650, 400);
 
     protected OutputDataWidget locationView;
 
@@ -110,7 +110,7 @@ public abstract class AbstractGeoProcessingDialog extends TitleAreaDialog {
     }
 
     @Override
-    protected Point getInitialSize() {
+    protected org.eclipse.swt.graphics.Point getInitialSize() {
         return windowSize;
     }
 

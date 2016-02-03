@@ -49,6 +49,7 @@ import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget.FileDataType;
+import org.locationtech.udig.processingtoolbox.styler.MapUtils;
 import org.locationtech.udig.processingtoolbox.styler.ProcessExecutorOperation;
 import org.locationtech.udig.processingtoolbox.tools.HtmlWriter;
 import org.locationtech.udig.project.IMap;
@@ -386,7 +387,6 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
         }
     }
 
-    @SuppressWarnings("nls")
     private boolean validOutput() {
         for (Entry<String, Object> entrySet : outputParams.entrySet()) {
             File outputFile = new File(outputParams.get(entrySet.getKey()).toString());
@@ -396,28 +396,10 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
 
             String msg = Messages.ProcessExecutionDialog_overwriteconfirm;
             if (MessageDialog.openConfirm(getParentShell(), getShell().getText(), msg)) {
-                if (outputFile.getName().toLowerCase().endsWith(".tif")) {
-                    if (!outputFile.delete()) {
-                        msg = Messages.ProcessExecutionDialog_deletefailed;
-                        MessageDialog.openInformation(getParentShell(), getShell().getText(), msg);
-                        return false;
-                    }
-                } else {
-                    String[] extensions = new String[] { "shp", "shx", "dbf", "prj", "sbn", "sbx",
-                            "qix", "fix", "lyr" };
-                    String fileName = outputFile.getName();
-                    int pos = outputFile.getName().lastIndexOf(".");
-                    if (pos > 0) {
-                        fileName = outputFile.getName().substring(0, pos);
-                    }
-
-                    for (String ext : extensions) {
-                        File file = new File(outputFile.getParent(), fileName + "." + ext);
-                        if (file.exists()) {
-                            file.delete();
-                        }
-                    }
-                    return true;
+                if (!MapUtils.confirmSpatialFile(outputFile)) {
+                    msg = Messages.ProcessExecutionDialog_deletefailed;
+                    MessageDialog.openInformation(getParentShell(), getShell().getText(), msg);
+                    return false;
                 }
             } else {
                 return false;

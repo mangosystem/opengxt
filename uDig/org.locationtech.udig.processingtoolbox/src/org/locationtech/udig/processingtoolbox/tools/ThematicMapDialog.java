@@ -343,27 +343,28 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
         }
     }
 
+    @SuppressWarnings("nls")
     private String getFunctionName() {
         String styleName = cboMethod.getText().toUpperCase();
 
         String functionName = null;
-        if (styleName.startsWith("LISA")) { //$NON-NLS-1$
-            functionName = "LISA Style"; //$NON-NLS-1$
-        } else if (styleName.startsWith("ZSCORE")) { //$NON-NLS-1$
-            functionName = "ZScore"; //$NON-NLS-1$
-        } else if (styleName.startsWith("ZSCORE STAND")) { //$NON-NLS-1$
-            functionName = "ZScore Standard"; //$NON-NLS-1$
-        } else if (styleName.startsWith("CL") || styleName.startsWith("JE") //$NON-NLS-1$ //$NON-NLS-2$
-                || styleName.startsWith("NA")) { //$NON-NLS-1$
-            functionName = "JenksNaturalBreaksFunction"; //$NON-NLS-1$
-        } else if (styleName.startsWith("E")) { //$NON-NLS-1$
-            functionName = "EqualIntervalFunction"; //$NON-NLS-1$
-        } else if (styleName.startsWith("S")) { //$NON-NLS-1$
-            functionName = "StandardDeviationFunction"; //$NON-NLS-1$
-        } else if (styleName.startsWith("Q")) { //$NON-NLS-1$
-            functionName = "QuantileFunction"; //$NON-NLS-1$
-        } else if (styleName.startsWith("U")) { //$NON-NLS-1$
-            functionName = "UniqueIntervalFunction"; //$NON-NLS-1$
+        if (styleName.startsWith("LISA")) {
+            functionName = "LISA Style";
+        } else if (styleName.startsWith("ZSCORE")) {
+            functionName = "ZScore";
+        } else if (styleName.startsWith("ZSCORE STAND")) {
+            functionName = "ZScore Standard";
+        } else if (styleName.startsWith("CL") || styleName.startsWith("JE")
+                || styleName.startsWith("NA")) {
+            functionName = "JenksNaturalBreaksFunction";
+        } else if (styleName.startsWith("E")) {
+            functionName = "EqualIntervalFunction";
+        } else if (styleName.startsWith("S")) {
+            functionName = "StandardDeviationFunction";
+        } else if (styleName.startsWith("Q")) {
+            functionName = "QuantileFunction";
+        } else if (styleName.startsWith("U")) {
+            functionName = "UniqueIntervalFunction";
         }
 
         return functionName;

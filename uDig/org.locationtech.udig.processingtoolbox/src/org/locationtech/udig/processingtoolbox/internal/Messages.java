@@ -21,6 +21,14 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.locationtech.udig.processingtoolbox.internal.messages"; //$NON-NLS-1$
     
+    public static String Feature_Name;
+    public static String Feature_Type;
+    public static String Feature_CRS;
+    public static String Feature_Point;
+    public static String Feature_LineString;
+    public static String Feature_Polygon;
+    public static String Feature_FeatureType;
+    
     public static String BoundingBoxViewer_CurrentMapExtent;
     public static String BoundingBoxViewer_CurrentMapFullExtent;
     public static String BoundingBoxViewer_LayerExtent;
@@ -124,6 +132,12 @@ public class Messages extends NLS {
     public static String LiteralDataViewer_MultipleFieldsSelection;
     public static String LiteralDataViewer_StatisticsFieldsSelection;
     
+    public static String MergeFeaturesDialog_title;
+    public static String MergeFeaturesDialog_description;
+    public static String MergeFeaturesDialog_InputFeatures;
+    public static String MergeFeaturesDialog_TemplateFeatures;
+    public static String MergeFeaturesDialog_Warning;
+    
     public static String MoranScatterPlotDialog_title;
     public static String MoranScatterPlotDialog_description;
     public static String MoranScatterPlotDialog_Graph;
@@ -223,6 +237,22 @@ public class Messages extends NLS {
     public static String SpatialWeightsMatrixDialog_Rook;
     public static String SpatialWeightsMatrixDialog_Bishops;
     
+    public static String SplitByAttributesDialog_title;
+    public static String SplitByAttributesDialog_description;
+    public static String SplitByAttributesDialog_InputFeatures;
+    public static String SplitByAttributesDialog_SplitField;
+    public static String SplitByAttributesDialog_UsePrefix;
+    public static String SplitByAttributesDialog_OutputLayers;
+    public static String SplitByAttributesDialog_OutputName;
+    public static String SplitByAttributesDialog_FieldValue;
+    public static String SplitByAttributesDialog_Count;
+    public static String SplitByAttributesDialog_NamePolicy;
+    public static String SplitByAttributesDialog_Warning;
+    
+    public static String SplitByFeaturesDialog_title;
+    public static String SplitByFeaturesDialog_description;
+    public static String SplitByFeaturesDialog_SplitFeatures;
+    
     public static String StatisticsFieldsSelectionDialog_title;
     public static String StatisticsFieldsSelectionDialog_Layer;
     public static String StatisticsFieldsSelectionDialog_Fields;
@@ -296,6 +326,8 @@ public class Messages extends NLS {
     public static String ToolboxView_DataCreation;
     public static String ToolboxView_Aggregation;
     public static String ToolboxView_Calculation;
+    public static String ToolboxView_Overlays;
+    public static String ToolboxView_Extract;
     public static String ToolboxView_Proximity;
     public static String ToolboxView_Graph;
     public static String ToolboxView_RasterTools;

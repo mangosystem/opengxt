@@ -19,6 +19,8 @@ import org.geotools.process.spatialstatistics.GlobalLeesSProcess.LeesSProcessRes
 import org.geotools.process.spatialstatistics.GlobalMoransIProcess.MoransIProcessResult;
 import org.geotools.process.spatialstatistics.JoinCountStatisticsProcess.JoinCountProcessResult;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
+import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
+import org.geotools.process.spatialstatistics.core.HistogramProcessResult.HistogramItem;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult.DataStatisticsItem;
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
@@ -463,6 +465,32 @@ public class HtmlWriter {
         write("<tr><td>Z-Score</td><td>" + format(value.getZ_Score()) + "</td></tr>");
         write("<tr><td>p-Value</td><td>" + format(value.getP_Value()) + "</td></tr>");
         write("<tr><td>Standard Error</td><td>" + format(value.getStandard_Error()) + "</td></tr>");
+
+        write("</table>");
+    }
+
+    // HistogramProcessResult
+    public void writeHistogramProcess(HistogramProcessResult value) {
+        writeH1("Histogram Summary");
+        writeH2(value.getTypeName() + ": " + value.getPropertyName());
+        writeH2("Area: " + value.getArea());
+        write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+        // header
+        write("<colgroup>");
+        write("<col width=\"60%\" />");
+        write("<col width=\"40%\" />");
+        write("</colgroup>");
+
+        write("<tr bgcolor=\"#cccccc\">");
+        write("<td><strong>Value</strong></td>");
+        write("<td><strong>Frequency</strong></td>");
+        write("</tr>");
+
+        // body
+        for (HistogramItem item : value.getHistogramItems()) {
+            write("<tr><td>" + item.getValue() + "</td><td>" + item.getFrequency() + "</td></tr>");
+        }
 
         write("</table>");
     }

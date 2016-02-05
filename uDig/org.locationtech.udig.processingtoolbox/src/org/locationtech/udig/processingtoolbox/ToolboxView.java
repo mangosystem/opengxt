@@ -45,6 +45,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.Processors;
+import org.geotools.process.spatialstatistics.HistogramGridCoverageProcessFactory;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;
@@ -78,6 +79,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
     protected static final Logger LOGGER = Logging.getLogger(ToolboxView.class);
 
     private static Boolean showLog = Boolean.FALSE;
+
+    private static Boolean selectedOnly = Boolean.TRUE;
 
     private static Boolean loadGeoToolsProcess = Boolean.TRUE;
 
@@ -128,6 +131,14 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
 
     public static void setLoadGeoToolsProcess(Boolean loadGeoToolsProcess) {
         ToolboxView.loadGeoToolsProcess = loadGeoToolsProcess;
+    }
+
+    public static Boolean getSelectedOnly() {
+        return selectedOnly;
+    }
+
+    public static void setSelectedOnly(Boolean selectedOnly) {
+        ToolboxView.selectedOnly = selectedOnly;
     }
 
     @Override
@@ -276,32 +287,24 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         ssTools.addChild(desTools);
         buildTool(desTools, "org.geotools.process.spatialstatistics.CountFeaturesProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.AreaProcessFactory");
-        buildTool(desTools,
-                "org.geotools.process.spatialstatistics.StatisticsFeaturesProcessFactory");
-        buildTool(desTools,
-                "org.geotools.process.spatialstatistics.PearsonCorrelationProcessFactory");
-        buildTool(desTools,
-                "org.geotools.process.spatialstatistics.StandardizedScoresProcessFactory");
+        buildTool(desTools, "org.geotools.process.spatialstatistics.StatisticsFeaturesProcessFactory");
+        buildTool(desTools, "org.geotools.process.spatialstatistics.PearsonCorrelationProcessFactory");
+        buildTool(desTools, "org.geotools.process.spatialstatistics.StandardizedScoresProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.FocalLQProcessFactory");
 
         // Point Pattern Analysis
         TreeParent patternTools = new TreeParent(Messages.ToolboxView_PointPattern, null, null);
         ssTools.addChild(patternTools);
-        buildTool(patternTools,
-                "org.geotools.process.spatialstatistics.NearestNeighborProcessFactory");
-        buildTool(patternTools,
-                "org.geotools.process.spatialstatistics.KNearestNeighborMapProcessFactory");
-        buildTool(patternTools,
-                "org.geotools.process.spatialstatistics.KMeansClusteringProcessFactory");
+        buildTool(patternTools, "org.geotools.process.spatialstatistics.NearestNeighborProcessFactory");
+        buildTool(patternTools, "org.geotools.process.spatialstatistics.KNearestNeighborMapProcessFactory");
+        buildTool(patternTools, "org.geotools.process.spatialstatistics.KMeansClusteringProcessFactory");
 
         // Global Spatial Autocorrelation
         TreeParent autoTools = new TreeParent(Messages.ToolboxView_Autocorrelation, null, null);
         ssTools.addChild(autoTools);
-        buildTool(autoTools,
-                "org.geotools.process.spatialstatistics.JoinCountStatisticsProcessFactory");
+        buildTool(autoTools, "org.geotools.process.spatialstatistics.JoinCountStatisticsProcessFactory");
         buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalMoransIProcessFactory");
-        buildTool(autoTools,
-                "org.geotools.process.spatialstatistics.GlobalGStatisticsProcessFactory");
+        buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalGStatisticsProcessFactory");
         buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalGearysCProcessFactory");
         buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalLeesSProcessFactory");
 
@@ -310,23 +313,19 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         ssTools.addChild(clusterTools);
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalMoransIProcessFactory");
         buildTool(clusterTools, Messages.MoranScatterPlotDialog_title, "MoranScatterPlotDialog");
-        buildTool(clusterTools,
-                "org.geotools.process.spatialstatistics.LocalGStatisticsProcessFactory");
+        buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalGStatisticsProcessFactory");
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalLeesSProcessFactory");
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalGearysCProcessFactory");
 
         // Spatial Distribution
         TreeParent distributionTools = new TreeParent(Messages.ToolboxView_Distribution, null, null);
         ssTools.addChild(distributionTools);
-        buildTool(distributionTools,
-                "org.geotools.process.spatialstatistics.MeanCenterProcessFactory");
-        buildTool(distributionTools,
-                "org.geotools.process.spatialstatistics.MedianCenterProcessFactory");
+        buildTool(distributionTools, "org.geotools.process.spatialstatistics.MeanCenterProcessFactory");
+        buildTool(distributionTools, "org.geotools.process.spatialstatistics.MedianCenterProcessFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.CentralFeatureFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.SDProcessFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.SDEProcessFactory");
-        buildTool(distributionTools,
-                "org.geotools.process.spatialstatistics.DirectionalMeanProcessFactory");
+        buildTool(distributionTools, "org.geotools.process.spatialstatistics.DirectionalMeanProcessFactory");
     }
 
     private void buildTool(TreeParent ssTools, String className) {
@@ -422,8 +421,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(graphTool);
         buildTool(graphTool, Messages.HistogramDialog_title, "HistogramDialog");
         buildTool(graphTool, Messages.BoxPlotDialog_title, "BoxPlotDialog");
-        buildTool(graphTool, Messages.ScatterPlotDialog_title, "ScatterPlotDialog");
         buildTool(graphTool, Messages.BubbleChartDialog_title, "BubbleChartDialog");
+        buildTool(graphTool, Messages.ScatterPlotDialog_title, "ScatterPlotDialog");
         buildTool(graphTool, Messages.MoranScatterPlotDialog_title, "MoranScatterPlotDialog");
 
         // Proximity
@@ -442,7 +441,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         // Aggregation
         TreeParent aggreTool = new TreeParent(Messages.ToolboxView_Aggregation, null, null);
         generalTool.addChild(aggreTool);
-        //buildTool(aggreTool, "org.geotools.process.spatialstatistics.DissolveProcessFactory");
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.DissolveProcessFactory");
         buildTool(aggreTool, "org.geotools.process.spatialstatistics.AttributeJoinProcessFactory");
         buildTool(aggreTool, "org.geotools.process.spatialstatistics.CollectEventsProcessFactory");
         buildTool(aggreTool, "org.geotools.process.spatialstatistics.UnionPolygonProcessFactory");
@@ -501,6 +500,11 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(interpolationTool);
         buildTool(interpolationTool, "org.geotools.process.spatialstatistics.IDWProcessFactory");
         buildTool(interpolationTool, "org.geotools.process.spatialstatistics.TPSProcessFactory");
+        
+        // Extraction
+        TreeParent extractionTool = new TreeParent(Messages.ToolboxView_Extract, null, null);
+        generalTool.addChild(extractionTool);
+        buildTool(extractionTool, "org.geotools.process.spatialstatistics.HistogramGridCoverageProcessFactory");
     }
 
     private void buildTool(TreeParent parent, String title, String dialogName) {

@@ -104,10 +104,12 @@ public class MapUtils {
         try {
             SimpleFeatureSource sfs = (SimpleFeatureSource) layer.getResource(FeatureSource.class,
                     new NullProgressMonitor());
-            // apply selected features
             Filter filter = Filter.INCLUDE;
-            if (layer.getFilter() != Filter.EXCLUDE) {
-                filter = layer.getFilter();
+            if (ToolboxView.getSelectedOnly()) {
+                // apply selected features
+                if (layer.getFilter() != Filter.EXCLUDE) {
+                    filter = layer.getFilter();
+                }
             }
 
             // check layer & FeatureCollection's crs

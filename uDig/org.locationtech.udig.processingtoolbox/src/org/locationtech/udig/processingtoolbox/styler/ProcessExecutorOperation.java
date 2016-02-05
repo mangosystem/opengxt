@@ -45,6 +45,7 @@ import org.geotools.process.spatialstatistics.JoinCountStatisticsProcess.JoinCou
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
+import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
@@ -200,6 +201,8 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
             writer.writePearson((PearsonResult) value);
         } else if (value instanceof JoinCountProcessResult) {
             writer.writeJoinCount((JoinCountProcessResult) value);
+        } else if (value instanceof HistogramProcessResult) {
+            writer.writeHistogramProcess((HistogramProcessResult) value);
         } else if (Number.class.isAssignableFrom(value.getClass())) {
             writer.writeH2(FormatUtils.format(Double.parseDouble(value.toString())));
         } else {
@@ -245,7 +248,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
 
         monitor.setTaskName(Messages.Task_AddingLayer);
         ToolboxPlugin.log(Messages.Task_AddingLayer);
-        
+
         SimpleFeatureType schema = featureSource.getSchema();
         SSStyleBuilder ssBuilder = new SSStyleBuilder(schema);
         ssBuilder.setOpacity(0.8f);

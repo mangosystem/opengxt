@@ -45,8 +45,6 @@ import org.eclipse.ui.part.ViewPart;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.Processors;
-import org.geotools.process.spatialstatistics.HistogramGridCoverageProcessFactory;
-import org.geotools.process.spatialstatistics.RasterClipByCircleProcessFactory;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;

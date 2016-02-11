@@ -93,8 +93,8 @@ public class CircularGridProcess extends AbstractStatisticsProcess {
                     CircularGridProcessFactory.extent, null);
             SimpleFeatureCollection boundsSource = (SimpleFeatureCollection) Params.getValue(input,
                     CircularGridProcessFactory.boundsSource, null);
-            if (gridBounds == null && boundsSource == null) {
-                throw new NullPointerException("extent or boundsSource parameters required");
+            if (gridBounds == null) {
+                throw new NullPointerException("extent parameters required");
             }
 
             Double radius = (Double) Params
@@ -117,10 +117,6 @@ public class CircularGridProcess extends AbstractStatisticsProcess {
             CircularGridOperation operation = new CircularGridOperation();
             operation.setBoundsSource(boundsSource);
             operation.setCircularType(circularType);
-
-            if (gridBounds == null) {
-                gridBounds = boundsSource.getBounds();
-            }
             SimpleFeatureCollection resultFc = operation.execute(gridBounds, radius);
             // end process
 

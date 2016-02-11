@@ -71,7 +71,7 @@ public class CircularGridProcessFactory extends SpatialStatisticsProcessFactory 
     /** extent */
     public static final Parameter<ReferencedEnvelope> extent = new Parameter<ReferencedEnvelope>(
             "extent", ReferencedEnvelope.class, getResource("CircularGrid.extent.title"),
-            getResource("CircularGrid.extent.description"), false, 0, 1, null, null);
+            getResource("CircularGrid.extent.description"), true, 1, 1, null, null);
 
     /** boundsSource */
     public static final Parameter<SimpleFeatureCollection> boundsSource = new Parameter<SimpleFeatureCollection>(

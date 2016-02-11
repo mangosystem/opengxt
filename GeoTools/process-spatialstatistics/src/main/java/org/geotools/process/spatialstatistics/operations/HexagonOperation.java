@@ -75,6 +75,9 @@ public class HexagonOperation extends GeneralOperation {
 
     public SimpleFeatureCollection execute(ReferencedEnvelope gridBounds, double sideLen)
             throws IOException {
+        // expand bbox
+        gridBounds.expandBy(sideLen);
+        
         CoordinateReferenceSystem crs = gridBounds.getCoordinateReferenceSystem();
         SimpleFeatureType featureType = FeatureTypes.getDefaultType("hexagon", Polygon.class, crs);
         featureType = FeatureTypes.add(featureType, UID, Integer.class, 19);

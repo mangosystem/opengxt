@@ -101,7 +101,9 @@ public class CircularGridOperation extends GeneralOperation {
             HexagonOperation operation = new HexagonOperation();
             operation.setOrientation(HexagonOrientation.FLAT);
             operation.setBoundsSource(boundsSource);
-            operation.setGeometryBoundary(boundsGeometry.getGeometry());
+            if (boundsGeometry != null) {
+                operation.setGeometryBoundary(boundsGeometry.getGeometry());
+            }
 
             // adjust side length of hexagonal grids
             final double sideLen = Math.pow(Math.pow(radius, 2.0) * (4.0 / 3.0), 0.5);

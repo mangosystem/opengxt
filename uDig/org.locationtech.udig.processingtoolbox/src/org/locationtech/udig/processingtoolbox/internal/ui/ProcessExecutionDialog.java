@@ -301,11 +301,11 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
 
         // process value
         GridData layoutData = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
-        if (param.type.isAssignableFrom(SimpleFeatureCollection.class)) {
+        if (SimpleFeatureCollection.class.isAssignableFrom(param.type)) {
             // vector layer parameters
             FeatureCollectionDataWidget featuresView = new FeatureCollectionDataWidget(map);
             featuresView.create(container, SWT.NONE, inputParams, param, uiParams);
-        } else if (param.type.isAssignableFrom(GridCoverage2D.class)) {
+        } else if (GridCoverage2D.class.isAssignableFrom(param.type)) {
             // raster layer parameters
             GridCoverageDataWidget gridCoverageView = new GridCoverageDataWidget(map);
             gridCoverageView.create(container, SWT.NONE, inputParams, param);
@@ -321,7 +321,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
             // expression parameters
             ExpressionWidget expressionView = new ExpressionWidget(map);
             expressionView.create(container, SWT.NONE, inputParams, param);
-        } else if (param.type.isAssignableFrom(CoordinateReferenceSystem.class)) {
+        } else if (CoordinateReferenceSystem.class.isAssignableFrom(param.type)) {
             // coordinate reference system parameters
             CrsWidget crsView = new CrsWidget(map);
             crsView.create(container, SWT.NONE, inputParams, param);

@@ -93,8 +93,8 @@ public class HexagonProcess extends AbstractStatisticsProcess {
                     HexagonProcessFactory.extent, null);
             SimpleFeatureCollection boundsSource = (SimpleFeatureCollection) Params.getValue(input,
                     HexagonProcessFactory.boundsSource, null);
-            if (gridBounds == null && boundsSource == null) {
-                throw new NullPointerException("extent or boundsSource parameters required");
+            if (gridBounds == null) {
+                throw new NullPointerException("extent parameters required");
             }
 
             Double sideLen = (Double) Params.getValue(input, HexagonProcessFactory.sideLen, null);
@@ -115,10 +115,6 @@ public class HexagonProcess extends AbstractStatisticsProcess {
             HexagonOperation operation = new HexagonOperation();
             operation.setBoundsSource(boundsSource);
             operation.setOrientation(orientation);
-
-            if (gridBounds == null) {
-                gridBounds = boundsSource.getBounds();
-            }
             SimpleFeatureCollection resultFc = operation.execute(gridBounds, sideLen);
             // end process
 

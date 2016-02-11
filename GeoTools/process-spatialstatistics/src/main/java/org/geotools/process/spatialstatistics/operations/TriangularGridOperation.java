@@ -107,7 +107,6 @@ public class TriangularGridOperation extends GeneralOperation {
             int yi = 0;
             double currentY = bbox.getMinY();
             while (currentY <= bbox.getMaxY()) {
-                int xi = 0;
                 double currentX = bbox.getMinX();
                 while (currentX <= bbox.getMaxX()) {
                     if (yi % 2 == 0) {
@@ -139,7 +138,6 @@ public class TriangularGridOperation extends GeneralOperation {
                         list.closeRing();
                         this.writeFeature(writer, gf.createPolygon(list.toCoordinateArray()));
                     }
-                    xi++;
                     currentX += size;
                 }
                 yi++;

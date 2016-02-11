@@ -221,19 +221,19 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
             Class<?> binding = entrySet.getValue().type;
             boolean outputWidgetRequired = false;
             FileDataType fileDataType = FileDataType.SHAPEFILE;
-            if (binding.isAssignableFrom(SimpleFeatureCollection.class)) {
+            if (SimpleFeatureCollection.class.isAssignableFrom(binding)) {
                 outputWidgetRequired = true;
                 fileDataType = FileDataType.SHAPEFILE;
-            } else if (binding.isAssignableFrom(Geometry.class)) {
+            } else if (Geometry.class.isAssignableFrom(binding)) {
                 outputWidgetRequired = true;
                 fileDataType = FileDataType.SHAPEFILE;
-            } else if (binding.isAssignableFrom(ReferencedEnvelope.class)) {
+            } else if (ReferencedEnvelope.class.isAssignableFrom(binding)) {
                 outputWidgetRequired = true;
                 fileDataType = FileDataType.SHAPEFILE;
-            } else if (binding.isAssignableFrom(BoundingBox.class)) {
+            } else if (BoundingBox.class.isAssignableFrom(binding)) {
                 outputWidgetRequired = true;
                 fileDataType = FileDataType.SHAPEFILE;
-            } else if (binding.isAssignableFrom(GridCoverage2D.class)) {
+            } else if (GridCoverage2D.class.isAssignableFrom(binding)) {
                 outputWidgetRequired = true;
                 fileDataType = FileDataType.RASTER;
             } else {

@@ -46,6 +46,7 @@ import org.geotools.feature.NameImpl;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.Processors;
 import org.geotools.process.spatialstatistics.HistogramGridCoverageProcessFactory;
+import org.geotools.process.spatialstatistics.RasterClipByCircleProcessFactory;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;
@@ -81,6 +82,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
     private static Boolean showLog = Boolean.FALSE;
 
     private static Boolean selectedOnly = Boolean.TRUE;
+
+    private static Boolean useDefaultStyle = Boolean.TRUE;
 
     private static Boolean loadGeoToolsProcess = Boolean.TRUE;
 
@@ -139,6 +142,14 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
 
     public static void setSelectedOnly(Boolean selectedOnly) {
         ToolboxView.selectedOnly = selectedOnly;
+    }
+
+    public static Boolean getUseDefaultStyle() {
+        return useDefaultStyle;
+    }
+
+    public static void setUseDefaultStyle(Boolean useDefaultStyle) {
+        ToolboxView.useDefaultStyle = useDefaultStyle;
     }
 
     @Override
@@ -505,6 +516,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent extractionTool = new TreeParent(Messages.ToolboxView_Extract, null, null);
         generalTool.addChild(extractionTool);
         buildTool(extractionTool, "org.geotools.process.spatialstatistics.HistogramGridCoverageProcessFactory");
+        buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByExtentProcessFactory");
+        buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByGeometryProcessFactory");
+        buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByCircleProcessFactory");
     }
 
     private void buildTool(TreeParent parent, String title, String dialogName) {

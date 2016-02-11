@@ -110,6 +110,9 @@ public class ToolboxPlugin extends AbstractUIPlugin {
         }
 
         console.activate();
+        if (message == null) {
+            return;
+        }
         internal.println(dateFormat.format(new java.util.Date()) + message.toString());
     }
 

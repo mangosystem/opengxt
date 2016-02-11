@@ -50,7 +50,6 @@ import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
 import org.geotools.process.spatialstatistics.storage.DataStoreFactory;
-import org.geotools.process.spatialstatistics.storage.RasterExportOperation;
 import org.geotools.process.spatialstatistics.storage.ShapeExportOperation;
 import org.geotools.process.spatialstatistics.styler.GraduatedColorStyleBuilder;
 import org.geotools.process.spatialstatistics.styler.GraduatedSymbolStyleBuilder;
@@ -64,6 +63,7 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.util.GeoToolsAdapters;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
+import org.locationtech.udig.processingtoolbox.ToolboxView;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.tools.HtmlWriter;
 import org.locationtech.udig.project.IMap;
@@ -77,6 +77,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.ProgressListener;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LinearRing;
 
 /**
  * ProcessExecutorOperation
@@ -162,12 +163,20 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                                 outputParams.get(entrySet.getKey()),
                                 resultInfo.get(entrySet.getKey()).metadata, monitor);
                     } else if (val instanceof GridCoverage2D) {
-                        File outputFile = new File(outputParams.get(entrySet.getKey()).toString());
-                        RasterExportOperation saveAs = new RasterExportOperation();
-                        GridCoverage2D output = saveAs.saveAsGeoTiff((GridCoverage2D) val,
-                                outputFile.getAbsolutePath());
                         ToolboxPlugin.log(Messages.Task_AddingLayer);
-                        MapUtils.addGridCoverageToMap(map, output, outputFile, null);
+                        try {
+                            File outputFile = new File(outputParams.get(entrySet.getKey())
+                                    .toString());
+                            GridCoverage2D output = MapUtils.saveAsGeoTiff((GridCoverage2D) val,
+                                    outputFile);
+                            MapUtils.addGridCoverageToMap(map, output, outputFile, null);
+                        } catch (IllegalArgumentException e) {
+                            ToolboxPlugin.log(e.getMessage());
+                        } catch (IndexOutOfBoundsException e) {
+                            ToolboxPlugin.log(e.getMessage());
+                        } catch (IOException e) {
+                            ToolboxPlugin.log(e.getMessage());
+                        }
                     } else {
                         postProcessing(val);
                     }
@@ -254,60 +263,63 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
         ssBuilder.setOpacity(0.8f);
 
         Style style = ssBuilder.getDefaultFeatureStyle();
-        if (outputMeta.containsKey(Parameter.OPTIONS)) {
-            // KVP(Parameter.OPTIONS, "renderer.fieldname")
-            // renderer = LISA, UniqueValues, ClassBreaks, Density, Distance, Interpolation
-            // ClassBreaks = EqualInterval, Quantile, NaturalBreaks, StdDev
+        if (ToolboxView.getUseDefaultStyle()) {
+            if (outputMeta.containsKey(Parameter.OPTIONS)) {
+                // KVP(Parameter.OPTIONS, "renderer.fieldname")
+                // renderer = LISA, UniqueValues, ClassBreaks, Density, Distance, Interpolation
+                // ClassBreaks = EqualInterval, Quantile, NaturalBreaks, StdDev
 
-            try {
-                String value = outputMeta.get(Parameter.OPTIONS).toString();
-                String[] splits = value.split("\\."); //$NON-NLS-1$ 
-                String styleName = splits[0].toUpperCase();
+                try {
+                    String value = outputMeta.get(Parameter.OPTIONS).toString();
+                    String[] splits = value.split("\\."); //$NON-NLS-1$ 
+                    String styleName = splits[0].toUpperCase();
 
-                String functionName = null;
-                if (styleName.startsWith("LISA")) { //$NON-NLS-1$
-                    style = ssBuilder.getLISAStyle("COType"); //$NON-NLS-1$
-                } else if (styleName.startsWith("CL") || styleName.startsWith("JE") //$NON-NLS-1$ //$NON-NLS-2$
-                        || styleName.startsWith("NA")) { //$NON-NLS-1$
-                    functionName = "JenksNaturalBreaksFunction"; //$NON-NLS-1$
-                } else if (styleName.startsWith("E")) { //$NON-NLS-1$
-                    functionName = "EqualIntervalFunction"; //$NON-NLS-1$
-                } else if (styleName.startsWith("S")) { //$NON-NLS-1$
-                    functionName = "StandardDeviationFunction"; //$NON-NLS-1$
-                } else if (styleName.startsWith("Q")) { //$NON-NLS-1$
-                    functionName = "QuantileFunction"; //$NON-NLS-1$
-                }
-
-                if (functionName != null && splits.length == 2) {
-                    String fieldName = splits[1]; // inputParams
-                    if (schema.indexOf(fieldName) == -1) {
-                        fieldName = inputParams.get(fieldName).toString();
+                    String functionName = null;
+                    if (styleName.startsWith("LISA")) { //$NON-NLS-1$
+                        style = ssBuilder.getLISAStyle("COType"); //$NON-NLS-1$
+                    } else if (styleName.startsWith("CL") || styleName.startsWith("JE") //$NON-NLS-1$ //$NON-NLS-2$
+                            || styleName.startsWith("NA")) { //$NON-NLS-1$
+                        functionName = "JenksNaturalBreaksFunction"; //$NON-NLS-1$
+                    } else if (styleName.startsWith("E")) { //$NON-NLS-1$
+                        functionName = "EqualIntervalFunction"; //$NON-NLS-1$
+                    } else if (styleName.startsWith("S")) { //$NON-NLS-1$
+                        functionName = "StandardDeviationFunction"; //$NON-NLS-1$
+                    } else if (styleName.startsWith("Q")) { //$NON-NLS-1$
+                        functionName = "QuantileFunction"; //$NON-NLS-1$
                     }
 
-                    if (schema.indexOf(fieldName) != -1) {
-                        Class<?> binding = schema.getDescriptor(fieldName).getType().getBinding();
-                        if (Number.class.isAssignableFrom(binding)) {
-                            SimpleShapeType shapeType = FeatureTypes.getSimpleShapeType(source);
-                            if (shapeType == SimpleShapeType.POINT) {
-                                GraduatedSymbolStyleBuilder builder = new GraduatedSymbolStyleBuilder();
-                                builder.setMethodName(functionName);
-                                style = builder.createStyle(source, fieldName);
-                            } else {
-                                GraduatedColorStyleBuilder builder = new GraduatedColorStyleBuilder();
-                                style = builder.createStyle(source, fieldName, functionName, 5,
-                                        "Blues"); //$NON-NLS-1$
+                    if (functionName != null && splits.length == 2) {
+                        String fieldName = splits[1]; // inputParams
+                        if (schema.indexOf(fieldName) == -1) {
+                            fieldName = inputParams.get(fieldName).toString();
+                        }
+
+                        if (schema.indexOf(fieldName) != -1) {
+                            Class<?> binding = schema.getDescriptor(fieldName).getType()
+                                    .getBinding();
+                            if (Number.class.isAssignableFrom(binding)) {
+                                SimpleShapeType shapeType = FeatureTypes.getSimpleShapeType(source);
+                                if (shapeType == SimpleShapeType.POINT) {
+                                    GraduatedSymbolStyleBuilder builder = new GraduatedSymbolStyleBuilder();
+                                    builder.setMethodName(functionName);
+                                    style = builder.createStyle(source, fieldName);
+                                } else {
+                                    GraduatedColorStyleBuilder builder = new GraduatedColorStyleBuilder();
+                                    style = builder.createStyle(source, fieldName, functionName, 5,
+                                            "Blues"); //$NON-NLS-1$
+                                }
                             }
                         }
                     }
+                } catch (Exception e) {
+                    ToolboxPlugin.log(e.getMessage());
                 }
-            } catch (Exception e) {
-                ToolboxPlugin.log(e.getMessage());
-            }
-        } else {
-            if (source.getSchema().indexOf("COType") != -1) { //$NON-NLS-1$
-                style = ssBuilder.getLISAStyle("COType"); //$NON-NLS-1$
-            } else if (source.getSchema().indexOf("GiZScore") != -1) { //$NON-NLS-1$
-                style = ssBuilder.getZScoreStdDevStyle("GiZScore"); //$NON-NLS-1$
+            } else {
+                if (source.getSchema().indexOf("COType") != -1) { //$NON-NLS-1$
+                    style = ssBuilder.getLISAStyle("COType"); //$NON-NLS-1$
+                } else if (source.getSchema().indexOf("GiZScore") != -1) { //$NON-NLS-1$
+                    style = ssBuilder.getZScoreStdDevStyle("GiZScore"); //$NON-NLS-1$
+                }
             }
         }
 
@@ -352,13 +364,19 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
             crs = (CoordinateReferenceSystem) source.getUserData();
         }
 
-        SimpleFeatureType schema = FeatureTypes.getDefaultType(layerName, source.getClass(), crs);
+        Geometry geometry = source;
+        if (source instanceof LinearRing) {
+            geometry = source.getFactory().createPolygon((LinearRing) source, null);
+            geometry.setUserData(source.getUserData());
+        }
+
+        SimpleFeatureType schema = FeatureTypes.getDefaultType(layerName, geometry.getClass(), crs);
 
         ListFeatureCollection features = new ListFeatureCollection(schema);
         SimpleFeatureBuilder builder = new SimpleFeatureBuilder(schema);
 
         SimpleFeature feature = builder.buildFeature(null);
-        feature.setDefaultGeometry(source);
+        feature.setDefaultGeometry(geometry);
         features.add(feature);
 
         return features;

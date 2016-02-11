@@ -279,7 +279,8 @@ public class MapUtils {
         return null;
     }
 
-    public static GridCoverage2D saveAsGeoTiff(GridCoverage2D source, File filePath) {
+    public static GridCoverage2D saveAsGeoTiff(GridCoverage2D source, File filePath)
+            throws IllegalArgumentException, IndexOutOfBoundsException, IOException {
         RasterExportOperation saveAs = new RasterExportOperation();
         return saveAs.saveAsGeoTiff(source, filePath.getAbsolutePath());
     }
@@ -341,18 +342,39 @@ public class MapUtils {
     @SuppressWarnings("nls")
     public static boolean confirmSpatialFile(File outputFile) {
         // single file or multiple files
-        if (outputFile.getName().toLowerCase().endsWith(".shp")) {
-            String[] extensions = new String[] { "shp", "shx", "dbf", "prj", "sbn", "sbx", "qix",
-                    "fix", "lyr", "cpg", "qpj", "qml" };
-            String fileName = FilenameUtils.getBaseName(outputFile.getPath());
+        final String fileName = outputFile.getName().toLowerCase();
+        if (fileName.endsWith(".shp")) {
+            String[] extensions = new String[] { "shx", "dbf", "prj", "sbn", "sbx", "qix", "fix",
+                    "lyr", "cpg", "qpj", "qml" };
+            String baseName = FilenameUtils.getBaseName(outputFile.getPath());
             for (String ext : extensions) {
-                File file = new File(outputFile.getParent(), fileName + "." + ext);
+                File file = new File(outputFile.getParent(), baseName + "." + ext);
                 if (file.exists()) {
                     file.delete();
                 }
             }
+            outputFile.delete();
+        } else if (fileName.endsWith(".tif") || fileName.endsWith(".tiff")) {
+            String[] extensions = new String[] { ".tfw", ".aux", ".aux.xml", ".ovr", ".rrd",
+                    ".xml", ".vat.dbf" };
+            String baseName = FilenameUtils.getBaseName(outputFile.getPath());
+            for (String ext : extensions) {
+                File file = new File(outputFile.getParent(), baseName + "." + ext);
+                if (file.exists()) {
+                    file.delete();
+                }
+            }
+
+            baseName = FilenameUtils.getName(outputFile.getPath());
+            for (String ext : extensions) {
+                File file = new File(outputFile.getParent(), baseName + ext);
+                if (file.exists()) {
+                    file.delete();
+                }
+            }
+            outputFile.delete();
         } else {
-            // .tif, .gml, .kml ...
+            // .gml, .kml ...
             if (!outputFile.delete()) {
                 return false;
             }

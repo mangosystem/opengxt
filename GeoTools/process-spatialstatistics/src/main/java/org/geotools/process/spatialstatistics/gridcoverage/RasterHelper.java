@@ -20,8 +20,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
+import java.awt.image.SampleModel;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -35,6 +37,7 @@ import javax.media.jai.PlanarImage;
 import org.geotools.coverage.Category;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
+import org.geotools.coverage.TypeMap;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridGeometry2D;
@@ -46,11 +49,13 @@ import org.geotools.factory.Hints;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.image.ImageWorker;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.resources.i18n.Vocabulary;
 import org.geotools.resources.i18n.VocabularyKeys;
 import org.geotools.util.NumberRange;
 import org.geotools.util.logging.Logging;
+import org.opengis.coverage.ColorInterpretation;
 import org.opengis.coverage.SampleDimension;
 import org.opengis.coverage.SampleDimensionType;
 import org.opengis.coverage.grid.GridGeometry;
@@ -101,7 +106,7 @@ public class RasterHelper {
         } catch (IOException e) {
             LOGGER.log(Level.FINE, e.getMessage(), e);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.FINE, e.getMessage(), e);
         }
 
         return gc2D;
@@ -110,11 +115,10 @@ public class RasterHelper {
     public static GridCoverage2D openGeoTiffFile(String filePath) {
         GridCoverage2D gc2D = null;
 
-        GeoTiffReader reader = null;
         try {
             File gridFile = new File(filePath);
             Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
-            reader = new GeoTiffReader(gridFile, hints);
+            GeoTiffReader reader = new GeoTiffReader(gridFile, hints);
             try {
                 gc2D = reader.read(null);
             } catch (IOException e) {
@@ -387,12 +391,12 @@ public class RasterHelper {
         return dataType;
     }
 
-    public static GridCoverage2D createGridCoverage(PlanarImage tiledImage, int bandCount,
-            double noDataValue, double minValue, double maxValue, ReferencedEnvelope coverageExtent) {
+    public static GridCoverage2D createGridCoverage(CharSequence name, PlanarImage tiledImage,
+            int bandCount, double noDataValue, double minValue, double maxValue,
+            ReferencedEnvelope coverageExtent) {
 
         if (tiledImage == null || coverageExtent == null) {
-            LOGGER.log(Level.FINE, "WritableRaster is null!");
-            return null;
+            throw new NullPointerException("tiledImage, coverageExtent is null!");
         }
 
         if (noDataValue == minValue) {
@@ -413,13 +417,11 @@ public class RasterHelper {
         Category values = new Category("values", colors, NumberRange.create(minValue, maxValue),
                 NumberRange.create(minValue, maxValue));
 
-        GridSampleDimension[] bandCol = null;
+        GridSampleDimension[] bands = null;
         GridSampleDimension band = null;
 
-        GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
-
         band = new GridSampleDimension("Dimension", new Category[] { nan, values }, null);
-        bandCol = new GridSampleDimension[] { band.geophysics(true) };
+        bands = new GridSampleDimension[] { band.geophysics(true) };
 
         // setting metadata
         final Map<CharSequence, Double> properties = new HashMap<CharSequence, Double>();
@@ -430,7 +432,7 @@ public class RasterHelper {
         properties.put(noDataName, Double.valueOf(noDataValue));
         properties.put("GC_NODATA", Double.valueOf(noDataValue));
 
-        return factory.create("GridCoverage2D", tiledImage, coverageExtent, bandCol, null,
-                properties);
+        GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
+        return factory.create(name, tiledImage, coverageExtent, bands, null, properties);
     }
 }

@@ -43,15 +43,14 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  * 
  * @source $URL$
  */
-@SuppressWarnings("nls")
 public class RasterExportOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterExportOperation.class);
 
     // http://www.javadocexamples.com/java_source/org/geotools/data/gtopo30/GTopo30DataSource.java.html
     // http://www.mail-archive.com/geotools-gt2-users@lists.sourceforge.net/msg09158.html
 
-    // CompressionType : CCITT RLE, CCITT T.4, CCITT T.6, LZW, JPEG, ZLib, 
-    //                 PackBits, Deflate, EXIF, JPEG
+    // CompressionType : CCITT RLE, CCITT T.4, CCITT T.6, LZW, JPEG, ZLib,
+    // PackBits, Deflate, EXIF, JPEG
 
     // GeoServer WCS Default = MODE_EXPLICIT, LZW, 0.75F, 256, 256
 
@@ -115,11 +114,8 @@ public class RasterExportOperation {
         this.useTileMode = useTileMode;
     }
 
-    public GridCoverage2D saveAsGeoTiff(GridCoverage2D sourceCoverage, String tiffFile) {
-        if (!confirmRasterFile(tiffFile)) {
-            return null;
-        }
-
+    public GridCoverage2D saveAsGeoTiff(GridCoverage2D sourceCoverage, String tiffFile)
+            throws IllegalArgumentException, IndexOutOfBoundsException, IOException {
         // getting the write parameters
         final GeoTiffWriteParams wp = new GeoTiffWriteParams();
         if (useCompressionMode) {
@@ -165,46 +161,9 @@ public class RasterExportOperation {
             // open GridCoverage2D
             Hints hints = new Hints(Hints.FORCE_LONGITUDE_FIRST_AXIS_ORDER, Boolean.TRUE);
             GeoTiffReader reader = new GeoTiffReader(outputFile, hints);
-
             return reader.read(null);
-        } catch (IllegalArgumentException e) {
-            LOGGER.log(Level.FINE, e.getMessage(), e);
-        } catch (IndexOutOfBoundsException e) {
-            LOGGER.log(Level.FINE, e.getMessage(), e);
-        } catch (IOException e) {
-            LOGGER.log(Level.FINE, e.getMessage(), e);
         } finally {
             writer.dispose();
         }
-
-        return null;
-    }
-
-    private boolean confirmRasterFile(String tiffFile) {
-        int pos = tiffFile.lastIndexOf('.');
-        String fileNoExt = tiffFile.substring(0, pos);
-
-        File outputFile = null;
-        String[] extList = new String[] { ".tfw", ".aux", ".rrd", ".xml", ".vat.dbf" };
-        for (String ext : extList) {
-            outputFile = new File(fileNoExt + ext);
-            if (outputFile.exists() && outputFile.isFile()) {
-                outputFile.delete();
-            }
-        }
-
-        // PointToRasterOp.tif.vat.dbf
-        outputFile = new File(tiffFile + ".vat.dbf");
-        if (outputFile.exists() && outputFile.isFile()) {
-            outputFile.delete();
-        }
-
-        // finally delete tif file
-        outputFile = new File(tiffFile);
-        if (outputFile.exists() && outputFile.isFile()) {
-            return outputFile.delete();
-        }
-
-        return true;
     }
 }

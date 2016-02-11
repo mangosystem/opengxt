@@ -139,7 +139,16 @@ public abstract class RasterProcessingOperation {
 
     public GridCoverage2D saveAsGeoTiff(GridCoverage2D inputCoverage, String geoTifFile) {
         RasterExportOperation saveAsOp = new RasterExportOperation();
-        return saveAsOp.saveAsGeoTiff(inputCoverage, geoTifFile);
+        try {
+            return saveAsOp.saveAsGeoTiff(inputCoverage, geoTifFile);
+        } catch (IllegalArgumentException e) {
+            LOGGER.log(Level.FINER, e.getMessage(), e);
+        } catch (IndexOutOfBoundsException e) {
+            LOGGER.log(Level.FINER, e.getMessage(), e);
+        } catch (IOException e) {
+            LOGGER.log(Level.FINER, e.getMessage(), e);
+        }
+        return null;
     }
 
     protected void updateStatistics(double retVal) {
@@ -492,16 +501,46 @@ public abstract class RasterProcessingOperation {
     }
 
     protected GridCoverage2D createGridCoverage(CharSequence name, PlanarImage tiledImage) {
-        return createGridCoverage(name, tiledImage, 0, NoData, MinValue, MaxValue, Extent);
+        return createGridCoverage(name, tiledImage, 1, NoData, MinValue, MaxValue, Extent);
+    }
+
+    protected GridCoverage2D createGridCoverage(CharSequence name, RenderedImage image,
+            GridSampleDimension[] bands, double noDataValue, double minValue, double maxValue,
+            ReferencedEnvelope extent) {
+
+        if (image == null || extent == null) {
+            throw new NullPointerException("WritableRaster is null!");
+        }
+
+        if (noDataValue == minValue) {
+            noDataValue = minValue - 1;
+        } else if (noDataValue == maxValue) {
+            noDataValue = maxValue + 1;
+        } else if (noDataValue > minValue && noDataValue < maxValue) {
+            noDataValue = minValue - 1;
+        }
+
+        CharSequence noDataName = Vocabulary.formatInternational(VocabularyKeys.NODATA);
+
+        // setting metadata
+        final Map<CharSequence, Double> properties = new HashMap<CharSequence, Double>();
+        properties.put("Maximum", Double.valueOf(maxValue));
+        properties.put("Minimum", Double.valueOf(minValue));
+        // properties.put("Mean", 1.0);
+        // properties.put("StdDev", 1.0);
+        properties.put(noDataName, Double.valueOf(noDataValue));
+        properties.put("GC_NODATA", Double.valueOf(noDataValue));
+
+        GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
+        return factory.create(name, image, extent, bands, null, properties);
     }
 
     protected GridCoverage2D createGridCoverage(CharSequence name, PlanarImage tiledImage,
             int bandCount, double noDataValue, double minValue, double maxValue,
-            ReferencedEnvelope coverageExtent) {
+            ReferencedEnvelope extent) {
 
-        if (tiledImage == null || coverageExtent == null) {
-            LOGGER.log(Level.WARNING, "WritableRaster is null!");
-            return null;
+        if (tiledImage == null || extent == null) {
+            throw new NullPointerException("WritableRaster is null!");
         }
 
         if (noDataValue == minValue) {
@@ -515,7 +554,7 @@ public abstract class RasterProcessingOperation {
         Color[] colors = new Color[] { Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED };
 
         CharSequence noDataName = Vocabulary.formatInternational(VocabularyKeys.NODATA);
-        Category nan = new Category(noDataName, new Color[] { new Color(0, 0, 0, 0) },
+        Category nan = new Category(noDataName, new Color[] { new Color(255, 255, 255, 0) },
                 NumberRange.create(noDataValue, noDataValue), NumberRange.create(noDataValue,
                         noDataValue));
 
@@ -538,6 +577,6 @@ public abstract class RasterProcessingOperation {
         properties.put("GC_NODATA", Double.valueOf(noDataValue));
 
         GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
-        return factory.create(name, tiledImage, coverageExtent, bands, null, properties);
+        return factory.create(name, tiledImage, extent, bands, null, properties);
     }
 }

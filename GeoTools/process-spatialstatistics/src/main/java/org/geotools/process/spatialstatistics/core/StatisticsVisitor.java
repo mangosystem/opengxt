@@ -74,8 +74,11 @@ public class StatisticsVisitor {
             return new LongStrategy();
         } else if (type == Float.class) {
             return new FloatStrategy();
-        } else if (Number.class.isAssignableFrom(type))
+        } else if (Number.class.isAssignableFrom(type)) {
             return new DoubleStrategy();
+        } else if (String.class.isAssignableFrom(type)) {
+            return new StringStrategy();
+        }
 
         return null;
     }
@@ -461,6 +464,61 @@ public class StatisticsVisitor {
         @Override
         public void setNoData(Number noData) {
             this.noData = new Integer(noData.intValue());
+        }
+    }
+
+    static class StringStrategy implements StatisticsStrategy {
+
+        Object noData = null;
+
+        int count = 0;
+
+        int invalidCount = 0;
+
+        Object firstValue = null;
+
+        Object lastValue = null;
+
+        @Override
+        public void add(Object value) {
+            if (value == null) {
+                invalidCount++;
+                return;
+            }
+
+            if (noData != null && noData.equals(value)) {
+                invalidCount++;
+                return;
+            }
+
+            if (firstValue == null) {
+                firstValue = value;
+            }
+
+            lastValue = value;
+
+            count++;
+        }
+
+        @Override
+        public StatisticsVisitorResult getResult() {
+            StatisticsVisitorResult sr = new StatisticsVisitorResult();
+            sr.setFirstValue(firstValue);
+            sr.setLastValue(lastValue);
+            sr.setCount(count);
+            sr.setNoData(noData);
+            return sr;
+        }
+
+        @Override
+        public void reset() {
+            count = invalidCount = 0;
+            firstValue = lastValue = null;
+        }
+
+        @Override
+        public void setNoData(Number noData) {
+            this.noData = noData;
         }
     }
 }

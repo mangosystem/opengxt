@@ -26,6 +26,7 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.transformation.ExplodeFeatureCollection;
 import org.geotools.process.spatialstatistics.transformation.ToPointFeatureCollection;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
@@ -53,10 +54,11 @@ public class FeatureToPointProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            Boolean inside, ProgressListener monitor) {
+            Boolean inside, Boolean singlePart, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(FeatureToPointProcessFactory.inputFeatures.key, inputFeatures);
         map.put(FeatureToPointProcessFactory.inside.key, inside);
+        map.put(FeatureToPointProcessFactory.singlePart.key, singlePart);
 
         Process process = new FeatureToPointProcess(null);
         Map<String, Object> resultMap;
@@ -93,6 +95,9 @@ public class FeatureToPointProcess extends AbstractStatisticsProcess {
 
             Boolean inside = (Boolean) Params.getValue(input, FeatureToPointProcessFactory.inside,
                     FeatureToPointProcessFactory.inside.sample);
+            Boolean singlePart = (Boolean) Params.getValue(input,
+                    FeatureToPointProcessFactory.singlePart,
+                    FeatureToPointProcessFactory.singlePart.sample);
 
             monitor.setTask(Text.text("Processing " + this.getClass().getSimpleName()));
             monitor.progress(25.0f);
@@ -102,7 +107,13 @@ public class FeatureToPointProcess extends AbstractStatisticsProcess {
             }
 
             // start process
-            SimpleFeatureCollection resultFc = new ToPointFeatureCollection(inputFeatures, inside);
+            SimpleFeatureCollection resultFc = null;
+            if (singlePart) {
+                resultFc = new ToPointFeatureCollection(
+                        new ExplodeFeatureCollection(inputFeatures), inside);
+            } else {
+                resultFc = new ToPointFeatureCollection(inputFeatures, inside);
+            }
             // end process
 
             monitor.setTask(Text.text("Encoding result"));

@@ -43,7 +43,7 @@ public class FeatureToPointProcessFactory extends SpatialStatisticsProcessFactor
     private static final String PROCESS_NAME = "FeatureToPoint";
 
     /*
-     * FeatureToPoint(SimpleFeatureCollection inputFeatures, Boolean inside): SimpleFeatureCollection
+     * FeatureToPoint(SimpleFeatureCollection inputFeatures, Boolean inside, Boolean singlePart): SimpleFeatureCollection
      */
 
     public FeatureToPointProcessFactory() {
@@ -76,11 +76,17 @@ public class FeatureToPointProcessFactory extends SpatialStatisticsProcessFactor
             getResource("FeatureToPoint.inside.title"),
             getResource("FeatureToPoint.inside.description"), false, 0, 1, Boolean.TRUE, null);
 
+    /** singlePart */
+    public static final Parameter<Boolean> singlePart = new Parameter<Boolean>("singlePart",
+            Boolean.class, getResource("FeatureToPoint.singlePart.title"),
+            getResource("FeatureToPoint.singlePart.description"), false, 0, 1, Boolean.FALSE, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(inside.key, inside);
+        parameterInfo.put(singlePart.key, singlePart);
         return parameterInfo;
     }
 

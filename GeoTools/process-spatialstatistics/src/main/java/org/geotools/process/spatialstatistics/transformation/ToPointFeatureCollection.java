@@ -19,14 +19,18 @@ package org.geotools.process.spatialstatistics.transformation;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
+import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.Filter;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -67,6 +71,28 @@ public class ToPointFeatureCollection extends GXTSimpleFeatureCollection {
         return schema;
     }
 
+    @Override
+    public ReferencedEnvelope getBounds() {
+        return DataUtilities.bounds(features());
+    }
+
+    @Override
+    public SimpleFeatureCollection subCollection(Filter filter) {
+        ListFeatureCollection subCollection = new ListFeatureCollection(getSchema());
+        SimpleFeatureIterator featureIter = features();
+        try {
+            while (featureIter.hasNext()) {
+                SimpleFeature feature = featureIter.next();
+                if (filter.evaluate(feature)) {
+                    subCollection.add(feature);
+                }
+            }
+        } finally {
+            featureIter.close();
+        }
+        return subCollection;
+    }
+
     static class ToPointFeatureIterator implements SimpleFeatureIterator {
         private SimpleFeatureIterator delegate;
 
@@ -95,18 +121,22 @@ public class ToPointFeatureCollection extends GXTSimpleFeatureCollection {
 
         public SimpleFeature next() throws NoSuchElementException {
             SimpleFeature sourceFeature = delegate.next();
-            SimpleFeature nextFeature = builder.buildFeature(sourceFeature.getID());
 
-            // transfer attributes
-            transferAttribute(sourceFeature, nextFeature);
-
-            // centroid or interior point
-            Geometry geometry = (Geometry) sourceFeature.getDefaultGeometry();
-            Point center = geometry.getCentroid();
-            if (useInside && shapeType == SimpleShapeType.POLYGON && !geometry.contains(center)) {
-                center = geometry.getInteriorPoint();
+            for (Object attribute : sourceFeature.getAttributes()) {
+                if (attribute instanceof Geometry) {
+                    // centroid or interior point
+                    Geometry geometry = (Geometry) attribute;
+                    Point center = geometry.getCentroid();
+                    if (useInside && shapeType == SimpleShapeType.POLYGON
+                            && !geometry.contains(center)) {
+                        center = geometry.getInteriorPoint();
+                    }
+                    attribute = center;
+                }
+                builder.add(attribute);
             }
-            nextFeature.setDefaultGeometry(center);
+            SimpleFeature nextFeature = builder.buildFeature(sourceFeature.getID());
+            builder.reset();
 
             return nextFeature;
         }

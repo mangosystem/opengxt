@@ -120,6 +120,8 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
     private ILayer layer = null;
 
     private SimpleFeatureCollection source = null;
+    
+    private String geom_field = null;
 
     private Button btnClear, btnTest, chkSelected;
 
@@ -320,6 +322,9 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
             public void handleEvent(Event event) {
                 if (valueTable.getSelectionCount() > 0) {
                     String selection = valueTable.getSelection()[0].getText();
+                    if (selection.contains("[geom]")) {
+                        selection = selection.replace("[geom]", "[" + geom_field + "]");
+                    }
                     updateExpression(selection);
                 }
             }
@@ -381,6 +386,7 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
         fieldTable.removeAll();
         for (AttributeDescriptor descriptor : schema.getAttributeDescriptors()) {
             if (descriptor instanceof GeometryDescriptor) {
+                this.geom_field = descriptor.getLocalName();
                 TableItem item = new TableItem(fieldTable, SWT.NULL);
                 item.setText(descriptor.getLocalName());
                 FontData fontData = item.getFont().getFontData()[0];
@@ -457,7 +463,11 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
                             if (i++ > 0) {
                                 buffer.append(", ");
                             }
-                            buffer.append(argument.getName());
+                            if (Geometry.class.isAssignableFrom(argument.getType())) {
+                                buffer.append("[geom]");
+                            } else {
+                                buffer.append(argument.getName());
+                            }
                         }
                         buffer.append(" )");
                         item.setText(buffer.toString());

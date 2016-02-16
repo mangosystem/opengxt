@@ -63,6 +63,8 @@ import org.opengis.filter.capability.FunctionName;
 import org.opengis.filter.expression.Expression;
 import org.opengis.parameter.Parameter;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 /**
  * Expression Builder Dialog
  * 
@@ -81,6 +83,8 @@ public class ExpressionBuilderDialog extends Dialog {
     private String initSQL = null;
 
     private SimpleFeatureCollection source = null;
+    
+    private String geom_field = null;
 
     private Table fieldTable, valueTable;
 
@@ -262,6 +266,9 @@ public class ExpressionBuilderDialog extends Dialog {
             public void handleEvent(Event event) {
                 if (valueTable.getSelectionCount() > 0) {
                     String selection = valueTable.getSelection()[0].getText();
+                    if (selection.contains("[geom]")) {
+                        selection = selection.replace("[geom]", "[" + geom_field + "]");
+                    }
                     updateExpression(selection);
                 }
             }
@@ -333,6 +340,7 @@ public class ExpressionBuilderDialog extends Dialog {
         fieldTable.removeAll();
         for (AttributeDescriptor descriptor : source.getSchema().getAttributeDescriptors()) {
             if (descriptor instanceof GeometryDescriptor) {
+                this.geom_field = descriptor.getLocalName();
                 TableItem item = new TableItem(fieldTable, SWT.NULL);
                 item.setText(descriptor.getLocalName());
                 FontData fontData = item.getFont().getFontData()[0];
@@ -409,7 +417,11 @@ public class ExpressionBuilderDialog extends Dialog {
                             if (i++ > 0) {
                                 buffer.append(", ");
                             }
-                            buffer.append(argument.getName());
+                            if (Geometry.class.isAssignableFrom(argument.getType())) {
+                                buffer.append("[geom]");
+                            } else {
+                                buffer.append(argument.getName());
+                            }
                         }
                         buffer.append(" )");
                         item.setText(buffer.toString());

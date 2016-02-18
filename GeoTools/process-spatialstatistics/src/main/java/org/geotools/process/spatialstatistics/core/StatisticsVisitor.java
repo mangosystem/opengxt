@@ -18,6 +18,11 @@ package org.geotools.process.spatialstatistics.core;
 
 import java.util.logging.Logger;
 
+import javax.media.jai.PlanarImage;
+import javax.media.jai.iterator.RectIter;
+import javax.media.jai.iterator.RectIterFactory;
+
+import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
@@ -46,6 +51,10 @@ public class StatisticsVisitor {
     private Expression expression;
 
     private StatisticsStrategy strategy = null;
+
+    public StatisticsVisitor(StatisticsStrategy strategy) {
+        this.strategy = strategy;
+    }
 
     public StatisticsVisitor(SimpleFeatureType schema, String propertyName)
             throws IllegalFilterException {
@@ -93,6 +102,24 @@ public class StatisticsVisitor {
             strategy.reset();
     }
 
+    public void visit(GridCoverage2D inputCoverage, Integer bandIndex) {
+        reset();
+
+        PlanarImage inputImage = (PlanarImage) inputCoverage.getRenderedImage();
+        RectIter readIter = RectIterFactory.create(inputImage, inputImage.getBounds());
+
+        readIter.startLines();
+        while (!readIter.finishedLines()) {
+            readIter.startPixels();
+            while (!readIter.finishedPixels()) {
+                double sampleValue = readIter.getSampleDouble(bandIndex);
+                visit(Double.valueOf(sampleValue));
+                readIter.nextPixel();
+            }
+            readIter.nextLine();
+        }
+    }
+
     public void visit(SimpleFeatureCollection features) {
         reset();
 
@@ -107,7 +134,10 @@ public class StatisticsVisitor {
     }
 
     public void visit(SimpleFeature feature) {
-        Object value = expression.evaluate(feature);
+        visit(expression.evaluate(feature));
+    }
+
+    public void visit(Object value) {
         if (strategy == null) {
             strategy = createStrategy(value.getClass());
         }
@@ -118,7 +148,7 @@ public class StatisticsVisitor {
         return strategy == null ? new StatisticsVisitorResult() : strategy.getResult();
     }
 
-    interface StatisticsStrategy {
+    public interface StatisticsStrategy {
         public void add(Object value);
 
         public StatisticsVisitorResult getResult();
@@ -128,7 +158,7 @@ public class StatisticsVisitor {
         public void reset();
     }
 
-    static class DoubleStrategy implements StatisticsStrategy {
+    public static class DoubleStrategy implements StatisticsStrategy {
 
         Double noData = null;
 
@@ -215,7 +245,7 @@ public class StatisticsVisitor {
         }
     }
 
-    static class FloatStrategy implements StatisticsStrategy {
+    public static class FloatStrategy implements StatisticsStrategy {
 
         Float noData = null;
 
@@ -301,7 +331,7 @@ public class StatisticsVisitor {
         }
     }
 
-    static class LongStrategy implements StatisticsStrategy {
+    public static class LongStrategy implements StatisticsStrategy {
 
         Long noData = null;
 
@@ -384,7 +414,7 @@ public class StatisticsVisitor {
         }
     }
 
-    static class IntegerStrategy implements StatisticsStrategy {
+    public static class IntegerStrategy implements StatisticsStrategy {
 
         Integer noData = null;
 
@@ -467,7 +497,7 @@ public class StatisticsVisitor {
         }
     }
 
-    static class StringStrategy implements StatisticsStrategy {
+    public static class StringStrategy implements StatisticsStrategy {
 
         Object noData = null;
 

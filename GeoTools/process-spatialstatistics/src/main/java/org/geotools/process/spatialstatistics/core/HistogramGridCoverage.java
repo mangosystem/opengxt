@@ -59,7 +59,7 @@ public class HistogramGridCoverage extends DataHistogram {
 
         int bandCount = coverage.getNumSampleDimensions();
         if (bandIndex >= bandCount) {
-            return false;
+            throw new ArrayIndexOutOfBoundsException("Process failed during execution");
         }
 
         SortedMap<Double, Integer> valueCountsMap = new TreeMap<Double, Integer>();

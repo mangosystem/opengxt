@@ -93,8 +93,8 @@ public class TriangularGridProcess extends AbstractStatisticsProcess {
                     TriangularGridProcessFactory.extent, null);
             SimpleFeatureCollection boundsSource = (SimpleFeatureCollection) Params.getValue(input,
                     TriangularGridProcessFactory.boundsSource, null);
-            if (gridBounds == null && boundsSource == null) {
-                throw new NullPointerException("extent or boundsSource parameters required");
+            if (gridBounds == null) {
+                throw new NullPointerException("extent parameters required");
             }
 
             Double size = (Double) Params.getValue(input, TriangularGridProcessFactory.size, null);
@@ -114,11 +114,8 @@ public class TriangularGridProcess extends AbstractStatisticsProcess {
 
             // start process
             TriangularGridOperation operation = new TriangularGridOperation();
-            operation.setOrientation(orientation);
             operation.setBoundsSource(boundsSource);
-            if (gridBounds == null) {
-                gridBounds = boundsSource.getBounds();
-            }
+            operation.setOrientation(orientation);
             SimpleFeatureCollection resultFc = operation.execute(gridBounds, size);
             // end process
 

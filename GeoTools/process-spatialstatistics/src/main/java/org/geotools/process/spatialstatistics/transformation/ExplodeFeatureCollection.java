@@ -95,12 +95,14 @@ public class ExplodeFeatureCollection extends GXTSimpleFeatureCollection {
                 }
 
                 // create feature
-                nextFeature = builder.buildFeature(Integer.toString(++featureID));
-                transferAttribute(origFeature, nextFeature);
-
                 Geometry multiPart = (Geometry) origFeature.getDefaultGeometry();
-                nextFeature.setDefaultGeometry(multiPart.getGeometryN(index));
-
+                for (Object attribute : origFeature.getAttributes()) {
+                    if (attribute instanceof Geometry) {
+                        attribute = multiPart.getGeometryN(index);
+                    }
+                    builder.add(attribute);
+                }
+                nextFeature = builder.buildFeature(Integer.toString(++featureID));
                 builder.reset();
                 index++;
 

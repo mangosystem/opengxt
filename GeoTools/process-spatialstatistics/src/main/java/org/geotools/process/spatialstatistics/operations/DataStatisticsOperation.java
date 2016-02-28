@@ -21,15 +21,20 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor;
+import org.geotools.process.spatialstatistics.core.StatisticsVisitor.DoubleStrategy;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitorResult;
+import org.geotools.process.spatialstatistics.gridcoverage.RasterCropOperation;
+import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult.DataStatisticsItem;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeatureType;
 
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * DataStatisticsOperation
@@ -40,6 +45,53 @@ import com.thoughtworks.xstream.annotations.XStreamImplicit;
  */
 public class DataStatisticsOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(DataStatisticsOperation.class);
+
+    public DataStatisticsResult execute(GridCoverage2D inputCoverage, Geometry cropShape,
+            Integer bandIndex) {
+        DataStatisticsResult result = new DataStatisticsResult();
+
+        int bandCount = inputCoverage.getNumSampleDimensions();
+        if (bandIndex >= bandCount) {
+            throw new ArrayIndexOutOfBoundsException("Process failed during execution");
+        }
+
+        String typeName = inputCoverage.getName().toString();
+        String propertyName = "Value";
+        Double noData = RasterHelper.getNoDataValue(inputCoverage);
+
+        StatisticsVisitor visitor = new StatisticsVisitor(new DoubleStrategy());
+        visitor.setNoData(noData);
+
+        if (cropShape == null) {
+            visitor.visit(inputCoverage, bandIndex);
+        } else {
+            RasterCropOperation cropOp = new RasterCropOperation();
+            visitor.visit(cropOp.execute(inputCoverage, cropShape), bandIndex);
+        }
+        StatisticsVisitorResult ret = visitor.getResult();
+
+        // remap for WPS PPIO
+        DataStatisticsItem item = new DataStatisticsItem(typeName, propertyName);
+        item.setCount(ret.getCount());
+        item.setInvalidCount(ret.getInvalidCount());
+
+        item.setSum(ret.getSum());
+        item.setMinimum(ret.getMinimum());
+        item.setMaximum(ret.getMaximum());
+        item.setMean(ret.getMean());
+        item.setStandardDeviation(ret.getStandardDeviation());
+        item.setVariance(ret.getVariance());
+        item.setCoefficientOfVariance(ret.getCoefficientOfVariance());
+
+        item.setRange(ret.getRange());
+        item.setRanges(ret.getMinimum() + " - " + ret.getMaximum());
+
+        item.setNoData(ret.getNoData());
+
+        result.add(item);
+
+        return result;
+    }
 
     public DataStatisticsResult execute(SimpleFeatureCollection inputFeatures, String fieldNames) {
         DataStatisticsResult result = new DataStatisticsResult();

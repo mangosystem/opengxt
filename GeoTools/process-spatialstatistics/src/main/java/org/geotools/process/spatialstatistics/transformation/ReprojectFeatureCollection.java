@@ -20,6 +20,7 @@ import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
@@ -35,7 +36,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
@@ -86,22 +86,7 @@ public class ReprojectFeatureCollection extends GXTSimpleFeatureCollection {
     }
 
     public ReferencedEnvelope getBounds() {
-        SimpleFeatureIterator featureIter = features();
-        try {
-            Envelope extent = new Envelope();
-            while (featureIter.hasNext()) {
-                SimpleFeature feature = featureIter.next();
-                final Geometry geom = ((Geometry) feature.getDefaultGeometry());
-                if (geom != null) {
-                    extent.expandToInclude(geom.getEnvelopeInternal());
-                }
-            }
-            return ReferencedEnvelope.reference(extent);
-        } catch (Exception e) {
-            throw new RuntimeException("Exception occurred while computing transformed bounds", e);
-        } finally {
-            featureIter.close();
-        }
+        return DataUtilities.bounds(features());
     }
 
     private MathTransform transform(CoordinateReferenceSystem source,

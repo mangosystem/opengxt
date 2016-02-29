@@ -60,10 +60,11 @@ public class HistogramGridCoverageProcess extends AbstractStatisticsProcess {
     }
 
     public static HistogramProcessResult process(GridCoverage2D inputCoverage, Geometry cropShape,
-            ProgressListener monitor) {
+            Integer bandIndex, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(HistogramGridCoverageProcessFactory.inputCoverage.key, inputCoverage);
         map.put(HistogramGridCoverageProcessFactory.cropShape.key, cropShape);
+        map.put(HistogramGridCoverageProcessFactory.bandIndex.key, bandIndex);
 
         Process process = new HistogramGridCoverageProcess(null);
         Map<String, Object> resultMap;
@@ -95,12 +96,15 @@ public class HistogramGridCoverageProcess extends AbstractStatisticsProcess {
 
             GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
                     HistogramGridCoverageProcessFactory.inputCoverage, null);
-
-            Geometry cropShape = (Geometry) Params.getValue(input,
-                    HistogramGridCoverageProcessFactory.cropShape, null);
             if (inputCoverage == null) {
                 throw new NullPointerException("inputCoverage parameters required");
             }
+
+            Geometry cropShape = (Geometry) Params.getValue(input,
+                    HistogramGridCoverageProcessFactory.cropShape, null);
+            Integer bandIndex = (Integer) Params.getValue(input,
+                    HistogramGridCoverageProcessFactory.bandIndex,
+                    HistogramGridCoverageProcessFactory.bandIndex.sample);
 
             monitor.setTask(Text.text("Processing Statistics"));
             monitor.progress(25.0f);
@@ -128,7 +132,7 @@ public class HistogramGridCoverageProcess extends AbstractStatisticsProcess {
                 }
 
                 DataHistogram process = new HistogramGridCoverage();
-                process.calculateHistogram(cropedCoverage, 0, noData);
+                process.calculateHistogram(cropedCoverage, bandIndex, noData);
                 result.putValues(process.getArrayValues(), process.getArrayFrequencies());
             }
             // end process

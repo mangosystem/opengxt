@@ -47,7 +47,7 @@ public class HistogramGridCoverageProcessFactory extends SpatialStatisticsProces
     private static final String PROCESS_NAME = "HistogramGridCoverage";
 
     /*
-     * HistogramGridCoverage(GridCoverage2D inputCoverage, Geometry cropShape): GridCoverage2D
+     * HistogramGridCoverage(GridCoverage2D inputCoverage, Geometry cropShape, Integer bandIndex): GridCoverage2D
      */
 
     public HistogramGridCoverageProcessFactory() {
@@ -80,11 +80,18 @@ public class HistogramGridCoverageProcessFactory extends SpatialStatisticsProces
             Geometry.class, getResource("HistogramGridCoverage.cropShape.title"),
             getResource("HistogramGridCoverage.cropShape.description"), false, 0, 1, null, null);
 
+    /** bandIndex */
+    public static final Parameter<Integer> bandIndex = new Parameter<Integer>("bandIndex",
+            Integer.class, getResource("HistogramGridCoverage.bandIndex.title"),
+            getResource("HistogramGridCoverage.bandIndex.description"), false, 0, 1,
+            Integer.valueOf(0), null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputCoverage.key, inputCoverage);
         parameterInfo.put(cropShape.key, cropShape);
+        parameterInfo.put(bandIndex.key, bandIndex);
         return parameterInfo;
     }
 

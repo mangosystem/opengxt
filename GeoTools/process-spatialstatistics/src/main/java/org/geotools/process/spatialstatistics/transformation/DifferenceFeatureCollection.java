@@ -1,0 +1,260 @@
+/*
+ *    GeoTools - The Open Source Java GIS Toolkit
+ *    http://geotools.org
+ *
+ *    (C) 2014, Open Source Geospatial Foundation (OSGeo)
+ *
+ *    This library is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation;
+ *    version 2.1 of the License.
+ *
+ *    This library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *    Lesser General Public License for more details.
+ */
+package org.geotools.process.spatialstatistics.transformation;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.logging.Logger;
+
+import org.geotools.data.DataUtilities;
+import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.util.logging.Logging;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.feature.type.GeometryDescriptor;
+import org.opengis.filter.Filter;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryComponentFilter;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.operation.union.CascadedPolygonUnion;
+
+/**
+ * Difference SimpleFeatureCollection Implementation
+ * 
+ * @author Minpa Lee, MangoSystem
+ * 
+ * @source $URL$
+ */
+public class DifferenceFeatureCollection extends GXTSimpleFeatureCollection {
+    protected static final Logger LOGGER = Logging.getLogger(DifferenceFeatureCollection.class);
+
+    private SimpleFeatureCollection differenceFeatures;
+
+    private SimpleFeatureType targetSchema;
+
+    public DifferenceFeatureCollection(SimpleFeatureCollection delegate,
+            SimpleFeatureCollection differenceFeatures) {
+        super(delegate);
+
+        this.differenceFeatures = differenceFeatures;
+        this.targetSchema = buildTargetSchema(delegate.getSchema());
+    }
+
+    private SimpleFeatureType buildTargetSchema(SimpleFeatureType schema) {
+        SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder();
+        for (AttributeDescriptor ad : schema.getAttributeDescriptors()) {
+            if (ad instanceof GeometryDescriptor) {
+                GeometryDescriptor gd = (GeometryDescriptor) ad;
+                Class<?> binding = ad.getType().getBinding();
+                if (Point.class.isAssignableFrom(binding)
+                        || GeometryCollection.class.isAssignableFrom(binding)) {
+                    tb.add(ad);
+                } else {
+                    Class<?> target;
+                    if (LineString.class.isAssignableFrom(binding)) {
+                        target = MultiLineString.class;
+                    } else if (Polygon.class.isAssignableFrom(binding)) {
+                        target = MultiPolygon.class;
+                    } else {
+                        throw new RuntimeException("Don't know how to handle geometries of type "
+                                + binding.getCanonicalName());
+                    }
+                    tb.minOccurs(ad.getMinOccurs());
+                    tb.maxOccurs(ad.getMaxOccurs());
+                    tb.nillable(ad.isNillable());
+                    tb.add(ad.getLocalName(), target, gd.getCoordinateReferenceSystem());
+                }
+            } else {
+                tb.add(ad);
+            }
+        }
+        tb.setName(schema.getName());
+        return tb.buildFeatureType();
+    }
+
+    public SimpleFeatureType getSchema() {
+        return targetSchema;
+    }
+
+    @Override
+    public SimpleFeatureIterator features() {
+        return new DifferenceFeatureIterator(delegate.features(), getSchema(), differenceFeatures);
+    }
+
+    @Override
+    public ReferencedEnvelope getBounds() {
+        return DataUtilities.bounds(features());
+    }
+
+    public int size() {
+        return DataUtilities.count(features());
+    }
+
+    static class DifferenceFeatureIterator implements SimpleFeatureIterator {
+        private SimpleFeatureIterator delegate;
+
+        private SimpleFeatureCollection differenceFeatures;
+
+        private String geomField;
+
+        private SimpleFeatureBuilder builder;
+
+        private SimpleFeature next;
+
+        private Class<?> target;
+
+        public DifferenceFeatureIterator(SimpleFeatureIterator delegate, SimpleFeatureType schema,
+                SimpleFeatureCollection differenceFeatures) {
+            this.delegate = delegate;
+            this.differenceFeatures = differenceFeatures;
+            this.geomField = differenceFeatures.getSchema().getGeometryDescriptor().getLocalName();
+            this.builder = new SimpleFeatureBuilder(schema);
+            this.target = schema.getGeometryDescriptor().getType().getBinding();
+        }
+
+        public void close() {
+            delegate.close();
+        }
+
+        public boolean hasNext() {
+            while (next == null && delegate.hasNext()) {
+                SimpleFeature feature = delegate.next();
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                if (geometry == null || geometry.isEmpty()) {
+                    continue;
+                }
+
+                Geometry diffGeom = geometry; // default
+                Filter filter = ff.intersects(ff.property(geomField), ff.literal(geometry));
+
+                // finally difference using union geometries(intersection features)
+                List<Geometry> geometries = new ArrayList<Geometry>();
+                SimpleFeatureIterator difIter = differenceFeatures.subCollection(filter).features();
+                try {
+                    while (difIter.hasNext()) {
+                        SimpleFeature diffFeature = difIter.next();
+                        geometries.add((Geometry) diffFeature.getDefaultGeometry());
+                    }
+                } finally {
+                    difIter.close();
+                }
+
+                if (geometries.size() > 0) {
+                    Geometry unionGeometry = new CascadedPolygonUnion(geometries).union();
+                    if (unionGeometry != null && !unionGeometry.isEmpty()) {
+                        diffGeom = difference(geometry, unionGeometry, target);
+                    }
+
+                    if (diffGeom == null || diffGeom.isEmpty()) {
+                        continue;
+                    }
+                }
+
+                for (Object attribute : feature.getAttributes()) {
+                    if (attribute instanceof Geometry) {
+                        builder.add(diffGeom);
+                    } else {
+                        builder.add(attribute);
+                    }
+                }
+                next = builder.buildFeature(feature.getID());
+            }
+
+            return next != null;
+        }
+
+        private Geometry difference(Geometry geom, Geometry overlay, Class<?> target) {
+            Geometry difference = geom.difference(overlay);
+
+            // empty difference?
+            if (difference == null || difference.getNumGeometries() == 0) {
+                return null;
+            }
+
+            // map the result to the target output type, removing the spurious lower dimensional
+            // elements that might result out of the intersection
+            Geometry result;
+            if (Point.class.isAssignableFrom(target) || MultiPoint.class.isAssignableFrom(target)
+                    || GeometryCollection.class.equals(target)) {
+                result = difference;
+            } else if (MultiLineString.class.isAssignableFrom(target)
+                    || LineString.class.isAssignableFrom(target)) {
+                final List<LineString> geoms = new ArrayList<LineString>();
+                difference.apply(new GeometryComponentFilter() {
+
+                    @Override
+                    public void filter(Geometry geom) {
+                        if (geom instanceof LineString) {
+                            geoms.add((LineString) geom);
+                        }
+                    }
+                });
+                if (geoms.size() == 0) {
+                    result = null;
+                } else {
+                    LineString[] ls = (LineString[]) geoms.toArray(new LineString[geoms.size()]);
+                    result = geom.getFactory().createMultiLineString(ls);
+                }
+            } else if (MultiPolygon.class.isAssignableFrom(target)
+                    || Polygon.class.isAssignableFrom(target)) {
+                final List<Polygon> geoms = new ArrayList<Polygon>();
+                difference.apply(new GeometryComponentFilter() {
+
+                    @Override
+                    public void filter(Geometry geom) {
+                        if (geom instanceof Polygon) {
+                            geoms.add((Polygon) geom);
+                        }
+                    }
+                });
+                if (geoms.size() == 0) {
+                    result = null;
+                } else {
+                    Polygon[] ps = (Polygon[]) geoms.toArray(new Polygon[geoms.size()]);
+                    result = geom.getFactory().createMultiPolygon(ps);
+                }
+            } else {
+                throw new RuntimeException("Unrecognized target type " + target.getCanonicalName());
+            }
+
+            return result;
+        }
+
+        public SimpleFeature next() throws NoSuchElementException {
+            if (!hasNext()) {
+                throw new NoSuchElementException("hasNext() returned false!");
+            }
+
+            SimpleFeature result = next;
+            next = null;
+            return result;
+        }
+    }
+}

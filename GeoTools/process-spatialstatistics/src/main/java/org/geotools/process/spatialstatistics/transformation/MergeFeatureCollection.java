@@ -106,7 +106,13 @@ public class MergeFeatureCollection extends GXTSimpleFeatureCollection {
     @Override
     public ReferencedEnvelope getBounds() {
         ReferencedEnvelope bounds = delegate.getBounds();
-        bounds.include(features.getBounds());
+        if (bounds == null) {
+            bounds = features.getBounds();
+        } else {
+            if (features.getBounds() != null) {
+                bounds.include(features.getBounds());
+            }
+        }
         return bounds;
     }
 

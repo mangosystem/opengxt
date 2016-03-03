@@ -146,6 +146,7 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
         return tb.buildFeatureType();
     }
 
+    @Override
     public SimpleFeatureType getSchema() {
         return targetSchema;
     }
@@ -200,7 +201,8 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
         }
 
         public boolean hasNext() {
-            while (next == null && delegate.hasNext()) {
+            while ((next == null && delegate.hasNext())
+                    || (next == null && !delegate.hasNext() && features.size() > 0)) {
                 if (features.size() == 0) {
                     // query intersected features
                     currentFeature = delegate.next();

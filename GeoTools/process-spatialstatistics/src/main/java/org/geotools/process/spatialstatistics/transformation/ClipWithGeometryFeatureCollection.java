@@ -32,7 +32,6 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
@@ -55,7 +54,8 @@ import com.vividsolutions.jts.geom.Polygon;
  * @source $URL$
  */
 public class ClipWithGeometryFeatureCollection extends GXTSimpleFeatureCollection {
-    protected static final Logger LOGGER = Logging.getLogger(ClipWithGeometryFeatureCollection.class);
+    protected static final Logger LOGGER = Logging
+            .getLogger(ClipWithGeometryFeatureCollection.class);
 
     private Geometry clip;
 
@@ -109,6 +109,11 @@ public class ClipWithGeometryFeatureCollection extends GXTSimpleFeatureCollectio
     }
 
     @Override
+    public SimpleFeatureType getSchema() {
+        return targetSchema;
+    }
+
+    @Override
     public int size() {
         return DataUtilities.count(features());
     }
@@ -151,7 +156,7 @@ public class ClipWithGeometryFeatureCollection extends GXTSimpleFeatureCollectio
                 SimpleFeature feature = delegate.next();
                 GeometryDescriptor gds = feature.getFeatureType().getGeometryDescriptor();
                 Object cliped = clipGeometry((Geometry) feature.getDefaultGeometry(), gds.getType()
-                        .getBinding(), gds.getCoordinateReferenceSystem());
+                        .getBinding());
                 if (cliped == null) {
                     clippedOut = true;
                 }
@@ -182,7 +187,7 @@ public class ClipWithGeometryFeatureCollection extends GXTSimpleFeatureCollectio
             return result;
         }
 
-        private Object clipGeometry(Geometry geom, Class<?> target, CoordinateReferenceSystem crs) {
+        private Object clipGeometry(Geometry geom, Class<?> target) {
             // first off, clip
             Geometry clipped = null;
             if (clipper != null) {

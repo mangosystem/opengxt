@@ -46,6 +46,8 @@ public class HtmlWriter {
     private boolean closed = false;
 
     public HtmlWriter(String title) {
+        sb.append("<!DOCTYPE html>").append(NEWLINE);
+        sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">").append(NEWLINE);
         sb.append("<head>").append(NEWLINE);
         sb.append("  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />")
                 .append(NEWLINE);
@@ -189,6 +191,10 @@ public class HtmlWriter {
             write("</tr>");
 
             // body
+            if (item.getCaseValue() != null) {
+                write("<tr><td>Case Value</td><td>" + item.getCaseValue() + "</td></tr>");
+            }
+            
             write("<tr><td>Count</td><td>" + item.getCount() + "</td></tr>");
             write("<tr><td>Invalid Count</td><td>" + item.getInvalidCount() + "</td></tr>");
             write("<tr><td>Minimum</td><td>" + format(item.getMinimum()) + "</td></tr>");

@@ -46,7 +46,7 @@ public class StatisticsFeaturesProcessFactory extends SpatialStatisticsProcessFa
     private static final String PROCESS_NAME = "StatisticsFeatures";
 
     /*
-     * StatisticsFeatures(SimpleFeatureCollection inputFeatures, String inputFields) : XML
+     * StatisticsFeatures(SimpleFeatureCollection inputFeatures, String inputFields, String caseField) : XML
      */
 
     public StatisticsFeaturesProcessFactory() {
@@ -80,11 +80,18 @@ public class StatisticsFeaturesProcessFactory extends SpatialStatisticsProcessFa
             String.class, getResource("StatisticsFeatures.inputFields.title"),
             getResource("StatisticsFeatures.inputFields.description"), true, 1, 1, null, null);
 
+    /** caseField */
+    public static final Parameter<String> caseField = new Parameter<String>("caseField",
+            String.class, getResource("StatisticsFeatures.caseField.title"),
+            getResource("StatisticsFeatures.caseField.description"), false, 0, 1, null, new KVP(Parameter.OPTIONS,
+                    "inputFeatures.All"));
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(inputFields.key, inputFields);
+        parameterInfo.put(caseField.key, caseField);
         return parameterInfo;
     }
 

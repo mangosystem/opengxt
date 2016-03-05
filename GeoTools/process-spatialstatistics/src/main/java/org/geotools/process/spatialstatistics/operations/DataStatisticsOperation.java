@@ -17,12 +17,16 @@
 package org.geotools.process.spatialstatistics.operations;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor.DoubleStrategy;
@@ -31,7 +35,9 @@ import org.geotools.process.spatialstatistics.gridcoverage.RasterCropOperation;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult.DataStatisticsItem;
 import org.geotools.util.logging.Logging;
+import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.expression.Expression;
 
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
 import com.vividsolutions.jts.geom.Geometry;
@@ -93,6 +99,68 @@ public class DataStatisticsOperation extends GeneralOperation {
         return result;
     }
 
+    public DataStatisticsResult execute(SimpleFeatureCollection inputFeatures, String fieldNames,
+            String caseField) {
+        if (caseField == null || caseField.length() == 0) {
+            return execute(inputFeatures, fieldNames);
+        }
+
+        DataStatisticsResult result = new DataStatisticsResult();
+
+        SimpleFeatureType featureType = inputFeatures.getSchema();
+        String typeName = featureType.getTypeName();
+        caseField = FeatureTypes.validateProperty(featureType, caseField);
+        if (featureType.indexOf(caseField) == -1) {
+            throw new NullPointerException(caseField + " does not exist!");
+        }
+
+        Expression expression = ff.property(caseField);
+
+        String[] fields = fieldNames.split(",");
+        for (int idx = 0; idx < fields.length; idx++) {
+            String propertyName = fields[idx].trim();
+            propertyName = FeatureTypes.validateProperty(featureType, propertyName);
+            if (featureType.indexOf(propertyName) == -1) {
+                LOGGER.log(Level.FINER, propertyName + " does not exist!");
+                continue;
+            }
+
+            // calculate
+            SimpleFeatureIterator featureIter = inputFeatures.features();
+            try {
+                Hashtable<String, StatisticsVisitor> map = new Hashtable<String, StatisticsVisitor>();
+                while (featureIter.hasNext()) {
+                    SimpleFeature feature = featureIter.next();
+                    Object caseValue = expression.evaluate(feature);
+                    caseValue = caseValue == null ? "Null" : caseValue.toString();
+
+                    StatisticsVisitor visitor = map.get(caseValue);
+                    if (visitor == null) {
+                        visitor = new StatisticsVisitor(featureType, propertyName);
+                        map.put((String) caseValue, visitor);
+                    }
+                    visitor.visit(feature);
+                }
+
+                // sort by key
+                List<String> caseKeys = Collections.list(map.keys());
+                Collections.sort(caseKeys);
+
+                // add result
+                Iterator<String> keyIter = caseKeys.iterator();
+                while (keyIter.hasNext()) {
+                    String caseValue = keyIter.next();
+                    DataStatisticsItem item = remap(map.get(caseValue).getResult(), typeName,
+                            propertyName, caseValue);
+                    result.add(item);
+                }
+            } finally {
+                featureIter.close();
+            }
+        }
+        return result;
+    }
+
     public DataStatisticsResult execute(SimpleFeatureCollection inputFeatures, String fieldNames) {
         DataStatisticsResult result = new DataStatisticsResult();
 
@@ -111,30 +179,36 @@ public class DataStatisticsOperation extends GeneralOperation {
             // calculate
             StatisticsVisitor visitor = new StatisticsVisitor(featureType, propertyName);
             visitor.visit(inputFeatures);
-            StatisticsVisitorResult ret = visitor.getResult();
 
             // remap for WPS PPIO
-            DataStatisticsItem item = new DataStatisticsItem(typeName, propertyName);
-            item.setCount(ret.getCount());
-            item.setInvalidCount(ret.getInvalidCount());
-
-            item.setSum(ret.getSum());
-            item.setMinimum(ret.getMinimum());
-            item.setMaximum(ret.getMaximum());
-            item.setMean(ret.getMean());
-            item.setStandardDeviation(ret.getStandardDeviation());
-            item.setVariance(ret.getVariance());
-            item.setCoefficientOfVariance(ret.getCoefficientOfVariance());
-
-            item.setRange(ret.getRange());
-            item.setRanges(ret.getMinimum() + " - " + ret.getMaximum());
-
-            item.setNoData(ret.getNoData());
+            DataStatisticsItem item = remap(visitor.getResult(), typeName, propertyName, null);
 
             result.add(item);
         }
 
         return result;
+    }
+
+    private DataStatisticsItem remap(StatisticsVisitorResult ret, String typeName,
+            String propertyName, String caseValue) {
+        DataStatisticsItem item = new DataStatisticsItem(typeName, propertyName, caseValue);
+        item.setCount(ret.getCount());
+        item.setInvalidCount(ret.getInvalidCount());
+
+        item.setSum(ret.getSum());
+        item.setMinimum(ret.getMinimum());
+        item.setMaximum(ret.getMaximum());
+        item.setMean(ret.getMean());
+        item.setStandardDeviation(ret.getStandardDeviation());
+        item.setVariance(ret.getVariance());
+        item.setCoefficientOfVariance(ret.getCoefficientOfVariance());
+
+        item.setRange(ret.getRange());
+        item.setRanges(ret.getMinimum() + " - " + ret.getMaximum());
+
+        item.setNoData(ret.getNoData());
+
+        return item;
     }
 
     // WPS PPIO output XML for Statistics Process Result
@@ -170,6 +244,8 @@ public class DataStatisticsOperation extends GeneralOperation {
         public static class DataStatisticsItem {
             String typeName;
 
+            String caseValue;
+
             String propertyName;
 
             Integer count;
@@ -201,6 +277,12 @@ public class DataStatisticsOperation extends GeneralOperation {
                 this.propertyName = propertyName;
             }
 
+            public DataStatisticsItem(String typeName, String propertyName, String caseValue) {
+                this.typeName = typeName;
+                this.propertyName = propertyName;
+                this.caseValue = caseValue;
+            }
+
             public DataStatisticsItem(String typeName, String propertyName, int count, double sum,
                     double min, double max, double mean, double standardDeviation, double variance,
                     double range, double coefficientOfVariance) {
@@ -224,6 +306,14 @@ public class DataStatisticsOperation extends GeneralOperation {
 
             public void setTypeName(String typeName) {
                 this.typeName = typeName;
+            }
+
+            public String getCaseValue() {
+                return caseValue;
+            }
+
+            public void setCaseValue(String caseValue) {
+                this.caseValue = caseValue;
             }
 
             public String getPropertyName() {

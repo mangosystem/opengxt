@@ -51,7 +51,6 @@ public class DataStatisticsResultPPIO extends XStreamPPIO {
         };
 
         xstream.processAnnotations(DataStatisticsResult.class);
-
         xstream.alias("DataStatistics", DataStatisticsResult.class);
 
         return xstream;

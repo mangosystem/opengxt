@@ -55,9 +55,15 @@ public class StatisticsFeaturesProcess extends AbstractStatisticsProcess {
 
     public static DataStatisticsResult process(SimpleFeatureCollection inputFeatures,
             String inputFields, ProgressListener monitor) {
+        return StatisticsFeaturesProcess.process(inputFeatures, inputFields, null, monitor);
+    }
+
+    public static DataStatisticsResult process(SimpleFeatureCollection inputFeatures,
+            String inputFields, String caseField, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(StatisticsFeaturesProcessFactory.inputFeatures.key, inputFeatures);
         map.put(StatisticsFeaturesProcessFactory.inputFields.key, inputFields);
+        map.put(StatisticsFeaturesProcessFactory.caseField.key, caseField);
 
         Process process = new StatisticsFeaturesProcess(null);
         Map<String, Object> resultMap;
@@ -91,8 +97,11 @@ public class StatisticsFeaturesProcess extends AbstractStatisticsProcess {
             String inputFields = (String) Params.getValue(input,
                     StatisticsFeaturesProcessFactory.inputFields, null);
             if (inputFeatures == null || inputFields == null) {
-                throw new NullPointerException("All parameters required");
+                throw new NullPointerException("inputFeatures, inputFields parameters required");
             }
+
+            String caseField = (String) Params.getValue(input,
+                    StatisticsFeaturesProcessFactory.caseField, null);
 
             monitor.setTask(Text.text("Processing ..."));
             monitor.progress(25.0f);
@@ -103,7 +112,7 @@ public class StatisticsFeaturesProcess extends AbstractStatisticsProcess {
 
             // start process
             DataStatisticsOperation operator = new DataStatisticsOperation();
-            DataStatisticsResult result = operator.execute(inputFeatures, inputFields);
+            DataStatisticsResult result = operator.execute(inputFeatures, inputFields, caseField);
             // end process
 
             monitor.setTask(Text.text("Encoding result"));

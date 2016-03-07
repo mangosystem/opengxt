@@ -36,7 +36,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
- * Calculates a standardized scores.
+ * Calculates a Standardized Score of Dissimilarity.
  * 
  * @author Minpa Lee, MangoSystem
  * 
@@ -82,16 +82,21 @@ public class StandardizedScoresOperation extends GeneralOperation {
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection features, String xField,
             String yField, String targetField) throws IOException {
+        xField = FeatureTypes.validateProperty(features.getSchema(), xField);
+        yField = FeatureTypes.validateProperty(features.getSchema(), yField);
+        
+        Expression xExpression = ff.property(xField);
+        Expression yExpression = ff.property(yField);
+        return execute(features, xExpression, yExpression, targetField);
+    }
+    
+    public SimpleFeatureCollection execute(SimpleFeatureCollection features, Expression xExpression,
+            Expression yExpression, String targetField) throws IOException {
         String typeName = features.getSchema().getTypeName();
         SimpleFeatureType schema = FeatureTypes.build(features.getSchema(), typeName);
         schema = FeatureTypes.add(schema, targetField, Double.class);
 
         // 1. pre calculation
-        xField = FeatureTypes.validateProperty(features.getSchema(), xField);
-        yField = FeatureTypes.validateProperty(features.getSchema(), yField);
-        Expression xExpression = ff.property(xField);
-        Expression yExpression = ff.property(yField);
-
         preCalculate(features, xExpression, yExpression);
 
         // 2. calculate standardized scores
@@ -132,5 +137,4 @@ public class StandardizedScoresOperation extends GeneralOperation {
 
         return featureWriter.getFeatureCollection();
     }
-
 }

@@ -30,10 +30,11 @@ import org.geotools.process.spatialstatistics.pattern.StandardizedScoresOperatio
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
+import org.opengis.filter.expression.Expression;
 import org.opengis.util.ProgressListener;
 
 /**
- * Calculates a standardized scores.
+ * Calculates a Standardized Score of Dissimilarity.
  * 
  * @author Minpa Lee, MangoSystem
  * 
@@ -53,7 +54,7 @@ public class StandardizedScoresProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            String xField, String yField, String targetField, ProgressListener monitor) {
+            Expression xField, Expression yField, String targetField, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(StandardizedScoresProcessFactory.inputFeatures.key, inputFeatures);
         map.put(StandardizedScoresProcessFactory.xField.key, xField);
@@ -89,9 +90,9 @@ public class StandardizedScoresProcess extends AbstractStatisticsProcess {
 
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, StandardizedScoresProcessFactory.inputFeatures, null);
-            String xField = (String) Params.getValue(input,
+            Expression xField = (Expression) Params.getValue(input,
                     StandardizedScoresProcessFactory.xField, null);
-            String yField = (String) Params.getValue(input,
+            Expression yField = (Expression) Params.getValue(input,
                     StandardizedScoresProcessFactory.yField, null);
             String targetField = (String) Params.getValue(input,
                     StandardizedScoresProcessFactory.targetField,

@@ -29,6 +29,7 @@ import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
+import org.opengis.filter.expression.Expression;
 import org.opengis.util.InternationalString;
 
 /**
@@ -45,7 +46,7 @@ public class StandardizedScoresProcessFactory extends SpatialStatisticsProcessFa
     private static final String PROCESS_NAME = "StandardizedScores";
 
     /*
-     * StandardizedScores(SimpleFeatureCollection inputFeatures, String xField, String yField, String targetField): SimpleFeatureCollection
+     * StandardizedScores(SimpleFeatureCollection inputFeatures, Expression xField, Expression yField, String targetField): SimpleFeatureCollection
      */
 
     public StandardizedScoresProcessFactory() {
@@ -75,14 +76,14 @@ public class StandardizedScoresProcessFactory extends SpatialStatisticsProcessFa
                     Parameter.FEATURE_TYPE, "All"));
 
     /** xField */
-    public static final Parameter<String> xField = new Parameter<String>("xField", String.class,
-            getResource("StandardizedScores.xField.title"),
+    public static final Parameter<Expression> xField = new Parameter<Expression>("xField",
+            Expression.class, getResource("StandardizedScores.xField.title"),
             getResource("StandardizedScores.xField.description"), true, 1, 1, null, new KVP(
                     Parameter.OPTIONS, "inputFeatures.Number"));
 
     /** yField */
-    public static final Parameter<String> yField = new Parameter<String>("yField", String.class,
-            getResource("StandardizedScores.yField.title"),
+    public static final Parameter<Expression> yField = new Parameter<Expression>("yField",
+            Expression.class, getResource("StandardizedScores.yField.title"),
             getResource("StandardizedScores.yField.description"), true, 1, 1, null, new KVP(
                     Parameter.OPTIONS, "inputFeatures.Number"));
 

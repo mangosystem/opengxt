@@ -29,6 +29,7 @@ import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
+import org.opengis.filter.Filter;
 import org.opengis.util.InternationalString;
 
 /**
@@ -44,7 +45,7 @@ public class AreaProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "SumAreas";
 
     /*
-     * SumAreas(SimpleFeatureCollection inputFeatures): double
+     * SumAreas(SimpleFeatureCollection inputFeatures, Filter filter): double
      */
 
     public AreaProcessFactory() {
@@ -72,10 +73,16 @@ public class AreaProcessFactory extends SpatialStatisticsProcessFactory {
             getResource("Area.inputFeatures.title"), getResource("Area.inputFeatures.description"),
             true, 1, 1, null, new KVP(Parameter.FEATURE_TYPE, "Polygon"));
 
+    /** filter */
+    public static final Parameter<Filter> filter = new Parameter<Filter>("filter", Filter.class,
+            getResource("Area.filter.title"), getResource("Area.filter.description"), false, 0, 1,
+            null, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
+        parameterInfo.put(filter.key, filter);
         return parameterInfo;
     }
 

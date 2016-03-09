@@ -29,13 +29,14 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
+import org.opengis.filter.Filter;
 import org.opengis.util.ProgressListener;
 
 /**
  * Counts the features in the featurecollection
  * 
  * @author Minpa Lee, MangoSystem
- *
+ * 
  * @source $URL$
  */
 public class CountFeaturesProcess extends AbstractStatisticsProcess {
@@ -52,9 +53,11 @@ public class CountFeaturesProcess extends AbstractStatisticsProcess {
         return factory;
     }
 
-    public static Integer process(SimpleFeatureCollection inputFeatures, ProgressListener monitor) {
+    public static Integer process(SimpleFeatureCollection inputFeatures, Filter filter,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(CountFeaturesProcessFactory.inputFeatures.key, inputFeatures);
+        map.put(CountFeaturesProcessFactory.filter.key, filter);
 
         Process process = new CountFeaturesProcess(null);
         Map<String, Object> resultMap;
@@ -84,6 +87,8 @@ public class CountFeaturesProcess extends AbstractStatisticsProcess {
 
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, CountFeaturesProcessFactory.inputFeatures, null);
+            Filter filter = (Filter) Params.getValue(input, CountFeaturesProcessFactory.filter,
+                    null);
             if (inputFeatures == null) {
                 throw new NullPointerException("inputFeatures parameters required");
             }
@@ -96,7 +101,13 @@ public class CountFeaturesProcess extends AbstractStatisticsProcess {
             }
 
             // start process
-            int count = inputFeatures.size();
+            int count = 0;
+            if (filter == null) {
+                count = inputFeatures.size();
+            } else {
+                count = inputFeatures.subCollection(filter).size();
+            }
+            
             // end process
 
             monitor.setTask(Text.text("Encoding result"));

@@ -21,7 +21,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <gt.version>14.2</gt.version>
+    <gt.version>11.2</gt.version>
   </properties>
   
   <!-- =========================================================== -->

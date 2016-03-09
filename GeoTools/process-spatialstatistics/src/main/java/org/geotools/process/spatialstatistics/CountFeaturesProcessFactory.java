@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.util.logging.Logging;
+import org.opengis.filter.Filter;
 import org.opengis.util.InternationalString;
 
 /**
@@ -43,7 +44,7 @@ public class CountFeaturesProcessFactory extends SpatialStatisticsProcessFactory
     private static final String PROCESS_NAME = "CountFeatures";
 
     /*
-     * CountFeatures(SimpleFeatureCollection inputFeatures): Integer
+     * CountFeatures(SimpleFeatureCollection inputFeatures, Filter filter): Integer
      */
 
     public CountFeaturesProcessFactory() {
@@ -69,12 +70,18 @@ public class CountFeaturesProcessFactory extends SpatialStatisticsProcessFactory
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("CountFeatures.inputFeatures.title"),
-            getResource("CountFeatures.inputFeatures.description"));
+            getResource("CountFeatures.inputFeatures.description"), true, 1, 1, null, null);
+
+    /** filter */
+    public static final Parameter<Filter> filter = new Parameter<Filter>("filter", Filter.class,
+            getResource("CountFeatures.filter.title"),
+            getResource("CountFeatures.filter.description"), false, 0, 1, null, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
+        parameterInfo.put(filter.key, filter);
         return parameterInfo;
     }
 

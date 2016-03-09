@@ -31,6 +31,7 @@ import org.geotools.text.Text;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.filter.Filter;
 import org.opengis.util.ProgressListener;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -38,7 +39,7 @@ import com.vividsolutions.jts.geom.Geometry;
 /**
  * Calculates area for each feature in a polygon features.
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -55,10 +56,12 @@ public class AreaProcess extends AbstractStatisticsProcess {
         return factory;
     }
 
-    public static Double process(SimpleFeatureCollection inputFeatures, ProgressListener monitor) {
+    public static Double process(SimpleFeatureCollection inputFeatures, Filter filter,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(AreaProcessFactory.inputFeatures.key, inputFeatures);
-        
+        map.put(AreaProcessFactory.filter.key, filter);
+
         Process process = new AreaProcess(null);
         Map<String, Object> resultMap;
         try {
@@ -87,6 +90,7 @@ public class AreaProcess extends AbstractStatisticsProcess {
 
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, AreaProcessFactory.inputFeatures, null);
+            Filter filter = (Filter) Params.getValue(input, AreaProcessFactory.filter, null);
             if (inputFeatures == null) {
                 throw new NullPointerException("inputFeatures parameters required");
             }
@@ -100,9 +104,9 @@ public class AreaProcess extends AbstractStatisticsProcess {
 
             // start process
             double area = 0.0;
-            SimpleFeatureIterator featureIter = null;
+            filter = filter == null ? Filter.INCLUDE : filter;
+            SimpleFeatureIterator featureIter = inputFeatures.subCollection(filter).features();
             try {
-                featureIter = inputFeatures.features();
                 while (featureIter.hasNext()) {
                     SimpleFeature feature = featureIter.next();
                     Geometry geometry = (Geometry) feature.getDefaultGeometry();

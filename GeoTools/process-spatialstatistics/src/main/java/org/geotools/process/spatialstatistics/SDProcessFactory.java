@@ -44,7 +44,7 @@ public class SDProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "StandardDistance";
 
     /*
-     * StandardDeviationalEllipse(SimpleFeatureCollection inputFeatures, String circleSize, String weightField, String caseField):
+     * StandardDistance(SimpleFeatureCollection inputFeatures, String circleSize, String weightField, String caseField):
      * SimpleFeatureCollection
      */
 

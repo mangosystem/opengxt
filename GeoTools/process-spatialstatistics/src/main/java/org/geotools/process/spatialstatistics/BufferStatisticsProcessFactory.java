@@ -44,7 +44,7 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
     private static final String PROCESS_NAME = "BufferPointStatistics";
 
     /*
-     * BufferPointStatistics(SimpleFeatureCollection inputFeatures, Double distance, SimpleFeatureCollection pointFeatures, statisticsFields String) :
+     * BufferPointStatistics(SimpleFeatureCollection inputFeatures, Double distance, SimpleFeatureCollection pointFeatures, String countField, String statisticsFields):
      * SimpleFeatureCollection
      */
 

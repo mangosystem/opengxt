@@ -43,7 +43,7 @@ public class KMeansClusteringProcessFactory extends SpatialStatisticsProcessFact
 
     private static final String PROCESS_NAME = "KMeansClustering";
 
-    // KMeansClustering(SimpleFeatureCollection inputFeatures, Integer numberOfClusters): SimpleFeatureCollection
+    // KMeansClustering(SimpleFeatureCollection inputFeatures, String targetField, Integer numberOfClusters): SimpleFeatureCollection
 
     public KMeansClusteringProcessFactory() {
         super(new NameImpl(NAMESPACE, PROCESS_NAME));

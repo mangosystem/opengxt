@@ -77,7 +77,7 @@ public class AttributeJoinProcessFactory extends SpatialStatisticsProcessFactory
     /** primaryKey */
     public static final Parameter<String> primaryKey = new Parameter<String>("primaryKey",
             String.class, getResource("AttributeJoin.primaryKey.title"),
-            getResource("AttributeJoin.primaryKey.description"), false, 0, 1, null, new KVP(
+            getResource("AttributeJoin.primaryKey.description"), true, 1, 1, null, new KVP(
                     Parameter.OPTIONS, "inputFeatures.All"));
 
     /** joinFeatures */
@@ -89,7 +89,7 @@ public class AttributeJoinProcessFactory extends SpatialStatisticsProcessFactory
     /** foreignKey */
     public static final Parameter<String> foreignKey = new Parameter<String>("foreignKey",
             String.class, getResource("AttributeJoin.foreignKey.title"),
-            getResource("AttributeJoin.foreignKey.description"), false, 0, 1, null, new KVP(
+            getResource("AttributeJoin.foreignKey.description"), true, 1, 1, null, new KVP(
                     Parameter.OPTIONS, "joinFeatures.All"));
 
     /** joinType */

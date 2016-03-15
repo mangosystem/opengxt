@@ -43,7 +43,7 @@ public class CollectEventsProcessFactory extends SpatialStatisticsProcessFactory
 
     private static final String PROCESS_NAME = "CollectEvents";
 
-    // CollectEvents (SimpleFeatureCollection inputFeatures, String countField)
+    // CollectEvents(SimpleFeatureCollection inputFeatures, String countField, Double tolerance): SimpleFeatureCollection
 
     public CollectEventsProcessFactory() {
         super(new NameImpl(NAMESPACE, PROCESS_NAME));

@@ -44,7 +44,7 @@ public class SumLineLengthProcessFactory extends SpatialStatisticsProcessFactory
     private static final String PROCESS_NAME = "SumLineLength";
 
     /*
-     * SumLineLength(SimpleFeatureCollection polygons, String lengthField, SimpleFeatureCollection lines): SimpleFeatureCollection
+     * SumLineLength(SimpleFeatureCollection polygons, String lengthField, String countField, SimpleFeatureCollection lines): SimpleFeatureCollection
      */
 
     public SumLineLengthProcessFactory() {

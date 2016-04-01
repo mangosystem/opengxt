@@ -33,6 +33,8 @@ public class HistogramProcessResult {
     String propertyName;
 
     String area = Double.toString(0d);
+    
+    String cellSize = Double.toString(0d);
 
     List<HistogramItem> histogramItems;
 
@@ -50,6 +52,14 @@ public class HistogramProcessResult {
 
     public void setPropertyName(String propertyName) {
         this.propertyName = propertyName;
+    }
+
+    public String getCellSize() {
+        return cellSize;
+    }
+
+    public void setCellSize(String cellSize) {
+        this.cellSize = cellSize;
     }
 
     public String getArea() {

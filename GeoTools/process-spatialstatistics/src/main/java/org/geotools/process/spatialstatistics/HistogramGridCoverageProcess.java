@@ -130,6 +130,9 @@ public class HistogramGridCoverageProcess extends AbstractStatisticsProcess {
                 if (cropShape != null) {
                     result.setArea(FormatUtils.format(cropShape.getArea())); // 6 digit
                 }
+                
+                double cellSize = RasterHelper.getCellSize(cropedCoverage);
+                result.setCellSize(FormatUtils.format(cellSize)); // 6 digit
 
                 DataHistogram process = new HistogramGridCoverage();
                 process.calculateHistogram(cropedCoverage, bandIndex, noData);

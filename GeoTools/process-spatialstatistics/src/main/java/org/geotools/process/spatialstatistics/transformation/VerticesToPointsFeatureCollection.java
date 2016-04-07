@@ -34,7 +34,9 @@ import org.opengis.filter.Filter;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
 /**
@@ -171,8 +173,13 @@ public class VerticesToPointsFeatureCollection extends GXTSimpleFeatureCollectio
                             origFeature = null;
                             break;
                         case Mid:
-                            LengthIndexedLine lil = new LengthIndexedLine(geometry);
-                            midpoint = lil.extractPoint(geometry.getLength() / 2.0);
+                            Class<?> binding = geometry.getClass();
+                            Geometry linearGeom = geometry;
+                            if (Polygon.class.equals(binding) || MultiPolygon.class.equals(binding)) {
+                                linearGeom = geometry.getBoundary();
+                            }
+                            LengthIndexedLine lil = new LengthIndexedLine(linearGeom);
+                            midpoint = lil.extractPoint(linearGeom.getLength() / 2.0);
                             index = 0;
                             origFeature = null;
                             break;

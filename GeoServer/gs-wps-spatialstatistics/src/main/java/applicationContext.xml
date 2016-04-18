@@ -13,6 +13,7 @@
     <bean id="LeesSPPIO" class="org.geoserver.wps.spatialstatistics.ppio.LeesSPPIO" />
     <bean id="GearysCPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GearysCPPIO" />
     <bean id="HistogramGridCoveragePPIO" class="org.geoserver.wps.spatialstatistics.ppio.HistogramGridCoveragePPIO" />
+    <bean id="QuadratResultPPIO" class="org.geoserver.wps.spatialstatistics.ppio.QuadratResultPPIO" />
 
     <!-- native format support --> 
     <bean id="FeatureCollectionGML311PPIO" class="org.geoserver.wps.spatialstatistics.ppio.FeatureCollectionGML311PPIO" />

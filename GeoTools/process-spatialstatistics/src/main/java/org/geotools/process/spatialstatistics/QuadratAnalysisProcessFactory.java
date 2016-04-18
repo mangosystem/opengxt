@@ -27,77 +27,71 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.pattern.QuadratOperation.QuadratResult;
+import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
 
 /**
- * KNearestNeighborMapProcessFactory
+ * QuadratAnalysisProcessFactory
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class KNearestNeighborMapProcessFactory extends SpatialStatisticsProcessFactory {
-    protected static final Logger LOGGER = Logging
-            .getLogger(KNearestNeighborMapProcessFactory.class);
+public class QuadratAnalysisProcessFactory extends SpatialStatisticsProcessFactory {
+    protected static final Logger LOGGER = Logging.getLogger(QuadratAnalysisProcessFactory.class);
 
-    private static final String PROCESS_NAME = "KNearestNeighborMap";
+    private static final String PROCESS_NAME = "QuadratAnalysis";
 
     /*
-     * KNearestNeighborMap(SimpleFeatureCollection inputFeatures, Integer neighbor, Boolean convexHull): SimpleFeatureCollection
+     * QuadratAnalysis(SimpleFeatureCollection inputFeatures, Double cellSize): QuadratResult
      */
 
-    public KNearestNeighborMapProcessFactory() {
+    public QuadratAnalysisProcessFactory() {
         super(new NameImpl(NAMESPACE, PROCESS_NAME));
     }
 
     @Override
     public Process create() {
-        return new KNearestNeighborMapProcess(this);
+        return new QuadratAnalysisProcess(this);
     }
 
     @Override
     public InternationalString getTitle() {
-        return getResource("KNearestNeighborMap.title");
+        return getResource("QuadratAnalysis.title");
     }
 
     @Override
     public InternationalString getDescription() {
-        return getResource("KNearestNeighborMap.description");
+        return getResource("QuadratAnalysis.description");
     }
 
     /** inputFeatures */
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
-            getResource("KNearestNeighborMap.inputFeatures.title"),
-            getResource("KNearestNeighborMap.inputFeatures.description"), true, 1, 1, null, null);
+            getResource("QuadratAnalysis.inputFeatures.title"),
+            getResource("QuadratAnalysis.inputFeatures.description"), true, 1, 1, null, new KVP(
+                    Parameter.FEATURE_TYPE, "Point"));
 
-    /** neighbor */
-    public static final Parameter<Integer> neighbor = new Parameter<Integer>("neighbor",
-            Integer.class, getResource("KNearestNeighborMap.neighbor.title"),
-            getResource("KNearestNeighborMap.neighbor.description"), true, 1, 1,
-            Integer.valueOf(1), null);
-
-    /** convexHull */
-    public static final Parameter<Boolean> convexHull = new Parameter<Boolean>("convexHull",
-            Boolean.class, getResource("KNearestNeighborMap.convexHull.title"),
-            getResource("KNearestNeighborMap.convexHull.description"), false, 0, 1, Boolean.FALSE,
+    /** cellSize */
+    public static final Parameter<Double> cellSize = new Parameter<Double>("cellSize",
+            Double.class, getResource("QuadratAnalysis.cellSize.title"),
+            getResource("QuadratAnalysis.cellSize.description"), false, 0, 1, Double.valueOf(0d),
             null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
-        parameterInfo.put(neighbor.key, neighbor);
-        parameterInfo.put(convexHull.key, convexHull);
+        parameterInfo.put(cellSize.key, cellSize);
         return parameterInfo;
     }
 
     /** result */
-    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
-            "result", SimpleFeatureCollection.class,
-            getResource("KNearestNeighborMap.result.title"),
-            getResource("KNearestNeighborMap.result.description"));
+    public static final Parameter<QuadratResult> RESULT = new Parameter<QuadratResult>("result",
+            QuadratResult.class, getResource("QuadratAnalysis.result.title"),
+            getResource("QuadratAnalysis.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

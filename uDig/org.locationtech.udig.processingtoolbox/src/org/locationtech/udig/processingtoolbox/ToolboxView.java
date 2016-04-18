@@ -297,7 +297,6 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(desTools, "org.geotools.process.spatialstatistics.CountFeaturesProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.AreaProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.StatisticsFeaturesProcessFactory");
-        buildTool(desTools, "org.geotools.process.spatialstatistics.StatisticsGridCoverageProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.PearsonCorrelationProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.StandardizedScoresProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.FocalLQProcessFactory");
@@ -306,6 +305,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent patternTools = new TreeParent(Messages.ToolboxView_PointPattern, null, null);
         ssTools.addChild(patternTools);
         buildTool(patternTools, "org.geotools.process.spatialstatistics.NearestNeighborProcessFactory");
+        buildTool(patternTools, "org.geotools.process.spatialstatistics.QuadratAnalysisProcessFactory");
         buildTool(patternTools, "org.geotools.process.spatialstatistics.KNearestNeighborMapProcessFactory");
         buildTool(patternTools, "org.geotools.process.spatialstatistics.KMeansClusteringProcessFactory");
 
@@ -501,6 +501,12 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent generalTool = new TreeParent(Messages.ToolboxView_RasterTools, null, null);
         root.addChild(generalTool);
 
+        // Descriptive Statistics
+        TreeParent desTools = new TreeParent(Messages.ToolboxView_DescriptiveStatistics, null, null);
+        generalTool.addChild(desTools);
+        buildTool(desTools, "org.geotools.process.spatialstatistics.StatisticsGridCoverageProcessFactory");
+        buildTool(desTools, "org.geotools.process.spatialstatistics.HistogramGridCoverageProcessFactory");
+
         // Density
         TreeParent densityTool = new TreeParent(Messages.ToolboxView_Density, null, null);
         generalTool.addChild(densityTool);
@@ -515,7 +521,6 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         // Extraction
         TreeParent extractionTool = new TreeParent(Messages.ToolboxView_Extract, null, null);
         generalTool.addChild(extractionTool);
-        buildTool(extractionTool, "org.geotools.process.spatialstatistics.HistogramGridCoverageProcessFactory");
         buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByExtentProcessFactory");
         buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByGeometryProcessFactory");
         buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByCircleProcessFactory");

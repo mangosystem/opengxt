@@ -4,6 +4,7 @@ org.geotools.process.spatialstatistics.StatisticsFeaturesProcessFactory
 org.geotools.process.spatialstatistics.PearsonCorrelationProcessFactory
 
 org.geotools.process.spatialstatistics.NearestNeighborProcessFactory
+org.geotools.process.spatialstatistics.QuadratAnalysisProcessFactory
 org.geotools.process.spatialstatistics.StandardizedScoresProcessFactory
 org.geotools.process.spatialstatistics.FocalLQProcessFactory
 org.geotools.process.spatialstatistics.KMeansClusteringProcessFactory

@@ -27,6 +27,7 @@ import org.geotools.process.spatialstatistics.operations.PearsonOperation.Pearso
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName;
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName.PearsonItem;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
+import org.geotools.process.spatialstatistics.pattern.QuadratOperation.QuadratResult;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 
@@ -497,6 +498,41 @@ public class HtmlWriter {
         for (HistogramItem item : value.getHistogramItems()) {
             write("<tr><td>" + item.getValue() + "</td><td>" + item.getFrequency() + "</td></tr>");
         }
+
+        write("</table>");
+    }
+
+    public void writeQuadratProcess(QuadratResult value) {
+        writeH1("Histogram Summary");
+        writeH2(value.getTypeName());
+        write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+        // header
+        write("<colgroup>");
+        write("<col width=\"60%\" />");
+        write("<col width=\"40%\" />");
+        write("</colgroup>");
+
+        write("<tr bgcolor=\"#cccccc\">");
+        write("<td><strong>Category</strong></td>");
+        write("<td><strong>Value</strong></td>");
+        write("</tr>");
+
+        // body
+        write("<tr><td>Feature Count</td><td>" + value.getFeatureCount() + "</td></tr>");
+        write("<tr><td>Area</td><td>" + format(value.getArea()) + "</td></tr>");
+        write("<tr><td>Cell Size</td><td>" + value.getCellSize() + "</td></tr>");
+
+        write("<tr><td>Columns</td><td>" + value.getColumns() + "</td></tr>");
+        write("<tr><td>Rows</td><td>" + value.getRows() + "</td></tr>");
+        write("<tr><td>Number of Quadrats</td><td>" + value.getNumber_of_Quadrats() + "</td></tr>");
+
+        write("<tr><td>Mean</td><td>" + value.getMean() + "</td></tr>");
+        write("<tr><td>Variance</td><td>" + value.getVariance() + "</td></tr>");
+        write("<tr><td>Variance/Mean Ratio</td><td>" + value.getVariance_Mean_Ratio() + "</td></tr>");
+        
+        write("<tr><td>D value of Kolmogorov-Smirnov Test</td><td>" + value.getKolmogorov_Smirnov_Test() + "</td></tr>");
+        write("<tr><td>Critical value at the 5% level</td><td>" + value.getCritical_Value_at_5percent() + "</td></tr>");
 
         write("</table>");
     }

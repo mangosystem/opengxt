@@ -49,6 +49,7 @@ import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
+import org.geotools.process.spatialstatistics.pattern.QuadratOperation.QuadratResult;
 import org.geotools.process.spatialstatistics.storage.DataStoreFactory;
 import org.geotools.process.spatialstatistics.storage.ShapeExportOperation;
 import org.geotools.process.spatialstatistics.styler.GraduatedColorStyleBuilder;
@@ -212,6 +213,8 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
             writer.writeJoinCount((JoinCountProcessResult) value);
         } else if (value instanceof HistogramProcessResult) {
             writer.writeHistogramProcess((HistogramProcessResult) value);
+        } else if (value instanceof QuadratResult) {
+            writer.writeQuadratProcess((QuadratResult) value);
         } else if (Number.class.isAssignableFrom(value.getClass())) {
             writer.writeH2(FormatUtils.format(Double.parseDouble(value.toString())));
         } else {

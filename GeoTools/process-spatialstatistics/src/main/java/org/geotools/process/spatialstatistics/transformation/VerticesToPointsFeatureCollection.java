@@ -81,6 +81,8 @@ public class VerticesToPointsFeatureCollection extends GXTSimpleFeatureCollectio
         case End:
         case Mid:
             return delegate.size();
+        case BothEnds:
+            return delegate.size() * 2;
         default:
             return DataUtilities.count(features());
         }

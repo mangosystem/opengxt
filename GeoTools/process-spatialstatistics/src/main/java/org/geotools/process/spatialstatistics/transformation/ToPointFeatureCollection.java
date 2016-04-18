@@ -72,6 +72,11 @@ public class ToPointFeatureCollection extends GXTSimpleFeatureCollection {
     }
 
     @Override
+    public int size() {
+        return delegate.size();
+    }
+
+    @Override
     public ReferencedEnvelope getBounds() {
         return DataUtilities.bounds(features());
     }

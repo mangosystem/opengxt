@@ -36,6 +36,8 @@ import com.vividsolutions.jts.geom.Geometry;
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
+ * 
+ * @reference es.unex.sextante.pointAnalysis.quadrat.QuadratAlgorithm
  */
 public class QuadratOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(QuadratOperation.class);

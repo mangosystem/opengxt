@@ -25,6 +25,7 @@ import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -32,6 +33,8 @@ import org.opengis.filter.expression.Expression;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
 /**
@@ -45,17 +48,27 @@ public class SplitByDistanceFeatureCollection extends GXTSimpleFeatureCollection
     protected static final Logger LOGGER = Logging
             .getLogger(SplitByDistanceFeatureCollection.class);
 
+    private SimpleFeatureType schema;
+
     private Expression distance;
 
     public SplitByDistanceFeatureCollection(SimpleFeatureCollection delegate, Expression distance) {
-        super(new ExplodeFeatureCollection(delegate)); // explode features !
+        super(delegate);
 
         this.distance = distance;
+
+        String typeName = delegate.getSchema().getTypeName();
+        this.schema = FeatureTypes.build(delegate.getSchema(), typeName, LineString.class);
     }
 
     @Override
     public SimpleFeatureIterator features() {
         return new SplitByDistanceFeatureIterator(delegate.features(), getSchema(), distance);
+    }
+
+    @Override
+    public SimpleFeatureType getSchema() {
+        return schema;
     }
 
     @Override
@@ -68,7 +81,7 @@ public class SplitByDistanceFeatureCollection extends GXTSimpleFeatureCollection
 
         private int index = 0;
 
-        private List<Geometry> lineStrings;
+        private List<Geometry> segments;
 
         private int featureID = 0;
 
@@ -100,13 +113,13 @@ public class SplitByDistanceFeatureCollection extends GXTSimpleFeatureCollection
                     origFeature = delegate.next();
                     Double interval = distance.evaluate(origFeature, Double.class);
                     Geometry geometry = (Geometry) origFeature.getDefaultGeometry();
-                    lineStrings = splitLines(geometry, interval);
+                    segments = splitLines(geometry, interval);
                 }
 
                 // create feature
                 for (Object attribute : origFeature.getAttributes()) {
                     if (attribute instanceof Geometry) {
-                        attribute = lineStrings.get(index);
+                        attribute = segments.get(index);
                     }
                     builder.add(attribute);
                 }
@@ -114,7 +127,7 @@ public class SplitByDistanceFeatureCollection extends GXTSimpleFeatureCollection
                 builder.reset();
                 index++;
 
-                if (index >= lineStrings.size()) {
+                if (index >= segments.size()) {
                     index = 0;
                     origFeature = null;
                 }
@@ -131,22 +144,32 @@ public class SplitByDistanceFeatureCollection extends GXTSimpleFeatureCollection
             return result;
         }
 
-        private List<Geometry> splitLines(Geometry lineString, double interval) {
-            List<Geometry> list = new ArrayList<Geometry>();
-            LengthIndexedLine lil = new LengthIndexedLine(lineString);
-            final int count = (int) Math.ceil(lineString.getLength() / interval);
-            
-            double startIndex = 0;
-            for (int index = 0; index < count; index++) {
-                LineString splits = (LineString) lil.extractLine(startIndex, startIndex + interval);
+        private List<Geometry> splitLines(Geometry geometry, double interval) {
+            List<Geometry> segments = new ArrayList<Geometry>();
 
-                if (splits != null && !splits.isEmpty() && splits.getLength() > 0) {
-                    splits.setUserData(lineString.getUserData());
-                    list.add(splits);
-                }
-                startIndex += interval;
+            Geometry lineString = geometry;
+            Class<?> binding = geometry.getClass();
+            if (Polygon.class.equals(binding) || MultiPolygon.class.equals(binding)) {
+                lineString = geometry.getBoundary();
             }
-            return list;
+
+            for (int index = 0; index < lineString.getNumGeometries(); index++) {
+                Geometry part = lineString.getGeometryN(index);
+                LengthIndexedLine lil = new LengthIndexedLine(part);
+                int count = (int) Math.ceil(part.getLength() / interval);
+
+                double startIndex = 0;
+                for (int i = 0; i < count; i++) {
+                    Geometry splits = lil.extractLine(startIndex, startIndex + interval);
+                    if (splits != null && !splits.isEmpty() && splits.getLength() > 0) {
+                        splits.setUserData(geometry.getUserData());
+                        segments.add(splits);
+                    }
+                    startIndex += interval;
+                }
+            }
+
+            return segments;
         }
     }
 }

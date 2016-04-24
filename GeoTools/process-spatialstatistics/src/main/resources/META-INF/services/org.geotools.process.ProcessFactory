@@ -40,6 +40,7 @@ org.geotools.process.spatialstatistics.FeatureEnvelopeToPolygonProcessFactory
 org.geotools.process.spatialstatistics.PointsToLineProcessFactory
 org.geotools.process.spatialstatistics.VerticesToPointsProcessFactory
 org.geotools.process.spatialstatistics.SplitLineByDistanceProcessFactory
+org.geotools.process.spatialstatistics.SplitLineAtVerticesProcessFactory
 
 org.geotools.process.spatialstatistics.DissolveProcessFactory
 org.geotools.process.spatialstatistics.SimplifyProcessFactory

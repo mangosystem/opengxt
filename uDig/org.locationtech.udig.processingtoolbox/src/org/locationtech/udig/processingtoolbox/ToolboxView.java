@@ -45,6 +45,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.Processors;
+import org.geotools.process.spatialstatistics.SplitLineAtVerticesProcessFactory;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;
@@ -494,6 +495,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RemoveHolesProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RemovePartsProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SplitLineByDistanceProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.SplitLineAtVerticesProcessFactory");
     }
 
     @SuppressWarnings("nls")

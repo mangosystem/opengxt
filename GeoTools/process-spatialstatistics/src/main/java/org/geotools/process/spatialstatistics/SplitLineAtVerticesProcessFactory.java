@@ -29,68 +29,61 @@ import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
-import org.opengis.filter.expression.Expression;
 import org.opengis.util.InternationalString;
 
 /**
- * SplitLineByDistanceProcessFactory
+ * SplitLineAtVerticesProcessFactory
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class SplitLineByDistanceProcessFactory extends SpatialStatisticsProcessFactory {
+public class SplitLineAtVerticesProcessFactory extends SpatialStatisticsProcessFactory {
     protected static final Logger LOGGER = Logging
-            .getLogger(SplitLineByDistanceProcessFactory.class);
+            .getLogger(SplitLineAtVerticesProcessFactory.class);
 
-    private static final String PROCESS_NAME = "SplitLineByDistance";
+    private static final String PROCESS_NAME = "SplitLineAtVertices";
 
-    // SplitLineByDistance(SimpleFeatureCollection lineFeatures, Expression distance): SimpleFeatureCollection
+    // SplitLineAtVertices(SimpleFeatureCollection lineFeatures): SimpleFeatureCollection
 
-    public SplitLineByDistanceProcessFactory() {
+    public SplitLineAtVerticesProcessFactory() {
         super(new NameImpl(NAMESPACE, PROCESS_NAME));
     }
 
     @Override
     public Process create() {
-        return new SplitLineByDistanceProcess(this);
+        return new SplitLineAtVerticesProcess(this);
     }
 
     @Override
     public InternationalString getTitle() {
-        return getResource("SplitLineByDistance.title");
+        return getResource("SplitLineAtVertices.title");
     }
 
     @Override
     public InternationalString getDescription() {
-        return getResource("SplitLineByDistance.description");
+        return getResource("SplitLineAtVertices.description");
     }
 
     /** lineFeatures */
     public static final Parameter<SimpleFeatureCollection> lineFeatures = new Parameter<SimpleFeatureCollection>(
             "lineFeatures", SimpleFeatureCollection.class,
-            getResource("SplitLineByDistance.lineFeatures.title"),
-            getResource("SplitLineByDistance.lineFeatures.description"), true, 1, 1, null,
-            new KVP(Parameter.FEATURE_TYPE, "Polyline"));
-
-    /** distance */
-    public static final Parameter<Expression> distance = new Parameter<Expression>("distance",
-            Expression.class, getResource("SplitLineByDistance.distance.title"),
-            getResource("SplitLineByDistance.distance.description"), true, 1, 1, null, null);
+            getResource("SplitLineAtVertices.lineFeatures.title"),
+            getResource("SplitLineAtVertices.lineFeatures.description"), true, 1, 1, null, new KVP(
+                    Parameter.FEATURE_TYPE, "Polyline"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(lineFeatures.key, lineFeatures);
-        parameterInfo.put(distance.key, distance);
         return parameterInfo;
     }
 
     /** result */
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class,
-            getResource("SplitLineByDistance.result.title"),
-            getResource("SplitLineByDistance.result.description"));
+            getResource("SplitLineAtVertices.result.title"),
+            getResource("SplitLineAtVertices.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

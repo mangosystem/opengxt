@@ -53,10 +53,10 @@ public class FlipLineProcess extends AbstractStatisticsProcess {
         return factory;
     }
 
-    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+    public static SimpleFeatureCollection process(SimpleFeatureCollection lineFeatures,
             ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(FlipLineProcessFactory.inputFeatures.key, inputFeatures);
+        map.put(FlipLineProcessFactory.lineFeatures.key, lineFeatures);
 
         Process process = new FlipLineProcess(null);
         Map<String, Object> resultMap;
@@ -85,9 +85,9 @@ public class FlipLineProcess extends AbstractStatisticsProcess {
             monitor.setTask(Text.text("Grabbing arguments"));
             monitor.progress(10.0f);
 
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, FlipLineProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
+            SimpleFeatureCollection lineFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                    FlipLineProcessFactory.lineFeatures, null);
+            if (lineFeatures == null) {
                 throw new NullPointerException("inputFeatures parameter required");
             }
 
@@ -100,7 +100,7 @@ public class FlipLineProcess extends AbstractStatisticsProcess {
 
             // start process
             SimpleFeatureCollection resultFc = DataUtilities.simple(new FlipLineFeatureCollection(
-                    inputFeatures));
+                    lineFeatures));
             // end process
 
             monitor.setTask(Text.text("Encoding result"));

@@ -44,7 +44,7 @@ public class FlipLineProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "FlipLine";
 
     /*
-     * FlipLine(SimpleFeatureCollection inputFeatures): SimpleFeatureCollection
+     * FlipLine(SimpleFeatureCollection lineFeatures): SimpleFeatureCollection
      */
 
     public FlipLineProcessFactory() {
@@ -66,17 +66,17 @@ public class FlipLineProcessFactory extends SpatialStatisticsProcessFactory {
         return getResource("FlipLine.description");
     }
 
-    /** inputFeatures */
-    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
-            "inputFeatures", SimpleFeatureCollection.class,
-            getResource("FlipLine.inputFeatures.title"),
-            getResource("FlipLine.inputFeatures.description"), true, 1, 1, null, new KVP(
+    /** lineFeatures */
+    public static final Parameter<SimpleFeatureCollection> lineFeatures = new Parameter<SimpleFeatureCollection>(
+            "lineFeatures", SimpleFeatureCollection.class,
+            getResource("FlipLine.lineFeatures.title"),
+            getResource("FlipLine.lineFeatures.description"), true, 1, 1, null, new KVP(
                     Parameter.FEATURE_TYPE, "LineString"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
-        parameterInfo.put(inputFeatures.key, inputFeatures);
+        parameterInfo.put(lineFeatures.key, lineFeatures);
         return parameterInfo;
     }
 

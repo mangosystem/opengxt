@@ -137,6 +137,7 @@ public class RasterClipByExtentProcess extends AbstractStatisticsProcess {
             return null;
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 }

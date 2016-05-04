@@ -127,6 +127,7 @@ public class SpatialJoinProcess extends AbstractStatisticsProcess {
             return null;
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 

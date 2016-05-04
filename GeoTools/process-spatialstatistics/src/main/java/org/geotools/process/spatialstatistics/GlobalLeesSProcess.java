@@ -174,6 +174,7 @@ public class GlobalLeesSProcess extends AbstractStatisticsProcess {
             return null;
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 

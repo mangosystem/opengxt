@@ -120,6 +120,7 @@ public class CalculateLengthProcess extends AbstractStatisticsProcess {
             throw new ProcessException(eek);
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 }

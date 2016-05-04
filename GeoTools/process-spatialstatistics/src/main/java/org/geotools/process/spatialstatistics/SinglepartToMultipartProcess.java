@@ -126,6 +126,7 @@ public class SinglepartToMultipartProcess extends AbstractStatisticsProcess {
             throw new ProcessException(eek);
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 }

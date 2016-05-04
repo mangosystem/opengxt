@@ -164,6 +164,7 @@ public class UnionPolygonProcess extends AbstractStatisticsProcess {
             return null;
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 

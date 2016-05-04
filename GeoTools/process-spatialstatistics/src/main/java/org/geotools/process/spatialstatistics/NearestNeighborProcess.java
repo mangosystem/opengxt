@@ -126,6 +126,7 @@ public class NearestNeighborProcess extends AbstractStatisticsProcess {
             return null;
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 

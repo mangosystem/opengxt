@@ -132,6 +132,7 @@ public class TriangularGridProcess extends AbstractStatisticsProcess {
             return null;
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 }

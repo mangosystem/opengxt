@@ -162,6 +162,7 @@ public class LocalMoransIProcess extends AbstractStatisticsProcess {
             return null;
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 

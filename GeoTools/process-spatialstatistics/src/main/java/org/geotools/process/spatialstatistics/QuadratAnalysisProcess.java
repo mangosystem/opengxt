@@ -120,6 +120,7 @@ public class QuadratAnalysisProcess extends AbstractStatisticsProcess {
             return null;
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 

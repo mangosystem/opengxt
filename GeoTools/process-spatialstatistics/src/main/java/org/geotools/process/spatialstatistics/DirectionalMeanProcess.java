@@ -126,6 +126,7 @@ public class DirectionalMeanProcess extends AbstractStatisticsProcess {
             return null;
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 }

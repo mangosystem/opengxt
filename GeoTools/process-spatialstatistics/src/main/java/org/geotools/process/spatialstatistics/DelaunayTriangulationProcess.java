@@ -124,6 +124,7 @@ public class DelaunayTriangulationProcess extends AbstractStatisticsProcess {
             return null;
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 

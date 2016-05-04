@@ -138,6 +138,7 @@ public class HubLinesByDistanceProcess extends AbstractStatisticsProcess {
             return null;
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 

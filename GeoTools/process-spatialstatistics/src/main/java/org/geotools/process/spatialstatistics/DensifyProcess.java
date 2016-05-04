@@ -119,6 +119,7 @@ public class DensifyProcess extends AbstractStatisticsProcess {
             throw new ProcessException(eek);
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 }

@@ -134,6 +134,7 @@ public class FishnetSizeProcess extends AbstractStatisticsProcess {
             return null;
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 }

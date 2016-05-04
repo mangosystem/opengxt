@@ -157,6 +157,7 @@ public class RasterClipByCircleProcess extends AbstractStatisticsProcess {
             return null;
         } finally {
             monitor.dispose();
+            started = false;
         }
     }
 }

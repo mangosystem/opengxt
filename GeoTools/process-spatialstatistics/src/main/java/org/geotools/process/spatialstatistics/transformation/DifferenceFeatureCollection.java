@@ -122,6 +122,8 @@ public class DifferenceFeatureCollection extends GXTSimpleFeatureCollection {
 
         private SimpleFeatureCollection differenceFeatures;
 
+        private ReferencedEnvelope bounds;
+
         private String geomField;
 
         private SimpleFeatureBuilder builder;
@@ -134,6 +136,7 @@ public class DifferenceFeatureCollection extends GXTSimpleFeatureCollection {
                 SimpleFeatureCollection differenceFeatures) {
             this.delegate = delegate;
             this.differenceFeatures = differenceFeatures;
+            this.bounds = differenceFeatures.getBounds();
             this.geomField = differenceFeatures.getSchema().getGeometryDescriptor().getLocalName();
             this.builder = new SimpleFeatureBuilder(schema);
             this.target = schema.getGeometryDescriptor().getType().getBinding();
@@ -152,28 +155,31 @@ public class DifferenceFeatureCollection extends GXTSimpleFeatureCollection {
                 }
 
                 Geometry diffGeom = geometry; // default
-                Filter filter = ff.intersects(ff.property(geomField), ff.literal(geometry));
+                if (bounds.intersects(geometry.getEnvelopeInternal())) {
+                    Filter filter = ff.intersects(ff.property(geomField), ff.literal(geometry));
 
-                // finally difference using union geometries(intersection features)
-                List<Geometry> geometries = new ArrayList<Geometry>();
-                SimpleFeatureIterator difIter = differenceFeatures.subCollection(filter).features();
-                try {
-                    while (difIter.hasNext()) {
-                        SimpleFeature diffFeature = difIter.next();
-                        geometries.add((Geometry) diffFeature.getDefaultGeometry());
-                    }
-                } finally {
-                    difIter.close();
-                }
-
-                if (geometries.size() > 0) {
-                    Geometry unionGeometry = new CascadedPolygonUnion(geometries).union();
-                    if (unionGeometry != null && !unionGeometry.isEmpty()) {
-                        diffGeom = difference(geometry, unionGeometry, target);
+                    // finally difference using union geometries(intersection features)
+                    List<Geometry> geometries = new ArrayList<Geometry>();
+                    SimpleFeatureIterator difIter = differenceFeatures.subCollection(filter)
+                            .features();
+                    try {
+                        while (difIter.hasNext()) {
+                            SimpleFeature diffFeature = difIter.next();
+                            geometries.add((Geometry) diffFeature.getDefaultGeometry());
+                        }
+                    } finally {
+                        difIter.close();
                     }
 
-                    if (diffGeom == null || diffGeom.isEmpty()) {
-                        continue;
+                    if (geometries.size() > 0) {
+                        Geometry unionGeometry = new CascadedPolygonUnion(geometries).union();
+                        if (unionGeometry != null && !unionGeometry.isEmpty()) {
+                            diffGeom = difference(geometry, unionGeometry, target);
+                        }
+
+                        if (diffGeom == null || diffGeom.isEmpty()) {
+                            continue;
+                        }
                     }
                 }
 

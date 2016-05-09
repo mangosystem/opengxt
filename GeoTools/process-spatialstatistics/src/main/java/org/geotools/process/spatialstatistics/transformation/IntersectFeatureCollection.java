@@ -170,6 +170,8 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
 
         private SimpleFeatureCollection overlays;
 
+        private ReferencedEnvelope bounds;
+
         private String geomField;
 
         private SimpleFeatureBuilder builder;
@@ -190,6 +192,7 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
                 SimpleFeatureCollection overlays, Hashtable<String, String> fieldMap) {
             this.delegate = delegate;
             this.overlays = overlays;
+            this.bounds = overlays.getBounds();
             this.geomField = overlays.getSchema().getGeometryDescriptor().getLocalName();
             this.builder = new SimpleFeatureBuilder(schema);
             this.target = schema.getGeometryDescriptor().getType().getBinding();
@@ -208,6 +211,10 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
                     currentFeature = delegate.next();
                     Geometry currentGeom = (Geometry) currentFeature.getDefaultGeometry();
                     if (currentGeom == null || currentGeom.isEmpty()) {
+                        continue;
+                    }
+
+                    if (!bounds.intersects(currentGeom.getEnvelopeInternal())) {
                         continue;
                     }
 

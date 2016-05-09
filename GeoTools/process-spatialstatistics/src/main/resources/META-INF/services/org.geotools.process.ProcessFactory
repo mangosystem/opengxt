@@ -85,6 +85,7 @@ org.geotools.process.spatialstatistics.RingMapProcessFactory
 org.geotools.process.spatialstatistics.HubLinesByDistanceProcessFactory
 org.geotools.process.spatialstatistics.HubLinesByIDProcessFactory
 org.geotools.process.spatialstatistics.NearProcessFactory
+org.geotools.process.spatialstatistics.SpatialClumpMapProcessFactory
 
 org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory
 org.geotools.process.spatialstatistics.KernelDensityProcessFactory

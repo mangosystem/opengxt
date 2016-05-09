@@ -458,6 +458,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(aggreTool, "org.geotools.process.spatialstatistics.UnionPolygonProcessFactory");
         buildTool(aggreTool, "org.geotools.process.spatialstatistics.RingMapProcessFactory");
         buildTool(aggreTool, "org.geotools.process.spatialstatistics.WindRoseMapProcessFactory");
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.SpatialClumpMapProcessFactory");
 
         // Extract
         TreeParent extractTool = new TreeParent(Messages.ToolboxView_Extract, null, null);

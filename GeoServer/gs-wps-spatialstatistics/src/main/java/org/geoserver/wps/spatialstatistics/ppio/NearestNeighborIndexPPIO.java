@@ -9,6 +9,7 @@ import java.io.InputStream;
 
 import javax.xml.namespace.QName;
 
+import org.geoserver.config.util.SecureXStream;
 import org.geoserver.wps.ppio.XStreamPPIO;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
 import org.xml.sax.ContentHandler;
@@ -37,8 +38,8 @@ public class NearestNeighborIndexPPIO extends XStreamPPIO {
     }
 
     @Override
-    protected XStream buildXStream() {
-        XStream xstream = new XStream(new DomDriver("UTF-8", nameCoder)) {
+    protected SecureXStream buildXStream() {
+        SecureXStream xstream = new SecureXStream(new DomDriver("UTF-8", nameCoder)) {
             @Override
             protected boolean useXStream11XmlFriendlyMapper() {
                 return true;

@@ -9,12 +9,12 @@ import java.io.InputStream;
 
 import javax.xml.namespace.QName;
 
+import org.geoserver.config.util.SecureXStream;
 import org.geoserver.wps.ppio.XStreamPPIO;
 import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
 import org.geotools.process.spatialstatistics.core.HistogramProcessResult.HistogramItem;
 import org.xml.sax.ContentHandler;
 
-import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.io.xml.SaxWriter;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
@@ -38,8 +38,8 @@ public class HistogramGridCoveragePPIO extends XStreamPPIO {
     }
 
     @Override
-    protected XStream buildXStream() {
-        XStream xstream = new XStream(new DomDriver("UTF-8", nameCoder)) {
+    protected SecureXStream buildXStream() {
+        SecureXStream xstream = new SecureXStream(new DomDriver("UTF-8", nameCoder)) {
             protected boolean useXStream11XmlFriendlyMapper() {
                 return true;
             }

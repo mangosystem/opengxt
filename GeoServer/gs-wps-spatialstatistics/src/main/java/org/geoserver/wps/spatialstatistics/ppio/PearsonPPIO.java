@@ -9,13 +9,13 @@ import java.io.InputStream;
 
 import javax.xml.namespace.QName;
 
+import org.geoserver.config.util.SecureXStream;
 import org.geoserver.wps.ppio.XStreamPPIO;
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName;
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName.PearsonItem;
 import org.xml.sax.ContentHandler;
 
-import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.io.xml.SaxWriter;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
@@ -39,8 +39,8 @@ public class PearsonPPIO extends XStreamPPIO {
     }
 
     @Override
-    protected XStream buildXStream() {
-        XStream xstream = new XStream(new DomDriver("UTF-8", nameCoder)) {
+    protected SecureXStream buildXStream() {
+        SecureXStream xstream = new SecureXStream(new DomDriver("UTF-8", nameCoder)) {
             @Override
             protected boolean useXStream11XmlFriendlyMapper() {
                 return true;

@@ -28,7 +28,7 @@ Export-Package: org.locationtech.udig.processingtoolbox;
    org.eclipse.swt.widgets,
    org.opengis.feature.type"
 Bundle-ClassPath: .,
- libs/gt-process-spatialstatistics-11.2.jar
+ libs/gt-process-spatialstatistics-13-SNAPSHOT.jar
 Import-Package: javax.media.jai,
  javax.media.jai.iterator,
  javax.media.jai.operator,

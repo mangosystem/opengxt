@@ -32,8 +32,6 @@ import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterKernelDensityOperation;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterKernelDensityOperation.KernelType;
-import org.geotools.text.Text;
-import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
@@ -88,13 +86,7 @@ public class KernelDensityProcess extends AbstractStatisticsProcess {
             throw new IllegalStateException("Process can only be run once");
         started = true;
 
-        if (monitor == null)
-            monitor = new NullProgressListener();
         try {
-            monitor.started();
-            monitor.setTask(Text.text("Grabbing arguments"));
-            monitor.progress(10.0f);
-
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, KernelDensityProcessFactory.inputFeatures, null);
             if (inputFeatures == null) {
@@ -112,13 +104,6 @@ public class KernelDensityProcess extends AbstractStatisticsProcess {
             ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
                     KernelDensityProcessFactory.extent, null);
 
-            monitor.setTask(Text.text("Processing ..."));
-            monitor.progress(25.0f);
-
-            if (monitor.isCanceled()) {
-                return null; // user has canceled this operation
-            }
-
             // start process
             ReferencedEnvelope boundingBox = inputFeatures.getBounds();
             if (extent != null) {
@@ -135,7 +120,7 @@ public class KernelDensityProcess extends AbstractStatisticsProcess {
                 searchRadius = Math.min(boundingBox.getWidth(), boundingBox.getHeight()) / 30.0;
                 LOGGER.warning("default neighborhood = Circle + Radius(" + searchRadius + ")");
             }
-            
+
             String version = JAI.getBuildVersion();
             LOGGER.warning(version);
 
@@ -147,19 +132,12 @@ public class KernelDensityProcess extends AbstractStatisticsProcess {
             resultGc = process.execute(inputFeatures, populationField, searchRadius);
             // end process
 
-            monitor.setTask(Text.text("Encoding result"));
-            monitor.progress(90.0f);
-
             Map<String, Object> resultMap = new HashMap<String, Object>();
             resultMap.put(KernelDensityProcessFactory.RESULT.key, resultGc);
-            monitor.complete(); // same as 100.0f
-
             return resultMap;
         } catch (Exception eek) {
-            monitor.exceptionOccurred(eek);
-            return null;
+            throw new ProcessException(eek);
         } finally {
-            monitor.dispose();
             started = false;
         }
     }

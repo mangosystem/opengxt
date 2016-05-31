@@ -29,8 +29,6 @@ import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.FishnetType;
 import org.geotools.process.spatialstatistics.operations.FishnetOperation;
-import org.geotools.text.Text;
-import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
@@ -83,13 +81,7 @@ public class FishnetCountProcess extends AbstractStatisticsProcess {
             throw new IllegalStateException("Process can only be run once");
         started = true;
 
-        if (monitor == null)
-            monitor = new NullProgressListener();
         try {
-            monitor.started();
-            monitor.setTask(Text.text("Grabbing arguments"));
-            monitor.progress(10.0f);
-
             ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
                     FishnetCountProcessFactory.extent, null);
             Integer columns = (Integer) Params.getValue(input, FishnetCountProcessFactory.columns,
@@ -106,13 +98,6 @@ public class FishnetCountProcess extends AbstractStatisticsProcess {
                     FishnetCountProcessFactory.boundaryInside,
                     FishnetCountProcessFactory.boundaryInside.sample);
 
-            monitor.setTask(Text.text("Processing ..."));
-            monitor.progress(25.0f);
-
-            if (monitor.isCanceled()) {
-                return null; // user has canceled this operation
-            }
-
             // start process
             FishnetOperation operation = new FishnetOperation();
             operation.setBoundaryInside(boundaryInside);
@@ -121,19 +106,12 @@ public class FishnetCountProcess extends AbstractStatisticsProcess {
             SimpleFeatureCollection resultFc = operation.execute(extent, columns, rows);
             // end process
 
-            monitor.setTask(Text.text("Encoding result"));
-            monitor.progress(90.0f);
-
             Map<String, Object> resultMap = new HashMap<String, Object>();
             resultMap.put(FishnetCountProcessFactory.RESULT.key, resultFc);
-            monitor.complete(); // same as 100.0f
-
             return resultMap;
         } catch (Exception eek) {
-            monitor.exceptionOccurred(eek);
-            return null;
+            throw new ProcessException(eek);
         } finally {
-            monitor.dispose();
             started = false;
         }
     }

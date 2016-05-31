@@ -29,8 +29,6 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.text.Text;
-import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
@@ -83,13 +81,7 @@ public class SelectFeaturesProcess extends AbstractStatisticsProcess {
             throw new IllegalStateException("Process can only be run once");
         started = true;
 
-        if (monitor == null)
-            monitor = new NullProgressListener();
         try {
-            monitor.started();
-            monitor.setTask(Text.text("Grabbing arguments"));
-            monitor.progress(10.0f);
-
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, SelectFeaturesProcessFactory.inputFeatures, null);
             Filter filter = (Filter) Params.getValue(input, SelectFeaturesProcessFactory.filter,
@@ -98,13 +90,6 @@ public class SelectFeaturesProcess extends AbstractStatisticsProcess {
                     SelectFeaturesProcessFactory.attributes, null);
             if (inputFeatures == null) {
                 throw new NullPointerException("inputFeatures parameter required");
-            }
-
-            monitor.setTask(Text.text("Processing " + this.getClass().getSimpleName()));
-            monitor.progress(25.0f);
-
-            if (monitor.isCanceled()) {
-                return null; // user has canceled this operation
             }
 
             // start process
@@ -128,19 +113,12 @@ public class SelectFeaturesProcess extends AbstractStatisticsProcess {
             }
             // end process
 
-            monitor.setTask(Text.text("Encoding result"));
-            monitor.progress(90.0f);
-
             Map<String, Object> resultMap = new HashMap<String, Object>();
             resultMap.put(SelectFeaturesProcessFactory.RESULT.key, resultFc);
-            monitor.complete(); // same as 100.0f
-
             return resultMap;
         } catch (Exception eek) {
-            monitor.exceptionOccurred(eek);
             throw new ProcessException(eek);
         } finally {
-            monitor.dispose();
             started = false;
         }
     }

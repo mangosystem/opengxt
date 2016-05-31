@@ -31,8 +31,6 @@ import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.transformation.DifferenceFeatureCollection;
 import org.geotools.process.spatialstatistics.transformation.MergeFeatureCollection;
-import org.geotools.text.Text;
-import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
@@ -82,13 +80,7 @@ public class UpdateProcess extends AbstractStatisticsProcess {
             throw new IllegalStateException("Process can only be run once");
         started = true;
 
-        if (monitor == null)
-            monitor = new NullProgressListener();
         try {
-            monitor.started();
-            monitor.setTask(Text.text("Grabbing arguments"));
-            monitor.progress(10.0f);
-
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, UpdateProcessFactory.inputFeatures, null);
             SimpleFeatureCollection updateFeatures = (SimpleFeatureCollection) Params.getValue(
@@ -106,13 +98,6 @@ public class UpdateProcess extends AbstractStatisticsProcess {
                 throw new ProcessException("updateFeatures must be a polygon features!");
             }
 
-            monitor.setTask(Text.text("Processing ..."));
-            monitor.progress(25.0f);
-
-            if (monitor.isCanceled()) {
-                return null; // user has canceled this operation
-            }
-
             // start process
             SimpleFeatureCollection diff1 = new DifferenceFeatureCollection(inputFeatures,
                     updateFeatures);
@@ -120,19 +105,12 @@ public class UpdateProcess extends AbstractStatisticsProcess {
                     diff1, updateFeatures));
             // end process
 
-            monitor.setTask(Text.text("Encoding result"));
-            monitor.progress(90.0f);
-
             Map<String, Object> resultMap = new HashMap<String, Object>();
             resultMap.put(UpdateProcessFactory.RESULT.key, resultFc);
-            monitor.complete(); // same as 100.0f
-
             return resultMap;
         } catch (Exception eek) {
-            monitor.exceptionOccurred(eek);
-            return null;
+            throw new ProcessException(eek);
         } finally {
-            monitor.dispose();
             started = false;
         }
     }

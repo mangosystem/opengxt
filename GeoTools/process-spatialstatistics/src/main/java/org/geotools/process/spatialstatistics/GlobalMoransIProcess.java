@@ -33,8 +33,6 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
-import org.geotools.text.Text;
-import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
@@ -89,13 +87,7 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
             throw new IllegalStateException("Process can only be run once");
         started = true;
 
-        if (monitor == null)
-            monitor = new NullProgressListener();
         try {
-            monitor.started();
-            monitor.setTask(Text.text("Grabbing arguments"));
-            monitor.progress(10.0f);
-
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, GlobalMoransIProcessFactory.inputFeatures, null);
             String inputField = (String) Params.getValue(input,
@@ -125,13 +117,6 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
                     GlobalMoransIProcessFactory.searchDistance,
                     GlobalMoransIProcessFactory.searchDistance.sample);
 
-            monitor.setTask(Text.text("Processing ..."));
-            monitor.progress(25.0f);
-
-            if (monitor.isCanceled()) {
-                return null; // user has canceled this operation
-            }
-
             // start process
             String typeName = inputFeatures.getSchema().getTypeName();
             MoransIProcessResult processResult = null;
@@ -153,19 +138,12 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
             }
             // end process
 
-            monitor.setTask(Text.text("Encoding result"));
-            monitor.progress(90.0f);
-
             Map<String, Object> resultMap = new HashMap<String, Object>();
             resultMap.put(GlobalMoransIProcessFactory.RESULT.key, processResult);
-            monitor.complete(); // same as 100.0f
-
             return resultMap;
         } catch (Exception eek) {
-            monitor.exceptionOccurred(eek);
-            return null;
+            throw new ProcessException(eek);
         } finally {
-            monitor.dispose();
             started = false;
         }
     }

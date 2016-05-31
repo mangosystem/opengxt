@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import org.geotools.data.DataStore;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.directory.DirectoryDataStore;
+import org.geotools.data.memory.MemoryDataStore;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
@@ -32,7 +33,6 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.process.spatialstatistics.storage.FeatureInserter;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
-import org.geotools.process.spatialstatistics.storage.MemoryDataStore2;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -65,7 +65,7 @@ public abstract class GeneralOperation {
 
     public DataStore getOutputDataStore() {
         if (outputDataStore == null) {
-            outputDataStore = new MemoryDataStore2();
+            outputDataStore = new MemoryDataStore();
         }
         return outputDataStore;
     }

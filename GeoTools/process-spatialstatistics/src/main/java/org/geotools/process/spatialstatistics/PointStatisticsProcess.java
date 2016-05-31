@@ -27,8 +27,6 @@ import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.operations.PointStatisticsOperation;
-import org.geotools.text.Text;
-import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
@@ -81,13 +79,7 @@ public class PointStatisticsProcess extends AbstractStatisticsProcess {
             throw new IllegalStateException("Process can only be run once");
         started = true;
 
-        if (monitor == null)
-            monitor = new NullProgressListener();
         try {
-            monitor.started();
-            monitor.setTask(Text.text("Grabbing arguments"));
-            monitor.progress(10.0f);
-
             SimpleFeatureCollection polygonFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, PointStatisticsProcessFactory.polygonFeatures, null);
             SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(
@@ -103,34 +95,19 @@ public class PointStatisticsProcess extends AbstractStatisticsProcess {
                         "polygonFeatures and pointFeatures parameters required");
             }
 
-            monitor.setTask(Text.text("Processing ..."));
-            monitor.progress(25.0f);
-
-            if (monitor.isCanceled()) {
-                return null; // user has canceled this operation
-            }
-
             // start process
             PointStatisticsOperation operation = new PointStatisticsOperation();
             operation.setBufferDistance(0.0);
             SimpleFeatureCollection resultFc = operation.execute(polygonFeatures, countField,
                     statisticsFields, pointFeatures);
-
             // end process
-
-            monitor.setTask(Text.text("Encoding result"));
-            monitor.progress(90.0f);
 
             Map<String, Object> resultMap = new HashMap<String, Object>();
             resultMap.put(PointStatisticsProcessFactory.RESULT.key, resultFc);
-            monitor.complete(); // same as 100.0f
-
             return resultMap;
         } catch (Exception eek) {
-            monitor.exceptionOccurred(eek);
-            return null;
+            throw new ProcessException(eek);
         } finally {
-            monitor.dispose();
             started = false;
         }
     }

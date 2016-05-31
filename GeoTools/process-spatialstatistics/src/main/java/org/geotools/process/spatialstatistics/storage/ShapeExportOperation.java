@@ -28,6 +28,7 @@ import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.Query;
+import org.geotools.data.memory.MemoryDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
@@ -92,8 +93,8 @@ public class ShapeExportOperation {
 
     public DataStore getOutputDataStore() {
         if (outputDataStore == null) {
-            // The default data store is a MemoryDataStore2
-            outputDataStore = new MemoryDataStore2();
+            // The default data store is a MemoryDataStore
+            outputDataStore = new MemoryDataStore();
         }
         return outputDataStore;
     }

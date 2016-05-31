@@ -32,8 +32,6 @@ import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterCropOperation;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
-import org.geotools.text.Text;
-import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
@@ -87,13 +85,7 @@ public class HistogramGridCoverageProcess extends AbstractStatisticsProcess {
             throw new IllegalStateException("Process can only be run once");
         started = true;
 
-        if (monitor == null)
-            monitor = new NullProgressListener();
         try {
-            monitor.started();
-            monitor.setTask(Text.text("Grabbing arguments"));
-            monitor.progress(10.0f);
-
             GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
                     HistogramGridCoverageProcessFactory.inputCoverage, null);
             if (inputCoverage == null) {
@@ -105,13 +97,6 @@ public class HistogramGridCoverageProcess extends AbstractStatisticsProcess {
             Integer bandIndex = (Integer) Params.getValue(input,
                     HistogramGridCoverageProcessFactory.bandIndex,
                     HistogramGridCoverageProcessFactory.bandIndex.sample);
-
-            monitor.setTask(Text.text("Processing Statistics"));
-            monitor.progress(25.0f);
-
-            if (monitor.isCanceled()) {
-                return null; // user has canceled this operation
-            }
 
             // start process
             // 1. crop raster
@@ -130,7 +115,7 @@ public class HistogramGridCoverageProcess extends AbstractStatisticsProcess {
                 if (cropShape != null) {
                     result.setArea(FormatUtils.format(cropShape.getArea())); // 6 digit
                 }
-                
+
                 double cellSize = RasterHelper.getCellSize(cropedCoverage);
                 result.setCellSize(FormatUtils.format(cellSize)); // 6 digit
 
@@ -140,19 +125,12 @@ public class HistogramGridCoverageProcess extends AbstractStatisticsProcess {
             }
             // end process
 
-            monitor.setTask(Text.text("Encoding result"));
-            monitor.progress(90.0f);
-
             Map<String, Object> resultMap = new HashMap<String, Object>();
             resultMap.put(HistogramGridCoverageProcessFactory.RESULT.key, result);
-            monitor.complete(); // same as 100.0f
-
             return resultMap;
         } catch (Exception eek) {
-            monitor.exceptionOccurred(eek);
-            return null;
+            throw new ProcessException(eek);
         } finally {
-            monitor.dispose();
             started = false;
         }
     }

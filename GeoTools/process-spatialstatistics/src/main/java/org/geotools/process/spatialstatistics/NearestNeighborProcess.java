@@ -29,8 +29,6 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
-import org.geotools.text.Text;
-import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
@@ -79,14 +77,8 @@ public class NearestNeighborProcess extends AbstractStatisticsProcess {
         if (started)
             throw new IllegalStateException("Process can only be run once");
         started = true;
-
-        if (monitor == null)
-            monitor = new NullProgressListener();
+        
         try {
-            monitor.started();
-            monitor.setTask(Text.text("Grabbing arguments"));
-            monitor.progress(10.0f);
-
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, NearestNeighborProcessFactory.inputFeatures, null);
             if (inputFeatures == null) {
@@ -98,34 +90,21 @@ public class NearestNeighborProcess extends AbstractStatisticsProcess {
             Double area = (Double) Params.getValue(input, NearestNeighborProcessFactory.area,
                     Double.valueOf(0.0));
 
-            monitor.setTask(Text.text("Processing ..."));
-            monitor.progress(25.0f);
-
-            if (monitor.isCanceled()) {
-                return null; // user has canceled this operation
-            }
-
             // start process
             NNIOperation operation = new NNIOperation();
+            operation.setDistanceType(distanceMethod);
             if (area == null) {
                 area = Double.valueOf(0.0d);
             }
             NearestNeighborResult nni = operation.execute(inputFeatures, area);
             // end process
 
-            monitor.setTask(Text.text("Encoding result"));
-            monitor.progress(90.0f);
-
             Map<String, Object> resultMap = new HashMap<String, Object>();
             resultMap.put(NearestNeighborProcessFactory.RESULT.key, nni);
-            monitor.complete(); // same as 100.0f
-
             return resultMap;
         } catch (Exception eek) {
-            monitor.exceptionOccurred(eek);
-            return null;
+            throw new ProcessException(eek);
         } finally {
-            monitor.dispose();
             started = false;
         }
     }

@@ -28,8 +28,6 @@ import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.RadialType;
 import org.geotools.process.spatialstatistics.operations.PolarGridsOperation;
-import org.geotools.text.Text;
-import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
@@ -83,13 +81,7 @@ public class PolarGridsFromGeometryProcess extends AbstractStatisticsProcess {
             throw new IllegalStateException("Process can only be run once");
         started = true;
 
-        if (monitor == null)
-            monitor = new NullProgressListener();
         try {
-            monitor.started();
-            monitor.setTask(Text.text("Grabbing arguments"));
-            monitor.progress(10.0f);
-
             Geometry origin = (Geometry) Params.getValue(input,
                     PolarGridsFromGeometryProcessFactory.origin, null);
             String radius = (String) Params.getValue(input,
@@ -104,13 +96,6 @@ public class PolarGridsFromGeometryProcess extends AbstractStatisticsProcess {
                     PolarGridsFromGeometryProcessFactory.sides,
                     PolarGridsFromGeometryProcessFactory.sides.sample);
 
-            monitor.setTask(Text.text("Processing ..."));
-            monitor.progress(25.0f);
-
-            if (monitor.isCanceled()) {
-                return null; // user has canceled this operation
-            }
-
             // start process
             String[] arrDistance = radius.split(",");
             double[] bufferRadius = new double[arrDistance.length];
@@ -121,24 +106,18 @@ public class PolarGridsFromGeometryProcess extends AbstractStatisticsProcess {
                     throw new NumberFormatException(nfe.getMessage());
                 }
             }
-            
-            PolarGridsOperation operation = new PolarGridsOperation();
-            SimpleFeatureCollection resultFc = operation.execute(origin, bufferRadius, sides, radialType);
-            // end process
 
-            monitor.setTask(Text.text("Encoding result"));
-            monitor.progress(90.0f);
+            PolarGridsOperation operation = new PolarGridsOperation();
+            SimpleFeatureCollection resultFc = operation.execute(origin, bufferRadius, sides,
+                    radialType);
+            // end process
 
             Map<String, Object> resultMap = new HashMap<String, Object>();
             resultMap.put(PolarGridsFromGeometryProcessFactory.RESULT.key, resultFc);
-            monitor.complete(); // same as 100.0f
-
             return resultMap;
         } catch (Exception eek) {
-            monitor.exceptionOccurred(eek);
-            return null;
+            throw new ProcessException(eek);
         } finally {
-            monitor.dispose();
             started = false;
         }
     }

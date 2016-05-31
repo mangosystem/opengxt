@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -28,8 +29,6 @@ import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.transformation.ExplodeFeatureCollection;
 import org.geotools.process.spatialstatistics.transformation.ToPointFeatureCollection;
-import org.geotools.text.Text;
-import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
@@ -80,13 +79,7 @@ public class FeatureToPointProcess extends AbstractStatisticsProcess {
             throw new IllegalStateException("Process can only be run once");
         started = true;
 
-        if (monitor == null)
-            monitor = new NullProgressListener();
         try {
-            monitor.started();
-            monitor.setTask(Text.text("Grabbing arguments"));
-            monitor.progress(10.0f);
-
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, FeatureToPointProcessFactory.inputFeatures, null);
             if (inputFeatures == null) {
@@ -99,13 +92,6 @@ public class FeatureToPointProcess extends AbstractStatisticsProcess {
                     FeatureToPointProcessFactory.singlePart,
                     FeatureToPointProcessFactory.singlePart.sample);
 
-            monitor.setTask(Text.text("Processing " + this.getClass().getSimpleName()));
-            monitor.progress(25.0f);
-
-            if (monitor.isCanceled()) {
-                return null; // user has canceled this operation
-            }
-
             // start process
             SimpleFeatureCollection resultFc = null;
             if (singlePart) {
@@ -116,19 +102,12 @@ public class FeatureToPointProcess extends AbstractStatisticsProcess {
             }
             // end process
 
-            monitor.setTask(Text.text("Encoding result"));
-            monitor.progress(90.0f);
-
             Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(FeatureToPointProcessFactory.RESULT.key, resultFc);
-            monitor.complete(); // same as 100.0f
-
+            resultMap.put(FeatureToPointProcessFactory.RESULT.key, DataUtilities.simple(resultFc));
             return resultMap;
         } catch (Exception eek) {
-            monitor.exceptionOccurred(eek);
             throw new ProcessException(eek);
         } finally {
-            monitor.dispose();
             started = false;
         }
     }

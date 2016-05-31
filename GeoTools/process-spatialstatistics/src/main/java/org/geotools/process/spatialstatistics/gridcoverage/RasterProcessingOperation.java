@@ -52,6 +52,7 @@ import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.data.DataStore;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.Transaction;
+import org.geotools.data.memory.MemoryDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
@@ -60,7 +61,6 @@ import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.process.spatialstatistics.storage.FeatureInserter;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
-import org.geotools.process.spatialstatistics.storage.MemoryDataStore2;
 import org.geotools.process.spatialstatistics.storage.RasterExportOperation;
 import org.geotools.resources.i18n.Vocabulary;
 import org.geotools.resources.i18n.VocabularyKeys;
@@ -118,7 +118,7 @@ public abstract class RasterProcessingOperation {
 
     public DataStore getOutputDataStore() {
         if (outDataStore == null) {
-            outDataStore = new MemoryDataStore2();
+            outDataStore = new MemoryDataStore();
         }
         return outDataStore;
     }

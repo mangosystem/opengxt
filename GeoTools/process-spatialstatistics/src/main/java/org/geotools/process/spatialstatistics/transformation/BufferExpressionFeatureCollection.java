@@ -44,7 +44,7 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
     protected static final Logger LOGGER = Logging
             .getLogger(BufferExpressionFeatureCollection.class);
 
-    private static final String BUFFER_FIELD = "buf_dist"; //$NON-NLS-1$
+    private static final String BUFFER_FIELD = "buf_dist";
 
     private Expression distance;
 
@@ -56,8 +56,13 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
             int quadrantSegments) {
         super(delegate);
 
+        if (quadrantSegments <= 0) {
+            quadrantSegments = 8;
+        }
+
         this.distance = distance;
         this.quadrantSegments = quadrantSegments;
+
         String typeName = delegate.getSchema().getTypeName();
         this.schema = FeatureTypes.build(delegate.getSchema(), typeName, Polygon.class);
         this.schema = FeatureTypes.add(schema, BUFFER_FIELD, Double.class, 19);

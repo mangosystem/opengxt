@@ -1,4 +1,4 @@
-## Spatial Statistics Tools for GeoTools, GeoServer WPS, uDig Processing Toolbox
+## Spatial Tools for GeoTools, GeoServer WPS, uDig
 
 ### Overview
 The goal of this project is to provide a spatial statistics tools for Geotools, Geoserver WPS, uDig Statistics Toolbox
@@ -8,7 +8,7 @@ The goal of this project is to provide a spatial statistics tools for Geotools, 
 * [GeoServer](http://geoserver.org) GeoServer is an open source software server written in Java that 
 allows users to share and edit geospatial data. Designed for interoperability, it publishes data from 
 any major spatial data source using open standards.
-* [uDig-User-friendly Desktop Internet GIS](http://locationtech.org/projects/technology.udig) is an open source desktop application framework, built with the Eclipse Rich Client (RCP) technology.
+* [uDig](http://locationtech.org/projects/technology.udig) is an open source desktop application framework, built with the Eclipse Rich Client (RCP) technology.
 
 ### License
 * GeoTools licensed under the [LGPL](http://www.gnu.org/licenses/lgpl.html). [License guide](http://docs.geotools.org/latest/userguide/welcome/license.html)
@@ -20,7 +20,11 @@ any major spatial data source using open standards.
 * Download jar files
 
 ### uDig Plugin Installation
-* Download and install uDig 2.0, [download here](http://udig.refractions.net/download/unstable)
+* Download and install uDig 2.0-SNAPSHOT (GeoTools 14.1)
+ * Windows [x86_64 Installer](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.exe)
+ * Windows [x86_64 zip](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.zip)
+ * Linux [x86_64 zip](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.linux.gtk.x86_64.zip)
+ * Mac OS/X [x86_64 zip](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.macosx.cocoa.x86_64.zip)
 * Start uDig application
 * Choose Help -> Find and Install... from the menu bar to open up the Install/Update window
 * Select Search for new features to install option and press Next.

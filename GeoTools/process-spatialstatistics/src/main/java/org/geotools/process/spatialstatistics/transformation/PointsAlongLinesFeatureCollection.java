@@ -60,6 +60,7 @@ public class PointsAlongLinesFeatureCollection extends GXTSimpleFeatureCollectio
 
         String typeName = delegate.getSchema().getTypeName();
         this.schema = FeatureTypes.build(delegate.getSchema(), typeName, Point.class);
+        this.schema = FeatureTypes.add(this.schema, "se_order", Integer.class);
     }
 
     @Override
@@ -124,6 +125,7 @@ public class PointsAlongLinesFeatureCollection extends GXTSimpleFeatureCollectio
                     }
                     builder.add(attribute);
                 }
+                builder.add(new Integer(index));
                 nextFeature = builder.buildFeature(Integer.toString(++featureID));
                 builder.reset();
                 index++;

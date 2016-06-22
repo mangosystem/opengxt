@@ -44,7 +44,7 @@ public class SpatialClumpMapProcessFactory extends SpatialStatisticsProcessFacto
     private static final String PROCESS_NAME = "SpatialClumpMap";
 
     /*
-     * SpatialClumpMap(SimpleFeatureCollection inputFeatures, Expression radius, int quadrantSegments): SimpleFeatureCollection
+     * SpatialClumpMap(SimpleFeatureCollection inputFeatures, Expression radius, Integer quadrantSegments): SimpleFeatureCollection
      */
 
     public SpatialClumpMapProcessFactory() {

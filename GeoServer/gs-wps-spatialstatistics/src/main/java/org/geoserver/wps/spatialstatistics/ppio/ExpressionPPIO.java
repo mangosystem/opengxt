@@ -39,7 +39,7 @@ public class ExpressionPPIO extends LiteralPPIO {
         if (value == null) {
             return null;
         }
-        return ((Expression) value).toString();
+        return ECQL.toCQL((Expression) value);
     }
 
 }

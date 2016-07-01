@@ -503,7 +503,7 @@ public class HtmlWriter {
     }
 
     public void writeQuadratProcess(QuadratResult value) {
-        writeH1("Histogram Summary");
+        writeH1("Quadrat Analysis Summary");
         writeH2(value.getTypeName());
         write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
 

@@ -45,6 +45,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.ProcessFactory;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
@@ -355,10 +356,9 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
                 LiteralDataWidget literalView = new LiteralDataWidget(map);
                 literalView.create(container, SWT.NONE, inputParams, param);
             } else {
-                if (metadata.containsKey(Parameter.OPTIONS)) {
-                    // layer's field : KVP(Parameter.OPTIONS, "파라미터명.필드유형")
+                if (metadata.containsKey(Params.FIELD)) {
                     final Combo cboField = new Combo(container, SWT.NONE | SWT.DROP_DOWN);
-                    uiParams.put(cboField, metadata.get(Parameter.OPTIONS).toString());
+                    uiParams.put(cboField, metadata.get(Params.FIELD).toString());
 
                     cboField.setLayoutData(layoutData);
                     cboField.setData(param.key);

@@ -46,6 +46,7 @@ import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
@@ -267,13 +268,13 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
 
         Style style = ssBuilder.getDefaultFeatureStyle();
         if (ToolboxView.getUseDefaultStyle()) {
-            if (outputMeta.containsKey(Parameter.OPTIONS)) {
-                // KVP(Parameter.OPTIONS, "renderer.fieldname")
+            if (outputMeta.containsKey(Params.STYLES)) {
+                // KVP(Params.STYLES, "renderer.fieldname")
                 // renderer = LISA, UniqueValues, ClassBreaks, Density, Distance, Interpolation
                 // ClassBreaks = EqualInterval, Quantile, NaturalBreaks, StdDev
 
                 try {
-                    String value = outputMeta.get(Parameter.OPTIONS).toString();
+                    String value = outputMeta.get(Params.STYLES).toString();
                     String[] splits = value.split("\\."); //$NON-NLS-1$ 
                     String styleName = splits[0].toUpperCase();
 

@@ -332,7 +332,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         ssTools.addChild(distributionTools);
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.MeanCenterProcessFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.MedianCenterProcessFactory");
-        buildTool(distributionTools, "org.geotools.process.spatialstatistics.CentralFeatureFactory");
+        buildTool(distributionTools, "org.geotools.process.spatialstatistics.CentralFeatureProcessFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.SDProcessFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.SDEProcessFactory");
         buildTool(distributionTools, "org.geotools.process.spatialstatistics.DirectionalMeanProcessFactory");

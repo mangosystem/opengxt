@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.transformation.ForceCRSFeatureCollection;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils;
@@ -82,8 +83,8 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
         if (metadata == null || metadata.size() == 0) {
             fillLayers(map, cboSfLayer, VectorLayerType.ALL);
         } else {
-            if (metadata.containsKey(Parameter.FEATURE_TYPE)) {
-                String val = metadata.get(Parameter.FEATURE_TYPE).toString();
+            if (metadata.containsKey(Params.FEATURES)) {
+                String val = metadata.get(Params.FEATURES).toString();
                 if (val.equalsIgnoreCase(VectorLayerType.ALL.toString())) {
                     fillLayers(map, cboSfLayer, VectorLayerType.ALL);
                 } else if (val.equalsIgnoreCase(VectorLayerType.POINT.toString())) {

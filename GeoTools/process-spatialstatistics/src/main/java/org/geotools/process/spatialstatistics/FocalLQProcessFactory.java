@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -71,17 +72,17 @@ public class FocalLQProcessFactory extends SpatialStatisticsProcessFactory {
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("FocalLQ.inputFeatures.title"),
             getResource("FocalLQ.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "All"));
+                    Params.FEATURES, "All"));
 
     /** xField */
     public static final Parameter<String> xField = new Parameter<String>("xField", String.class,
             getResource("FocalLQ.xField.title"), getResource("FocalLQ.xField.description"), true,
-            1, 1, null, new KVP(Parameter.OPTIONS, "inputFeatures.Number"));
+            1, 1, null, new KVP(Params.FIELD, "inputFeatures.Number"));
 
     /** yField */
     public static final Parameter<String> yField = new Parameter<String>("yField", String.class,
             getResource("FocalLQ.yField.title"), getResource("FocalLQ.yField.description"), true,
-            1, 1, null, new KVP(Parameter.OPTIONS, "inputFeatures.Number"));
+            1, 1, null, new KVP(Params.FIELD, "inputFeatures.Number"));
 
     /** searchDistance */
     public static final Parameter<Double> searchDistance = new Parameter<Double>("searchDistance",

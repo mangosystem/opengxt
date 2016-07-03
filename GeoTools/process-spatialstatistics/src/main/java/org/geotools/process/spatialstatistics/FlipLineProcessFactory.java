@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -71,7 +72,7 @@ public class FlipLineProcessFactory extends SpatialStatisticsProcessFactory {
             "lineFeatures", SimpleFeatureCollection.class,
             getResource("FlipLine.lineFeatures.title"),
             getResource("FlipLine.lineFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "LineString"));
+                    Params.FEATURES, "LineString"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

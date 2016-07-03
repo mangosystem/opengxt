@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -44,7 +45,8 @@ public class PointStatisticsProcessFactory extends SpatialStatisticsProcessFacto
     private static final String PROCESS_NAME = "PointStatistics";
 
     /*
-     * PointStatistics(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection pointFeatures, String countField, String statisticsFields): SimpleFeatureCollection
+     * PointStatistics(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection pointFeatures, String countField, String statisticsFields):
+     * SimpleFeatureCollection
      */
 
     public PointStatisticsProcessFactory() {
@@ -71,14 +73,14 @@ public class PointStatisticsProcessFactory extends SpatialStatisticsProcessFacto
             "polygonFeatures", SimpleFeatureCollection.class,
             getResource("PointStatistics.polygonFeatures.title"),
             getResource("PointStatistics.polygonFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Polygon"));
+                    Params.FEATURES, "Polygon"));
 
     /** pointFeatures */
     public static final Parameter<SimpleFeatureCollection> pointFeatures = new Parameter<SimpleFeatureCollection>(
             "pointFeatures", SimpleFeatureCollection.class,
             getResource("PointStatistics.pointFeatures.title"),
             getResource("PointStatistics.pointFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Point"));
+                    Params.FEATURES, "Point"));
 
     /** countField */
     public static final Parameter<String> countField = new Parameter<String>("countField",
@@ -105,7 +107,7 @@ public class PointStatisticsProcessFactory extends SpatialStatisticsProcessFacto
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("PointStatistics.result.title"),
             getResource("PointStatistics.result.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "EqualInterval.countField"));
+                    Params.STYLES, "EqualInterval.countField"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

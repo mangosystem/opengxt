@@ -29,6 +29,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterInterpolationOperator.RadiusType;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
@@ -74,13 +75,13 @@ public class IDWProcessFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class, getResource("IDW.inputFeatures.title"),
             getResource("IDW.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Point"));
+                    Params.FEATURES, "Point"));
 
     /** inputField */
     public static final Parameter<String> inputField = new Parameter<String>("inputField",
             String.class, getResource("IDW.inputField.title"),
-            getResource("IDW.inputField.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+            getResource("IDW.inputField.description"), true, 1, 1, null, new KVP(Params.FIELD,
+                    "inputFeatures.Number"));
 
     /** power */
     public static final Parameter<Double> power = new Parameter<Double>("power", Double.class,

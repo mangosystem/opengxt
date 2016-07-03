@@ -29,6 +29,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -72,13 +73,13 @@ public class TPSProcessFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class, getResource("TPS.inputFeatures.title"),
             getResource("TPS.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Point"));
+                    Params.FEATURES, "Point"));
 
     /** inputField */
     public static final Parameter<String> inputField = new Parameter<String>("inputField",
             String.class, getResource("TPS.inputField.title"),
-            getResource("TPS.inputField.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+            getResource("TPS.inputField.description"), true, 1, 1, null, new KVP(Params.FIELD,
+                    "inputFeatures.Number"));
 
     /** cellSize */
     public static final Parameter<Double> cellSize = new Parameter<Double>("cellSize",

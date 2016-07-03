@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -81,7 +82,7 @@ public class RingMapProcessFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<String> targetField = new Parameter<String>("targetField",
             String.class, getResource("RingMap.targetField.title"),
             getResource("RingMap.targetField.description"), false, 0, 1, "ring_val", new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+                    Params.FIELD, "inputFeatures.Number"));
 
     /** ringGap */
     public static final Parameter<Integer> ringGap = new Parameter<Integer>("ringGap",
@@ -101,8 +102,8 @@ public class RingMapProcessFactory extends SpatialStatisticsProcessFactory {
     /** ringmap */
     public static final Parameter<SimpleFeatureCollection> ringmap = new Parameter<SimpleFeatureCollection>(
             "ringmap", SimpleFeatureCollection.class, getResource("RingMap.ringmap.title"),
-            getResource("RingMap.ringmap.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "Quantile.targetField"));
+            getResource("RingMap.ringmap.description"), true, 1, 1, null, new KVP(Params.STYLES,
+                    "Quantile.targetField"));
 
     /** anchor */
     public static final Parameter<SimpleFeatureCollection> anchor = new Parameter<SimpleFeatureCollection>(

@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.expression.Expression;
@@ -71,7 +72,7 @@ public class RandomPointsPerFeaturesProcessFactory extends SpatialStatisticsProc
             "polygonFeatures", SimpleFeatureCollection.class,
             getResource("RandomPointsPerFeatures.polygonFeatures.title"),
             getResource("RandomPointsPerFeatures.polygonFeatures.description"), true, 1, 1, null,
-            new KVP(Parameter.FEATURE_TYPE, "Polygon"));
+            new KVP(Params.FEATURES, "Polygon"));
 
     /** expression */
     public static final Parameter<Expression> expression = new Parameter<Expression>("expression",

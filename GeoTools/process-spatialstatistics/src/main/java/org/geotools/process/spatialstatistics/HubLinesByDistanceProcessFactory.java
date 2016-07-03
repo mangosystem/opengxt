@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -84,7 +85,7 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
     public static final Parameter<String> hubIdField = new Parameter<String>("hubIdField",
             String.class, getResource("HubLinesByDistance.hubIdField.title"),
             getResource("HubLinesByDistance.hubIdField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "hubFeatures.All"));
+                    Params.FIELD, "hubFeatures.All"));
 
     /** preserveAttributes */
     public static final Parameter<Boolean> preserveAttributes = new Parameter<Boolean>(

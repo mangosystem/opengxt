@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.pattern.QuadratOperation.QuadratResult;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
@@ -72,7 +73,7 @@ public class QuadratAnalysisProcessFactory extends SpatialStatisticsProcessFacto
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("QuadratAnalysis.inputFeatures.title"),
             getResource("QuadratAnalysis.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Point"));
+                    Params.FEATURES, "Point"));
 
     /** cellSize */
     public static final Parameter<Double> cellSize = new Parameter<Double>("cellSize",

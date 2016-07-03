@@ -44,7 +44,8 @@ public class SpatialJoinProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "SpatialJoin";
 
     /*
-     * SpatialJoin(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection joinFeatures, SpatialJoinType joinType, Double searchRadius) : SimpleFeatureCollection
+     * SpatialJoin(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection joinFeatures, SpatialJoinType joinType, Double searchRadius) :
+     * SimpleFeatureCollection
      */
 
     public SpatialJoinProcessFactory() {

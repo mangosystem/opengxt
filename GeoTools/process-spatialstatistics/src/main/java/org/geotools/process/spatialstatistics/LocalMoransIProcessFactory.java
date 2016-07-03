@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -80,7 +81,7 @@ public class LocalMoransIProcessFactory extends SpatialStatisticsProcessFactory 
     public static final Parameter<String> inputField = new Parameter<String>("inputField",
             String.class, getResource("LocalMoransI.inputField.title"),
             getResource("LocalMoransI.inputField.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+                    Params.FIELD, "inputFeatures.Number"));
 
     /** spatialConcept */
     public static final Parameter<SpatialConcept> spatialConcept = new Parameter<SpatialConcept>(
@@ -104,8 +105,8 @@ public class LocalMoransIProcessFactory extends SpatialStatisticsProcessFactory 
             StandardizationMethod.NONE, null);
 
     /** searchDistance */
-    public static final Parameter<Double> searchDistance = new Parameter<Double>(
-            "searchDistance", Double.class, getResource("LocalMoransI.searchDistance.title"),
+    public static final Parameter<Double> searchDistance = new Parameter<Double>("searchDistance",
+            Double.class, getResource("LocalMoransI.searchDistance.title"),
             getResource("LocalMoransI.searchDistance.description"), false, 0, 1,
             Double.valueOf(0.0), null);
 

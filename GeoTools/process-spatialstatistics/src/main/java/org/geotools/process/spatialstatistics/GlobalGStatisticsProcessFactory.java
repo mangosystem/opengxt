@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.GlobalGStatisticsProcess.GStatisticsProcessResult;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -81,7 +82,7 @@ public class GlobalGStatisticsProcessFactory extends SpatialStatisticsProcessFac
     public static final Parameter<String> inputField = new Parameter<String>("inputField",
             String.class, getResource("GlobalGStatistics.inputField.title"),
             getResource("GlobalGStatistics.inputField.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+                    Params.FIELD, "inputFeatures.Number"));
 
     /** spatialConcept */
     public static final Parameter<SpatialConcept> spatialConcept = new Parameter<SpatialConcept>(
@@ -105,8 +106,8 @@ public class GlobalGStatisticsProcessFactory extends SpatialStatisticsProcessFac
             StandardizationMethod.NONE, null);
 
     /** searchDistance */
-    public static final Parameter<Double> searchDistance = new Parameter<Double>(
-            "searchDistance", Double.class, getResource("GlobalGStatistics.searchDistance.title"),
+    public static final Parameter<Double> searchDistance = new Parameter<Double>("searchDistance",
+            Double.class, getResource("GlobalGStatistics.searchDistance.title"),
             getResource("GlobalGStatistics.searchDistance.description"), false, 0, 1,
             Double.valueOf(0.0), null);
 

@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -71,19 +72,19 @@ public class CalculateAreaProcessFactory extends SpatialStatisticsProcessFactory
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("CalculateArea.inputFeatures.title"),
             getResource("CalculateArea.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Polygon"));
+                    Params.FEATURES, "Polygon"));
 
     /** areaField */
     public static final Parameter<String> areaField = new Parameter<String>("areaField",
             String.class, getResource("CalculateArea.areaField.title"),
             getResource("CalculateArea.areaField.description"), false, 0, 1, "geom_area", new KVP(
-                    Parameter.OPTIONS, "inputFeatures.All"));
+                    Params.FIELD, "inputFeatures.All"));
 
     /** perimeterField */
     public static final Parameter<String> perimeterField = new Parameter<String>("perimeterField",
             String.class, getResource("CalculateArea.perimeterField.title"),
             getResource("CalculateArea.perimeterField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.All"));
+                    Params.FIELD, "inputFeatures.All"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

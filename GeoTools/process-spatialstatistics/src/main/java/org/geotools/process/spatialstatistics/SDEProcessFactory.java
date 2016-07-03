@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -71,7 +72,7 @@ public class SDEProcessFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class, getResource("Sde.inputFeatures.title"),
             getResource("Sde.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "All"));
+                    Params.FEATURES, "All"));
 
     /** ellipseSize */
     public static final Parameter<String> ellipseSize = new Parameter<String>("ellipseSize",
@@ -81,13 +82,13 @@ public class SDEProcessFactory extends SpatialStatisticsProcessFactory {
     /** weightField */
     public static final Parameter<String> weightField = new Parameter<String>("weightField",
             String.class, getResource("Sde.weightField.title"),
-            getResource("Sde.weightField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+            getResource("Sde.weightField.description"), false, 0, 1, null, new KVP(Params.FIELD,
+                    "inputFeatures.Number"));
 
     /** caseField */
     public static final Parameter<String> caseField = new Parameter<String>("caseField",
             String.class, getResource("Sde.caseField.title"),
-            getResource("Sde.caseField.description"), false, 0, 1, null, new KVP(Parameter.OPTIONS,
+            getResource("Sde.caseField.description"), false, 0, 1, null, new KVP(Params.FIELD,
                     "inputFeatures.All"));
 
     @Override

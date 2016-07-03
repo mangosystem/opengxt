@@ -22,7 +22,7 @@ import org.geotools.process.impl.AbstractProcess;
 /**
  * AbstractStatisticsProcess.
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */

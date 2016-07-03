@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -44,8 +45,7 @@ public class SDProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "StandardDistance";
 
     /*
-     * StandardDistance(SimpleFeatureCollection inputFeatures, String circleSize, String weightField, String caseField):
-     * SimpleFeatureCollection
+     * StandardDistance(SimpleFeatureCollection inputFeatures, String circleSize, String weightField, String caseField): SimpleFeatureCollection
      */
 
     public SDProcessFactory() {
@@ -70,8 +70,8 @@ public class SDProcessFactory extends SpatialStatisticsProcessFactory {
     /** inputFeatures */
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class, getResource("Sd.inputFeatures.title"),
-            getResource("Sd.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "All"));
+            getResource("Sd.inputFeatures.description"), true, 1, 1, null, new KVP(Params.FEATURES,
+                    "All"));
 
     /** circleSize */
     public static final Parameter<String> circleSize = new Parameter<String>("circleSize",
@@ -81,13 +81,13 @@ public class SDProcessFactory extends SpatialStatisticsProcessFactory {
     /** weightField */
     public static final Parameter<String> weightField = new Parameter<String>("weightField",
             String.class, getResource("Sd.weightField.title"),
-            getResource("Sd.weightField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+            getResource("Sd.weightField.description"), false, 0, 1, null, new KVP(Params.FIELD,
+                    "inputFeatures.Number"));
 
     /** caseField */
     public static final Parameter<String> caseField = new Parameter<String>("caseField",
             String.class, getResource("Sd.caseField.title"),
-            getResource("Sd.caseField.description"), false, 0, 1, null, new KVP(Parameter.OPTIONS,
+            getResource("Sd.caseField.description"), false, 0, 1, null, new KVP(Params.FIELD,
                     "inputFeatures.All"));
 
     @Override

@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.Filter;
@@ -71,7 +72,7 @@ public class AreaProcessFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("Area.inputFeatures.title"), getResource("Area.inputFeatures.description"),
-            true, 1, 1, null, new KVP(Parameter.FEATURE_TYPE, "Polygon"));
+            true, 1, 1, null, new KVP(Params.FEATURES, "Polygon"));
 
     /** filter */
     public static final Parameter<Filter> filter = new Parameter<Filter>("filter", Filter.class,

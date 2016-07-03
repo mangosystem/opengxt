@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -70,25 +71,25 @@ public class SumLineLengthProcessFactory extends SpatialStatisticsProcessFactory
     public static final Parameter<SimpleFeatureCollection> polygons = new Parameter<SimpleFeatureCollection>(
             "polygons", SimpleFeatureCollection.class, getResource("SumLineLength.polygons.title"),
             getResource("SumLineLength.polygons.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Polygon"));
+                    Params.FEATURES, "Polygon"));
 
     /** lengthField */
     public static final Parameter<String> lengthField = new Parameter<String>("lengthField",
             String.class, getResource("SumLineLength.lengthField.title"),
             getResource("SumLineLength.lengthField.description"), true, 1, 1, "sum_len", new KVP(
-                    Parameter.OPTIONS, "polygons.All"));
+                    Params.FIELD, "polygons.All"));
 
     /** countField */
     public static final Parameter<String> countField = new Parameter<String>("countField",
             String.class, getResource("SumLineLength.countField.title"),
             getResource("SumLineLength.countField.description"), false, 0, 1, "line_cnt", new KVP(
-                    Parameter.OPTIONS, "polygons.All"));
+                    Params.FIELD, "polygons.All"));
 
     /** lines */
     public static final Parameter<SimpleFeatureCollection> lines = new Parameter<SimpleFeatureCollection>(
             "lines", SimpleFeatureCollection.class, getResource("SumLineLength.lines.title"),
             getResource("SumLineLength.lines.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "LineString"));
+                    Params.FEATURES, "LineString"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -104,7 +105,7 @@ public class SumLineLengthProcessFactory extends SpatialStatisticsProcessFactory
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("SumLineLength.result.title"),
             getResource("SumLineLength.result.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "NaturalBreaks.lengthField"));
+                    Params.STYLES, "NaturalBreaks.lengthField"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

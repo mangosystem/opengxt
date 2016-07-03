@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -71,7 +72,7 @@ public class DirectionalMeanProcessFactory extends SpatialStatisticsProcessFacto
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("DirectionalMean.inputFeatures.title"),
             getResource("DirectionalMean.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "LineString"));
+                    Params.FEATURES, "LineString"));
 
     /** orientationOnly */
     public static final Parameter<Boolean> orientationOnly = new Parameter<Boolean>(
@@ -83,7 +84,7 @@ public class DirectionalMeanProcessFactory extends SpatialStatisticsProcessFacto
     public static final Parameter<String> caseField = new Parameter<String>("caseField",
             String.class, getResource("DirectionalMean.caseField.title"),
             getResource("DirectionalMean.caseField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.All"));
+                    Params.FIELD, "inputFeatures.All"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

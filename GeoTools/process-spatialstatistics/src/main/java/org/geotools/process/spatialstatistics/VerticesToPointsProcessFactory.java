@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.PointLocationType;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
@@ -72,12 +73,13 @@ public class VerticesToPointsProcessFactory extends SpatialStatisticsProcessFact
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("VerticesToPoints.inputFeatures.title"),
             getResource("VerticesToPoints.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Polyline"));
+                    Params.FEATURES, "Polyline"));
 
     /** location */
     public static final Parameter<PointLocationType> location = new Parameter<PointLocationType>(
             "location", PointLocationType.class, getResource("VerticesToPoints.location.title"),
-            getResource("VerticesToPoints.location.description"), false, 0, 1, PointLocationType.All, null);
+            getResource("VerticesToPoints.location.description"), false, 0, 1,
+            PointLocationType.All, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

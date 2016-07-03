@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.CircularType;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
@@ -46,7 +47,8 @@ public class CircularGridProcessFactory extends SpatialStatisticsProcessFactory 
     private static final String PROCESS_NAME = "CircularGrid";
 
     /*
-     * CircularGrid(ReferencedEnvelope extent, SimpleFeatureCollection boundsSource, Double radius, CircularType circularType) : SimpleFeatureCollection
+     * CircularGrid(ReferencedEnvelope extent, SimpleFeatureCollection boundsSource, Double radius, CircularType circularType) :
+     * SimpleFeatureCollection
      */
 
     public CircularGridProcessFactory() {
@@ -78,7 +80,7 @@ public class CircularGridProcessFactory extends SpatialStatisticsProcessFactory 
             "boundsSource", SimpleFeatureCollection.class,
             getResource("CircularGrid.boundsSource.title"),
             getResource("CircularGrid.boundsSource.description"), false, 0, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Polygon"));
+                    Params.FEATURES, "Polygon"));
 
     /** radius */
     public static final Parameter<Double> radius = new Parameter<Double>("radius", Double.class,

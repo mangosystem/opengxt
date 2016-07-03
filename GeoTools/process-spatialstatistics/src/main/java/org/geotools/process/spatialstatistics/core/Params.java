@@ -35,6 +35,26 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 public class Params {
     protected static final Logger LOGGER = Logging.getLogger(Params.class);
 
+    /**
+     * MetaData for FeatureCollection Parameter
+     */
+    public static final String FEATURES = "Features";
+
+    /**
+     * MetaData for Fields Parameter
+     */
+    public static final String FIELDS = "Fields";
+
+    /**
+     * MetaData for Field Parameter
+     */
+    public static final String FIELD = "Field";
+
+    /**
+     * MetaData for Fields Parameter
+     */
+    public static final String STYLES = "Styles";
+
     public static Object getValue(Map<String, Object> input, Parameter<?> parameter,
             Object defaultValue) {
         Object param = input.get(parameter.key);

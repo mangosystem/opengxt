@@ -28,6 +28,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterExtractValuesToPointsOperation.ExtractionType;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
@@ -74,25 +75,27 @@ public class ExtractValuesToPointsProcessFactory extends SpatialStatisticsProces
     public static final Parameter<SimpleFeatureCollection> pointFeatures = new Parameter<SimpleFeatureCollection>(
             "pointFeatures", SimpleFeatureCollection.class,
             getResource("ExtractValuesToPoints.pointFeatures.title"),
-            getResource("ExtractValuesToPoints.pointFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Point"));
+            getResource("ExtractValuesToPoints.pointFeatures.description"), true, 1, 1, null,
+            new KVP(Params.FEATURES, "Point"));
 
     /** valueField */
     public static final Parameter<String> valueField = new Parameter<String>("valueField",
             String.class, getResource("ExtractValuesToPoints.valueField.title"),
-            getResource("ExtractValuesToPoints.valueField.description"), false, 0, 1, "rasterval", new KVP(
-                    Parameter.OPTIONS, "pointFeatures.All"));
+            getResource("ExtractValuesToPoints.valueField.description"), false, 0, 1, "rasterval",
+            new KVP(Params.FIELD, "pointFeatures.All"));
 
     /** valueCoverage */
     public static final Parameter<GridCoverage2D> valueCoverage = new Parameter<GridCoverage2D>(
-            "valueCoverage", GridCoverage2D.class, getResource("ExtractValuesToPoints.valueCoverage.title"),
+            "valueCoverage", GridCoverage2D.class,
+            getResource("ExtractValuesToPoints.valueCoverage.title"),
             getResource("ExtractValuesToPoints.valueCoverage.description"), true, 1, 1, null, null);
 
     /** valueType */
     public static final Parameter<ExtractionType> valueType = new Parameter<ExtractionType>(
-            "valueType", ExtractionType.class, getResource("ExtractValuesToPoints.valueType.title"),
-            getResource("ExtractValuesToPoints.valueType.description"), false, 0, 1, ExtractionType.Default,
-            null);
+            "valueType", ExtractionType.class,
+            getResource("ExtractValuesToPoints.valueType.title"),
+            getResource("ExtractValuesToPoints.valueType.description"), false, 0, 1,
+            ExtractionType.Default, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -106,7 +109,8 @@ public class ExtractValuesToPointsProcessFactory extends SpatialStatisticsProces
 
     /** result */
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
-            "result", SimpleFeatureCollection.class, getResource("ExtractValuesToPoints.result.title"),
+            "result", SimpleFeatureCollection.class,
+            getResource("ExtractValuesToPoints.result.title"),
             getResource("ExtractValuesToPoints.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();

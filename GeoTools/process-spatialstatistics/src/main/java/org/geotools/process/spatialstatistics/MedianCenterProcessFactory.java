@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -71,19 +72,19 @@ public class MedianCenterProcessFactory extends SpatialStatisticsProcessFactory 
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("MedianCenter.inputFeatures.title"),
             getResource("MedianCenter.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "All"));
+                    Params.FEATURES, "All"));
 
     /** weightField */
     public static final Parameter<String> weightField = new Parameter<String>("weightField",
             String.class, getResource("MedianCenter.weightField.title"),
             getResource("MedianCenter.weightField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+                    Params.FIELD, "inputFeatures.Number"));
 
     /** caseField */
     public static final Parameter<String> caseField = new Parameter<String>("caseField",
             String.class, getResource("MedianCenter.caseField.title"),
             getResource("MedianCenter.caseField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.All"));
+                    Params.FIELD, "inputFeatures.All"));
 
     /** attributeFields */
     public static final Parameter<String> attributeFields = new Parameter<String>(

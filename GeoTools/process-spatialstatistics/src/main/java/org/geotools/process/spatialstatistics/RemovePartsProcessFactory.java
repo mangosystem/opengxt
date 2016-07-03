@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.FilterFactory2;
@@ -76,7 +77,7 @@ public class RemovePartsProcessFactory extends SpatialStatisticsProcessFactory {
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("RemoveParts.inputFeatures.title"),
             getResource("RemoveParts.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Polygon"));
+                    Params.FEATURES, "Polygon"));
 
     /** minimumArea */
     public static final Parameter<Expression> minimumArea = new Parameter<Expression>(

@@ -29,6 +29,7 @@ import org.geotools.feature.NameImpl;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.grid.hexagon.HexagonOrientation;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -46,7 +47,8 @@ public class HexagonProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "Hexagon";
 
     /*
-     * Hexagon(ReferencedEnvelope extent, SimpleFeatureCollection boundsSource, Double sideLen, HexagonOrientation orientation) : SimpleFeatureCollection
+     * Hexagon(ReferencedEnvelope extent, SimpleFeatureCollection boundsSource, Double sideLen, HexagonOrientation orientation) :
+     * SimpleFeatureCollection
      */
 
     public HexagonProcessFactory() {
@@ -70,28 +72,26 @@ public class HexagonProcessFactory extends SpatialStatisticsProcessFactory {
 
     /** extent */
     public static final Parameter<ReferencedEnvelope> extent = new Parameter<ReferencedEnvelope>(
-            "extent", ReferencedEnvelope.class,
-            getResource("Hexagon.extent.title"),
+            "extent", ReferencedEnvelope.class, getResource("Hexagon.extent.title"),
             getResource("Hexagon.extent.description"), true, 1, 1, null, null);
-
 
     /** boundsSource */
     public static final Parameter<SimpleFeatureCollection> boundsSource = new Parameter<SimpleFeatureCollection>(
             "boundsSource", SimpleFeatureCollection.class,
             getResource("Hexagon.boundsSource.title"),
             getResource("Hexagon.boundsSource.description"), false, 0, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Polygon"));
+                    Params.FEATURES, "Polygon"));
 
     /** sideLen */
-    public static final Parameter<Double> sideLen = new Parameter<Double>("sideLen",
-            Double.class, getResource("Hexagon.sideLen.title"),
-            getResource("Hexagon.sideLen.description"), true, 1, 1, null, null);
+    public static final Parameter<Double> sideLen = new Parameter<Double>("sideLen", Double.class,
+            getResource("Hexagon.sideLen.title"), getResource("Hexagon.sideLen.description"), true,
+            1, 1, null, null);
 
     /** orientation */
     public static final Parameter<HexagonOrientation> orientation = new Parameter<HexagonOrientation>(
-            "orientation", HexagonOrientation.class,
-            getResource("Hexagon.orientation.title"),
-            getResource("Hexagon.orientation.description"), false, 0, 1, HexagonOrientation.FLAT, null);
+            "orientation", HexagonOrientation.class, getResource("Hexagon.orientation.title"),
+            getResource("Hexagon.orientation.description"), false, 0, 1, HexagonOrientation.FLAT,
+            null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -104,8 +104,9 @@ public class HexagonProcessFactory extends SpatialStatisticsProcessFactory {
     }
 
     /** result */
-    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>("result", SimpleFeatureCollection.class,
-            getResource("Hexagon.result.title"), getResource("Hexagon.result.description"));
+    public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
+            "result", SimpleFeatureCollection.class, getResource("Hexagon.result.title"),
+            getResource("Hexagon.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

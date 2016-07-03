@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.expression.Expression;
@@ -70,8 +71,8 @@ public class SplitLineByDistanceProcessFactory extends SpatialStatisticsProcessF
     public static final Parameter<SimpleFeatureCollection> lineFeatures = new Parameter<SimpleFeatureCollection>(
             "lineFeatures", SimpleFeatureCollection.class,
             getResource("SplitLineByDistance.lineFeatures.title"),
-            getResource("SplitLineByDistance.lineFeatures.description"), true, 1, 1, null,
-            new KVP(Parameter.FEATURE_TYPE, "Polyline"));
+            getResource("SplitLineByDistance.lineFeatures.description"), true, 1, 1, null, new KVP(
+                    Params.FEATURES, "Polyline"));
 
     /** distance */
     public static final Parameter<Expression> distance = new Parameter<Expression>("distance",

@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -69,13 +70,13 @@ public class CollectEventsProcessFactory extends SpatialStatisticsProcessFactory
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("CollectEvents.inputFeatures.title"),
             getResource("CollectEvents.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Point"));
+                    Params.FEATURES, "Point"));
 
     /** countField */
     public static final Parameter<String> countField = new Parameter<String>("countField",
             String.class, getResource("CollectEvents.countField.title"),
             getResource("CollectEvents.countField.description"), false, 0, 1, "icount", new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+                    Params.FIELD, "inputFeatures.Number"));
 
     /** tolerance */
     public static final Parameter<Double> tolerance = new Parameter<Double>("tolerance",
@@ -95,7 +96,7 @@ public class CollectEventsProcessFactory extends SpatialStatisticsProcessFactory
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("CollectEvents.result.title"),
             getResource("CollectEvents.result.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "EqualInterval.countField"));
+                    Params.STYLES, "EqualInterval.countField"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

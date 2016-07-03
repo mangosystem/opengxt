@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.JoinCountStatisticsProcess.JoinCountProcessResult;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.ContiguityType;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
@@ -75,7 +76,7 @@ public class JoinCountStatisticsProcessFactory extends SpatialStatisticsProcessF
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("JoinCount.inputFeatures.title"),
             getResource("JoinCount.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Polygon"));
+                    Params.FEATURES, "Polygon"));
 
     /** blackExpression */
     public static final Parameter<Filter> blackExpression = new Parameter<Filter>(

@@ -86,8 +86,8 @@ public class CountFeaturesProcessFactory extends SpatialStatisticsProcessFactory
     }
 
     /** result */
-    public static final Parameter<Integer> RESULT = new Parameter<Integer>("result",
-            Integer.class, getResource("CountFeatures.result.title"),
+    public static final Parameter<Integer> RESULT = new Parameter<Integer>("result", Integer.class,
+            getResource("CountFeatures.result.title"),
             getResource("CountFeatures.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();

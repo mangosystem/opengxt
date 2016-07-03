@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.ThiessenAttributeMode;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
@@ -75,7 +76,7 @@ public class ThiessenPolygonProcessFactory extends SpatialStatisticsProcessFacto
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("Thiessen.inputFeatures.title"),
             getResource("Thiessen.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Point"));
+                    Params.FEATURES, "Point"));
 
     /** attributes */
     public static final Parameter<ThiessenAttributeMode> attributes = new Parameter<ThiessenAttributeMode>(

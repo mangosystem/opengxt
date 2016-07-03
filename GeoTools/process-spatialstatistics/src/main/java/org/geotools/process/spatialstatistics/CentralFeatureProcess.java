@@ -55,17 +55,17 @@ public class CentralFeatureProcess extends AbstractStatisticsProcess {
             DistanceMethod distanceMethod, String weightField, String selfPotentialWeightField,
             String caseField, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(CentralFeatureFactory.inputFeatures.key, inputFeatures);
-        map.put(CentralFeatureFactory.distanceMethod.key, distanceMethod);
-        map.put(CentralFeatureFactory.weightField.key, weightField);
-        map.put(CentralFeatureFactory.selfPotentialWeightField.key, selfPotentialWeightField);
-        map.put(CentralFeatureFactory.caseField.key, caseField);
+        map.put(CentralFeatureProcessFactory.inputFeatures.key, inputFeatures);
+        map.put(CentralFeatureProcessFactory.distanceMethod.key, distanceMethod);
+        map.put(CentralFeatureProcessFactory.weightField.key, weightField);
+        map.put(CentralFeatureProcessFactory.selfPotentialWeightField.key, selfPotentialWeightField);
+        map.put(CentralFeatureProcessFactory.caseField.key, caseField);
 
         Process process = new CentralFeatureProcess(null);
         Map<String, Object> resultMap;
         try {
             resultMap = process.execute(map, monitor);
-            return (SimpleFeatureCollection) resultMap.get(CentralFeatureFactory.RESULT.key);
+            return (SimpleFeatureCollection) resultMap.get(CentralFeatureProcessFactory.RESULT.key);
         } catch (ProcessException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
@@ -82,19 +82,19 @@ public class CentralFeatureProcess extends AbstractStatisticsProcess {
 
         try {
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, CentralFeatureFactory.inputFeatures, null);
+                    input, CentralFeatureProcessFactory.inputFeatures, null);
             if (inputFeatures == null) {
                 throw new NullPointerException("inputFeatures parameter required");
             }
 
             DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
-                    CentralFeatureFactory.distanceMethod,
-                    CentralFeatureFactory.distanceMethod.sample);
-            String weightField = (String) Params.getValue(input, CentralFeatureFactory.weightField,
+                    CentralFeatureProcessFactory.distanceMethod,
+                    CentralFeatureProcessFactory.distanceMethod.sample);
+            String weightField = (String) Params.getValue(input, CentralFeatureProcessFactory.weightField,
                     null);
             String selfPotentialWeightField = (String) Params.getValue(input,
-                    CentralFeatureFactory.selfPotentialWeightField, null);
-            String caseField = (String) Params.getValue(input, CentralFeatureFactory.caseField,
+                    CentralFeatureProcessFactory.selfPotentialWeightField, null);
+            String caseField = (String) Params.getValue(input, CentralFeatureProcessFactory.caseField,
                     null);
 
             // start process
@@ -109,7 +109,7 @@ public class CentralFeatureProcess extends AbstractStatisticsProcess {
             // end process
 
             Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(CentralFeatureFactory.RESULT.key, resultFc);
+            resultMap.put(CentralFeatureProcessFactory.RESULT.key, resultFc);
             return resultMap;
         } catch (Exception eek) {
             throw new ProcessException(eek);

@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -71,14 +72,14 @@ public class UpdateProcessFactory extends SpatialStatisticsProcessFactory {
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("Update.inputFeatures.title"),
             getResource("Update.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Polygon"));
+                    Params.FEATURES, "Polygon"));
 
     /** updateFeatures */
     public static final Parameter<SimpleFeatureCollection> updateFeatures = new Parameter<SimpleFeatureCollection>(
             "updateFeatures", SimpleFeatureCollection.class,
             getResource("Update.updateFeatures.title"),
             getResource("Update.updateFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Polygon"));
+                    Params.FEATURES, "Polygon"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

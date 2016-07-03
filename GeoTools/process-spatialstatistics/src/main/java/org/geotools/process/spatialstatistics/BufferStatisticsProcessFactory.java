@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -44,8 +45,8 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
     private static final String PROCESS_NAME = "BufferPointStatistics";
 
     /*
-     * BufferPointStatistics(SimpleFeatureCollection inputFeatures, Double distance, SimpleFeatureCollection pointFeatures, String countField, String statisticsFields):
-     * SimpleFeatureCollection
+     * BufferPointStatistics(SimpleFeatureCollection inputFeatures, Double distance, SimpleFeatureCollection pointFeatures, String countField, String
+     * statisticsFields): SimpleFeatureCollection
      */
 
     public BufferStatisticsProcessFactory() {
@@ -84,7 +85,7 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
             "pointFeatures", SimpleFeatureCollection.class,
             getResource("BufferPointStatistics.pointFeatures.title"),
             getResource("BufferPointStatistics.pointFeatures.description"), true, 1, 1, null,
-            new KVP(Parameter.FEATURE_TYPE, "Point"));
+            new KVP(Params.FEATURES, "Point"));
 
     /** countField */
     public static final Parameter<String> countField = new Parameter<String>("countField",
@@ -114,7 +115,7 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
             "result", SimpleFeatureCollection.class,
             getResource("BufferPointStatistics.result.title"),
             getResource("BufferPointStatistics.result.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "EqualInterval.countField"));
+                    Params.STYLES, "EqualInterval.countField"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

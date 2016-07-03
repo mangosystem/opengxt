@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.expression.Expression;
@@ -73,25 +74,25 @@ public class StandardizedScoresProcessFactory extends SpatialStatisticsProcessFa
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("StandardizedScores.inputFeatures.title"),
             getResource("StandardizedScores.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "All"));
+                    Params.FEATURES, "All"));
 
     /** xField */
     public static final Parameter<Expression> xField = new Parameter<Expression>("xField",
             Expression.class, getResource("StandardizedScores.xField.title"),
             getResource("StandardizedScores.xField.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+                    Params.FIELD, "inputFeatures.Number"));
 
     /** yField */
     public static final Parameter<Expression> yField = new Parameter<Expression>("yField",
             Expression.class, getResource("StandardizedScores.yField.title"),
             getResource("StandardizedScores.yField.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+                    Params.FIELD, "inputFeatures.Number"));
 
     /** targetField */
     public static final Parameter<String> targetField = new Parameter<String>("targetField",
             String.class, getResource("StandardizedScores.targetField.title"),
             getResource("StandardizedScores.targetField.description"), false, 0, 1, "std_scr",
-            new KVP(Parameter.OPTIONS, "inputFeatures.Number"));
+            new KVP(Params.FIELD, "inputFeatures.Number"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -108,7 +109,7 @@ public class StandardizedScoresProcessFactory extends SpatialStatisticsProcessFa
             "result", SimpleFeatureCollection.class,
             getResource("StandardizedScores.result.title"),
             getResource("StandardizedScores.result.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "Quantile.targetField"));
+                    Params.STYLES, "Quantile.targetField"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

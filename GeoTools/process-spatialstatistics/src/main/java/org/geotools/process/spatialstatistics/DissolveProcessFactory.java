@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -76,7 +77,7 @@ public class DissolveProcessFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<String> dissolveField = new Parameter<String>("dissolveField",
             String.class, getResource("Dissolve.dissolveField.title"),
             getResource("Dissolve.dissolveField.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.All"));
+                    Params.FIELD, "inputFeatures.All"));
 
     /** statisticsFields */
     public static final Parameter<String> statisticsFields = new Parameter<String>(

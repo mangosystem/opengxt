@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -74,7 +75,7 @@ public class DelaunayTriangulationProcessFactory extends SpatialStatisticsProces
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("DelaunayTriangulation.inputFeatures.title"),
             getResource("DelaunayTriangulation.inputFeatures.description"), true, 1, 1, null,
-            new KVP(Parameter.FEATURE_TYPE, "Point"));
+            new KVP(Params.FEATURES, "Point"));
 
     /** clipArea */
     public static final Parameter<Geometry> clipArea = new Parameter<Geometry>("clipArea",

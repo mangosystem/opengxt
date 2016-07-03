@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -74,7 +75,7 @@ public class KMeansClusteringProcessFactory extends SpatialStatisticsProcessFact
     public static final Parameter<String> targetField = new Parameter<String>("targetField",
             String.class, getResource("KMeansClustering.targetField.title"),
             getResource("KMeansClustering.targetField.description"), true, 1, 1, "cluster",
-            new KVP(Parameter.OPTIONS, "inputFeatures.Number"));
+            new KVP(Params.FIELD, "inputFeatures.Number"));
 
     /** numberOfClusters */
     public static final Parameter<Integer> numberOfClusters = new Parameter<Integer>(

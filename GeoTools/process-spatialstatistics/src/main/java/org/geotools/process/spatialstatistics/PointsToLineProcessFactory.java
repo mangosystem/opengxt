@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -71,19 +72,19 @@ public class PointsToLineProcessFactory extends SpatialStatisticsProcessFactory 
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("PointsToLine.inputFeatures.title"),
             getResource("PointsToLine.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Point"));
+                    Params.FEATURES, "Point"));
 
     /** lineField */
     public static final Parameter<String> lineField = new Parameter<String>("lineField",
             String.class, getResource("PointsToLine.lineField.title"),
             getResource("PointsToLine.lineField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.All"));
+                    Params.FIELD, "inputFeatures.All"));
 
     /** sortField */
     public static final Parameter<String> sortField = new Parameter<String>("sortField",
             String.class, getResource("PointsToLine.sortField.title"),
             getResource("PointsToLine.sortField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.All"));
+                    Params.FIELD, "inputFeatures.All"));
 
     /** closeLine */
     public static final Parameter<Boolean> closeLine = new Parameter<Boolean>("closeLine",

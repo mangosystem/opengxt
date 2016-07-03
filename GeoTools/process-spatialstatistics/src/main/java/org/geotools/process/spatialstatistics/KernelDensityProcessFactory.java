@@ -29,6 +29,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterKernelDensityOperation.KernelType;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
@@ -75,7 +76,7 @@ public class KernelDensityProcessFactory extends SpatialStatisticsProcessFactory
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("KernelDensity.inputFeatures.title"),
             getResource("KernelDensity.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Point"));
+                    Params.FEATURES, "Point"));
 
     /** kernelType */
     public static final Parameter<KernelType> kernelType = new Parameter<KernelType>("kernelType",
@@ -87,7 +88,7 @@ public class KernelDensityProcessFactory extends SpatialStatisticsProcessFactory
     public static final Parameter<String> populationField = new Parameter<String>(
             "populationField", String.class, getResource("KernelDensity.populationField.title"),
             getResource("KernelDensity.populationField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+                    Params.FIELD, "inputFeatures.Number"));
 
     /** searchRadius */
     public static final Parameter<Double> searchRadius = new Parameter<Double>("searchRadius",

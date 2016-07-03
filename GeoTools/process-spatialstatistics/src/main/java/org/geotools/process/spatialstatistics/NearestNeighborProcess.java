@@ -77,7 +77,7 @@ public class NearestNeighborProcess extends AbstractStatisticsProcess {
         if (started)
             throw new IllegalStateException("Process can only be run once");
         started = true;
-        
+
         try {
             SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
                     input, NearestNeighborProcessFactory.inputFeatures, null);

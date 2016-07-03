@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -46,7 +47,8 @@ public class CalculateXYCoordinateProcessFactory extends SpatialStatisticsProces
     private static final String PROCESS_NAME = "CalculateXYCoordinate";
 
     /*
-     * CalculateXYCoordinate(SimpleFeatureCollection inputFeatures, String xField, String yField, Boolean inside, CoordinateReferenceSystem targetCRS): SimpleFeatureCollection
+     * CalculateXYCoordinate(SimpleFeatureCollection inputFeatures, String xField, String yField, Boolean inside, CoordinateReferenceSystem
+     * targetCRS): SimpleFeatureCollection
      */
 
     public CalculateXYCoordinateProcessFactory() {
@@ -78,13 +80,13 @@ public class CalculateXYCoordinateProcessFactory extends SpatialStatisticsProces
     public static final Parameter<String> xField = new Parameter<String>("xField", String.class,
             getResource("CalculateXYCoordinate.xField.title"),
             getResource("CalculateXYCoordinate.xField.description"), false, 0, 1, "x_coord",
-            new KVP(Parameter.OPTIONS, "inputFeatures.All"));
+            new KVP(Params.FIELD, "inputFeatures.All"));
 
     /** yField */
     public static final Parameter<String> yField = new Parameter<String>("yField", String.class,
             getResource("CalculateXYCoordinate.yField.title"),
             getResource("CalculateXYCoordinate.yField.description"), false, 0, 1, "y_coord",
-            new KVP(Parameter.OPTIONS, "inputFeatures.All"));
+            new KVP(Params.FIELD, "inputFeatures.All"));
 
     /** inside */
     public static final Parameter<Boolean> inside = new Parameter<Boolean>("inside", Boolean.class,

@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -73,13 +74,13 @@ public class WindRoseMapProcessFactory extends SpatialStatisticsProcessFactory {
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("WindRoseMap.inputFeatures.title"),
             getResource("WindRoseMap.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Point"));
+                    Params.FEATURES, "Point"));
 
     /** weightField */
     public static final Parameter<String> weightField = new Parameter<String>("weightField",
             String.class, getResource("WindRoseMap.weightField.title"),
             getResource("WindRoseMap.weightField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+                    Params.FIELD, "inputFeatures.Number"));
 
     /** center */
     public static final Parameter<Geometry> center = new Parameter<Geometry>("center",
@@ -99,7 +100,7 @@ public class WindRoseMapProcessFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<SimpleFeatureCollection> windRose = new Parameter<SimpleFeatureCollection>(
             "windRose", SimpleFeatureCollection.class, getResource("WindRoseMap.windRose.title"),
             getResource("WindRoseMap.windRose.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "Quantile.sum"));
+                    Params.STYLES, "Quantile.sum"));
 
     /** anchor */
     public static final Parameter<SimpleFeatureCollection> anchor = new Parameter<SimpleFeatureCollection>(

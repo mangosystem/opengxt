@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
@@ -39,8 +40,8 @@ import org.opengis.util.InternationalString;
  * 
  * @source $URL$
  */
-public class CentralFeatureFactory extends SpatialStatisticsProcessFactory {
-    protected static final Logger LOGGER = Logging.getLogger(CentralFeatureFactory.class);
+public class CentralFeatureProcessFactory extends SpatialStatisticsProcessFactory {
+    protected static final Logger LOGGER = Logging.getLogger(CentralFeatureProcessFactory.class);
 
     private static final String PROCESS_NAME = "CentralFeature";
 
@@ -49,7 +50,7 @@ public class CentralFeatureFactory extends SpatialStatisticsProcessFactory {
      * String caseField): SimpleFeatureCollection
      */
 
-    public CentralFeatureFactory() {
+    public CentralFeatureProcessFactory() {
         super(new NameImpl(NAMESPACE, PROCESS_NAME));
     }
 
@@ -73,7 +74,7 @@ public class CentralFeatureFactory extends SpatialStatisticsProcessFactory {
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("CentralFeature.inputFeatures.title"),
             getResource("CentralFeature.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "All"));
+                    Params.FEATURES, "All"));
 
     /** distanceMethod */
     public static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
@@ -86,20 +87,20 @@ public class CentralFeatureFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<String> weightField = new Parameter<String>("weightField",
             String.class, getResource("CentralFeature.weightField.title"),
             getResource("CentralFeature.weightField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.Number"));
+                    Params.FIELD, "inputFeatures.Number"));
 
     /** selfPotentialWeightField */
     public static final Parameter<String> selfPotentialWeightField = new Parameter<String>(
             "selfPotentialWeightField", String.class,
             getResource("CentralFeature.selfPotentialWeightField.title"),
             getResource("CentralFeature.selfPotentialWeightField.description"), false, 0, 1, null,
-            new KVP(Parameter.OPTIONS, "inputFeatures.Number"));
+            new KVP(Params.FIELD, "inputFeatures.Number"));
 
     /** caseField */
     public static final Parameter<String> caseField = new Parameter<String>("caseField",
             String.class, getResource("CentralFeature.caseField.title"),
             getResource("CentralFeature.caseField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.All"));
+                    Params.FIELD, "inputFeatures.All"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

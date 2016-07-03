@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.expression.Expression;
@@ -40,8 +41,7 @@ import org.opengis.util.InternationalString;
  * @source $URL$
  */
 public class PointsAlongLinesProcessFactory extends SpatialStatisticsProcessFactory {
-    protected static final Logger LOGGER = Logging
-            .getLogger(PointsAlongLinesProcessFactory.class);
+    protected static final Logger LOGGER = Logging.getLogger(PointsAlongLinesProcessFactory.class);
 
     private static final String PROCESS_NAME = "PointsAlongLines";
 
@@ -70,8 +70,8 @@ public class PointsAlongLinesProcessFactory extends SpatialStatisticsProcessFact
     public static final Parameter<SimpleFeatureCollection> lineFeatures = new Parameter<SimpleFeatureCollection>(
             "lineFeatures", SimpleFeatureCollection.class,
             getResource("PointsAlongLines.lineFeatures.title"),
-            getResource("PointsAlongLines.lineFeatures.description"), true, 1, 1, null,
-            new KVP(Parameter.FEATURE_TYPE, "Polyline"));
+            getResource("PointsAlongLines.lineFeatures.description"), true, 1, 1, null, new KVP(
+                    Params.FEATURES, "Polyline"));
 
     /** distance */
     public static final Parameter<Expression> distance = new Parameter<Expression>("distance",
@@ -88,8 +88,7 @@ public class PointsAlongLinesProcessFactory extends SpatialStatisticsProcessFact
 
     /** result */
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
-            "result", SimpleFeatureCollection.class,
-            getResource("PointsAlongLines.result.title"),
+            "result", SimpleFeatureCollection.class, getResource("PointsAlongLines.result.title"),
             getResource("PointsAlongLines.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();

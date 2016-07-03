@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -76,7 +77,7 @@ public class RandomPointsProcessFactory extends SpatialStatisticsProcessFactory 
             "polygonFeatures", SimpleFeatureCollection.class,
             getResource("RandomPoints.polygonFeatures.title"),
             getResource("RandomPoints.polygonFeatures.description"), false, 0, 1, null, new KVP(
-                    Parameter.FEATURE_TYPE, "Polygon"));
+                    Params.FEATURES, "Polygon"));
 
     /** pointCount */
     public static final Parameter<Integer> pointCount = new Parameter<Integer>("pointCount",

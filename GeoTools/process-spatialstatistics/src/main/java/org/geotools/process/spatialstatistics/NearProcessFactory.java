@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -81,8 +82,8 @@ public class NearProcessFactory extends SpatialStatisticsProcessFactory {
     /** nearIdField */
     public static final Parameter<String> nearIdField = new Parameter<String>("nearIdField",
             String.class, getResource("Near.nearIdField.title"),
-            getResource("Near.nearIdField.description"), false, 0, 1, null, new KVP(
-                    Parameter.OPTIONS, "nearFeatures.All"));
+            getResource("Near.nearIdField.description"), false, 0, 1, null, new KVP(Params.FIELD,
+                    "nearFeatures.All"));
 
     /** maximumDistance */
     public static final Parameter<Double> maximumDistance = new Parameter<Double>(

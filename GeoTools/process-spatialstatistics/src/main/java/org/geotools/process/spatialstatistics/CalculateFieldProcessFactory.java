@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.expression.Expression;
@@ -82,7 +83,7 @@ public class CalculateFieldProcessFactory extends SpatialStatisticsProcessFactor
     public static final Parameter<String> fieldName = new Parameter<String>("fieldName",
             String.class, getResource("CalculateField.fieldName.title"),
             getResource("CalculateField.fieldName.description"), false, 0, 1, "evaluated", new KVP(
-                    Parameter.OPTIONS, "inputFeatures.All"));
+                    Params.FIELD, "inputFeatures.All"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -97,7 +98,7 @@ public class CalculateFieldProcessFactory extends SpatialStatisticsProcessFactor
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("CalculateField.result.title"),
             getResource("CalculateField.result.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "NaturalBreaks.fieldName"));
+                    Params.STYLES, "NaturalBreaks.fieldName"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

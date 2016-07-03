@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -77,7 +78,7 @@ public class SinglepartToMultipartProcessFactory extends SpatialStatisticsProces
     public static final Parameter<String> caseField = new Parameter<String>("caseField",
             String.class, getResource("SinglepartToMultipart.caseField.title"),
             getResource("SinglepartToMultipart.caseField.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "inputFeatures.All"));
+                    Params.FIELD, "inputFeatures.All"));
 
     /** dissolve */
     public static final Parameter<Boolean> dissolve = new Parameter<Boolean>("dissolve",

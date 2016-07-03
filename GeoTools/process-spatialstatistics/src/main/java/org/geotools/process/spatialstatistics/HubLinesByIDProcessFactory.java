@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -77,7 +78,7 @@ public class HubLinesByIDProcessFactory extends SpatialStatisticsProcessFactory 
     public static final Parameter<String> hubIdField = new Parameter<String>("hubIdField",
             String.class, getResource("HubLinesByID.hubIdField.title"),
             getResource("HubLinesByID.hubIdField.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "hubFeatures.All"));
+                    Params.FIELD, "hubFeatures.All"));
 
     /** spokeFeatures */
     public static final Parameter<SimpleFeatureCollection> spokeFeatures = new Parameter<SimpleFeatureCollection>(
@@ -89,7 +90,7 @@ public class HubLinesByIDProcessFactory extends SpatialStatisticsProcessFactory 
     public static final Parameter<String> spokeIdField = new Parameter<String>("spokeIdField",
             String.class, getResource("HubLinesByID.spokeIdField.title"),
             getResource("HubLinesByID.spokeIdField.description"), true, 1, 1, null, new KVP(
-                    Parameter.OPTIONS, "spokeFeatures.All"));
+                    Params.FIELD, "spokeFeatures.All"));
 
     /** preserveAttributes */
     public static final Parameter<Boolean> preserveAttributes = new Parameter<Boolean>(

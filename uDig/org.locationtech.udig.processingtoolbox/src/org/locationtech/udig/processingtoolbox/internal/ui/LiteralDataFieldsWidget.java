@@ -18,7 +18,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -27,27 +26,24 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Widget;
 import org.geotools.data.Parameter;
-import org.geotools.filter.text.cql2.CQLException;
-import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.project.IMap;
-import org.opengis.filter.expression.Expression;
 
 /**
- * Expression control
+ * LiteralData - Fields control
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class ExpressionWidget extends AbstractToolboxWidget {
-    protected static final Logger LOGGER = Logging.getLogger(ExpressionWidget.class);
+public class LiteralDataFieldsWidget extends AbstractToolboxWidget {
+    protected static final Logger LOGGER = Logging.getLogger(LiteralDataFieldsWidget.class);
 
     private IMap map;
 
-    public ExpressionWidget(IMap map) {
+    public LiteralDataFieldsWidget(IMap map) {
         this.map = map;
     }
 
@@ -76,26 +72,17 @@ public class ExpressionWidget extends AbstractToolboxWidget {
         }
 
         Map<String, Object> metadata = param.metadata;
-        if (metadata != null && metadata.containsKey(Params.FIELD)) {
+        if (metadata != null && metadata.containsKey(Params.FIELDS)) {
             uiParams.put(cboField, metadata);
         }
 
-        final Color oldBackColor = cboField.getBackground();
         cboField.addModifyListener(new ModifyListener() {
             @Override
             public void modifyText(ModifyEvent e) {
                 if (cboField.getText().length() == 0) {
-                    cboField.setBackground(oldBackColor);
                     processParams.put(param.key, null);
                 } else {
-                    try {
-                        Expression expression = ECQL.toExpression(cboField.getText());
-                        processParams.put(param.key, expression);
-                        cboField.setBackground(oldBackColor);
-                    } catch (CQLException e1) {
-                        processParams.put(param.key, null);
-                        cboField.setBackground(warningColor);
-                    }
+                    processParams.put(param.key, cboField.getText());
                 }
             }
         });
@@ -106,8 +93,8 @@ public class ExpressionWidget extends AbstractToolboxWidget {
         btnOpen.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                ExpressionBuilderDialog dialog = new ExpressionBuilderDialog(parent.getShell(),
-                        map, cboField.getText());
+                MultipleFieldsSelectionDialog dialog = new MultipleFieldsSelectionDialog(parent
+                        .getShell(), map);
                 dialog.setBlockOnOpen(true);
                 if (dialog.open() == Window.OK) {
                     cboField.add(dialog.getSelectedValues());

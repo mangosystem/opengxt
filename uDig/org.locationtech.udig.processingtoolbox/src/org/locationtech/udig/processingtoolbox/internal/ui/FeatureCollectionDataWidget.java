@@ -61,7 +61,7 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
 
     public void create(final Composite parent, final int style,
             final Map<String, Object> processParams, final Parameter<?> param,
-            final Map<Widget, String> uiParams) {
+            final Map<Widget, Map<String, Object>> uiParams) {
         composite = new Composite(parent, style);
         composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 
@@ -113,24 +113,25 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
                 }
                 processParams.put(param.key, sfc);
 
-                // related field selection "파라미터명.필드유형"
+                // related field selection = Category, "TypeName.FieldType"
                 SimpleFeatureType schema = sfc.getSchema();
-                for (Entry<Widget, String> entrySet : uiParams.entrySet()) {
-                    String paramValue = entrySet.getValue().split("\\.")[0]; //$NON-NLS-1$
-                    if (paramValue.equals(param.key)) {
-                        // FieldType = ALL, String, Number, Integer, Double
-                        String fieldType = entrySet.getValue().split("\\.")[1]; //$NON-NLS-1$
-                        Combo cboField = (Combo) entrySet.getKey();
-                        if (fieldType.equalsIgnoreCase(FieldType.ALL.toString())) {
-                            fillFields(cboField, schema, FieldType.ALL);
-                        } else if (fieldType.equalsIgnoreCase(FieldType.String.toString())) {
-                            fillFields(cboField, schema, FieldType.String);
-                        } else if (fieldType.equalsIgnoreCase(FieldType.Number.toString())) {
-                            fillFields(cboField, schema, FieldType.Number);
-                        } else if (fieldType.equalsIgnoreCase(FieldType.Integer.toString())) {
-                            fillFields(cboField, schema, FieldType.Integer);
-                        } else if (fieldType.equalsIgnoreCase(FieldType.Double.toString())) {
-                            fillFields(cboField, schema, FieldType.Double);
+                for (Entry<Widget, Map<String, Object>> entrySet : uiParams.entrySet()) {
+                    for (Entry<String, Object> kvpSet : entrySet.getValue().entrySet()) {
+                        String category = kvpSet.getKey();
+                        String value = kvpSet.getValue().toString();
+                        String typeName = value.split("\\.")[0]; //$NON-NLS-1$
+                        String fieldType = value.split("\\.")[1]; //$NON-NLS-1$
+
+                        if (typeName.equals(param.key)) {
+                            if (category.endsWith(Params.FIELD)) {
+                                // FieldType = ALL, String, Number, Integer, Double
+                                Combo cboField = (Combo) entrySet.getKey();
+                                fillFields(cboField, schema, fieldType);
+                            } else if (category.endsWith(Params.FIELDS)) {
+                                // FieldType = ALL, String, Number, Integer, Double
+                                Combo cboField = (Combo) entrySet.getKey();
+                                fillFields(cboField, schema, fieldType);
+                            }
                         }
                     }
                 }
@@ -190,6 +191,20 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
         }
     }
 
+    private void fillFields(Combo combo, SimpleFeatureType schema, String fieldType) {
+        if (fieldType.equalsIgnoreCase(FieldType.ALL.toString())) {
+            fillFields(combo, schema, FieldType.ALL);
+        } else if (fieldType.equalsIgnoreCase(FieldType.String.toString())) {
+            fillFields(combo, schema, FieldType.String);
+        } else if (fieldType.equalsIgnoreCase(FieldType.Number.toString())) {
+            fillFields(combo, schema, FieldType.Number);
+        } else if (fieldType.equalsIgnoreCase(FieldType.Integer.toString())) {
+            fillFields(combo, schema, FieldType.Integer);
+        } else if (fieldType.equalsIgnoreCase(FieldType.Double.toString())) {
+            fillFields(combo, schema, FieldType.Double);
+        }
+    }
+    
     private void fillFields(Combo combo, SimpleFeatureType schema, FieldType fieldType) {
         String selectedValue = combo.getText() == null ? null : combo.getText();
 

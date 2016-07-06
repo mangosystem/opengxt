@@ -26,8 +26,6 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
@@ -35,7 +33,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -85,7 +82,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
 
     private Map<String, Object> outputParams = new HashMap<String, Object>();
 
-    private Map<Widget, String> uiParams = new HashMap<Widget, String>();
+    private Map<Widget, Map<String, Object>> uiParams = new HashMap<Widget, Map<String, Object>>();
 
     private boolean outputTabRequired = false;
 
@@ -301,7 +298,6 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
         insertParamTitle(container, param);
 
         // process value
-        GridData layoutData = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
         if (SimpleFeatureCollection.class.isAssignableFrom(param.type)) {
             // vector layer parameters
             FeatureCollectionDataWidget featuresView = new FeatureCollectionDataWidget(map);
@@ -321,7 +317,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
         } else if (Expression.class.isAssignableFrom(param.type)) {
             // expression parameters
             ExpressionWidget expressionView = new ExpressionWidget(map);
-            expressionView.create(container, SWT.NONE, inputParams, param);
+            expressionView.create(container, SWT.NONE, inputParams, param, uiParams);
         } else if (CoordinateReferenceSystem.class.isAssignableFrom(param.type)) {
             // coordinate reference system parameters
             CrsWidget crsView = new CrsWidget(map);
@@ -357,31 +353,15 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
                 literalView.create(container, SWT.NONE, inputParams, param);
             } else {
                 if (metadata.containsKey(Params.FIELD)) {
-                    final Combo cboField = new Combo(container, SWT.NONE | SWT.DROP_DOWN);
-                    uiParams.put(cboField, metadata.get(Params.FIELD).toString());
-
-                    cboField.setLayoutData(layoutData);
-                    cboField.setData(param.key);
-                    if (param.sample != null) {
-                        cboField.add(param.sample.toString());
-                        cboField.setText(param.sample.toString());
-                    }
-
-                    cboField.addModifyListener(new ModifyListener() {
-                        @Override
-                        public void modifyText(ModifyEvent e) {
-                            if (cboField.getText().length() == 0) {
-                                inputParams.put(param.key, null);
-                            } else {
-                                inputParams.put(param.key, cboField.getText());
-                            }
-                        }
-                    });
-
+                    LiteralDataFieldWidget fieldView = new LiteralDataFieldWidget(map);
+                    fieldView.create(container, SWT.NONE, inputParams, param, uiParams);
+                } else if (metadata.containsKey(Params.FIELDS)) {
+                    LiteralDataFieldsWidget fieldView = new LiteralDataFieldsWidget(map);
+                    fieldView.create(container, SWT.NONE, inputParams, param, uiParams);
                 } else {
                     // other literal parameters
-                    LiteralDataWidget filterView = new LiteralDataWidget(map);
-                    filterView.create(container, SWT.NONE, inputParams, param);
+                    LiteralDataWidget literalView = new LiteralDataWidget(map);
+                    literalView.create(container, SWT.NONE, inputParams, param);
                 }
             }
         }

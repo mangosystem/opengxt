@@ -554,18 +554,17 @@ public abstract class RasterProcessingOperation {
         Color[] colors = new Color[] { Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED };
 
         CharSequence noDataName = Vocabulary.formatInternational(VocabularyKeys.NODATA);
+        
         Category nan = new Category(noDataName, new Color[] { new Color(255, 255, 255, 0) },
-                NumberRange.create(noDataValue, noDataValue), NumberRange.create(noDataValue,
-                        noDataValue));
+                NumberRange.create(noDataValue, noDataValue));
 
-        Category values = new Category("values", colors, NumberRange.create(minValue, maxValue),
-                NumberRange.create(minValue, maxValue));
-
+        Category values = new Category("values", colors, NumberRange.create(minValue, maxValue));
+        
         GridSampleDimension[] bands = null;
         GridSampleDimension band = null;
 
         band = new GridSampleDimension("Dimension", new Category[] { nan, values }, null);
-        bands = new GridSampleDimension[] { band.geophysics(true) };
+        bands = new GridSampleDimension[] { band };
 
         // setting metadata
         final Map<CharSequence, Double> properties = new HashMap<CharSequence, Double>();

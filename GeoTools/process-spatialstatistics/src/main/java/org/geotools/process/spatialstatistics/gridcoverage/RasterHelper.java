@@ -20,10 +20,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
-import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.RenderedImage;
-import java.awt.image.SampleModel;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -37,7 +35,6 @@ import javax.media.jai.PlanarImage;
 import org.geotools.coverage.Category;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
-import org.geotools.coverage.TypeMap;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridGeometry2D;
@@ -49,13 +46,11 @@ import org.geotools.factory.Hints;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.image.ImageWorker;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.resources.i18n.Vocabulary;
 import org.geotools.resources.i18n.VocabularyKeys;
 import org.geotools.util.NumberRange;
 import org.geotools.util.logging.Logging;
-import org.opengis.coverage.ColorInterpretation;
 import org.opengis.coverage.SampleDimension;
 import org.opengis.coverage.SampleDimensionType;
 import org.opengis.coverage.grid.GridGeometry;
@@ -410,18 +405,17 @@ public class RasterHelper {
         Color[] colors = new Color[] { Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED };
 
         CharSequence noDataName = Vocabulary.formatInternational(VocabularyKeys.NODATA);
-        Category nan = new Category(noDataName, new Color[] { new Color(0, 0, 0, 0) },
-                NumberRange.create(noDataValue, noDataValue), NumberRange.create(noDataValue,
-                        noDataValue));
+        
+        Category nan = new Category(noDataName, new Color[] { new Color(255, 255, 255, 0) },
+                NumberRange.create(noDataValue, noDataValue));
 
-        Category values = new Category("values", colors, NumberRange.create(minValue, maxValue),
-                NumberRange.create(minValue, maxValue));
-
+        Category values = new Category("values", colors, NumberRange.create(minValue, maxValue));
+        
         GridSampleDimension[] bands = null;
         GridSampleDimension band = null;
 
         band = new GridSampleDimension("Dimension", new Category[] { nan, values }, null);
-        bands = new GridSampleDimension[] { band.geophysics(true) };
+        bands = new GridSampleDimension[] { band };
 
         // setting metadata
         final Map<CharSequence, Double> properties = new HashMap<CharSequence, Double>();

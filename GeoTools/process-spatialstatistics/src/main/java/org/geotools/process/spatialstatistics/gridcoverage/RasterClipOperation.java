@@ -22,9 +22,12 @@ import javax.media.jai.BorderExtenderConstant;
 import javax.media.jai.JAI;
 import javax.media.jai.ParameterBlockJAI;
 import javax.media.jai.PlanarImage;
+import javax.media.jai.iterator.RectIter;
+import javax.media.jai.iterator.RectIterFactory;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.util.logging.Logging;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -103,6 +106,20 @@ public class RasterClipOperation extends RasterProcessingOperation {
                 clipped = createGridCoverage(inputCoverage.getName(), outputImage,
                         inputCoverage.getSampleDimensions(), NoData, MinValue, MaxValue, Extent);
             } else {
+                RectIter readIter = RectIterFactory.create(outputImage, outputImage.getBounds());
+                readIter.startLines();
+                while (!readIter.finishedLines()) {
+                    readIter.startPixels();
+                    while (!readIter.finishedPixels()) {
+                        double sampleValue = readIter.getSampleDouble(0);
+                        if (!SSUtils.compareDouble(sampleValue, NoData)) {
+                            MaxValue = Math.max(MaxValue, sampleValue);
+                            MinValue = Math.min(MinValue, sampleValue);
+                        }
+                        readIter.nextPixel();
+                    }
+                    readIter.nextLine();
+                }
                 clipped = createGridCoverage(inputCoverage.getName(), outputImage);
             }
         }

@@ -79,7 +79,8 @@ public class StatisticsFeaturesProcessFactory extends SpatialStatisticsProcessFa
     /** inputFields */
     public static final Parameter<String> inputFields = new Parameter<String>("inputFields",
             String.class, getResource("StatisticsFeatures.inputFields.title"),
-            getResource("StatisticsFeatures.inputFields.description"), true, 1, 1, null, null);
+            getResource("StatisticsFeatures.inputFields.description"), true, 1, 1, null, new KVP(
+                    Params.FIELDS, "inputFeatures.Number"));
 
     /** caseField */
     public static final Parameter<String> caseField = new Parameter<String>("caseField",

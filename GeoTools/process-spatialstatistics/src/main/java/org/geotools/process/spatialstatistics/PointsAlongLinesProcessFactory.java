@@ -76,7 +76,8 @@ public class PointsAlongLinesProcessFactory extends SpatialStatisticsProcessFact
     /** distance */
     public static final Parameter<Expression> distance = new Parameter<Expression>("distance",
             Expression.class, getResource("PointsAlongLines.distance.title"),
-            getResource("PointsAlongLines.distance.description"), true, 1, 1, null, null);
+            getResource("PointsAlongLines.distance.description"), true, 1, 1, null, new KVP(
+                    Params.FIELD, "lineFeatures.Number"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

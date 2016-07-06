@@ -81,7 +81,8 @@ public class JoinCountStatisticsProcessFactory extends SpatialStatisticsProcessF
     /** blackExpression */
     public static final Parameter<Filter> blackExpression = new Parameter<Filter>(
             "blackExpression", Filter.class, getResource("JoinCount.blackExpression.title"),
-            getResource("JoinCount.blackExpression.description"), true, 1, 1, null, null);
+            getResource("JoinCount.blackExpression.description"), true, 1, 1, null, new KVP(
+                    Params.FIELD, "inputFeatures.All"));
 
     /** contiguityType */
     public static final Parameter<ContiguityType> contiguityType = new Parameter<ContiguityType>(

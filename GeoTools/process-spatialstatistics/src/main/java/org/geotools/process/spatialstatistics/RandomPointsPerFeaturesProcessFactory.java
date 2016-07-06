@@ -77,7 +77,8 @@ public class RandomPointsPerFeaturesProcessFactory extends SpatialStatisticsProc
     /** expression */
     public static final Parameter<Expression> expression = new Parameter<Expression>("expression",
             Expression.class, getResource("RandomPointsPerFeatures.expression.title"),
-            getResource("RandomPointsPerFeatures.expression.description"), true, 1, 1, null, null);
+            getResource("RandomPointsPerFeatures.expression.description"), true, 1, 1, null, new KVP(
+                    Params.FIELD, "polygonFeatures.Number"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

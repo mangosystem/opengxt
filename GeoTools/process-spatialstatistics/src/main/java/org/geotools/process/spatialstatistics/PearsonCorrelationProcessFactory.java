@@ -79,7 +79,8 @@ public class PearsonCorrelationProcessFactory extends SpatialStatisticsProcessFa
     /** inputFields */
     public static final Parameter<String> inputFields = new Parameter<String>("inputFields",
             String.class, getResource("Pearson.inputFields.title"),
-            getResource("Pearson.inputFields.description"), true, 1, 1, null, null);
+            getResource("Pearson.inputFields.description"), true, 1, 1, null, new KVP(
+                    Params.FIELDS, "inputFeatures.Number"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

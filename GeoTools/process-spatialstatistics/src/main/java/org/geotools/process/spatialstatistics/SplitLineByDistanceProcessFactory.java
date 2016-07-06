@@ -77,7 +77,8 @@ public class SplitLineByDistanceProcessFactory extends SpatialStatisticsProcessF
     /** distance */
     public static final Parameter<Expression> distance = new Parameter<Expression>("distance",
             Expression.class, getResource("SplitLineByDistance.distance.title"),
-            getResource("SplitLineByDistance.distance.description"), true, 1, 1, null, null);
+            getResource("SplitLineByDistance.distance.description"), true, 1, 1, null, new KVP(
+                    Params.FIELD, "lineFeatures.Number"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

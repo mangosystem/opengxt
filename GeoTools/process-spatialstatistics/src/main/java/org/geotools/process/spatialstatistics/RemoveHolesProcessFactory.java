@@ -82,7 +82,8 @@ public class RemoveHolesProcessFactory extends SpatialStatisticsProcessFactory {
     /** minimumArea */
     public static final Parameter<Expression> minimumArea = new Parameter<Expression>(
             "minimumArea", Expression.class, getResource("RemoveHoles.minimumArea.title"),
-            getResource("RemoveHoles.minimumArea.description"), false, 0, 1, ff.literal(0.0d), null);
+            getResource("RemoveHoles.minimumArea.description"), false, 0, 1, ff.literal(0.0d),
+            new KVP(Params.FIELD, "inputFeatures.Number"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

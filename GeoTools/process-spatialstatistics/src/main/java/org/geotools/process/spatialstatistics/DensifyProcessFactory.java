@@ -78,7 +78,8 @@ public class DensifyProcessFactory extends SpatialStatisticsProcessFactory {
     /** tolerance */
     public static final Parameter<Expression> tolerance = new Parameter<Expression>("tolerance",
             Expression.class, getResource("Densify.tolerance.title"),
-            getResource("Densify.tolerance.description"), true, 1, 1, null, null);
+            getResource("Densify.tolerance.description"), true, 1, 1, null, new KVP(
+                    Params.FIELD, "inputFeatures.Number"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

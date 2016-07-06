@@ -27,6 +27,8 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.expression.Expression;
 import org.opengis.util.InternationalString;
@@ -75,7 +77,8 @@ public class BufferExpressionProcessFactory extends SpatialStatisticsProcessFact
     /** distance */
     public static final Parameter<Expression> distance = new Parameter<Expression>("distance",
             Expression.class, getResource("BufferFeatures.distance.title"),
-            getResource("BufferFeatures.distance.description"), true, 1, 1, null, null);
+            getResource("BufferFeatures.distance.description"), true, 1, 1, null, new KVP(
+                    Params.FIELD, "inputFeatures.Number"));
 
     /** quadrantSegments */
     public static final Parameter<Integer> quadrantSegments = new Parameter<Integer>(

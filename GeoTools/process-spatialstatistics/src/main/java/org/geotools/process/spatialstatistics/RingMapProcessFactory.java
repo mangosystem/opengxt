@@ -76,7 +76,7 @@ public class RingMapProcessFactory extends SpatialStatisticsProcessFactory {
     /** fields */
     public static final Parameter<String> fields = new Parameter<String>("fields", String.class,
             getResource("RingMap.fields.title"), getResource("RingMap.fields.description"), true,
-            1, 1, null, null);
+            1, 1, null, new KVP(Params.FIELDS, "inputFeatures.Number"));
 
     /** targetField */
     public static final Parameter<String> targetField = new Parameter<String>("targetField",

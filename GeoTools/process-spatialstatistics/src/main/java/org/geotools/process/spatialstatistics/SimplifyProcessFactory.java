@@ -78,7 +78,8 @@ public class SimplifyProcessFactory extends SpatialStatisticsProcessFactory {
     /** tolerance */
     public static final Parameter<Expression> tolerance = new Parameter<Expression>("tolerance",
             Expression.class, getResource("Simplify.tolerance.title"),
-            getResource("Simplify.tolerance.description"), true, 1, 1, null, null);
+            getResource("Simplify.tolerance.description"), true, 1, 1, null, new KVP(
+                    Params.FIELD, "inputFeatures.Number"));
 
     /** preserveTopology */
     public static final Parameter<Boolean> preserveTopology = new Parameter<Boolean>(

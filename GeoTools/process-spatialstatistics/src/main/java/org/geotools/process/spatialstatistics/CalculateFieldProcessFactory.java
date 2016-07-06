@@ -77,7 +77,8 @@ public class CalculateFieldProcessFactory extends SpatialStatisticsProcessFactor
     /** expression */
     public static final Parameter<Expression> expression = new Parameter<Expression>("expression",
             Expression.class, getResource("CalculateField.expression.title"),
-            getResource("CalculateField.expression.description"), true, 1, 1, null, null);
+            getResource("CalculateField.expression.description"), true, 1, 1, null, new KVP(
+                    Params.FIELD, "inputFeatures.All"));
 
     /** fieldName */
     public static final Parameter<String> fieldName = new Parameter<String>("fieldName",

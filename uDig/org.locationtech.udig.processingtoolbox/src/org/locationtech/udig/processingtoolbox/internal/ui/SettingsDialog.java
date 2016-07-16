@@ -43,7 +43,7 @@ import org.locationtech.udig.processingtoolbox.internal.Messages;
 public class SettingsDialog extends Dialog {
     protected static final Logger LOGGER = Logging.getLogger(SettingsDialog.class);
 
-    private Button btnOpen, chkLog, chkSel, chkStyle;
+    private Button btnOpen, chkLog, chkSel, chkStyle, chkAddLayer;
 
     private Text txtCrs;
 
@@ -108,6 +108,12 @@ public class SettingsDialog extends Dialog {
         chkStyle.setSelection(ToolboxView.getUseDefaultStyle());
         chkStyle.addSelectionListener(selectionListener);
 
+        // 1.5 add layer automatically after processing
+        chkAddLayer = widget.createCheckbox(generalComposite, Messages.SettingsDialog_AddLayerAuto,
+                null, 4);
+        chkAddLayer.setSelection(ToolboxView.getAddLayerAutomatically());
+        chkAddLayer.addSelectionListener(selectionListener);
+
         tabItemGeneral.setControl(generalComposite);
 
         // 2. advanced tab
@@ -137,6 +143,8 @@ public class SettingsDialog extends Dialog {
                 ToolboxView.setSelectedOnly(chkSel.getSelection());
             } else if (widget.equals(chkStyle)) {
                 ToolboxView.setUseDefaultStyle(chkStyle.getSelection());
+            } else if (widget.equals(chkAddLayer)) {
+                ToolboxView.setAddLayerAutomatically(chkAddLayer.getSelection());
             } else if (widget.equals(btnOpen)) {
                 final Shell shell = Display.getCurrent().getActiveShell();
                 DirectoryDialog dirDialog = new DirectoryDialog(shell);

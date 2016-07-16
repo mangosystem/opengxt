@@ -171,7 +171,10 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                                     .toString());
                             GridCoverage2D output = MapUtils.saveAsGeoTiff((GridCoverage2D) val,
                                     outputFile);
-                            MapUtils.addGridCoverageToMap(map, output, outputFile, null);
+                            
+                            if (ToolboxView.getAddLayerAutomatically()) {
+                                MapUtils.addGridCoverageToMap(map, output, outputFile, null);
+                            }
                         } catch (IllegalArgumentException e) {
                             ToolboxPlugin.log(e.getMessage());
                         } catch (IndexOutOfBoundsException e) {
@@ -256,6 +259,10 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
         }
 
         if (featureSource == null) {
+            return;
+        }
+        
+        if (!ToolboxView.getAddLayerAutomatically()) {
             return;
         }
 

@@ -85,6 +85,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
 
     private static Boolean loadGeoToolsProcess = Boolean.TRUE;
 
+    private static Boolean addLayerAutomatically = Boolean.TRUE;
+
     private TreeViewer viewer;
 
     private IAction actionEnv;
@@ -148,6 +150,14 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
 
     public static void setUseDefaultStyle(Boolean useDefaultStyle) {
         ToolboxView.useDefaultStyle = useDefaultStyle;
+    }
+
+    public static Boolean getAddLayerAutomatically() {
+        return addLayerAutomatically;
+    }
+
+    public static void setAddLayerAutomatically(Boolean addLayerAutomatically) {
+        ToolboxView.addLayerAutomatically = addLayerAutomatically;
     }
 
     @Override

@@ -217,6 +217,7 @@ public class Messages extends NLS {
     public static String SettingsDialog_advanced; 
     public static String SettingsDialog_OnlySelectedFeatures;
     public static String SettingsDialog_SetDefaultStyle;
+    public static String SettingsDialog_AddLayerAuto;
     
     public static String SpatialWeightsMatrixDialog_title;
     public static String SpatialWeightsMatrixDialog_description;

@@ -1,22 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
   <name>gt-process-spatialstatistics</name>
-  <comment>Processes for spatial statistics.</comment>
-  <projects>
-    <project>gt-api</project>
-    <project>gt-coverage</project>
-    <project>gt-cql</project>
-    <project>gt-data</project>
-    <project>gt-epsg-hsql</project>
-    <project>gt-grid</project>
-    <project>gt-main</project>
-    <project>gt-metadata</project>
-    <project>gt-opengis</project>
-    <project>gt-process</project>
-    <project>gt-property</project>
-    <project>gt-referencing</project>
-    <project>gt-sample-data</project>
-    <project>gt-shapefile</project>
-  </projects>
+  <comment>Processes for spatial statistics. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
+  <projects/>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>

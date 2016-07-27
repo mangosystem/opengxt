@@ -96,3 +96,4 @@ org.geotools.process.spatialstatistics.StatisticsGridCoverageProcessFactory
 org.geotools.process.spatialstatistics.RasterClipByGeometryProcessFactory
 org.geotools.process.spatialstatistics.RasterClipByExtentProcessFactory
 org.geotools.process.spatialstatistics.RasterClipByCircleProcessFactory
+org.geotools.process.spatialstatistics.RasterProfileProcessFactory

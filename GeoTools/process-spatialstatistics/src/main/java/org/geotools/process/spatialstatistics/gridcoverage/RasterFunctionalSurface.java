@@ -282,7 +282,7 @@ public class RasterFunctionalSurface {
                 grid2D.evaluate(gdPos, gridVals);
                 coord.z = gridVals[0];
             } catch (Exception e) {
-                coord.z = Double.NaN;
+                coord.z = noData;
             }
         }
 

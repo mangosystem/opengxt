@@ -40,6 +40,7 @@ import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.Filter;
+import org.opengis.filter.expression.PropertyName;
 
 /**
  * GraduatedColorStyleBuilder
@@ -120,7 +121,7 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
                 .getSimpleShapeType(geomDesc.getType().getBinding());
 
         FeatureTypeStyle fts = sf.createFeatureTypeStyle();
-        for (int k = 0; k < classBreaks.length - 1; k++) {
+        for (int k = 0, length = classBreaks.length - 2; k <= length; k++) {
             final Color uvColor = colors[k];
 
             Symbolizer symbolizer = null;
@@ -150,17 +151,18 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
                         ff.literal(outlineWidth), ff.literal(outlineOpacity));
 
                 Fill fill = sf.createFill(ff.literal(uvColor), ff.literal(fillOpacity));
-
                 symbolizer = sf.createPolygonSymbolizer(outlineStroke, fill, geometryPropertyName);
                 break;
             }
 
-            Filter filter = ff.between(ff.property(propertyName), ff.literal(classBreaks[k]),
-                    ff.literal(classBreaks[k + 1]));
+            PropertyName property = ff.property(propertyName);
+            Filter lower = ff.greaterOrEqual(property, ff.literal(classBreaks[k]));
+            Filter upper = k == length ? ff.lessOrEqual(property, ff.literal(classBreaks[k + 1]))
+                    : ff.less(property, ff.literal(classBreaks[k + 1]));
+            
             Rule rule = sf.createRule();
             rule.setName(classBreaks[k] + " - " + classBreaks[k + 1]);
-            rule.setFilter(filter);
-
+            rule.setFilter(ff.and(lower, upper));
             rule.symbolizers().add(symbolizer);
 
             fts.rules().add(rule);

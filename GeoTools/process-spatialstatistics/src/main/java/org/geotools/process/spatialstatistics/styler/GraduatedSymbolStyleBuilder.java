@@ -38,6 +38,7 @@ import org.geotools.styling.visitor.DuplicatingStyleVisitor;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.Filter;
+import org.opengis.filter.expression.PropertyName;
 
 /**
  * GraduatedSymbolStyleBuilder
@@ -206,7 +207,7 @@ public class GraduatedSymbolStyleBuilder extends AbstractFeatureStyleBuilder {
         }
 
         DuplicatingStyleVisitor styleVisitor = new DuplicatingStyleVisitor();
-        for (int k = 0; k < classBreaks.length - 1; k++) {
+        for (int k = 0, length = classBreaks.length - 2; k <= length; k++) {
             float size = minSize + (step * k);
 
             Symbolizer symbolizer = null;
@@ -231,13 +232,15 @@ public class GraduatedSymbolStyleBuilder extends AbstractFeatureStyleBuilder {
 
                 symbolizer = sf.createLineSymbolizer(copy, geometryPropertyName);
             }
-
-            Filter filter = ff.between(ff.property(propertyName), ff.literal(classBreaks[k]),
-                    ff.literal(classBreaks[k + 1]));
+            
+            PropertyName property = ff.property(propertyName);
+            Filter lower = ff.greaterOrEqual(property, ff.literal(classBreaks[k]));
+            Filter upper = k == length ? ff.lessOrEqual(property, ff.literal(classBreaks[k + 1]))
+                    : ff.less(property, ff.literal(classBreaks[k + 1]));
+            
             Rule rule = sf.createRule();
             rule.setName(classBreaks[k] + " - " + classBreaks[k + 1]);
-            rule.setFilter(filter);
-
+            rule.setFilter(ff.and(lower, upper));
             rule.symbolizers().add(symbolizer);
 
             featureTypeStyle.rules().add(rule);

@@ -84,6 +84,12 @@ public class RasterFunctionalSurface {
                 observerOffset, useCurvature);
     }
 
+    public LineString getLineOfSight(Coordinate observer, Coordinate target, double observerOffset,
+            boolean useCurvature, boolean useRefraction, double refractionFactor) {
+        return getLineOfSight(gf.createLineString(new Coordinate[] { observer, target }),
+                observerOffset, useCurvature, useRefraction, refractionFactor);
+    }
+
     public LineString getLineOfSight(LineString segment, double observerOffset, boolean useCurvature) {
         return getLineOfSight(segment, observerOffset, useCurvature, false, 0.13);
     }

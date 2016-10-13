@@ -543,8 +543,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         // Surface Analysis
         TreeParent surfaceTool = new TreeParent(Messages.ToolboxView_RasterSurface, null, null);
         generalTool.addChild(surfaceTool);
-        buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterProfileProcessFactory");  
-        buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterRadialLOSProcessFactory");  
+        buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterProfileProcessFactory");
+        buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterLinearLOSProcessFactory");
+        buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterRadialLOSProcessFactory");
     }
 
     private void buildTool(TreeParent parent, String title, String dialogName) {

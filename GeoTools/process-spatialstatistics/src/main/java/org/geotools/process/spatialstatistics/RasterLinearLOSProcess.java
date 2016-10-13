@@ -43,18 +43,18 @@ import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * Determines the visibility a surface within a specified radius and field of view of an observation point.
+ * Determines the visibility, based on the elevation, of all the points in a straight line on a surface between observer and target points.
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
-    protected static final Logger LOGGER = Logging.getLogger(RasterRadialLOSProcess.class);
+public class RasterLinearLOSProcess extends AbstractStatisticsProcess {
+    protected static final Logger LOGGER = Logging.getLogger(RasterLinearLOSProcess.class);
 
     private boolean started = false;
 
-    public RasterRadialLOSProcess(ProcessFactory factory) {
+    public RasterLinearLOSProcess(ProcessFactory factory) {
         super(factory);
     }
 
@@ -63,26 +63,25 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(GridCoverage2D inputCoverage,
-            Geometry observerPoint, Double observerOffset, Double radius, Integer sides,
+            Geometry observerPoint, Double observerOffset, Geometry targetPoint,
             Boolean useCurvature, Boolean useRefraction, Double refractionFactor,
             ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(RasterRadialLOSProcessFactory.inputCoverage.key, inputCoverage);
-        map.put(RasterRadialLOSProcessFactory.observerPoint.key, observerPoint);
-        map.put(RasterRadialLOSProcessFactory.observerOffset.key, observerOffset);
-        map.put(RasterRadialLOSProcessFactory.radius.key, radius);
-        map.put(RasterRadialLOSProcessFactory.sides.key, sides);
-        map.put(RasterRadialLOSProcessFactory.useCurvature.key, useCurvature);
-        map.put(RasterRadialLOSProcessFactory.useRefraction.key, useRefraction);
-        map.put(RasterRadialLOSProcessFactory.refractionFactor.key, refractionFactor);
+        map.put(RasterLinearLOSProcessFactory.inputCoverage.key, inputCoverage);
+        map.put(RasterLinearLOSProcessFactory.observerPoint.key, observerPoint);
+        map.put(RasterLinearLOSProcessFactory.observerOffset.key, observerOffset);
+        map.put(RasterLinearLOSProcessFactory.targetPoint.key, targetPoint);
+        map.put(RasterLinearLOSProcessFactory.useCurvature.key, useCurvature);
+        map.put(RasterLinearLOSProcessFactory.useRefraction.key, useRefraction);
+        map.put(RasterLinearLOSProcessFactory.refractionFactor.key, refractionFactor);
 
-        Process process = new RasterRadialLOSProcess(null);
+        Process process = new RasterLinearLOSProcess(null);
         Map<String, Object> resultMap;
         try {
             resultMap = process.execute(map, monitor);
 
             return (SimpleFeatureCollection) resultMap
-                    .get(RasterRadialLOSProcessFactory.RESULT.key);
+                    .get(RasterLinearLOSProcessFactory.RESULT.key);
         } catch (ProcessException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
@@ -99,65 +98,56 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
 
         try {
             GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
-                    RasterRadialLOSProcessFactory.inputCoverage, null);
+                    RasterLinearLOSProcessFactory.inputCoverage, null);
             Geometry observerPoint = (Geometry) Params.getValue(input,
-                    RasterRadialLOSProcessFactory.observerPoint, null);
+                    RasterLinearLOSProcessFactory.observerPoint, null);
             Double observerOffset = (Double) Params.getValue(input,
-                    RasterRadialLOSProcessFactory.observerOffset,
-                    RasterRadialLOSProcessFactory.observerOffset.sample);
-            Double radius = (Double) Params.getValue(input, RasterRadialLOSProcessFactory.radius,
-                    RasterRadialLOSProcessFactory.radius.sample);
-            Integer sides = (Integer) Params.getValue(input, RasterRadialLOSProcessFactory.sides,
-                    RasterRadialLOSProcessFactory.sides.sample);
+                    RasterLinearLOSProcessFactory.observerOffset,
+                    RasterLinearLOSProcessFactory.observerOffset.sample);
+            Geometry targetPoint = (Geometry) Params.getValue(input,
+                    RasterLinearLOSProcessFactory.targetPoint, null);
             Boolean useCurvature = (Boolean) Params.getValue(input,
-                    RasterRadialLOSProcessFactory.useCurvature,
-                    RasterRadialLOSProcessFactory.useCurvature.sample);
+                    RasterLinearLOSProcessFactory.useCurvature,
+                    RasterLinearLOSProcessFactory.useCurvature.sample);
             Boolean useRefraction = (Boolean) Params.getValue(input,
-                    RasterRadialLOSProcessFactory.useRefraction,
-                    RasterRadialLOSProcessFactory.useRefraction.sample);
+                    RasterLinearLOSProcessFactory.useRefraction,
+                    RasterLinearLOSProcessFactory.useRefraction.sample);
             Double refractionFactor = (Double) Params.getValue(input,
-                    RasterRadialLOSProcessFactory.refractionFactor,
-                    RasterRadialLOSProcessFactory.refractionFactor.sample);
+                    RasterLinearLOSProcessFactory.refractionFactor,
+                    RasterLinearLOSProcessFactory.refractionFactor.sample);
 
-            if (inputCoverage == null || observerPoint == null || radius == null) {
+            if (inputCoverage == null || observerPoint == null || targetPoint == null) {
                 throw new NullPointerException(
-                        "inputCoverage, observerPoint, radius parameters required");
+                        "inputCoverage, observerPoint, targetPoint parameters required");
             }
 
-            if (radius <= 0 || observerOffset < 0 || sides <= 0) {
-                throw new NullPointerException(
-                        "radius, observerOffset, sides parameters must be a positive value");
+            if (observerOffset < 0) {
+                throw new NullPointerException("observerOffset parameter must be a positive value");
             }
 
             // start process
-            final String ANGLE_FIELD = "Angle";
             final String VALUE_FIELD = "Visible";
 
+            LineSegment segment = new LineSegment(observerPoint.getCoordinate(),
+                    targetPoint.getCoordinate());
+            LineString userLine = segment.toGeometry(observerPoint.getFactory());
+
+            RasterFunctionalSurface process = new RasterFunctionalSurface(inputCoverage);
+            LineString los = process.getLineOfSight(userLine, observerOffset, useCurvature,
+                    useRefraction, refractionFactor);
+
+            // prepare feature type
             CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
-            SimpleFeatureType featureType = FeatureTypes.getDefaultType("RadialLineOfSight",
+            SimpleFeatureType featureType = FeatureTypes.getDefaultType("LinearLineOfSight",
                     LineString.class, crs);
-            featureType = FeatureTypes.add(featureType, ANGLE_FIELD, Double.class, 38);
-            featureType = FeatureTypes.add(featureType, VALUE_FIELD, Integer.class, 5);
+            featureType = FeatureTypes.add(featureType, VALUE_FIELD, Integer.class, 38);
 
             // prepare transactional feature store
             ListFeatureCollection resultSfc = new ListFeatureCollection(featureType);
             SimpleFeatureBuilder builder = new SimpleFeatureBuilder(featureType);
 
-            RasterFunctionalSurface process = new RasterFunctionalSurface(inputCoverage);
-            Coordinate center = observerPoint.getCoordinate();
-            int serialID = 0;
-            for (int index = 0; index < sides; index++) {
-                double angle = ((double) index / (double) sides) * Math.PI * 2.0;
-                double dx = Math.cos(angle) * radius;
-                double dy = Math.sin(angle) * radius;
-
-                Coordinate to = new Coordinate(center.x + dx, center.y + dy);
-                Geometry los = process.getLineOfSight(center, to, observerOffset, useCurvature,
-                        useRefraction, refractionFactor);
-                if (los == null) {
-                    continue;
-                }
-
+            if (los != null) {
+                int serialID = 0;
                 for (int idx = 0; idx < los.getNumGeometries(); idx++) {
                     Coordinate[] coordinates = los.getCoordinates();
                     for (int i = 0; i < coordinates.length - 1; i++) {
@@ -167,7 +157,6 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
                         String fid = featureType.getTypeName() + "." + (++serialID);
                         SimpleFeature newFeature = builder.buildFeature(fid);
                         newFeature.setDefaultGeometry(linestring);
-                        newFeature.setAttribute(ANGLE_FIELD, Math.round(angle * (180.0 / Math.PI)));
                         newFeature.setAttribute(VALUE_FIELD, coordinates[i + 1].z);
                         resultSfc.add(newFeature);
                     }
@@ -176,7 +165,7 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
             // end process
 
             Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(RasterRadialLOSProcessFactory.RESULT.key, resultSfc);
+            resultMap.put(RasterLinearLOSProcessFactory.RESULT.key, resultSfc);
             return resultMap;
         } catch (Exception eek) {
             throw new ProcessException(eek);

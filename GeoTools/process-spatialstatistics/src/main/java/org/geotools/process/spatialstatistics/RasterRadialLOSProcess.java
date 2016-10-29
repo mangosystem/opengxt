@@ -16,7 +16,9 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,8 +41,10 @@ import org.opengis.util.ProgressListener;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.operation.linemerge.LineMerger;
 
 /**
  * Determines the visibility a surface within a specified radius and field of view of an observation point.
@@ -53,6 +57,10 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RasterRadialLOSProcess.class);
 
     private boolean started = false;
+
+    static final String ANGLE_FIELD = "Angle";
+
+    static final String VALUE_FIELD = "Visible";
 
     public RasterRadialLOSProcess(ProcessFactory factory) {
         super(factory);
@@ -130,9 +138,6 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
             }
 
             // start process
-            final String ANGLE_FIELD = "Angle";
-            final String VALUE_FIELD = "Visible";
-
             CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
             SimpleFeatureType featureType = FeatureTypes.getDefaultType("RadialLineOfSight",
                     LineString.class, crs);
@@ -158,17 +163,54 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
                     continue;
                 }
 
+                int previsible = -1;
+                List<Geometry> segments = new ArrayList<Geometry>();
+                GeometryFactory gf = los.getFactory();
                 for (int idx = 0; idx < los.getNumGeometries(); idx++) {
                     Coordinate[] coordinates = los.getCoordinates();
                     for (int i = 0; i < coordinates.length - 1; i++) {
+                        int visible = (int) coordinates[i + 1].z;
+                        if (i == 0) {
+                            previsible = visible;
+                            segments.clear();
+                        }
+
                         LineSegment seg = new LineSegment(coordinates[i], coordinates[i + 1]);
-                        Geometry linestring = seg.toGeometry(los.getFactory());
+                        Geometry lineseg = seg.toGeometry(los.getFactory());
+
+                        if (visible == previsible) {
+                            segments.add(lineseg);
+                        } else {
+                            LineMerger lineMerger = new LineMerger();
+                            lineMerger.add(segments);
+                            Geometry mergeMls = gf.createMultiLineString(GeometryFactory
+                                    .toLineStringArray(lineMerger.getMergedLineStrings()));
+
+                            String fid = featureType.getTypeName() + "." + (++serialID);
+                            SimpleFeature newFeature = builder.buildFeature(fid);
+                            newFeature.setDefaultGeometry(mergeMls);
+                            newFeature.setAttribute(ANGLE_FIELD,
+                                    Math.round(angle * (180.0 / Math.PI)));
+                            newFeature.setAttribute(VALUE_FIELD, visible);
+                            resultSfc.add(newFeature);
+
+                            segments.clear();
+                            previsible = visible;
+                            segments.add(lineseg);
+                        }
+                    }
+
+                    if (segments.size() > 0) {
+                        LineMerger lineMerger = new LineMerger();
+                        lineMerger.add(segments);
+                        Geometry mergeMls = gf.createMultiLineString(GeometryFactory
+                                .toLineStringArray(lineMerger.getMergedLineStrings()));
 
                         String fid = featureType.getTypeName() + "." + (++serialID);
                         SimpleFeature newFeature = builder.buildFeature(fid);
-                        newFeature.setDefaultGeometry(linestring);
+                        newFeature.setDefaultGeometry(mergeMls);
                         newFeature.setAttribute(ANGLE_FIELD, Math.round(angle * (180.0 / Math.PI)));
-                        newFeature.setAttribute(VALUE_FIELD, coordinates[i + 1].z);
+                        newFeature.setAttribute(VALUE_FIELD, previsible);
                         resultSfc.add(newFeature);
                     }
                 }

@@ -11,6 +11,7 @@ org.geotools.process.spatialstatistics.KMeansClusteringProcessFactory
 org.geotools.process.spatialstatistics.KNearestNeighborMapProcessFactory
 org.geotools.process.spatialstatistics.WindRoseMapProcessFactory
 org.geotools.process.spatialstatistics.RectangularBinningProcessFactory
+org.geotools.process.spatialstatistics.CircularBinningProcessFactory
 
 org.geotools.process.spatialstatistics.JoinCountStatisticsProcessFactory
 org.geotools.process.spatialstatistics.GlobalMoransIProcessFactory

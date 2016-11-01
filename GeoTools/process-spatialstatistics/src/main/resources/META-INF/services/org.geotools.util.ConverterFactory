@@ -1,1 +1,2 @@
 org.geotools.process.spatialstatistics.util.ExpressionConverterFactory
+org.geotools.process.spatialstatistics.util.BoundingBoxDataConverterFactory

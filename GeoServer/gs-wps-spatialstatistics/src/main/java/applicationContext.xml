@@ -18,6 +18,7 @@
     <!-- native format support --> 
     <bean id="FeatureCollectionGML311PPIO" class="org.geoserver.wps.spatialstatistics.ppio.FeatureCollectionGML311PPIO" />
     <bean id="GeometryGeoJSONPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GeometryGeoJSONPPIO" />
-    <bean id="ExpressionPPIO" class="org.geoserver.wps.spatialstatistics.ppio.ExpressionPPIO" />   
+    <bean id="ExpressionPPIO" class="org.geoserver.wps.spatialstatistics.ppio.ExpressionPPIO" />
+    <bean id="BoundingBoxDataPPIO" class="org.geoserver.wps.spatialstatistics.ppio.BoundingBoxDataPPIO" />
 
 </beans>

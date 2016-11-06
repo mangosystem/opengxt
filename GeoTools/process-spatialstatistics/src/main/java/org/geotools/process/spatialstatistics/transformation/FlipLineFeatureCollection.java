@@ -22,9 +22,11 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -45,6 +47,14 @@ public class FlipLineFeatureCollection extends GXTSimpleFeatureCollection {
     @Override
     public SimpleFeatureIterator features() {
         return new FlipLineFeatureIterator(delegate.features(), getSchema());
+    }
+
+    @Override
+    public ReferencedEnvelope getBounds() {
+        ReferencedEnvelope bbox = delegate.getBounds();
+        CoordinateReferenceSystem crs = bbox.getCoordinateReferenceSystem();
+        return new ReferencedEnvelope(bbox.getMinX(), bbox.getMaxX(), bbox.getMinY(),
+                bbox.getMaxY(), crs);
     }
 
     static class FlipLineFeatureIterator implements SimpleFeatureIterator {

@@ -35,68 +35,68 @@ import org.opengis.filter.expression.Expression;
 import org.opengis.util.InternationalString;
 
 /**
- * CircularBinningProcessFactory
+ * HexagonalBinningProcessFactory
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public class CircularBinningProcessFactory extends SpatialStatisticsProcessFactory {
-    protected static final Logger LOGGER = Logging.getLogger(CircularBinningProcessFactory.class);
+public class HexagonalBinningProcessFactory extends SpatialStatisticsProcessFactory {
+    protected static final Logger LOGGER = Logging.getLogger(HexagonalBinningProcessFactory.class);
 
-    private static final String PROCESS_NAME = "CircularBinning";
+    private static final String PROCESS_NAME = "HexagonalBinning";
 
     /*
-     * CircularBinning(SimpleFeatureCollection features, Expression weight, ReferencedEnvelope bbox, Double radius, Boolean validGrid):
+     * HexagonalBinning(SimpleFeatureCollection features, Expression weight, ReferencedEnvelope bbox, Double size, Boolean validGrid):
      * SimpleFeatureCollection
      */
 
-    public CircularBinningProcessFactory() {
+    public HexagonalBinningProcessFactory() {
         super(new NameImpl(NAMESPACE, PROCESS_NAME));
     }
 
     @Override
     public Process create() {
-        return new CircularBinningProcess(this);
+        return new HexagonalBinningProcess(this);
     }
 
     @Override
     public InternationalString getTitle() {
-        return getResource("CircularBinning.title");
+        return getResource("HexagonalBinning.title");
     }
 
     @Override
     public InternationalString getDescription() {
-        return getResource("CircularBinning.description");
+        return getResource("HexagonalBinning.description");
     }
 
     /** features */
     public static final Parameter<SimpleFeatureCollection> features = new Parameter<SimpleFeatureCollection>(
             "features", SimpleFeatureCollection.class,
-            getResource("CircularBinning.features.title"),
-            getResource("CircularBinning.features.description"), true, 1, 1, null, new KVP(
+            getResource("HexagonalBinning.features.title"),
+            getResource("HexagonalBinning.features.description"), true, 1, 1, null, new KVP(
                     Params.FEATURES, "Point"));
 
     /** weight */
     public static final Parameter<Expression> weight = new Parameter<Expression>("weight",
-            Expression.class, getResource("CircularBinning.weight.title"),
-            getResource("CircularBinning.weight.description"), false, 0, 1, null, new KVP(
+            Expression.class, getResource("HexagonalBinning.weight.title"),
+            getResource("HexagonalBinning.weight.description"), false, 0, 1, null, new KVP(
                     Params.FIELD, "features.Number"));
 
     /** bbox */
     public static final Parameter<ReferencedEnvelope> bbox = new Parameter<ReferencedEnvelope>(
-            "bbox", ReferencedEnvelope.class, getResource("CircularBinning.bbox.title"),
-            getResource("CircularBinning.bbox.description"), false, 0, 1, null, null);
+            "bbox", ReferencedEnvelope.class, getResource("HexagonalBinning.bbox.title"),
+            getResource("HexagonalBinning.bbox.description"), false, 0, 1, null, null);
 
-    /** radius */
-    public static final Parameter<Double> radius = new Parameter<Double>("radius", Double.class,
-            getResource("CircularBinning.radius.title"),
-            getResource("CircularBinning.radius.description"), true, 1, 1, null, null);
+    /** size */
+    public static final Parameter<Double> size = new Parameter<Double>("size", Double.class,
+            getResource("HexagonalBinning.size.title"),
+            getResource("HexagonalBinning.size.description"), true, 1, 1, null, null);
 
     /** validGrid */
     public static final Parameter<Boolean> validGrid = new Parameter<Boolean>("validGrid",
-            Boolean.class, getResource("CircularBinning.validGrid.title"),
-            getResource("CircularBinning.validGrid.description"), false, 0, 1, Boolean.TRUE, null);
+            Boolean.class, getResource("HexagonalBinning.validGrid.title"),
+            getResource("HexagonalBinning.validGrid.description"), false, 0, 1, Boolean.TRUE, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -104,15 +104,15 @@ public class CircularBinningProcessFactory extends SpatialStatisticsProcessFacto
         parameterInfo.put(features.key, features);
         parameterInfo.put(weight.key, weight);
         parameterInfo.put(bbox.key, bbox);
-        parameterInfo.put(radius.key, radius);
+        parameterInfo.put(size.key, size);
         parameterInfo.put(validGrid.key, validGrid);
         return parameterInfo;
     }
 
     /** result */
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
-            "result", SimpleFeatureCollection.class, getResource("CircularBinning.result.title"),
-            getResource("CircularBinning.result.description"));
+            "result", SimpleFeatureCollection.class, getResource("HexagonalBinning.result.title"),
+            getResource("HexagonalBinning.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

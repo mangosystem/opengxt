@@ -159,6 +159,9 @@ public class FeatureInserter implements IFeatureInserter {
         if (isWriteMode) {
             simpleFeature = this.writer.next();
         } else {
+            if (id == null) {
+                id = String.valueOf(featureCount + 1);
+            }
             simpleFeature = this.builder.buildFeature(id);
         }
 

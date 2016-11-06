@@ -35,7 +35,6 @@ import org.opengis.referencing.operation.MathTransform;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
@@ -45,39 +44,18 @@ import com.vividsolutions.jts.geom.Polygon;
  * 
  * @source $URL$
  * 
+ * @reference http://www.redblobgames.com/grids/hexagons/
  */
-public class CircularBinningOperation extends BinningOperation {
-    protected static final Logger LOGGER = Logging.getLogger(CircularBinningOperation.class);
+public class HexagonalBinningOperation extends BinningOperation {
+    protected static final Logger LOGGER = Logging.getLogger(HexagonalBinningOperation.class);
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection features,
-            ReferencedEnvelope bbox, Double radius) throws IOException {
-        return execute(features, null, bbox, radius);
+            ReferencedEnvelope bbox, Double size) throws IOException {
+        return execute(features, null, bbox, size);
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection features, Expression weight,
-            ReferencedEnvelope bbox, Double radius) throws IOException {
-        if (bbox == null) {
-            throw new NullPointerException("bbox parameter is null");
-        }
-
-        double diameter = radius * 2.0;
-
-        int columns = (int) Math.floor((bbox.getWidth() / diameter) + 0.5d);
-        int rows = (int) Math.floor((bbox.getHeight() / diameter) + 0.5d);
-
-        columns = columns * diameter < bbox.getWidth() ? columns + 1 : columns;
-        rows = rows * diameter < bbox.getHeight() ? rows + 1 : rows;
-
-        // recalculate envelope : origin = lower left
-        CoordinateReferenceSystem targetCRS = bbox.getCoordinateReferenceSystem();
-        ReferencedEnvelope finalBBox = new ReferencedEnvelope(targetCRS);
-        finalBBox.init(bbox.getMinX(), bbox.getMinX() + (columns * diameter), bbox.getMinY(),
-                bbox.getMinY() + (rows * diameter));
-        return execute(features, weight, bbox, columns, rows);
-    }
-
-    private SimpleFeatureCollection execute(SimpleFeatureCollection features, Expression weight,
-            ReferencedEnvelope bbox, Integer columns, Integer rows) throws IOException {
+            ReferencedEnvelope bbox, Double size) throws IOException {
         if (bbox == null) {
             throw new NullPointerException("bbox parameter is null");
         }
@@ -93,7 +71,15 @@ public class CircularBinningOperation extends BinningOperation {
         schema = FeatureTypes.add(schema, UID, Integer.class, 19);
         schema = FeatureTypes.add(schema, AGG_FIELD, Double.class, 38);
 
-        final double diameter = bbox.getWidth() / columns;
+        final double yoffset = size * 1.5;            // height = size * 2
+        final double xoffset = Math.sqrt(3.0) * size; // width = sqrt(3)/2 * height
+        final double half_xoffset = 0.5 * xoffset;
+
+        int columns = (int) Math.floor((bbox.getWidth() / xoffset) + 0.5d);
+        int rows = (int) Math.floor((bbox.getHeight() / yoffset) + 0.5d);
+
+        columns = columns * xoffset < bbox.getWidth() ? columns + 1 : columns;
+        rows = rows * yoffset < bbox.getHeight() ? rows + 1 : rows;
 
         final double minX = bbox.getMinX();
         final double minY = bbox.getMinY();
@@ -110,6 +96,7 @@ public class CircularBinningOperation extends BinningOperation {
                 transformer.setCoordinateReferenceSystem(targetCRS);
             }
 
+            final double yOrigin = minY + (size * 0.25); 
             while (featureIter.hasNext()) {
                 SimpleFeature feat = featureIter.next();
                 Double val = weight == null ? Double.valueOf(1.0) : weight.evaluate(feat,
@@ -126,8 +113,14 @@ public class CircularBinningOperation extends BinningOperation {
                 Coordinate coordinate = geometry.getCentroid().getCoordinate();
 
                 // origin = lower left
-                int col = (int) Math.floor((coordinate.x - minX) / diameter);
-                int row = (int) Math.floor((coordinate.y - minY) / diameter);
+                // TODO: find nearest hexagon
+                // Coordinate center = new Coordinate(minX + 0.5 * xoffset, minY + size);
+                int row = (int) Math.floor((coordinate.y - yOrigin) / yoffset);
+                int col = (int) Math.floor((coordinate.x - minX) / xoffset);
+                if ((row % 2) == 1) {
+                    col = (int) Math.floor((coordinate.x - minX - half_xoffset) / xoffset);
+                }
+                
                 if (col < 0 || row < 0 || col >= columns || row >= rows) {
                     continue;
                 }
@@ -164,22 +157,24 @@ public class CircularBinningOperation extends BinningOperation {
                 maxRow = rows;
             }
 
-            final double radius = diameter / 2.0;
-            Point center = gf.createPoint(new Coordinate(minX + radius, minY + radius));
-            final Geometry circle = center.buffer(radius, quadrantSegments);
+            // create hexagon
+            final Geometry hexogon = createHexagon(minX, minY, size);
 
             int fid = 0;
-            double ypos = minRow * diameter;
+            double ypos = minRow * yoffset;
             for (int row = minRow; row < maxRow; row++) {
-                double xpos = minCol * diameter;
+                double xpos = minCol * xoffset;
+                if ((row % 2) == 1) {
+                    xpos += half_xoffset;
+                }
                 for (int col = minCol; col < maxCol; col++) {
                     Double gridValue = gridValues[row][col];
                     if (gridValue == null && getOnlyValidGrid()) {
-                        xpos += diameter;
+                        xpos += xoffset;
                         continue;
                     }
 
-                    Geometry grid = (Geometry) circle.clone();
+                    Geometry grid = (Geometry) hexogon.clone();
                     grid.apply(new CoordinateTranslateFilter(xpos, ypos));
                     grid.setUserData(targetCRS);
 
@@ -195,9 +190,9 @@ public class CircularBinningOperation extends BinningOperation {
                     newFeature.setDefaultGeometry(grid);
 
                     featureWriter.write(newFeature);
-                    xpos += diameter;
+                    xpos += xoffset;
                 }
-                ypos += diameter;
+                ypos += yoffset;
             }
         } catch (Exception e) {
             featureWriter.rollback(e);
@@ -206,5 +201,19 @@ public class CircularBinningOperation extends BinningOperation {
         }
 
         return featureWriter.getFeatureCollection();
+    }
+
+    private Geometry createHexagon(double minX, double minY, double size) {
+        // center:top --> clockwise
+        double span = Math.sqrt(3.0) * size;
+        Coordinate[] ring = new Coordinate[7];
+        ring[0] = new Coordinate(minX + 0.5 * span, minY + 2.0 * size);
+        ring[1] = new Coordinate(minX + span, minY + 1.5 * size);
+        ring[2] = new Coordinate(minX + span, minY + 0.5 * size);
+        ring[3] = new Coordinate(minX + 0.5 * span, minY);
+        ring[4] = new Coordinate(minX, minY + 0.5 * size);
+        ring[5] = new Coordinate(minX, minY + 1.5 * size);
+        ring[6] = ring[0];
+        return gf.createPolygon(gf.createLinearRing(ring), null);
     }
 }

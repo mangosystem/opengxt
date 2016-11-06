@@ -48,7 +48,7 @@ public class RectangularBinningProcessFactory extends SpatialStatisticsProcessFa
     private static final String PROCESS_NAME = "RectangularBinning";
 
     /*
-     * RectangularBinning(SimpleFeatureCollection features, Expression weight, ReferencedEnvelope bbox, Integer columns, Integer rows, Boolean
+     * RectangularBinning(SimpleFeatureCollection features, Expression weight, ReferencedEnvelope bbox, Double width, Double height, Boolean
      * validGrid): SimpleFeatureCollection
      */
 
@@ -81,7 +81,8 @@ public class RectangularBinningProcessFactory extends SpatialStatisticsProcessFa
     /** weight */
     public static final Parameter<Expression> weight = new Parameter<Expression>("weight",
             Expression.class, getResource("RectangularBinning.weight.title"),
-            getResource("RectangularBinning.weight.description"), false, 0, 1, null, null);
+            getResource("RectangularBinning.weight.description"), false, 0, 1, null, new KVP(
+                    Params.FIELD, "features.Number"));
 
     /** bbox */
     public static final Parameter<ReferencedEnvelope> bbox = new Parameter<ReferencedEnvelope>(

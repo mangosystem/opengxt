@@ -103,3 +103,4 @@ org.geotools.process.spatialstatistics.RasterClipByCircleProcessFactory
 org.geotools.process.spatialstatistics.RasterProfileProcessFactory
 org.geotools.process.spatialstatistics.RasterRadialLOSProcessFactory
 org.geotools.process.spatialstatistics.RasterLinearLOSProcessFactory
+org.geotools.process.spatialstatistics.RasterHighLowProcessFactory

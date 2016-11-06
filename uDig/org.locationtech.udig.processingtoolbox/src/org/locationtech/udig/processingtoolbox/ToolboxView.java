@@ -468,6 +468,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(aggreTool, "org.geotools.process.spatialstatistics.RingMapProcessFactory");
         buildTool(aggreTool, "org.geotools.process.spatialstatistics.WindRoseMapProcessFactory");
         buildTool(aggreTool, "org.geotools.process.spatialstatistics.SpatialClumpMapProcessFactory");
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.RectangularBinningProcessFactory");
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.CircularBinningProcessFactory");
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.HexagonalBinningProcessFactory");
 
         // Extract
         TreeParent extractTool = new TreeParent(Messages.ToolboxView_Extract, null, null);
@@ -508,6 +511,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RemovePartsProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SplitLineByDistanceProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SplitLineAtVerticesProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.FlowMapProcessFactory");
     }
 
     @SuppressWarnings("nls")

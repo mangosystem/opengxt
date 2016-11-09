@@ -341,6 +341,9 @@ public class Messages extends NLS {
     public static String ToolboxView_Density;
     public static String ToolboxView_Interpolation;
     public static String ToolboxView_RasterSurface;
+    public static String ToolboxView_Conditional;
+    public static String ToolboxView_Conversion;
+    public static String ToolboxView_Reclass;
 
     static {
         // initialize resource bundle

@@ -525,6 +525,28 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(desTools);
         buildTool(desTools, "org.geotools.process.spatialstatistics.StatisticsGridCoverageProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.HistogramGridCoverageProcessFactory");
+        
+        // Conversion
+        TreeParent conversionTool = new TreeParent(Messages.ToolboxView_Conversion, null, null);
+        generalTool.addChild(conversionTool);
+        buildTool(conversionTool, "org.geotools.process.spatialstatistics.RasterToPolygonProcessFactory");
+        
+        // Reclass
+        TreeParent reclassTool = new TreeParent(Messages.ToolboxView_Reclass, null, null);
+        generalTool.addChild(reclassTool);
+        buildTool(reclassTool, "org.geotools.process.spatialstatistics.RasterReclassProcessFactory");
+        
+        // Extraction
+        TreeParent extractionTool = new TreeParent(Messages.ToolboxView_Extract, null, null);
+        generalTool.addChild(extractionTool);
+        buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByExtentProcessFactory");
+        buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByGeometryProcessFactory");
+        buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByCircleProcessFactory");
+        
+        // Conditional Tool
+        TreeParent conditionalTool = new TreeParent(Messages.ToolboxView_Conditional, null, null);
+        generalTool.addChild(conditionalTool);
+        buildTool(conditionalTool, "org.geotools.process.spatialstatistics.RasterConProcessFactory");
 
         // Density
         TreeParent densityTool = new TreeParent(Messages.ToolboxView_Density, null, null);
@@ -536,13 +558,6 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(interpolationTool);
         buildTool(interpolationTool, "org.geotools.process.spatialstatistics.IDWProcessFactory");
         buildTool(interpolationTool, "org.geotools.process.spatialstatistics.TPSProcessFactory");
-        
-        // Extraction
-        TreeParent extractionTool = new TreeParent(Messages.ToolboxView_Extract, null, null);
-        generalTool.addChild(extractionTool);
-        buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByExtentProcessFactory");
-        buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByGeometryProcessFactory");
-        buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByCircleProcessFactory");
 
         // Surface Analysis
         TreeParent surfaceTool = new TreeParent(Messages.ToolboxView_RasterSurface, null, null);

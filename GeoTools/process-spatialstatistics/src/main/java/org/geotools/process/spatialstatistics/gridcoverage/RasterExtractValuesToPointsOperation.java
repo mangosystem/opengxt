@@ -23,7 +23,6 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
-import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.SlopeType;
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;

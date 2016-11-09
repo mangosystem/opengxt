@@ -215,6 +215,6 @@ public class SSUtils {
     }
 
     public static boolean compareFloat(float a, float b) {
-        return compareDouble(a, b, FLOAT_COMPARE_TOLERANCE);
+        return compareFloat(a, b, FLOAT_COMPARE_TOLERANCE);
     }
 }

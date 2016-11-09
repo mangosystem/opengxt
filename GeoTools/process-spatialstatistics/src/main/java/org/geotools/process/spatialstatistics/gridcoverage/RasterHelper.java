@@ -16,6 +16,8 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
+import it.geosolutions.jaiext.range.NoDataContainer;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -252,6 +254,9 @@ public class RasterHelper {
             objNoData = srcCoverage.getProperty("GC_NODATA");
             if (objNoData != null && objNoData instanceof Number) {
                 return (Double) objNoData;
+            } else if (objNoData != null && objNoData instanceof NoDataContainer) {
+                NoDataContainer container = (NoDataContainer) objNoData;
+                return container.getAsSingleValue();
             } else {
                 SampleDimension gridDim = srcCoverage.getSampleDimension(0);
                 double[] ndVals = gridDim.getNoDataValues();

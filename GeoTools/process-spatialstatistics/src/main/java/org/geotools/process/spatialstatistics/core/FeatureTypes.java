@@ -52,7 +52,7 @@ public class FeatureTypes {
     
     public static final int DBF_LIMIT = 10;
 
-    public static final String SHAPE_FIELD = "the_geom";
+    public static final String SHAPE_FIELD = "geom";
     
     public static String NAMESPACE = "feature";
 

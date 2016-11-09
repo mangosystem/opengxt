@@ -56,7 +56,9 @@ import org.geotools.data.memory.MemoryDataStore;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.process.spatialstatistics.storage.FeatureInserter;
@@ -68,8 +70,11 @@ import org.geotools.util.NullProgressListener;
 import org.geotools.util.NumberRange;
 import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
+import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.util.ProgressListener;
+
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Abstract Raster Processing Operation
@@ -406,7 +411,6 @@ public abstract class RasterProcessingOperation {
     protected DiskMemImage createDiskMemImage(GridCoverage2D srcCoverage,
             RasterPixelType transferType) {
         Extent = new ReferencedEnvelope(srcCoverage.getEnvelope());
-        NoData = RasterHelper.getNoDataValue(srcCoverage);
         CellSize = RasterHelper.getCellSize(srcCoverage);
 
         final RenderedImage img = srcCoverage.getRenderedImage();
@@ -500,10 +504,6 @@ public abstract class RasterProcessingOperation {
         return new FeatureInserter(featureStore);
     }
 
-    protected GridCoverage2D createGridCoverage(CharSequence name, PlanarImage tiledImage) {
-        return createGridCoverage(name, tiledImage, 1, NoData, MinValue, MaxValue, Extent);
-    }
-
     protected GridCoverage2D createGridCoverage(CharSequence name, RenderedImage image,
             GridSampleDimension[] bands, double noDataValue, double minValue, double maxValue,
             ReferencedEnvelope extent) {
@@ -535,6 +535,10 @@ public abstract class RasterProcessingOperation {
         return factory.create(name, image, extent, bands, null, properties);
     }
 
+    protected GridCoverage2D createGridCoverage(CharSequence name, PlanarImage tiledImage) {
+        return createGridCoverage(name, tiledImage, 1, NoData, MinValue, MaxValue, Extent);
+    }
+
     protected GridCoverage2D createGridCoverage(CharSequence name, PlanarImage tiledImage,
             int bandCount, double noDataValue, double minValue, double maxValue,
             ReferencedEnvelope extent) {
@@ -551,20 +555,16 @@ public abstract class RasterProcessingOperation {
             noDataValue = minValue - 1;
         }
 
-        Color[] colors = new Color[] { Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED };
-
         CharSequence noDataName = Vocabulary.formatInternational(VocabularyKeys.NODATA);
-        
         Category nan = new Category(noDataName, new Color[] { new Color(255, 255, 255, 0) },
                 NumberRange.create(noDataValue, noDataValue));
 
+        Color[] colors = new Color[] { Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED };
         Category values = new Category("values", colors, NumberRange.create(minValue, maxValue));
-        
-        GridSampleDimension[] bands = null;
-        GridSampleDimension band = null;
 
-        band = new GridSampleDimension("Dimension", new Category[] { nan, values }, null);
-        bands = new GridSampleDimension[] { band };
+        GridSampleDimension band = new GridSampleDimension("Dimension", new Category[] { nan,
+                values }, null);
+        GridSampleDimension[] bands = new GridSampleDimension[] { band };
 
         // setting metadata
         final Map<CharSequence, Double> properties = new HashMap<CharSequence, Double>();
@@ -577,5 +577,14 @@ public abstract class RasterProcessingOperation {
 
         GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
         return factory.create(name, tiledImage, extent, bands, null, properties);
+    }
+
+    protected SimpleFeature createTemplateFeature(GridCoverage2D inputGc) {
+        String typeName = inputGc.getName().toString();
+        SimpleFeatureType schema = FeatureTypes.getDefaultType(typeName, Point.class,
+                inputGc.getCoordinateReferenceSystem());
+        schema = FeatureTypes.add(schema, typeName, Double.class);
+        schema = FeatureTypes.add(schema, "Value", Double.class);
+        return new SimpleFeatureBuilder(schema).buildFeature(null);
     }
 }

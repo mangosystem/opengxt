@@ -24,11 +24,13 @@ import java.util.logging.Logger;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.Filter;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -64,6 +66,14 @@ public class SplitLineFeatureCollection extends GXTSimpleFeatureCollection {
     @Override
     public SimpleFeatureType getSchema() {
         return schema;
+    }
+
+    @Override
+    public SimpleFeatureCollection subCollection(Filter filter) {
+        if (filter == Filter.INCLUDE) {
+            return this;
+        }
+        return new SubFeatureCollection(this, filter);
     }
 
     @Override

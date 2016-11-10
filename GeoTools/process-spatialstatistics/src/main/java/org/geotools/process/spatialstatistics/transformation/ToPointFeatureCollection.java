@@ -23,6 +23,7 @@ import org.geotools.data.DataUtilities;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
@@ -72,6 +73,14 @@ public class ToPointFeatureCollection extends GXTSimpleFeatureCollection {
     }
 
     @Override
+    public SimpleFeatureCollection subCollection(Filter filter) {
+        if (filter == Filter.INCLUDE) {
+            return this;
+        }
+        return new SubFeatureCollection(this, filter);
+    }
+
+    @Override
     public int size() {
         return delegate.size();
     }
@@ -79,23 +88,6 @@ public class ToPointFeatureCollection extends GXTSimpleFeatureCollection {
     @Override
     public ReferencedEnvelope getBounds() {
         return DataUtilities.bounds(features());
-    }
-
-    @Override
-    public SimpleFeatureCollection subCollection(Filter filter) {
-        ListFeatureCollection subCollection = new ListFeatureCollection(getSchema());
-        SimpleFeatureIterator featureIter = features();
-        try {
-            while (featureIter.hasNext()) {
-                SimpleFeature feature = featureIter.next();
-                if (filter.evaluate(feature)) {
-                    subCollection.add(feature);
-                }
-            }
-        } finally {
-            featureIter.close();
-        }
-        return subCollection;
     }
 
     static class ToPointFeatureIterator implements SimpleFeatureIterator {

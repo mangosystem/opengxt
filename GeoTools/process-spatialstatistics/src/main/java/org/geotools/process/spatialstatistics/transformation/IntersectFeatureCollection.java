@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -149,6 +150,14 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
     @Override
     public SimpleFeatureType getSchema() {
         return targetSchema;
+    }
+
+    @Override
+    public SimpleFeatureCollection subCollection(Filter filter) {
+        if (filter == Filter.INCLUDE) {
+            return this;
+        }
+        return new SubFeatureCollection(this, filter);
     }
 
     @Override

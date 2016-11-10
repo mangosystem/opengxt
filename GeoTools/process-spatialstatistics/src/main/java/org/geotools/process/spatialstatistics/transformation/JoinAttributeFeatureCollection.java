@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import org.geotools.data.Join;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
@@ -141,6 +142,14 @@ public class JoinAttributeFeatureCollection extends GXTSimpleFeatureCollection {
     @Override
     public SimpleFeatureType getSchema() {
         return schema;
+    }
+
+    @Override
+    public SimpleFeatureCollection subCollection(Filter filter) {
+        if (filter == Filter.INCLUDE) {
+            return this;
+        }
+        return new SubFeatureCollection(this, filter);
     }
 
     @Override

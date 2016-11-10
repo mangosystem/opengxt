@@ -23,6 +23,7 @@ import org.geotools.data.DataUtilities;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
@@ -75,6 +76,14 @@ public class VerticesToPointsFeatureCollection extends GXTSimpleFeatureCollectio
     }
 
     @Override
+    public SimpleFeatureCollection subCollection(Filter filter) {
+        if (filter == Filter.INCLUDE) {
+            return this;
+        }
+        return new SubFeatureCollection(this, filter);
+    }
+
+    @Override
     public int size() {
         switch (location) {
         case Start:
@@ -96,23 +105,6 @@ public class VerticesToPointsFeatureCollection extends GXTSimpleFeatureCollectio
         default:
             return DataUtilities.bounds(features());
         }
-    }
-
-    @Override
-    public SimpleFeatureCollection subCollection(Filter filter) {
-        ListFeatureCollection subCollection = new ListFeatureCollection(getSchema());
-        SimpleFeatureIterator featureIter = features();
-        try {
-            while (featureIter.hasNext()) {
-                SimpleFeature feature = featureIter.next();
-                if (filter.evaluate(feature)) {
-                    subCollection.add(feature);
-                }
-            }
-        } finally {
-            featureIter.close();
-        }
-        return subCollection;
     }
 
     static class VerticesToPointsFeatureIterator implements SimpleFeatureIterator {

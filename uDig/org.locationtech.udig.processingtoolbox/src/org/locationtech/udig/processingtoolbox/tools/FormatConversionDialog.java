@@ -204,7 +204,7 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
     private void loadlayers(Table table) {
         table.removeAll();
         for (ILayer layer : map.getMapLayers()) {
-            if (layer.hasResource(FeatureSource.class)) {
+            if (layer.getName() != null && layer.hasResource(FeatureSource.class)) {
                 TableItem item = new TableItem(table, SWT.NONE);
                 String type = layer.getSchema().getGeometryDescriptor().getType().getBinding()
                         .getSimpleName();

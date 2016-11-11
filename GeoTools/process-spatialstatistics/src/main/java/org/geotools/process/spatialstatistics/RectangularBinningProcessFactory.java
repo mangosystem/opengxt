@@ -121,7 +121,8 @@ public class RectangularBinningProcessFactory extends SpatialStatisticsProcessFa
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class,
             getResource("RectangularBinning.result.title"),
-            getResource("RectangularBinning.result.description"));
+            getResource("RectangularBinning.result.description"), true, 1, 1, null, new KVP(
+                    Params.STYLES, "EqualInterval.val"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

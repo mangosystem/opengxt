@@ -112,7 +112,8 @@ public class CircularBinningProcessFactory extends SpatialStatisticsProcessFacto
     /** result */
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("CircularBinning.result.title"),
-            getResource("CircularBinning.result.description"));
+            getResource("CircularBinning.result.description"), true, 1, 1, null, new KVP(
+                    Params.STYLES, "EqualInterval.val"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

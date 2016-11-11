@@ -112,7 +112,8 @@ public class HexagonalBinningProcessFactory extends SpatialStatisticsProcessFact
     /** result */
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class, getResource("HexagonalBinning.result.title"),
-            getResource("HexagonalBinning.result.description"));
+            getResource("HexagonalBinning.result.description"), true, 1, 1, null, new KVP(
+                    Params.STYLES, "EqualInterval.val"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

@@ -89,8 +89,8 @@ public class RasterHighLowProcessFactory extends SpatialStatisticsProcessFactory
     /** valueType */
     public static final Parameter<HighLowType> valueType = new Parameter<HighLowType>("valueType",
             HighLowType.class, getResource("RasterHighLowPoints.valueType.title"),
-            getResource("RasterHighLowPoints.valueType.description"), false, 0, 1,
-            HighLowType.High, null);
+            getResource("RasterHighLowPoints.valueType.description"), true, 1, 1, HighLowType.High,
+            null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

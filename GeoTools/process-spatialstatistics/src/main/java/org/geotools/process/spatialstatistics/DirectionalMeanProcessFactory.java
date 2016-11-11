@@ -72,7 +72,7 @@ public class DirectionalMeanProcessFactory extends SpatialStatisticsProcessFacto
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("DirectionalMean.inputFeatures.title"),
             getResource("DirectionalMean.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "LineString"));
+                    Params.FEATURES, Params.LineString));
 
     /** orientationOnly */
     public static final Parameter<Boolean> orientationOnly = new Parameter<Boolean>(

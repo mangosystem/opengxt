@@ -78,7 +78,7 @@ public class ClipWithFeaturesProcessFactory extends SpatialStatisticsProcessFact
             "clipFeatures", SimpleFeatureCollection.class,
             getResource("ClipWithFeatures.clipFeatures.title"),
             getResource("ClipWithFeatures.clipFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polygon"));
+                    Params.FEATURES, Params.Polygon));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

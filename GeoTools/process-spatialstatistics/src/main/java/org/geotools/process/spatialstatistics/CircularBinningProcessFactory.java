@@ -75,7 +75,7 @@ public class CircularBinningProcessFactory extends SpatialStatisticsProcessFacto
             "features", SimpleFeatureCollection.class,
             getResource("CircularBinning.features.title"),
             getResource("CircularBinning.features.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Point"));
+                    Params.FEATURES, Params.Point));
 
     /** weight */
     public static final Parameter<Expression> weight = new Parameter<Expression>("weight",

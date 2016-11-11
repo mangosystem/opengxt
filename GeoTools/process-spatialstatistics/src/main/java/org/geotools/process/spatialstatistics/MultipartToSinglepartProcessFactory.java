@@ -73,7 +73,7 @@ public class MultipartToSinglepartProcessFactory extends SpatialStatisticsProces
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("MultipartToSinglepart.inputFeatures.title"),
             getResource("MultipartToSinglepart.inputFeatures.description"), true, 1, 1, null,
-            new KVP(Params.FEATURES, "Multipart"));
+            new KVP(Params.FEATURES, Params.Multipart));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

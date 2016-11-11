@@ -73,7 +73,7 @@ public class DensifyProcessFactory extends SpatialStatisticsProcessFactory {
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("Densify.inputFeatures.title"),
             getResource("Densify.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polyline"));
+                    Params.FEATURES, Params.Polyline));
 
     /** tolerance */
     public static final Parameter<Expression> tolerance = new Parameter<Expression>("tolerance",

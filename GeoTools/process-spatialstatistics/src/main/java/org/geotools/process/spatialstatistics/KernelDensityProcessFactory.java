@@ -76,7 +76,7 @@ public class KernelDensityProcessFactory extends SpatialStatisticsProcessFactory
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("KernelDensity.inputFeatures.title"),
             getResource("KernelDensity.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Point"));
+                    Params.FEATURES, Params.Point));
 
     /** kernelType */
     public static final Parameter<KernelType> kernelType = new Parameter<KernelType>("kernelType",

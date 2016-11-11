@@ -97,6 +97,10 @@ public class RasterHighLowProcess extends AbstractStatisticsProcess {
                 throw new NullPointerException("inputCoverage parameter required");
             }
 
+            if (valueType == null) {
+                valueType = HighLowType.Both;
+            }
+
             // start process
             RasterHighLowPointsOperation process = new RasterHighLowPointsOperation();
             SimpleFeatureCollection resultFc = process.execute(inputCoverage, bandIndex, cropShape,

@@ -72,7 +72,7 @@ public class CalculateAreaProcessFactory extends SpatialStatisticsProcessFactory
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("CalculateArea.inputFeatures.title"),
             getResource("CalculateArea.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polygon"));
+                    Params.FEATURES, Params.Polygon));
 
     /** areaField */
     public static final Parameter<String> areaField = new Parameter<String>("areaField",

@@ -55,6 +55,19 @@ public class Params {
      */
     public static final String STYLES = "Styles";
 
+    /**
+     * Geometry Type for Polygon, LineString, Point, Polyline(Polygon or LineString), Multipart
+     */
+    public static final String Polygon = "Polygon";
+
+    public static final String LineString = "LineString";
+
+    public static final String Point = "Point";
+
+    public static final String Polyline = "Polyline";
+
+    public static final String Multipart = "Multipart";
+
     public static Object getValue(Map<String, Object> input, Parameter<?> parameter,
             Object defaultValue) {
         Object param = input.get(parameter.key);
@@ -90,7 +103,7 @@ public class Params {
         return param;
     }
 
-    // create boundingbox from comma separated coordinates string and crs 
+    // create boundingbox from comma separated coordinates string and crs
     public static ReferencedEnvelope getBoundingBox(String bBox, CoordinateReferenceSystem crs) {
         if (bBox == null || bBox.isEmpty()) {
             return new ReferencedEnvelope(crs);

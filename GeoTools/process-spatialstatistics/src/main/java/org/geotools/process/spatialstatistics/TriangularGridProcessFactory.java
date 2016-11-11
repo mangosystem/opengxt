@@ -80,7 +80,7 @@ public class TriangularGridProcessFactory extends SpatialStatisticsProcessFactor
             "boundsSource", SimpleFeatureCollection.class,
             getResource("TriangularGrid.boundsSource.title"),
             getResource("TriangularGrid.boundsSource.description"), false, 0, 1, null, new KVP(
-                    Params.FEATURES, "Polygon"));
+                    Params.FEATURES, Params.Polygon));
 
     /** size */
     public static final Parameter<Double> size = new Parameter<Double>("size", Double.class,

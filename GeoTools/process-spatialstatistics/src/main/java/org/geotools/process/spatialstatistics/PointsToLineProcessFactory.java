@@ -72,7 +72,7 @@ public class PointsToLineProcessFactory extends SpatialStatisticsProcessFactory 
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("PointsToLine.inputFeatures.title"),
             getResource("PointsToLine.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Point"));
+                    Params.FEATURES, Params.Point));
 
     /** lineField */
     public static final Parameter<String> lineField = new Parameter<String>("lineField",

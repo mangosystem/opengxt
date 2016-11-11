@@ -70,8 +70,7 @@ public class SDProcessFactory extends SpatialStatisticsProcessFactory {
     /** inputFeatures */
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class, getResource("Sd.inputFeatures.title"),
-            getResource("Sd.inputFeatures.description"), true, 1, 1, null, new KVP(Params.FEATURES,
-                    "All"));
+            getResource("Sd.inputFeatures.description"), true, 1, 1, null, null);
 
     /** circleSize */
     public static final Parameter<String> circleSize = new Parameter<String>("circleSize",

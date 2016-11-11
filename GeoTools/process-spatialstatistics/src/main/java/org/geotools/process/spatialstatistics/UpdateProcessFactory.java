@@ -72,14 +72,14 @@ public class UpdateProcessFactory extends SpatialStatisticsProcessFactory {
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("Update.inputFeatures.title"),
             getResource("Update.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polygon"));
+                    Params.FEATURES, Params.Polygon));
 
     /** updateFeatures */
     public static final Parameter<SimpleFeatureCollection> updateFeatures = new Parameter<SimpleFeatureCollection>(
             "updateFeatures", SimpleFeatureCollection.class,
             getResource("Update.updateFeatures.title"),
             getResource("Update.updateFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polygon"));
+                    Params.FEATURES, Params.Polygon));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

@@ -73,14 +73,14 @@ public class PointStatisticsProcessFactory extends SpatialStatisticsProcessFacto
             "polygonFeatures", SimpleFeatureCollection.class,
             getResource("PointStatistics.polygonFeatures.title"),
             getResource("PointStatistics.polygonFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polygon"));
+                    Params.FEATURES, Params.Polygon));
 
     /** pointFeatures */
     public static final Parameter<SimpleFeatureCollection> pointFeatures = new Parameter<SimpleFeatureCollection>(
             "pointFeatures", SimpleFeatureCollection.class,
             getResource("PointStatistics.pointFeatures.title"),
             getResource("PointStatistics.pointFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Point"));
+                    Params.FEATURES, Params.Point));
 
     /** countField */
     public static final Parameter<String> countField = new Parameter<String>("countField",

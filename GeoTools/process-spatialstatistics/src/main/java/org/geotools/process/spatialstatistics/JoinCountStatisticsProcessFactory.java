@@ -76,7 +76,7 @@ public class JoinCountStatisticsProcessFactory extends SpatialStatisticsProcessF
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("JoinCount.inputFeatures.title"),
             getResource("JoinCount.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polygon"));
+                    Params.FEATURES, Params.Polygon));
 
     /** blackExpression */
     public static final Parameter<Filter> blackExpression = new Parameter<Filter>(

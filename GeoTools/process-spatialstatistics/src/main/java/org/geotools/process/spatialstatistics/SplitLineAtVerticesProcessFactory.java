@@ -71,7 +71,7 @@ public class SplitLineAtVerticesProcessFactory extends SpatialStatisticsProcessF
             "lineFeatures", SimpleFeatureCollection.class,
             getResource("SplitLineAtVertices.lineFeatures.title"),
             getResource("SplitLineAtVertices.lineFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polyline"));
+                    Params.FEATURES, Params.Polyline));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

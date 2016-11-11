@@ -72,7 +72,7 @@ public class AreaProcessFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("Area.inputFeatures.title"), getResource("Area.inputFeatures.description"),
-            true, 1, 1, null, new KVP(Params.FEATURES, "Polygon"));
+            true, 1, 1, null, new KVP(Params.FEATURES, Params.Polygon));
 
     /** filter */
     public static final Parameter<Filter> filter = new Parameter<Filter>("filter", Filter.class,

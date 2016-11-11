@@ -76,7 +76,7 @@ public class ThiessenPolygonProcessFactory extends SpatialStatisticsProcessFacto
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("Thiessen.inputFeatures.title"),
             getResource("Thiessen.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Point"));
+                    Params.FEATURES, Params.Point));
 
     /** attributes */
     public static final Parameter<ThiessenAttributeMode> attributes = new Parameter<ThiessenAttributeMode>(

@@ -72,13 +72,13 @@ public class RandomPointsPerFeaturesProcessFactory extends SpatialStatisticsProc
             "polygonFeatures", SimpleFeatureCollection.class,
             getResource("RandomPointsPerFeatures.polygonFeatures.title"),
             getResource("RandomPointsPerFeatures.polygonFeatures.description"), true, 1, 1, null,
-            new KVP(Params.FEATURES, "Polygon"));
+            new KVP(Params.FEATURES, Params.Polygon));
 
     /** expression */
     public static final Parameter<Expression> expression = new Parameter<Expression>("expression",
             Expression.class, getResource("RandomPointsPerFeatures.expression.title"),
-            getResource("RandomPointsPerFeatures.expression.description"), true, 1, 1, null, new KVP(
-                    Params.FIELD, "polygonFeatures.Number"));
+            getResource("RandomPointsPerFeatures.expression.description"), true, 1, 1, null,
+            new KVP(Params.FIELD, "polygonFeatures.Number"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

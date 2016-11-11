@@ -72,7 +72,7 @@ public class SplitLineByDistanceProcessFactory extends SpatialStatisticsProcessF
             "lineFeatures", SimpleFeatureCollection.class,
             getResource("SplitLineByDistance.lineFeatures.title"),
             getResource("SplitLineByDistance.lineFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polyline"));
+                    Params.FEATURES,Params.Polyline));
 
     /** distance */
     public static final Parameter<Expression> distance = new Parameter<Expression>("distance",

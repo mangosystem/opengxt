@@ -72,7 +72,7 @@ public class UnionPolygonProcessFactory extends SpatialStatisticsProcessFactory 
             "polygonFeatures", SimpleFeatureCollection.class,
             getResource("UnionPolygon.polygonFeatures.title"),
             getResource("UnionPolygon.polygonFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polygon"));
+                    Params.FEATURES, Params.Polygon));
 
     /** preserveHole */
     public static final Parameter<Boolean> preserveHole = new Parameter<Boolean>("preserveHole",

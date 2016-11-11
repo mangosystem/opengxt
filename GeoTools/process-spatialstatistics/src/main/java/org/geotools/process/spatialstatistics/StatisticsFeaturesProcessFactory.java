@@ -73,8 +73,7 @@ public class StatisticsFeaturesProcessFactory extends SpatialStatisticsProcessFa
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("StatisticsFeatures.inputFeatures.title"),
-            getResource("StatisticsFeatures.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "All"));
+            getResource("StatisticsFeatures.inputFeatures.description"), true, 1, 1, null, null);
 
     /** inputFields */
     public static final Parameter<String> inputFields = new Parameter<String>("inputFields",

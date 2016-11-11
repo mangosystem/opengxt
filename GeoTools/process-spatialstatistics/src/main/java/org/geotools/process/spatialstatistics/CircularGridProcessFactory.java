@@ -80,7 +80,7 @@ public class CircularGridProcessFactory extends SpatialStatisticsProcessFactory 
             "boundsSource", SimpleFeatureCollection.class,
             getResource("CircularGrid.boundsSource.title"),
             getResource("CircularGrid.boundsSource.description"), false, 0, 1, null, new KVP(
-                    Params.FEATURES, "Polygon"));
+                    Params.FEATURES, Params.Polygon));
 
     /** radius */
     public static final Parameter<Double> radius = new Parameter<Double>("radius", Double.class,

@@ -75,7 +75,7 @@ public class SelectFeaturesProcessFactory extends SpatialStatisticsProcessFactor
     /** filter */
     public static final Parameter<Filter> filter = new Parameter<Filter>("filter", Filter.class,
             getResource("SelectFeatures.filter.title"),
-            getResource("SelectFeatures.filter.description"), false, 0, 1, null, null);
+            getResource("SelectFeatures.filter.description"), true, 1, 1, null, null);
 
     /** attributes */
     public static final Parameter<String> attributes = new Parameter<String>("attributes",

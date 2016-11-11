@@ -75,7 +75,7 @@ public class DelaunayTriangulationProcessFactory extends SpatialStatisticsProces
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("DelaunayTriangulation.inputFeatures.title"),
             getResource("DelaunayTriangulation.inputFeatures.description"), true, 1, 1, null,
-            new KVP(Params.FEATURES, "Point"));
+            new KVP(Params.FEATURES, Params.Point));
 
     /** clipArea */
     public static final Parameter<Geometry> clipArea = new Parameter<Geometry>("clipArea",

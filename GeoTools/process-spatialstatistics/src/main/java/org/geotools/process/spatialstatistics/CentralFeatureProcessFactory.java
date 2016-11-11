@@ -73,8 +73,7 @@ public class CentralFeatureProcessFactory extends SpatialStatisticsProcessFactor
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("CentralFeature.inputFeatures.title"),
-            getResource("CentralFeature.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "All"));
+            getResource("CentralFeature.inputFeatures.description"), true, 1, 1, null, null);
 
     /** distanceMethod */
     public static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(

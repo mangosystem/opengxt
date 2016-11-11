@@ -71,8 +71,7 @@ public class SDEProcessFactory extends SpatialStatisticsProcessFactory {
     /** inputFeatures */
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class, getResource("Sde.inputFeatures.title"),
-            getResource("Sde.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "All"));
+            getResource("Sde.inputFeatures.description"), true, 1, 1, null, null);
 
     /** ellipseSize */
     public static final Parameter<String> ellipseSize = new Parameter<String>("ellipseSize",

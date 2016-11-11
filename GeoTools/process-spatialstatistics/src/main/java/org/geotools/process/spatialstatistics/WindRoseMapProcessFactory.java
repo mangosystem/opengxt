@@ -74,7 +74,7 @@ public class WindRoseMapProcessFactory extends SpatialStatisticsProcessFactory {
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("WindRoseMap.inputFeatures.title"),
             getResource("WindRoseMap.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Point"));
+                    Params.FEATURES, Params.Point));
 
     /** weightField */
     public static final Parameter<String> weightField = new Parameter<String>("weightField",

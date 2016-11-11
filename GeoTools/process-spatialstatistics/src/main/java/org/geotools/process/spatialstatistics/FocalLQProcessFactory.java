@@ -71,8 +71,7 @@ public class FocalLQProcessFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("FocalLQ.inputFeatures.title"),
-            getResource("FocalLQ.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "All"));
+            getResource("FocalLQ.inputFeatures.description"), true, 1, 1, null, null);
 
     /** xField */
     public static final Parameter<String> xField = new Parameter<String>("xField", String.class,

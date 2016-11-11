@@ -71,8 +71,7 @@ public class MeanCenterProcessFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("MeanCenter.inputFeatures.title"),
-            getResource("MeanCenter.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "All"));
+            getResource("MeanCenter.inputFeatures.description"), true, 1, 1, null, null);
 
     /** weightField */
     public static final Parameter<String> weightField = new Parameter<String>("weightField",

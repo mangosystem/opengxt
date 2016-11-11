@@ -71,7 +71,7 @@ public class PointsAlongLinesProcessFactory extends SpatialStatisticsProcessFact
             "lineFeatures", SimpleFeatureCollection.class,
             getResource("PointsAlongLines.lineFeatures.title"),
             getResource("PointsAlongLines.lineFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polyline"));
+                    Params.FEATURES, Params.Polyline));
 
     /** distance */
     public static final Parameter<Expression> distance = new Parameter<Expression>("distance",

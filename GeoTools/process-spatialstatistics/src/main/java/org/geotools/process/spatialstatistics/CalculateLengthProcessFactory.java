@@ -72,7 +72,7 @@ public class CalculateLengthProcessFactory extends SpatialStatisticsProcessFacto
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("CalculateLength.inputFeatures.title"),
             getResource("CalculateLength.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polyline"));
+                    Params.FEATURES, Params.Polyline));
 
     /** lengthField */
     public static final Parameter<String> lengthField = new Parameter<String>("lengthField",

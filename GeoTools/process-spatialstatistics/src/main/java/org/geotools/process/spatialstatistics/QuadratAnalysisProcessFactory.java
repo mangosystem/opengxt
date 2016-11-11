@@ -73,7 +73,7 @@ public class QuadratAnalysisProcessFactory extends SpatialStatisticsProcessFacto
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("QuadratAnalysis.inputFeatures.title"),
             getResource("QuadratAnalysis.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Point"));
+                    Params.FEATURES, Params.Point));
 
     /** cellSize */
     public static final Parameter<Double> cellSize = new Parameter<Double>("cellSize",

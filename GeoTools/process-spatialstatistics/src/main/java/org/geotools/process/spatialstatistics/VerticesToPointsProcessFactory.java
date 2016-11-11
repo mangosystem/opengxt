@@ -73,7 +73,7 @@ public class VerticesToPointsProcessFactory extends SpatialStatisticsProcessFact
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("VerticesToPoints.inputFeatures.title"),
             getResource("VerticesToPoints.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polyline"));
+                    Params.FEATURES, Params.Polyline));
 
     /** location */
     public static final Parameter<PointLocationType> location = new Parameter<PointLocationType>(

@@ -73,7 +73,7 @@ public class SimplifyProcessFactory extends SpatialStatisticsProcessFactory {
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("Simplify.inputFeatures.title"),
             getResource("Simplify.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "POLYLINE"));
+                    Params.FEATURES, Params.Polyline));
 
     /** tolerance */
     public static final Parameter<Expression> tolerance = new Parameter<Expression>("tolerance",

@@ -70,7 +70,7 @@ public class CollectEventsProcessFactory extends SpatialStatisticsProcessFactory
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("CollectEvents.inputFeatures.title"),
             getResource("CollectEvents.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Point"));
+                    Params.FEATURES, Params.Point));
 
     /** countField */
     public static final Parameter<String> countField = new Parameter<String>("countField",

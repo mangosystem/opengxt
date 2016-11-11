@@ -73,8 +73,7 @@ public class StandardizedScoresProcessFactory extends SpatialStatisticsProcessFa
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("StandardizedScores.inputFeatures.title"),
-            getResource("StandardizedScores.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "All"));
+            getResource("StandardizedScores.inputFeatures.description"), true, 1, 1, null, null);
 
     /** xField */
     public static final Parameter<Expression> xField = new Parameter<Expression>("xField",

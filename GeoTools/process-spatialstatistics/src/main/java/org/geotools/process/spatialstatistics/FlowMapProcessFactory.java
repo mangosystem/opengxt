@@ -73,7 +73,7 @@ public class FlowMapProcessFactory extends SpatialStatisticsProcessFactory {
             "lineFeatures", SimpleFeatureCollection.class,
             getResource("FlowMap.lineFeatures.title"),
             getResource("FlowMap.lineFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "LineString"));
+                    Params.FEATURES, Params.LineString));
 
     /** odValue */
     public static final Parameter<Expression> odValue = new Parameter<Expression>("odValue",

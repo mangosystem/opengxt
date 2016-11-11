@@ -75,7 +75,7 @@ public class HexagonalBinningProcessFactory extends SpatialStatisticsProcessFact
             "features", SimpleFeatureCollection.class,
             getResource("HexagonalBinning.features.title"),
             getResource("HexagonalBinning.features.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Point"));
+                    Params.FEATURES, Params.Point));
 
     /** weight */
     public static final Parameter<Expression> weight = new Parameter<Expression>("weight",

@@ -73,7 +73,7 @@ public class TPSProcessFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class, getResource("TPS.inputFeatures.title"),
             getResource("TPS.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Point"));
+                    Params.FEATURES, Params.Point));
 
     /** inputField */
     public static final Parameter<String> inputField = new Parameter<String>("inputField",

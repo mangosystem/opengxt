@@ -71,7 +71,7 @@ public class SumLineLengthProcessFactory extends SpatialStatisticsProcessFactory
     public static final Parameter<SimpleFeatureCollection> polygons = new Parameter<SimpleFeatureCollection>(
             "polygons", SimpleFeatureCollection.class, getResource("SumLineLength.polygons.title"),
             getResource("SumLineLength.polygons.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polygon"));
+                    Params.FEATURES, Params.Polygon));
 
     /** lengthField */
     public static final Parameter<String> lengthField = new Parameter<String>("lengthField",
@@ -89,7 +89,7 @@ public class SumLineLengthProcessFactory extends SpatialStatisticsProcessFactory
     public static final Parameter<SimpleFeatureCollection> lines = new Parameter<SimpleFeatureCollection>(
             "lines", SimpleFeatureCollection.class, getResource("SumLineLength.lines.title"),
             getResource("SumLineLength.lines.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "LineString"));
+                    Params.FEATURES, Params.LineString));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

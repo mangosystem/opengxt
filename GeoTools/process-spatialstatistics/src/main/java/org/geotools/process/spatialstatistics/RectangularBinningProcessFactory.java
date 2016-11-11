@@ -76,7 +76,7 @@ public class RectangularBinningProcessFactory extends SpatialStatisticsProcessFa
             "features", SimpleFeatureCollection.class,
             getResource("RectangularBinning.features.title"),
             getResource("RectangularBinning.features.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Point"));
+                    Params.FEATURES, Params.Point));
 
     /** weight */
     public static final Parameter<Expression> weight = new Parameter<Expression>("weight",

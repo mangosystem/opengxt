@@ -85,7 +85,7 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
             "pointFeatures", SimpleFeatureCollection.class,
             getResource("BufferPointStatistics.pointFeatures.title"),
             getResource("BufferPointStatistics.pointFeatures.description"), true, 1, 1, null,
-            new KVP(Params.FEATURES, "Point"));
+            new KVP(Params.FEATURES, Params.Point));
 
     /** countField */
     public static final Parameter<String> countField = new Parameter<String>("countField",

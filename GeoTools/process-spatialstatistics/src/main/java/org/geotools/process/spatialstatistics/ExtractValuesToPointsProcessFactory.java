@@ -76,7 +76,7 @@ public class ExtractValuesToPointsProcessFactory extends SpatialStatisticsProces
             "pointFeatures", SimpleFeatureCollection.class,
             getResource("ExtractValuesToPoints.pointFeatures.title"),
             getResource("ExtractValuesToPoints.pointFeatures.description"), true, 1, 1, null,
-            new KVP(Params.FEATURES, "Point"));
+            new KVP(Params.FEATURES, Params.Point));
 
     /** valueField */
     public static final Parameter<String> valueField = new Parameter<String>("valueField",

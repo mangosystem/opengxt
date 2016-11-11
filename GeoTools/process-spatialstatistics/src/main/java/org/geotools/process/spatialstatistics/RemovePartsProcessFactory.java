@@ -77,7 +77,7 @@ public class RemovePartsProcessFactory extends SpatialStatisticsProcessFactory {
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("RemoveParts.inputFeatures.title"),
             getResource("RemoveParts.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "Polygon"));
+                    Params.FEATURES, Params.Polygon));
 
     /** minimumArea */
     public static final Parameter<Expression> minimumArea = new Parameter<Expression>(

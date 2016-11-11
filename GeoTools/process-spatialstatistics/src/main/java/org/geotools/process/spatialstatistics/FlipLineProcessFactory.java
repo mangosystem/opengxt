@@ -72,7 +72,7 @@ public class FlipLineProcessFactory extends SpatialStatisticsProcessFactory {
             "lineFeatures", SimpleFeatureCollection.class,
             getResource("FlipLine.lineFeatures.title"),
             getResource("FlipLine.lineFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, "LineString"));
+                    Params.FEATURES, Params.LineString));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

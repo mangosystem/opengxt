@@ -43,7 +43,7 @@ import org.locationtech.udig.processingtoolbox.internal.Messages;
 public class SettingsDialog extends Dialog {
     protected static final Logger LOGGER = Logging.getLogger(SettingsDialog.class);
 
-    private Button btnOpen, chkLog, chkSel, chkStyle, chkAddLayer;
+    private Button btnOpen, chkLog, chkSel, chkStyle, chkAddLayer, chkMandatoryParameter;
 
     private Text txtCrs;
 
@@ -114,6 +114,12 @@ public class SettingsDialog extends Dialog {
         chkAddLayer.setSelection(ToolboxView.getAddLayerAutomatically());
         chkAddLayer.addSelectionListener(selectionListener);
 
+        // 1.6 show only mandatory parameter
+        chkMandatoryParameter = widget.createCheckbox(generalComposite,
+                Messages.SettingsDialog_MandatoryParameter, null, 4);
+        chkMandatoryParameter.setSelection(ToolboxView.getMandatoryParameterOnly());
+        chkMandatoryParameter.addSelectionListener(selectionListener);
+
         tabItemGeneral.setControl(generalComposite);
 
         // 2. advanced tab
@@ -145,6 +151,8 @@ public class SettingsDialog extends Dialog {
                 ToolboxView.setUseDefaultStyle(chkStyle.getSelection());
             } else if (widget.equals(chkAddLayer)) {
                 ToolboxView.setAddLayerAutomatically(chkAddLayer.getSelection());
+            } else if (widget.equals(chkMandatoryParameter)) {
+                ToolboxView.setMandatoryParameterOnly(chkMandatoryParameter.getSelection());
             } else if (widget.equals(btnOpen)) {
                 final Shell shell = Display.getCurrent().getActiveShell();
                 DirectoryDialog dirDialog = new DirectoryDialog(shell);

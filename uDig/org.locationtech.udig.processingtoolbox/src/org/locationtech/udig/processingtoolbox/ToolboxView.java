@@ -88,6 +88,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
 
     private static Boolean addLayerAutomatically = Boolean.TRUE;
 
+    private static Boolean mandatoryParameterOnly = Boolean.FALSE;
+
     private TreeViewer viewer;
 
     private IAction actionEnv;
@@ -122,7 +124,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
     }
 
     public static Boolean getShowLog() {
-        return showLog;
+        return ToolboxView.showLog;
     }
 
     public static void setShowLog(Boolean showLog) {
@@ -159,6 +161,14 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
 
     public static void setAddLayerAutomatically(Boolean addLayerAutomatically) {
         ToolboxView.addLayerAutomatically = addLayerAutomatically;
+    }
+
+    public static Boolean getMandatoryParameterOnly() {
+        return mandatoryParameterOnly;
+    }
+
+    public static void setMandatoryParameterOnly(Boolean mandatoryParameterOnly) {
+        ToolboxView.mandatoryParameterOnly = mandatoryParameterOnly;
     }
 
     @Override

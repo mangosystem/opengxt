@@ -45,6 +45,7 @@ import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
+import org.locationtech.udig.processingtoolbox.ToolboxView;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget.FileDataType;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils;
@@ -208,6 +209,9 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
         // input parameters
         Map<String, Parameter<?>> paramInfo = factory.getParameterInfo(processName);
         for (Entry<String, Parameter<?>> entrySet : paramInfo.entrySet()) {
+            if (ToolboxView.getMandatoryParameterOnly() && entrySet.getValue().getMinOccurs() == 0) {
+                continue;
+            }
             inputParams.put(entrySet.getValue().key, entrySet.getValue().sample);
             insertControl(container, entrySet.getValue());
         }

@@ -34,6 +34,7 @@ import org.locationtech.udig.project.IMap;
 public class LiteralDataFieldWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(LiteralDataFieldWidget.class);
 
+    @SuppressWarnings("unused")
     private IMap map;
 
     public LiteralDataFieldWidget(IMap map) {

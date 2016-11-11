@@ -95,7 +95,7 @@ public class ExportStyleDialog extends AbstractGeoProcessingDialog implements IR
         TableSelectionWidget tblSelection = new TableSelectionWidget(inputTable);
         tblSelection.create(group, SWT.NONE, 2, 1);
 
-        chkOverwrite = uiBuilder.createCheckbox(parent, Messages.ExportStyleDialog_overwrite, null,
+        chkOverwrite = uiBuilder.createCheckbox(container, Messages.ExportStyleDialog_overwrite, null,
                 1);
 
         locationView = new OutputDataWidget(FileDataType.FOLDER, SWT.OPEN);
@@ -113,7 +113,6 @@ public class ExportStyleDialog extends AbstractGeoProcessingDialog implements IR
         table.removeAll();
         for (ILayer layer : map.getMapLayers()) {
             if (layer.getName() != null) {
-                // exclude wms, wmts ...
                 Style style = (Style) layer.getStyleBlackboard().get(SLDContent.ID);
                 if (style == null) {
                     continue;

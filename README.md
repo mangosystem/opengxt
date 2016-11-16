@@ -17,7 +17,12 @@ any major spatial data source using open standards.
 
 ### Download GeoTools & GeoServer WPS libraries
 * Visit [SourceForge](https://sourceforge.net/projects/mango-spatialstatistics/)
-* Download jar files
+* Geotools 14.x
+ * Download gt-process-spatialstatistics-14.1.jar file
+* GeoServer 2.8.x
+ * Download gs-wps-spatialstatistics-2.8.1.jar, gt-process-spatialstatistics-14.1.jar files
+ * Copy these files to the WEB-INF/lib directory of the GeoServer installation.
+ * Restart GeoServer
 
 ### uDig Plugin Installation
 * Download and install uDig 2.0-SNAPSHOT (GeoTools 14.1)
@@ -41,9 +46,11 @@ any major spatial data source using open standards.
 * [Transifex - English(defalut), Korean ...](https://www.transifex.com/projects/p/ss-rd/)
 
 ### Contributor
-* MapPlus (mapplus@gmail.com)
-* mangowoong (socoooooool@gmail.com)
-* mangosystem (yhlim0129@gmail.com)
+* mapplus (mapplus@gmail.com)
+* mangosystem (https://github.com/mangosystem)
+* mangowoong (https://github.com/mangowoong)
+* favorson (https://github.com/favorson)
+* rlawlgus18 (https://github.com/rlawlgus18)
 
 ### Gallery
 

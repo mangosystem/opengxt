@@ -69,6 +69,7 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.statistics.HistogramType;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -279,7 +280,7 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
             ChartEntity entity = event.getEntity();
             if (entity != null && (entity instanceof XYItemEntity)) {
                 XYItemEntity item = (XYItemEntity) entity;
-                HistogramDataset2 dataSet = (HistogramDataset2) item.getDataset();
+                HistogramDataset dataSet = (HistogramDataset) item.getDataset();
                 double min = dataSet.getStartXValue(0, item.getItem());
                 double max = dataSet.getEndXValue(0, item.getItem());
                 CustomXYBarPainter.selectedColumn = item.getItem();
@@ -298,7 +299,7 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
         int bin = spinner.getSelection();
 
         double[] values = getValues(features, field);
-        HistogramDataset2 dataset = new HistogramDataset2();
+        HistogramDataset dataset = new HistogramDataset();
         dataset.addSeries(field, values, bin, minMaxVisitor.getMinX(), minMaxVisitor.getMaxX());
         dataset.setType(histogramType);
 
@@ -327,7 +328,7 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
         valueAxis.setAutoRange(false);
         valueAxis.setRange(minMaxVisitor.getMinX(), minMaxVisitor.getMaxX());
 
-        String rangeAxisLabel = histogramType == HistogramType.FREQUENCY ? "Frequency" : "Percent"; //$NON-NLS-1$ //$NON-NLS-2$
+        String rangeAxisLabel = histogramType == HistogramType.FREQUENCY ? "Frequency" : "Ratio"; //$NON-NLS-1$ //$NON-NLS-2$
         NumberAxis rangeAxis = new NumberAxis(rangeAxisLabel);
         rangeAxis.setLabelFont(new Font(fontData.getName(), fontStyle, 12));
         rangeAxis.setTickLabelFont(new Font(fontData.getName(), fontStyle, 10));

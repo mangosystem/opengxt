@@ -52,7 +52,6 @@ import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.locationtech.udig.style.sld.editor.BorderColorComboListener.Outline;
-import org.locationtech.udig.ui.graphics.Glyph;
 
 /**
  * Histogram Dialog
@@ -79,7 +78,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
 
     private Combo cboLayer, cboField, cboMethod, cboNormal, cboOutline;
 
-    private ImageCombo cboColorRamp;
+    private Combo cboColorRamp;
 
     private Spinner spnClass, spnTransparency, spnLineWidth;
 
@@ -127,13 +126,13 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
 
         // Ramp
         uiBuilder.createLabel(container, Messages.ThematicMapDialog_ColorRamp, EMPTY, image, 1);
-        cboColorRamp = new ImageCombo(container, SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY);
-        cboColorRamp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 5, 1));
+        cboColorRamp = uiBuilder.createCombo(container, 2, true);
 
         // Reverse color ramp
         uiBuilder.createLabel(container, EMPTY, EMPTY, null, 1);
-        chkReverse = uiBuilder.createCheckbox(container, Messages.ThematicMapDialog_Reverse, EMPTY, 5);
-        
+        chkReverse = uiBuilder.createCheckbox(container, Messages.ThematicMapDialog_Reverse, EMPTY,
+                5);
+
         // transparency
         uiBuilder.createLabel(container, Messages.ThematicMapDialog_Transparency, EMPTY, image, 1);
         Composite subCon = new Composite(container, SWT.NONE);
@@ -255,8 +254,8 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
         cboColorRamp.removeAll();
         for (BrewerPalette palette : palettes) {
             String name = String.format("%s(%s)", palette.getName(), palette.getDescription());
-            Image image = Glyph.palette(palette.getColors()).createImage();
-            cboColorRamp.add(image, name);
+            // Image image = Glyph.palette(palette.getColors()).createImage();
+            cboColorRamp.add(name);
         }
         cboColorRamp.select(cboColorRamp.getItemCount() > 5 ? 5 : 0);
     }
@@ -299,7 +298,8 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
                 Style style = ssBuilder.getDefaultFeatureStyle();
 
                 // crate thematic style
-                SimpleShapeType shapeType = FeatureTypes.getSimpleShapeType(activeLayer.getSchema());
+                SimpleShapeType shapeType = FeatureTypes
+                        .getSimpleShapeType(activeLayer.getSchema());
                 if (shapeType == SimpleShapeType.POINT) {
                     GraduatedSymbolStyleBuilder builder = new GraduatedSymbolStyleBuilder();
                     builder.setFillOpacity(opacity);

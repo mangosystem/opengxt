@@ -73,7 +73,7 @@ public class MapImagePPIO extends BinaryPPIO {
             if (filter != Filter.INCLUDE && filter != null) {
                 sfc = retypeCheck(info.getInputFeatures()).subCollection(filter);
             }
-            mapContent.layers().add(new FeatureLayer(sfc.subCollection(filter), style));
+            mapContent.layers().add(new FeatureLayer(sfc, style));
         }
         mapContent.getViewport().setBounds(info.getMapExtent());
 

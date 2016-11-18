@@ -77,7 +77,7 @@ public class CalculateSumLineLengthOperation extends GeneralOperation {
 
         SimpleFeatureType featureType = FeatureTypes.build(polygons, getOutputTypeName());
         featureType = FeatureTypes.add(featureType, lengthField, Double.class, 38);
-        featureType = FeatureTypes.add(featureType, countField, Integer.class, 38);
+        featureType = FeatureTypes.add(featureType, countField, Integer.class, 5);
 
         // number, string, int, long, float, double....
         AttributeDescriptor lenDsc = featureType.getDescriptor(lengthField);
@@ -90,9 +90,8 @@ public class CalculateSumLineLengthOperation extends GeneralOperation {
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = polygons.features();
         try {
-            featureIter = polygons.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry clipGeometry = (Geometry) feature.getDefaultGeometry();
@@ -104,9 +103,8 @@ public class CalculateSumLineLengthOperation extends GeneralOperation {
 
                 double sumLength = 0d;
                 int lineCount = 0;
-                SimpleFeatureIterator lineIter = null;
+                SimpleFeatureIterator lineIter = lines.subCollection(filter).features();
                 try {
-                    lineIter = lines.subCollection(filter).features();
                     while (lineIter.hasNext()) {
                         SimpleFeature lineFeature = lineIter.next();
                         Geometry lineStrings = (Geometry) lineFeature.getDefaultGeometry();
@@ -117,8 +115,7 @@ public class CalculateSumLineLengthOperation extends GeneralOperation {
                         }
                     }
                 } finally {
-                    if (lineIter != null)
-                        lineIter.close();
+                    lineIter.close();
                 }
 
                 SimpleFeature newFeature = featureWriter.buildFeature(null);

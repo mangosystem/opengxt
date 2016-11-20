@@ -34,9 +34,9 @@ public class SSUtils {
     protected static final Logger LOGGER = Logging.getLogger(SSUtils.class);
 
     public enum StatEnum {
-        LEFT,   // area under the curve to the left
-        RIGHT,  // area under the curve to the right
-        BOTH   // two-tailed test
+        LEFT, // area under the curve to the left
+        RIGHT, // area under the curve to the right
+        BOTH // two-tailed test
     }
 
     /** Default tolerance for double comparisons: 1.0e-8 = 0.00000001 */
@@ -71,7 +71,6 @@ public class SSUtils {
         double x17 = 30.789933034;
         double x18 = 3.99019417011;
         double lt = 7.0;
-        // double utz = 18.66;
         double con = 1.28;
         boolean pos = x >= 0;
         double z = Math.abs(x);
@@ -120,31 +119,24 @@ public class SSUtils {
     public static double getAngle(double numerator, double denominator) {
         double ratio = 0.0;
         if (denominator == 0.0) {
-            // #### 90 Degrees in Radians ####
             ratio = Math.PI / 2.0;
         } else if (numerator == 0.0) {
-            // #### 180 Degrees in Radians ####
             ratio = Math.PI;
         } else {
             ratio = Math.abs(Math.atan(numerator / denominator));
         }
 
-        // #### Quadrant Adjustment ####
         double angle = 0.0;
         if (numerator >= 0) {
             if (denominator >= 0) {
-                // #### X and Y Positive (First Quadrant) ####
                 angle = ratio;
             } else {
-                // #### Y is Negative (Second Quadrant) ####
                 angle = Math.PI - ratio;
             }
         } else {
             if (denominator < 0) {
-                // #### X and Y Negative (Third Quadrant) ####
                 angle = Math.PI + ratio;
             } else {
-                // #### Y is Positive (Fourth Quadrant) ####
                 angle = (2.0 * Math.PI) - ratio;
             }
         }
@@ -179,14 +171,7 @@ public class SSUtils {
     }
 
     public static boolean compareDouble(double a, double b, double rTol) {
-        // a (float): float to be compared
-        // b (float): float to be compared
-        // rTol (float): relative tolerance
-        // aTol (float): absolute tolerance
-
         final double aTol = 0.00000001;
-
-        // return (boolean): true if |a - b| < aTol + (rTol * |b|)
 
         if (Math.abs(a - b) < aTol + (rTol * Math.abs(b))) {
             return true;
@@ -200,11 +185,6 @@ public class SSUtils {
     }
 
     public static boolean compareFloat(float a, float b, float rTol) {
-        // a (float): float to be compared
-        // b (float): float to be compared
-        // rTol (float): relative tolerance
-        // aTol (float): absolute tolerance
-
         final float aTol = 0.0001f;
 
         if (Math.abs(a - b) < aTol + (rTol * Math.abs(b))) {

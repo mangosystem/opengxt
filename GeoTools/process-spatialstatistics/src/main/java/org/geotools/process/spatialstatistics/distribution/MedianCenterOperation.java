@@ -82,13 +82,10 @@ public class MedianCenterOperation extends AbstractDisributionOperator {
                     continue;
                 }
 
-                // geometry's true centroid
                 Coordinate coordinate = getTrueCentroid(geometry);
 
-                // Case Field
                 Object caseVal = idxCase == -1 ? ALL : feature.getAttribute(idxCase);
 
-                // Weight Field
                 double weightVal = 1.0;
                 if (idxWeight != -1) {
                     weightVal = this.getValue(feature, weightExpr, weightVal);

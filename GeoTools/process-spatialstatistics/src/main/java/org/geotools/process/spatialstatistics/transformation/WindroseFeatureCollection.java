@@ -157,7 +157,7 @@ public class WindroseFeatureCollection extends GXTSimpleFeatureCollection {
             double stepAngle = 360.0 / SEG;
             double halfStep = stepAngle / 2.0;
 
-            // pre porcess
+            // pre process
             for (int index = 0; index < SEG; index++) {
                 double startDeg = (index * stepAngle) - halfStep;
                 double endDeg = ((index + 1) * stepAngle) - halfStep;
@@ -207,7 +207,7 @@ public class WindroseFeatureCollection extends GXTSimpleFeatureCollection {
 
                     double adjustedRadius = ((value - minValue) / diff) * radius;
                     if (adjustedRadius == 0) {
-                        adjustedRadius = radius * 0.01;
+                        adjustedRadius = radius * 0.001;
                     }
 
                     double startDeg = (index * stepAngle) - halfStep;

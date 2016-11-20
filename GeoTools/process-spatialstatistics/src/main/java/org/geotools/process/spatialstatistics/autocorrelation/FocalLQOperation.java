@@ -32,7 +32,6 @@ import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.Filter;
 
 /**
  * Calculates a Focal Location Quotients (Focal LQ).
@@ -151,9 +150,8 @@ public class FocalLQOperation extends AbstractStatisticsOperation {
 
         // insert features
         int idx = 0;
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = inputFeatures.features();
         try {
-            featureIter = inputFeatures.subCollection(Filter.INCLUDE).features();
             while (featureIter.hasNext()) {
                 final SimpleFeature feature = featureIter.next();
 

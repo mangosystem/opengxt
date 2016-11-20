@@ -81,13 +81,10 @@ public class StandardDistanceOperation extends AbstractDisributionOperator {
                     continue;
                 }
 
-                // geometry's true centroid
                 Coordinate coordinate = getTrueCentroid(geometry);
 
-                // #### Case Field ####
                 Object caseVal = idxCase == -1 ? ALL : feature.getAttribute(idxCase);
 
-                // #### Weight Field ####
                 double weightVal = 1.0;
                 if (idxWeight != -1) {
                     weightVal = this.getValue(feature, weightExpr, weightVal);
@@ -127,8 +124,6 @@ public class StandardDistanceOperation extends AbstractDisributionOperator {
                 final Point cenPoint = curSd.getMeanCenter();
                 final double stdDist = curSd.getStdDist(this.stdDeviation);
 
-                // #### Calculate a Point For Each Degree in Circle Polygon
-                // for degree in NUM.arange(0, 360): :
                 final Geometry sdCircle = cenPoint.buffer(stdDist, 90, 1);
 
                 SimpleFeature newFeature = featureWriter.buildFeature(null);

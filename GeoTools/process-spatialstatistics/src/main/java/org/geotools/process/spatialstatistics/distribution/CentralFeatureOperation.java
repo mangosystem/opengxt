@@ -81,19 +81,14 @@ public class CentralFeatureOperation extends AbstractDisributionOperator {
                     continue;
                 }
 
-                // geometry's true centroid
                 Coordinate coordinate = getTrueCentroid(geometry);
-
-                // #### Case Field ####
                 Object caseVal = idxCase == -1 ? ALL : feature.getAttribute(idxCase);
 
-                // #### Weight Field ####
                 double weightVal = 1.0;
                 if (idxWeight != -1) {
                     weightVal = this.getValue(feature, weightExpr, 0.0);
                 }
 
-                // #### Potential Field ####
                 double potVal = 0.0;
                 if (idxPot != -1) {
                     potVal = this.getValue(feature, potentialExpr, potVal);

@@ -102,16 +102,13 @@ public class LinearDirectionalMeanOperation extends AbstractDisributionOperator 
                 Object caseVal = iter.next();
                 LinearDirectionalMean curDm = resultMap.get(caseVal);
 
-                // FIELDS = {"CompassA", "DirMean", "CirVar", "AveX", "AveY", "AveLen"};
                 SimpleFeature newFeature = featureWriter.buildFeature(null);
                 newFeature.setDefaultGeometry(curDm.getDirectionalLine());
 
-                // create feature and set geometry
                 if (idxCase != -1) {
                     newFeature.setAttribute(caseField, caseVal);
                 }
 
-                // #### Re-adjust Angle Back towards North ####
                 double degreeAngle = curDm.getDegreeAngle();
                 if (orientationOnly) {
                     degreeAngle = degreeAngle - 180.0;

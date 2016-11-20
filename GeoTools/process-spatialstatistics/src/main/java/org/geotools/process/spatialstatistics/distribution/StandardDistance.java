@@ -42,6 +42,7 @@ public class StandardDistance {
 
     private double weightSum = 0.0;
 
+    @SuppressWarnings("unused")
     private int numFeatures = 0;
 
     private double sdVal = Double.NaN;
@@ -68,7 +69,6 @@ public class StandardDistance {
     }
 
     public void addValue(Coordinate coordinate, double weight) {
-        // #### Calculate Mean Center and Standard Distance ####
         weightSum += weight;
 
         sumX += coordinate.x * weight;

@@ -101,22 +101,17 @@ public class MedianCenter {
             return medianCenter;
         }
 
-        // Calculate Median Center
         final int maxIters = 100; // maximum number of iterations
         final double tolerance = 0.000001;
 
-        // Set Initial Guess to the Mean Center and Begin
         Event med = new Event();
         med.x = sumX / weightSum;
         med.y = sumY / weightSum;
 
-        // Calculates the weighted median center
-        // (minimizes the Euclidean distance) for a set of xy-coordinates. (1, A)
         if (events.size() == 1) {
             return gf.createPoint(new Coordinate(med.x, med.y));
         }
 
-        // Create Maximum Weight for Coincident Points
         double width = maxX - minX;
         double height = maxY - minY;
 
@@ -136,15 +131,12 @@ public class MedianCenter {
         while (flag) {
 
             if (iterations++ >= maxIters) {
-                // Maximum Number of Iterations Reached
                 flag = false;
                 break;
             }
 
-            // Re-weight Coordinates and Get New Estimate
             Event newCenter = evaluateDistance(med, extentArea);
 
-            // Decision Criteria
             boolean diffX = SSUtils.compareDouble(newCenter.x, med.x, tolerance);
             boolean diffY = SSUtils.compareDouble(newCenter.y, med.y, tolerance);
             if (diffX && diffY) {

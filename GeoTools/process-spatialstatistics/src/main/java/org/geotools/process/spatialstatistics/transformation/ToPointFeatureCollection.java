@@ -20,7 +20,6 @@ import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
 import org.geotools.data.DataUtilities;
-import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.collection.SubFeatureCollection;

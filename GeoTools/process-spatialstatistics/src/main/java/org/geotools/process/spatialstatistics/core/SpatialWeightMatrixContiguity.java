@@ -103,7 +103,7 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
                     while (subIter.hasNext()) {
                         SimpleFeature secondaryFeature = subIter.next();
                         Object secondaryID = secondaryFeature.getAttribute(uniqueField);
-                        if (primaryID.equals(secondaryID)) {
+                        if (!this.isSelfContains() && primaryID.equals(secondaryID)) {
                             continue;
                         }
 

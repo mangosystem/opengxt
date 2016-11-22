@@ -35,9 +35,8 @@ import com.vividsolutions.jts.index.kdtree.KdTree;
 
 /**
  * SpatialWeightMatrix - Distance based weights - k-Nearest Neighbors. <br>
- * K Nearest Neighbors (KNN) is a distance-based definition of neighbors where "k" refers to the
- * number of neighbors of a location. It is computed as the distance between a point and the number
- * (k) of nearest neighbor points (i.e. the distance between the central points of polygons).
+ * K Nearest Neighbors (KNN) is a distance-based definition of neighbors where "k" refers to the number of neighbors of a location. It is computed as
+ * the distance between a point and the number (k) of nearest neighbor points (i.e. the distance between the central points of polygons).
  * 
  * @author Minpa Lee, MangoSystem
  * 
@@ -104,7 +103,7 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
                         while (subIter.hasNext()) {
                             SimpleFeature secondaryFeature = subIter.next();
                             Object secondaryID = secondaryFeature.getAttribute(uniqueField);
-                            if (primaryID.equals(secondaryID)) {
+                            if (!this.isSelfContains() && primaryID.equals(secondaryID)) {
                                 continue;
                             }
 
@@ -156,8 +155,9 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
                             }
 
                             Object secondaryID = node.getData();
-                            if (primaryID.equals(secondaryID)
-                                    || sortedMap.containsValue(secondaryID)) {
+                            if (!this.isSelfContains()
+                                    && (primaryID.equals(secondaryID) || sortedMap
+                                            .containsValue(secondaryID))) {
                                 continue;
                             }
 

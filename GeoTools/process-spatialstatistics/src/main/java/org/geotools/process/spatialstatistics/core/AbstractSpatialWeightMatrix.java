@@ -38,6 +38,16 @@ public abstract class AbstractSpatialWeightMatrix {
     }
 
     protected final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+    
+    protected boolean selfContains = false;
+
+    public boolean isSelfContains() {
+        return selfContains;
+    }
+
+    public void setSelfContains(boolean selfContains) {
+        this.selfContains = selfContains;
+    }
 
     public abstract SpatialWeightMatrixResult execute(SimpleFeatureCollection features,
             String uniqueField);

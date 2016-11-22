@@ -18,6 +18,7 @@ package org.geotools.process.spatialstatistics.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -110,6 +111,8 @@ public class SpatialWeightMatrixDistance extends AbstractSpatialWeightMatrix {
             DistanceFactory factory = DistanceFactory.newInstance();
             factory.DistanceType = distanceMethod;
             thresholdDistance = factory.getThresholDistance(features);
+            LOGGER.log(Level.WARNING, "The default neighborhood search threshold was "
+                    + thresholdDistance);
         }
 
         // 1. extract centroid and build spatial index
@@ -144,7 +147,8 @@ public class SpatialWeightMatrixDistance extends AbstractSpatialWeightMatrix {
                 for (KdNode node : result) {
                     Object secondaryID = node.getData();
                     double distance = coordinate.distance(node.getCoordinate());
-                    if (primaryID.equals(secondaryID) || distance > thresholdDistance) {
+                    if (!this.isSelfContains()
+                            && (primaryID.equals(secondaryID) || distance > thresholdDistance)) {
                         continue;
                     }
 

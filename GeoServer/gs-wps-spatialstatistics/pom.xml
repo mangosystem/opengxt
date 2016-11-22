@@ -11,7 +11,7 @@
   <!-- =========================================================== -->
   <groupId>org.geoserver</groupId>
   <artifactId>gs-wps-spatialstatistics</artifactId>
-  <version>2.8.1</version>
+  <version>2.8.5</version>
   <packaging>jar</packaging>
   <name>Spatial Statistics Web Processing Service Module</name>
   <url>https://github.com/MapPlus/spatial_statistics_for_geotools_udig</url>
@@ -25,15 +25,15 @@
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <gs.version>2.8.1</gs.version>
-    <gt.version>14.1</gt.version>
+    <gs.version>2.8.5</gs.version>
+    <gt.version>14.5</gt.version>
   </properties>
   
   <repositories>
     <repository>
       <id>boundless</id>
       <name>Boundless Maven Repository</name>
-      <url>>https://repo.boundlessgeo.com/main/</url>
+      <url>https://repo.boundlessgeo.com/main/</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>

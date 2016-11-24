@@ -21,14 +21,18 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.Query;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.factory.Hints;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
+import org.geotools.process.RenderingProcess;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.RadialType;
 import org.geotools.process.spatialstatistics.operations.PolarGridsOperation;
 import org.geotools.util.logging.Logging;
+import org.opengis.coverage.grid.GridGeometry;
 import org.opengis.util.ProgressListener;
 
 /**
@@ -38,7 +42,8 @@ import org.opengis.util.ProgressListener;
  * 
  * @source $URL$
  */
-public class PolarGridsFromFeaturesProcess extends AbstractStatisticsProcess {
+public class PolarGridsFromFeaturesProcess extends AbstractStatisticsProcess implements
+        RenderingProcess {
     protected static final Logger LOGGER = Logging.getLogger(PolarGridsFromFeaturesProcess.class);
 
     private boolean started = false;
@@ -118,5 +123,48 @@ public class PolarGridsFromFeaturesProcess extends AbstractStatisticsProcess {
         } finally {
             started = false;
         }
+    }
+
+    /**
+     * Given a target query and a target grid geometry returns the grid geometry to be used to read the input data of the process involved in
+     * rendering. This method will be called only if the input data is a grid coverage or a grid coverage reader
+     */
+    @Override
+    public GridGeometry invertGridGeometry(Map<String, Object> input, Query targetQuery,
+            GridGeometry targetGridGeometry) throws ProcessException {
+        return targetGridGeometry;
+    }
+
+    /**
+     * Given a target query and a target grid geometry returns the query to be used to read the input data of the process involved in rendering. This
+     * method will be called only if the input data is a feature collection.
+     */
+
+    @Override
+    public Query invertQuery(Map<String, Object> input, Query targetQuery,
+            GridGeometry targetGridGeometry) throws ProcessException {
+        String radius = (String) input.get(PolarGridsFromFeaturesProcessFactory.radius.key);
+        if (radius == null || radius.trim().length() == 0) {
+            return targetQuery;
+        }
+
+        String[] splits = radius.split(",");
+        double queryBuffer = 0d;
+        for (int k = 0; k < splits.length; k++) {
+            try {
+                double distance = Double.parseDouble(splits[k].trim());
+                queryBuffer = Math.max(distance, queryBuffer);
+            } catch (NumberFormatException nfe) {
+                LOGGER.log(Level.WARNING, nfe.getMessage());
+            }
+        }
+
+        if (queryBuffer > 0) {
+            targetQuery.setFilter(expandBBox(targetQuery.getFilter(), queryBuffer));
+            targetQuery.setProperties(null);
+            targetQuery.getHints().put(Hints.GEOMETRY_DISTANCE, 0.0);
+        }
+
+        return targetQuery;
     }
 }

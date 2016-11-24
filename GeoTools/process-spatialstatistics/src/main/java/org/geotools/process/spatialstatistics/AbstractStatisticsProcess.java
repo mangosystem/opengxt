@@ -18,6 +18,8 @@ package org.geotools.process.spatialstatistics;
 
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.impl.AbstractProcess;
+import org.geotools.process.spatialstatistics.util.BBOXExpandingFilterVisitor;
+import org.opengis.filter.Filter;
 
 /**
  * AbstractStatisticsProcess.
@@ -30,5 +32,10 @@ public abstract class AbstractStatisticsProcess extends AbstractProcess {
 
     public AbstractStatisticsProcess(ProcessFactory factory) {
         super(factory);
+    }
+
+    protected Filter expandBBox(Filter filter, double distance) {
+        return (Filter) filter.accept(new BBOXExpandingFilterVisitor(distance, distance, distance,
+                distance), null);
     }
 }

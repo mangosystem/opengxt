@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.Query;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.factory.Hints;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
@@ -33,6 +34,7 @@ import org.geotools.process.spatialstatistics.transformation.BufferExpressionFea
 import org.geotools.util.logging.Logging;
 import org.opengis.coverage.grid.GridGeometry;
 import org.opengis.filter.expression.Expression;
+import org.opengis.filter.expression.Literal;
 import org.opengis.util.ProgressListener;
 
 /**
@@ -112,30 +114,46 @@ public class BufferExpressionProcess extends AbstractStatisticsProcess implement
     }
 
     /**
-     * Given a target query and a target grid geometry returns the query to be used to read the input data of the process involved in rendering. This
-     * method will be called only if the input data is a feature collection.
-     * 
-     * @param targetQuery the query used against the data source
-     * @param gridGeometry the grid geometry of the destination image
-     * @return The transformed query, or null if no inversion is possible/meaningful
-     */
-    @Override
-    public Query invertQuery(Map<String, Object> input, Query targetQuery, GridGeometry gridGeometry)
-            throws ProcessException {
-        return null;
-    }
-
-    /**
      * Given a target query and a target grid geometry returns the grid geometry to be used to read the input data of the process involved in
      * rendering. This method will be called only if the input data is a grid coverage or a grid coverage reader
-     * 
-     * @param targetQuery the query used against the data source
-     * @param gridGeometry the grid geometry of the destination image
-     * @return The transformed query, or null if no inversion is possible/meaningful
      */
     @Override
     public GridGeometry invertGridGeometry(Map<String, Object> input, Query targetQuery,
             GridGeometry targetGridGeometry) throws ProcessException {
-        return null;
+        return targetGridGeometry;
+    }
+
+    /**
+     * Given a target query and a target grid geometry returns the query to be used to read the input data of the process involved in rendering. This
+     * method will be called only if the input data is a feature collection.
+     */
+
+    @Override
+    public Query invertQuery(Map<String, Object> input, Query targetQuery,
+            GridGeometry targetGridGeometry) throws ProcessException {
+        Expression expression = (Expression) input.get(BufferExpressionProcessFactory.distance.key);
+        if (expression == null) {
+            return targetQuery;
+        }
+
+        if (expression instanceof Literal) {
+            double queryBuffer = 0d;
+            try {
+                Object value = ((Literal) expression).getValue();
+                if (Number.class.isAssignableFrom(value.getClass())) {
+                    queryBuffer = ((Number) value).doubleValue();
+                }
+            } catch (NumberFormatException nfe) {
+                LOGGER.log(Level.WARNING, nfe.getMessage());
+            }
+
+            if (queryBuffer > 0) {
+                targetQuery.setFilter(expandBBox(targetQuery.getFilter(), queryBuffer));
+                targetQuery.setProperties(null);
+                targetQuery.getHints().put(Hints.GEOMETRY_DISTANCE, 0.0);
+            }
+        }
+
+        return targetQuery;
     }
 }

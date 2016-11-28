@@ -105,6 +105,8 @@ public class PointsAlongLinesFeatureCollection extends GXTSimpleFeatureCollectio
 
         private SimpleFeature origFeature = null;
 
+        private String typeName;
+
         public PointsAlongLinesFeatureIterator(SimpleFeatureIterator delegate,
                 SimpleFeatureType schema, Expression distance) {
             this.delegate = delegate;
@@ -112,6 +114,7 @@ public class PointsAlongLinesFeatureCollection extends GXTSimpleFeatureCollectio
             this.index = 0;
             this.builder = new SimpleFeatureBuilder(schema);
             this.distance = distance;
+            this.typeName = schema.getTypeName();
         }
 
         public void close() {
@@ -136,7 +139,7 @@ public class PointsAlongLinesFeatureCollection extends GXTSimpleFeatureCollectio
                     builder.add(attribute);
                 }
                 builder.add(new Integer(index));
-                nextFeature = builder.buildFeature(Integer.toString(++featureID));
+                nextFeature = builder.buildFeature(buildID(typeName, ++featureID));
                 builder.reset();
                 index++;
 

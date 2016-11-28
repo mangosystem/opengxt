@@ -96,11 +96,14 @@ public class SplitLineFeatureCollection extends GXTSimpleFeatureCollection {
 
         private SimpleFeature origFeature = null;
 
+        private String typeName;
+
         public SplitLineFeatureIterator(SimpleFeatureIterator delegate, SimpleFeatureType schema) {
             this.delegate = delegate;
 
             this.index = 0;
             this.builder = new SimpleFeatureBuilder(schema);
+            this.typeName = schema.getTypeName();
         }
 
         public void close() {
@@ -123,7 +126,7 @@ public class SplitLineFeatureCollection extends GXTSimpleFeatureCollection {
                     }
                     builder.add(attribute);
                 }
-                nextFeature = builder.buildFeature(Integer.toString(++featureID));
+                nextFeature = builder.buildFeature(buildID(typeName, ++featureID));
                 builder.reset();
                 index++;
 

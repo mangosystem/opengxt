@@ -191,6 +191,8 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
 
         private SimpleFeature currentFeature;
 
+        private String typeName;
+
         private Class<?> target;
 
         private int counter = 1;
@@ -206,6 +208,7 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
             this.builder = new SimpleFeatureBuilder(schema);
             this.target = schema.getGeometryDescriptor().getType().getBinding();
             this.fieldMap = fieldMap;
+            this.typeName = schema.getTypeName();
         }
 
         public void close() {
@@ -266,7 +269,7 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
                     builder.set(entry.getValue(), value);
                 }
 
-                next = builder.buildFeature(Integer.toString(counter++));
+                next = builder.buildFeature(buildID(typeName, counter++));
                 builder.reset();
                 features.remove(0);
                 break;

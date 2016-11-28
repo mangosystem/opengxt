@@ -125,10 +125,13 @@ public class SpatialClumpFeatureCollection extends GXTSimpleFeatureCollection {
 
         private SimpleFeatureBuilder builder;
 
+        private String typeName;
+
         public SpatialClumpFeatureIterator(Geometry multiPart, SimpleFeatureType schema) {
             this.multiPart = multiPart;
             this.count = multiPart.getNumGeometries();
             this.builder = new SimpleFeatureBuilder(schema);
+            this.typeName = schema.getTypeName();
         }
 
         public void close() {
@@ -144,7 +147,7 @@ public class SpatialClumpFeatureCollection extends GXTSimpleFeatureCollection {
                 throw new NoSuchElementException("hasNext() returned false!");
             }
 
-            SimpleFeature next = builder.buildFeature(Integer.toString(++featureID));
+            SimpleFeature next = builder.buildFeature(buildID(typeName, ++featureID));
             next.setDefaultGeometry(multiPart.getGeometryN(index++));
             next.setAttribute("uid", Integer.valueOf(index));
 

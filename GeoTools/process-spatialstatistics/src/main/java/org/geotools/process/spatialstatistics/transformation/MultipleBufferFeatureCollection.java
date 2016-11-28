@@ -112,6 +112,8 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
 
         private SimpleFeature origFeature = null;
 
+        private String typeName;
+
         public BufferedFeatureIterator(SimpleFeatureIterator delegate, SimpleFeatureType schema,
                 double[] distances, Boolean outsideOnly) {
             this.delegate = delegate;
@@ -120,6 +122,7 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
             this.distances = distances;
             this.outsideOnly = outsideOnly;
             this.builder = new SimpleFeatureBuilder(schema);
+            this.typeName = schema.getTypeName();
         }
 
         public void close() {
@@ -141,7 +144,7 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
                 }
 
                 // create feature
-                nextFeature = builder.buildFeature(Integer.toString(++featureID));
+                nextFeature = builder.buildFeature(buildID(typeName, ++featureID));
                 transferAttribute(origFeature, nextFeature);
                 nextFeature.setDefaultGeometry(buff);
                 nextFeature.setAttribute(bufferField, distances[bufferIndex]);

@@ -106,6 +106,8 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
         private SimpleFeatureBuilder builder;
 
         private SimpleFeature next;
+        
+        private String typeName;
 
         public BufferExpressionFeatureIterator(SimpleFeatureIterator delegate,
                 SimpleFeatureType schema, Expression distance, int quadrantSegments) {
@@ -114,6 +116,7 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
             this.distance = distance;
             this.quadrantSegments = quadrantSegments;
             this.builder = new SimpleFeatureBuilder(schema);
+            this.typeName = schema.getTypeName();
         }
 
         public void close() {
@@ -125,7 +128,7 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
                 SimpleFeature source = delegate.next();
                 Double eval = distance.evaluate(source, Double.class);
                 if (eval != null) {
-                    next = builder.buildFeature(Integer.toString(++count));
+                    next = builder.buildFeature(buildID(typeName, ++count));
 
                     // transfer attributes
                     transferAttribute(source, next);

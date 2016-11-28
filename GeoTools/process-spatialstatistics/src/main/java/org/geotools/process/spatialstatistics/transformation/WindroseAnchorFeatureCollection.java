@@ -127,12 +127,14 @@ public class WindroseAnchorFeatureCollection extends GXTSimpleFeatureCollection 
         private void init(SimpleFeatureBuilder builder) {
             ListFeatureCollection result = new ListFeatureCollection(builder.getFeatureType());
 
+            String typeName = builder.getFeatureType().getTypeName();
             int featureID = 1;
+            
             // create circle
             double radius_step = radius / 5;
             for (int index = 0; index < 5; index++) {
                 double buffer_radius = radius_step * (index + 1);
-                SimpleFeature feature = builder.buildFeature(Integer.toString(featureID++));
+                SimpleFeature feature = builder.buildFeature(buildID(typeName, featureID++));
                 feature.setDefaultGeometry(center.buffer(buffer_radius, SEG).getBoundary());
 
                 feature.setAttribute(FIELDS[0], buffer_radius);
@@ -142,7 +144,7 @@ public class WindroseAnchorFeatureCollection extends GXTSimpleFeatureCollection 
             // create direction
             for (int index = 0; index < 16; index++) {
                 double degree = 22.5 * index;
-                SimpleFeature feature = builder.buildFeature(Integer.toString(featureID++));
+                SimpleFeature feature = builder.buildFeature(buildID(typeName, featureID++));
                 feature.setDefaultGeometry(createLine(center, Math.toRadians(degree), radius));
 
                 feature.setAttribute(FIELDS[1], NORTH[index]);

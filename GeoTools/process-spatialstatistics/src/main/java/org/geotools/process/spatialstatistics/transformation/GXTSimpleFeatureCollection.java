@@ -30,8 +30,8 @@ import org.opengis.filter.FilterFactory2;
 /**
  * A FeatureCollection which completely delegates to another FeatureCollection.
  * 
- * @author Minpa Lee, MangoSystem  
- *
+ * @author Minpa Lee, MangoSystem
+ * 
  * @source $URL$
  */
 public class GXTSimpleFeatureCollection extends DecoratingSimpleFeatureCollection {
@@ -50,6 +50,10 @@ public class GXTSimpleFeatureCollection extends DecoratingSimpleFeatureCollectio
         if (close instanceof WrappingIterator) {
             ((WrappingIterator) close).close();
         }
+    }
+
+    protected static String buildID(String typeName, int id) {
+        return new StringBuilder().append(typeName).append(".").append(id).toString();
     }
 
     protected static void transferAttribute(SimpleFeature source, SimpleFeature target) {

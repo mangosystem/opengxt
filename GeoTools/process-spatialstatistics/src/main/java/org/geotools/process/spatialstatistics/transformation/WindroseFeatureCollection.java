@@ -149,6 +149,8 @@ public class WindroseFeatureCollection extends GXTSimpleFeatureCollection {
 
         private void init(SimpleFeatureBuilder builder) {
             String the_geom = delegate.getSchema().getGeometryDescriptor().getLocalName();
+            String typeName = builder.getFeatureType().getTypeName();
+            
             ListFeatureCollection result = new ListFeatureCollection(builder.getFeatureType());
 
             double minValue = Double.MAX_VALUE;
@@ -169,7 +171,7 @@ public class WindroseFeatureCollection extends GXTSimpleFeatureCollection {
                 StatisticsVisitorResult ret = visitor.getResult();
 
                 // { "uid", "count", "min", "max", "sum", "mean", "std_dev", "var" };
-                SimpleFeature feature = builder.buildFeature(Integer.toString(index));
+                SimpleFeature feature = builder.buildFeature(buildID(typeName, index));
                 feature.setDefaultGeometry(cell);
 
                 feature.setAttribute(FIELDS[0], index);

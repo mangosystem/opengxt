@@ -154,6 +154,8 @@ public class MergeFeatureCollection extends GXTSimpleFeatureCollection {
 
         private SimpleFeature next;
 
+        private String typeName;
+
         private int featureID = 0;
 
         public MergeFeatureIterator(SimpleFeatureCollection firstCollection,
@@ -161,6 +163,7 @@ public class MergeFeatureCollection extends GXTSimpleFeatureCollection {
             this.firstDelegate = firstCollection.features();
             this.secondDelegate = secondCollection.features();
             this.builder = new SimpleFeatureBuilder(schema);
+            this.typeName = schema.getTypeName();
         }
 
         public void close() {
@@ -174,7 +177,7 @@ public class MergeFeatureCollection extends GXTSimpleFeatureCollection {
                 for (PropertyDescriptor property : builder.getFeatureType().getDescriptors()) {
                     builder.set(property.getName(), f.getAttribute(property.getName()));
                 }
-                next = builder.buildFeature(Integer.toString(featureID));
+                next = builder.buildFeature(buildID(typeName, featureID));
                 builder.reset();
                 featureID++;
             }
@@ -184,7 +187,7 @@ public class MergeFeatureCollection extends GXTSimpleFeatureCollection {
                 for (PropertyDescriptor property : builder.getFeatureType().getDescriptors()) {
                     builder.set(property.getName(), f.getAttribute(property.getName()));
                 }
-                next = builder.buildFeature(Integer.toString(featureID));
+                next = builder.buildFeature(buildID(typeName, featureID));
                 builder.reset();
                 featureID++;
             }

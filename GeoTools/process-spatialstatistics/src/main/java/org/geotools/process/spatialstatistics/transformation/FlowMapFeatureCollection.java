@@ -166,7 +166,9 @@ public class FlowMapFeatureCollection extends GXTSimpleFeatureCollection {
 
         private SimpleFeature source = null;
 
-        ArrowBuilder arrowBuilder = new ArrowBuilder();
+        private String typeName;
+
+        private ArrowBuilder arrowBuilder = new ArrowBuilder();
 
         public BufferExpressionFeatureIterator(SimpleFeatureIterator delegate,
                 SimpleFeatureType schema, Expression odValue, Expression doValue, double[] minMax,
@@ -179,6 +181,7 @@ public class FlowMapFeatureCollection extends GXTSimpleFeatureCollection {
             this.minMax = minMax;
             this.maxSize = maxSize;
             this.builder = new SimpleFeatureBuilder(schema);
+            this.typeName = schema.getTypeName();
         }
 
         public void close() {
@@ -192,7 +195,7 @@ public class FlowMapFeatureCollection extends GXTSimpleFeatureCollection {
                     source = delegate.next();
                 }
 
-                next = builder.buildFeature(Integer.toString(++count));
+                next = builder.buildFeature(buildID(typeName, ++count));
                 next.setAttributes(source.getAttributes());
                 Geometry line = (Geometry) source.getDefaultGeometry();
 

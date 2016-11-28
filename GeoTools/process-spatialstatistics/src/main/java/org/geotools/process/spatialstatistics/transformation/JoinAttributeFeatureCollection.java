@@ -176,6 +176,8 @@ public class JoinAttributeFeatureCollection extends GXTSimpleFeatureCollection {
 
         private SimpleFeature nextFeature = null;
 
+        private String typeName;
+
         private int counter = 1;
 
         public AttributeJoinFeatureIterator(SimpleFeatureIterator originIter,
@@ -188,6 +190,7 @@ public class JoinAttributeFeatureCollection extends GXTSimpleFeatureCollection {
             this.joinType = joinType;
             this.joinFields = joinFields;
             this.builder = new SimpleFeatureBuilder(schema);
+            this.typeName = schema.getTypeName();
             this.counter = 1;
         }
 
@@ -202,7 +205,6 @@ public class JoinAttributeFeatureCollection extends GXTSimpleFeatureCollection {
                 return false;
             }
 
-            String typeName = builder.getFeatureType().getTypeName();
             SimpleFeature origin = originIter.next();
             for (AttributeDescriptor ad : origin.getFeatureType().getAttributeDescriptors()) {
                 Object value = origin.getAttribute(ad.getLocalName());
@@ -221,7 +223,7 @@ public class JoinAttributeFeatureCollection extends GXTSimpleFeatureCollection {
                         builder.set(entry.getValue(), value);
                     }
                     hasJoin = true;
-                    nextFeature = builder.buildFeature(typeName + "." + counter++);
+                    nextFeature = builder.buildFeature(buildID(typeName, counter++));
                     builder.reset();
                     break; // one to one
                 }
@@ -232,7 +234,7 @@ public class JoinAttributeFeatureCollection extends GXTSimpleFeatureCollection {
             if (joinType == Join.Type.INNER && !hasJoin) {
                 return hasNext();
             } else if (joinType == Join.Type.OUTER && !hasJoin) {
-                nextFeature = builder.buildFeature(typeName + "." + counter++);
+                nextFeature = builder.buildFeature(buildID(typeName, counter++));
                 builder.reset();
             }
 
@@ -240,6 +242,9 @@ public class JoinAttributeFeatureCollection extends GXTSimpleFeatureCollection {
         }
 
         public SimpleFeature next() throws NoSuchElementException {
+            if (!hasNext()) {
+                throw new NoSuchElementException("hasNext() returned false!");
+            }
             return nextFeature;
         }
     }

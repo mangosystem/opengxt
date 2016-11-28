@@ -103,6 +103,8 @@ public class SplitByDistanceFeatureCollection extends GXTSimpleFeatureCollection
 
         private SimpleFeature origFeature = null;
 
+        private String typeName;
+
         public SplitByDistanceFeatureIterator(SimpleFeatureIterator delegate,
                 SimpleFeatureType schema, Expression distance) {
             this.delegate = delegate;
@@ -110,6 +112,7 @@ public class SplitByDistanceFeatureCollection extends GXTSimpleFeatureCollection
             this.index = 0;
             this.builder = new SimpleFeatureBuilder(schema);
             this.distance = distance;
+            this.typeName = schema.getTypeName();
         }
 
         public void close() {
@@ -133,7 +136,7 @@ public class SplitByDistanceFeatureCollection extends GXTSimpleFeatureCollection
                     }
                     builder.add(attribute);
                 }
-                nextFeature = builder.buildFeature(Integer.toString(++featureID));
+                nextFeature = builder.buildFeature(buildID(typeName, ++featureID));
                 builder.reset();
                 index++;
 

@@ -121,12 +121,15 @@ public class VerticesToPointsFeatureCollection extends GXTSimpleFeatureCollectio
 
         private SimpleFeature origFeature = null;
 
+        private String typeName;
+
         public VerticesToPointsFeatureIterator(SimpleFeatureIterator delegate,
                 SimpleFeatureType schema, PointLocationType location) {
             this.delegate = delegate;
 
             this.location = location;
             this.builder = new SimpleFeatureBuilder(schema);
+            this.typeName = schema.getTypeName();
         }
 
         public void close() {
@@ -192,7 +195,7 @@ public class VerticesToPointsFeatureCollection extends GXTSimpleFeatureCollectio
                     builder.add(attribute);
                 }
 
-                nextFeature = builder.buildFeature(Integer.toString(++featureID));
+                nextFeature = builder.buildFeature(buildID(typeName, ++featureID));
                 builder.reset();
             }
             return nextFeature != null;

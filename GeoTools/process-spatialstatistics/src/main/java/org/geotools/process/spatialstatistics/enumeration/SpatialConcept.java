@@ -25,40 +25,51 @@ package org.geotools.process.spatialstatistics.enumeration;
  */
 public enum SpatialConcept {
     /**
-     * Nearby neighboring features have a larger influence on the computations for a target
-     * feature than features that are far away.
+     * Nearby neighboring features have a larger influence on the computations for a target feature than features that are far away. distance decay =
+     * 1.
      */
-    INVERSEDISTANCE,
+    InverseDistance,
 
     /**
-     * Same as INVERSE_DISTANCE except that the slope is sharper, so influence drops off more
-     * quickly, and only a target feature's closest neighbors will exert substantial influence
-     * on computations for that feature.
+     * Same as InverseDistance except that the slope is sharper, so influence drops off more quickly, and only a target feature's closest neighbors
+     * will exert substantial influence on computations for that feature. distance decay = 2.
      */
-    INVERSEDISTANCESQUARED,
+    InverseDistanceSquared,
 
     /**
-     * Each feature is analyzed within the context of neighboring features. Neighboring features
-     * inside the specified critical distance receive a weight of 1 and exert influence on
-     * computations for the target feature.
+     * Each feature is analyzed within the context of neighboring features. Neighboring features inside the specified critical distance receive a
+     * weight of 1 and exert influence on computations for the target feature.
      */
-    FIXEDDISTANCEBAND,
+    FixedDistance,
 
     /**
-     * Features within the specified critical distance of a target feature receive a weight of 1
-     * and influence computations for that feature.
+     * Features within the specified critical distance of a target feature receive a weight of 1 and influence computations for that feature.
      */
-    ZONEOFINDIFFERENCE,
+    ZoneOfIndifference,
 
     /**
-     * Polygon features that share a boundary, share a node, or overlap will influence
-     * computations for the target polygon feature.
+     * K Nearest Neighbors (KNN) is a distance-based definition of neighbors where "k" refers to the number of neighbors of a location. It is computed
+     * as the distance between a point and the number (k) of nearest neighbor points (i.e. the distance between the central points of polygons).
      */
-    POLYGONCONTIGUITY,
+    KNearestNeighbors,
 
     /**
-     * Spatial weights from file
+     * Polygon features that share a boundary, share a node, or overlap will influence computations for the target polygon feature.
      */
-    SPATIALWEIGHTSFROMFILE
+    ContiguityEdgesNodes,
 
+    /**
+     * Only neighboring polygon features that share a boundary or overlap will influence computations for the target polygon feature.
+     */
+    ContiguityEdgesOnly,
+
+    /**
+     * Only neighboring polygon features that share a node will influence computations for the target polygon feature.
+     */
+    ContiguityNodesOnly,
+
+    /**
+     * Spatial relationships are defined by a specified spatial weights file.
+     */
+    WeightsFromFile
 }

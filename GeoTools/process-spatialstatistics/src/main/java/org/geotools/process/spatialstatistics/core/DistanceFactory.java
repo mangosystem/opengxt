@@ -25,12 +25,15 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.GeoTools;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory2;
+import org.opengis.filter.expression.Expression;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -49,7 +52,15 @@ public class DistanceFactory {
 
     static GeometryFactory gf = JTSFactoryFinder.getGeometryFactory(GeoTools.getDefaultHints());
 
-    public DistanceMethod DistanceType = DistanceMethod.Euclidean;
+    private DistanceMethod distanceType = DistanceMethod.Euclidean;
+
+    public DistanceMethod getDistanceType() {
+        return distanceType;
+    }
+
+    public void setDistanceType(DistanceMethod distanceType) {
+        this.distanceType = distanceType;
+    }
 
     public static DistanceFactory newInstance() {
         return new DistanceFactory();
@@ -59,7 +70,7 @@ public class DistanceFactory {
         double sumDistance = 0.0;
         for (SpatialEvent destEvent : spatialEventSet) {
             if (destEvent.oid != curEvent.oid) {
-                sumDistance += getDistance(curEvent, destEvent, DistanceType);
+                sumDistance += getDistance(curEvent, destEvent, distanceType);
             }
         }
         return sumDistance / spatialEventSet.size();
@@ -88,7 +99,7 @@ public class DistanceFactory {
         double minDistance = Double.MAX_VALUE;
         for (SpatialEvent destEvent : srcEvents) {
             if (destEvent.oid != curEvent.oid) {
-                minDistance = Math.min(minDistance, getDistance(curEvent, destEvent, DistanceType));
+                minDistance = Math.min(minDistance, getDistance(curEvent, destEvent, distanceType));
                 if (minDistance == 0d) {
                     return minDistance;
                 }
@@ -101,7 +112,7 @@ public class DistanceFactory {
         double maxDistance = Double.MIN_VALUE;
         for (SpatialEvent destEvent : srcEvents) {
             if (destEvent.oid != curEvent.oid) {
-                maxDistance = Math.max(maxDistance, getDistance(curEvent, destEvent, DistanceType));
+                maxDistance = Math.max(maxDistance, getDistance(curEvent, destEvent, distanceType));
             }
         }
         return maxDistance;
@@ -140,10 +151,10 @@ public class DistanceFactory {
                 for (SpatialEvent destEvent : spatialEventSet) {
                     if (curEvent.oid != destEvent.oid) {
                         if (useWeight) {
-                            curDistance += getDistance(curEvent, destEvent, DistanceType)
+                            curDistance += getDistance(curEvent, destEvent, distanceType)
                                     * destEvent.weight;
                         } else {
-                            curDistance += getDistance(curEvent, destEvent, DistanceType);
+                            curDistance += getDistance(curEvent, destEvent, distanceType);
                         }
                     }
                 }
@@ -163,17 +174,17 @@ public class DistanceFactory {
             double standardDeviation, boolean useWeight) {
         double diffX = 0, diffY = 0, diffDist = 0;
         double sumWeight = 0.0;
-        double weight = 1;
+        double weight = 1.0;
 
         SpatialEvent centerPoint = getMeanCenter(spatialEventSet, useWeight);
 
         for (SpatialEvent curEvent : spatialEventSet) {
-            weight = useWeight ? curEvent.weight : 1;
+            weight = useWeight ? curEvent.weight : 1.0;
             sumWeight += weight;
 
             diffX = curEvent.x - centerPoint.x;
             diffY = curEvent.y - centerPoint.y;
-            
+
             diffDist += (diffX * diffX * weight) + (diffY * diffY * weight);
         }
         double stdDistance = Math.sqrt(diffDist / sumWeight) * standardDeviation;
@@ -190,6 +201,16 @@ public class DistanceFactory {
 
         // for degree in NUM.arange(0, 360):
         return centerPoint.buffer(sdtPoint.weight * standardDeviation, 90, 1);
+    }
+
+    public double getDistance(SpatialEvent origEvent, SpatialEvent destEvent) {
+        switch (distanceType) {
+        case Euclidean:
+            return getEuclideanDistance(origEvent, destEvent);
+        case Manhattan:
+            return getManhattanDistance(origEvent, destEvent);
+        }
+        return getEuclideanDistance(origEvent, destEvent);
     }
 
     public double getDistance(SpatialEvent origEvent, SpatialEvent destEvent,
@@ -235,11 +256,10 @@ public class DistanceFactory {
 
     public static List<SpatialEvent> loadEvents(SimpleFeatureCollection features, String weightField) {
         List<SpatialEvent> events = new ArrayList<SpatialEvent>();
-        int idxField = -1;
-        if (!StringHelper.isNullOrEmpty(weightField)) {
-            String propertyName = FeatureTypes.validateProperty(features.getSchema(), weightField);
-            idxField = features.getSchema().indexOf(propertyName);
-        }
+
+        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+        weightField = FeatureTypes.validateProperty(features.getSchema(), weightField);
+        Expression expression = ff.property(weightField);
 
         SimpleFeatureIterator featureIter = features.features();
         try {
@@ -248,14 +268,10 @@ public class DistanceFactory {
                 Geometry origGeom = (Geometry) feature.getDefaultGeometry();
                 Coordinate coordinate = origGeom.getCentroid().getCoordinate();
 
-                SpatialEvent sEvent = new SpatialEvent(FeatureTypes.getFID(feature), coordinate);
-                if (idxField != -1) {
-                    try {
-                        sEvent.weight = Double.valueOf(feature.getAttribute(idxField).toString());
-                    } catch (NumberFormatException e) {
-                        sEvent.weight = 1;
-                    }
-                }
+                Double weight = expression.evaluate(feature, Double.class);
+
+                SpatialEvent sEvent = new SpatialEvent(feature.getID(), coordinate);
+                sEvent.weight = weight == null ? 1.0 : weight;
                 events.add(sEvent);
             }
         } finally {
@@ -264,5 +280,4 @@ public class DistanceFactory {
 
         return events;
     }
-
 }

@@ -82,7 +82,7 @@ public class ThiessenPolygonProcessFactory extends SpatialStatisticsProcessFacto
     public static final Parameter<ThiessenAttributeMode> attributes = new Parameter<ThiessenAttributeMode>(
             "attributes", ThiessenAttributeMode.class, getResource("Thiessen.attributes.title"),
             getResource("Thiessen.attributes.description"), false, 0, 1,
-            ThiessenAttributeMode.ONLY_FID, null);
+            ThiessenAttributeMode.OnlyFID, null);
 
     /** clipArea */
     public static final Parameter<Geometry> clipArea = new Parameter<Geometry>("clipArea",

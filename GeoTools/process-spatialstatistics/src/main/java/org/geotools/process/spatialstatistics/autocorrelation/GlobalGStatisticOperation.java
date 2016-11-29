@@ -38,12 +38,12 @@ import org.geotools.util.logging.Logging;
 public class GlobalGStatisticOperation extends AbstractStatisticsOperation {
     protected static final Logger LOGGER = Logging.getLogger(GlobalGStatisticOperation.class);
 
-    SpatialWeightMatrix swMatrix = null;
+    private SpatialWeightMatrix swMatrix = null;
 
     public GeneralG execute(SimpleFeatureCollection inputFeatures, String inputField,
             double distanceBand) {
         this.setDistanceBand(distanceBand);
-        this.setSpatialConceptType(SpatialConcept.INVERSEDISTANCE);
+        this.setSpatialConceptType(SpatialConcept.InverseDistance);
 
         return execute(inputFeatures, inputField);
     }
@@ -52,23 +52,19 @@ public class GlobalGStatisticOperation extends AbstractStatisticsOperation {
         // Get input arguments, construct an "inputs" object
 
         swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
-        swMatrix.distanceBandWidth = this.getDistanceBand();
-        swMatrix.buildWeightMatrix(inputFeatures, inputField, this.getDistanceType());
+        swMatrix.setDistanceMethod(getDistanceType());
+        swMatrix.setDistanceBandWidth(getDistanceBand());
+        swMatrix.buildWeightMatrix(inputFeatures, inputField);
 
-        // """Calculate General G and Z Score."""
         double dZSum = swMatrix.dZSum;
         double dZ2Sum = swMatrix.dZ2Sum;
         double dZ3Sum = swMatrix.dZ3Sum;
         double dZ4Sum = swMatrix.dZ4Sum;
-        double n = swMatrix.Events.size() * 1.0;
+        double n = swMatrix.getEvents().size() * 1.0;
 
         double dZMean = swMatrix.dZSum / n;
         double dZVar = Math.pow((swMatrix.dZ2Sum / n) - Math.pow(dZMean, 2), 0.5);
 
-        // # Loop for each Z value.
-        // int iNeighborCnt = 0;
-        // int noNeighs = 0;
-        // idsNoNeighs = [];
         double dNeighborProductSum = 0.0;
         double dTotalProductSum = 0.0;
         double dS1 = 0.0;
@@ -76,30 +72,21 @@ public class GlobalGStatisticOperation extends AbstractStatisticsOperation {
         double dWijSum = 0.0;
         double dWijWji2Sum = 0.0;
 
-        for (SpatialEvent curE : swMatrix.Events) {
+        for (SpatialEvent curE : swMatrix.getEvents()) {
             double dWijS2Sum = 0.0;
             double dWjiS2Sum = 0.0;
 
-            for (SpatialEvent destE : swMatrix.Events) {
+            for (SpatialEvent destE : swMatrix.getEvents()) {
                 if (curE.oid == destE.oid)
-                    continue; // # i may not equal j
+                    continue;
 
                 dTotalProductSum += curE.weight * destE.weight;
-                
-                // # Calculate the weight (dWij)
-                double dWij = 0.0;
-                double dWji = 0.0;
 
-                if (this.getSpatialConceptType() == SpatialConcept.POLYGONCONTIGUITY) {
-                    dWij = 0.0;
-                    // if (destE is neighbor ) dWij = 1.0;
-                    dWji = dWij;
-                } else {
-                    dWij = swMatrix.getWeight(curE, destE);
-                    dWji = dWij;
-                }
+                // Calculate the weight (dWij)
+                double dWij = swMatrix.getWeight(curE, destE);
+                double dWji = dWij;
 
-                if (getStandardizationType() == StandardizationMethod.ROW) {
+                if (getStandardizationType() == StandardizationMethod.Row) {
                     dWij = swMatrix.standardizeWeight(curE, dWij);
                     dWji = swMatrix.standardizeWeight(destE, dWji);
                 }
@@ -114,7 +101,7 @@ public class GlobalGStatisticOperation extends AbstractStatisticsOperation {
             dS2 += Math.pow(dWijS2Sum + dWjiS2Sum, 2.0);
         }
 
-        // # Calculate B and S working variables needed to calculate variance.
+        // Calculate B and S working variables needed to calculate variance.
         dS1 = 0.5 * dWijWji2Sum;
         double B0 = ((Math.pow(n, 2.0) + (-3.0 * n) + 3.0) * dS1) - (n * dS2)
                 + (3.0 * Math.pow(dWijSum, 2.0));
@@ -125,19 +112,29 @@ public class GlobalGStatisticOperation extends AbstractStatisticsOperation {
                 + (8.0 * Math.pow(dWijSum, 2.0));
         double B4 = dS1 - dS2 + Math.pow(dWijSum, 2.0);
 
-        // # Calculate Observed G, Expected G and Z Score.
-        double dGObs = dNeighborProductSum / dTotalProductSum;
+        // Calculate Observed G, Expected G and Z Score.
         double dGExp = dWijSum / (n * (n - 1.0));
         dZVar = ((((B0 * Math.pow(dZ2Sum, 2.0)) + (B1 * dZ4Sum)
                 + (B2 * Math.pow(dZSum, 2.0) * dZ2Sum) + (B3 * dZSum * dZ3Sum) + (B4 * Math.pow(
                 dZSum, 4.0))) / (Math.pow((Math.pow(dZSum, 2.0) - dZ2Sum), 2.0) * (n * (n - 1.0)
                 * (n - 2.0) * (n - 3.0)))) - Math.pow(dGExp, 2.0));
 
+        if (dTotalProductSum <= 0.0) {
+            GeneralG generalG = new GeneralG(0d, dGExp, dZVar);
+            generalG.setConceptualization(getSpatialConceptType());
+            generalG.setDistanceMethod(getDistanceType());
+            generalG.setRowStandardization(getStandardizationType());
+            generalG.setDistanceThreshold(swMatrix.getDistanceBandWidth());
+            return generalG;
+        }
+
+        double dGObs = dNeighborProductSum / dTotalProductSum;
+
         GeneralG generalG = new GeneralG(dGObs, dGExp, dZVar);
         generalG.setConceptualization(getSpatialConceptType());
         generalG.setDistanceMethod(getDistanceType());
         generalG.setRowStandardization(getStandardizationType());
-        generalG.setDistanceThreshold(swMatrix.distanceBandWidth);
+        generalG.setDistanceThreshold(swMatrix.getDistanceBandWidth());
 
         return generalG;
     }
@@ -150,11 +147,11 @@ public class GlobalGStatisticOperation extends AbstractStatisticsOperation {
 
         double zVariance = 0.0;
 
-        SpatialConcept conceptualization = SpatialConcept.INVERSEDISTANCE;
+        SpatialConcept conceptualization = SpatialConcept.InverseDistance;
 
         DistanceMethod distanceMethod = DistanceMethod.Euclidean;
 
-        StandardizationMethod rowStandardization = StandardizationMethod.NONE;
+        StandardizationMethod rowStandardization = StandardizationMethod.None;
 
         double distanceThreshold = 0.0;
 
@@ -192,7 +189,6 @@ public class GlobalGStatisticOperation extends AbstractStatisticsOperation {
         }
 
         public double getZScore() {
-            // dZScore = (dGObs - dGExp) / dZVar**0.5
             double dX = observedGeneralG - expectedGeneralG;
             double dY = Math.pow(getZVariance(), 0.5);
             if (dY == 0) {
@@ -203,10 +199,7 @@ public class GlobalGStatisticOperation extends AbstractStatisticsOperation {
         }
 
         public double getPValue() {
-            // dPVal = STATS.zProb(dZScore, type = 2)
-            double zScore = this.getZScore();
-
-            return SSUtils.zProb(zScore, StatEnum.BOTH);
+            return SSUtils.zProb(this.getZScore(), StatEnum.BOTH);
         }
 
         public SpatialConcept getConceptualization() {

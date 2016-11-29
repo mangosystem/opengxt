@@ -38,19 +38,20 @@ import org.geotools.util.logging.Logging;
 public class GlobalLeesSOperation extends AbstractStatisticsOperation {
     protected static final Logger LOGGER = Logging.getLogger(GlobalLeesSOperation.class);
 
-    SpatialWeightMatrix swMatrix = null;
+    private SpatialWeightMatrix swMatrix = null;
 
     public GlobalLeesSOperation() {
         // Default Setting
         this.setDistanceType(DistanceMethod.Euclidean);
-        this.setSpatialConceptType(SpatialConcept.INVERSEDISTANCE);
-        this.setStandardizationType(StandardizationMethod.NONE);
+        this.setSpatialConceptType(SpatialConcept.InverseDistance);
+        this.setStandardizationType(StandardizationMethod.None);
     }
 
     public LeesS execute(SimpleFeatureCollection inputFeatures, String inputField) {
         swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
-        swMatrix.distanceBandWidth = this.getDistanceBand();
-        swMatrix.buildWeightMatrix(inputFeatures, inputField, this.getDistanceType());
+        swMatrix.setDistanceMethod(getDistanceType());
+        swMatrix.setDistanceBandWidth(getDistanceBand());
+        swMatrix.buildWeightMatrix(inputFeatures, inputField);
 
         double dSumWC = 0.0; // sum of weighted co-variance (dWij * dCij)
         double dSumW = 0.0; // sum of all weights (dWij)
@@ -61,11 +62,10 @@ public class GlobalLeesSOperation extends AbstractStatisticsOperation {
         double dSumS1 = 0.0;
         double dSumS2 = 0.0;
 
-        // clculate sample mean.
-        double n = swMatrix.Events.size();
+        double n = swMatrix.getEvents().size();
         double dZMean = swMatrix.dZSum / n;
 
-        for (SpatialEvent curE : swMatrix.Events) {
+        for (SpatialEvent curE : swMatrix.getEvents()) {
             double dWijS2Sum = 0.0;
             double dWjiS2Sum = 0.0;
             double dWCijSum = 0.0;
@@ -73,24 +73,17 @@ public class GlobalLeesSOperation extends AbstractStatisticsOperation {
             dM2 += Math.pow(dZiDeviation, 2.0);
             dM4 += Math.pow(dZiDeviation, 4.0);
 
-            for (SpatialEvent destE : swMatrix.Events) {
+            for (SpatialEvent destE : swMatrix.getEvents()) {
                 if (curE.oid == destE.oid)
                     continue;
 
                 double dCij = destE.weight - dZMean;
 
-                double dWij = 0.0;
-                double dWji = 0.0;
-                if (this.getSpatialConceptType() == SpatialConcept.POLYGONCONTIGUITY) {
-                    dWij = 0.0;
-                    // if (destE is neighbor ) dWij = 1.0;
-                    dWji = dWij;
-                } else {
-                    dWij = swMatrix.getWeight(curE, destE);
-                    dWji = dWij;
-                }
+                // Calculate the weight (dWij)
+                double dWij = swMatrix.getWeight(curE, destE);
+                double dWji = dWij;
 
-                if (getStandardizationType() == StandardizationMethod.ROW) {
+                if (getStandardizationType() == StandardizationMethod.Row) {
                     dWij = swMatrix.standardizeWeight(curE, dWij);
                     dWji = swMatrix.standardizeWeight(destE, dWji);
                 }
@@ -125,8 +118,14 @@ public class GlobalLeesSOperation extends AbstractStatisticsOperation {
         double eon = (f0on * g0on) / n;
         double dExpected = (eoff) + (eon);
 
-        if (dSumW <= 0.0)
-            return new LeesS();
+        if (dSumW <= 0.0) {
+            LeesS leesS = new LeesS(0d, dExpected, 0d);
+            leesS.setConceptualization(getSpatialConceptType());
+            leesS.setDistanceMethod(getDistanceType());
+            leesS.setRowStandardization(getStandardizationType());
+            leesS.setDistanceThreshold(swMatrix.getDistanceBandWidth());
+            return leesS;
+        }
 
         // Finally, we can calculate
         double dLeesS = dSumWC2 / (dM2 * dSumW2);
@@ -149,7 +148,7 @@ public class GlobalLeesSOperation extends AbstractStatisticsOperation {
         leesS.setConceptualization(getSpatialConceptType());
         leesS.setDistanceMethod(getDistanceType());
         leesS.setRowStandardization(getStandardizationType());
-        leesS.setDistanceThreshold(swMatrix.distanceBandWidth);
+        leesS.setDistanceThreshold(swMatrix.getDistanceBandWidth());
 
         return leesS;
     }
@@ -162,11 +161,11 @@ public class GlobalLeesSOperation extends AbstractStatisticsOperation {
 
         double zVariance = 0.0;
 
-        SpatialConcept conceptualization = SpatialConcept.INVERSEDISTANCE;
+        SpatialConcept conceptualization = SpatialConcept.InverseDistance;
 
         DistanceMethod distanceMethod = DistanceMethod.Euclidean;
 
-        StandardizationMethod rowStandardization = StandardizationMethod.NONE;
+        StandardizationMethod rowStandardization = StandardizationMethod.None;
 
         double distanceThreshold = 0.0;
 
@@ -213,8 +212,7 @@ public class GlobalLeesSOperation extends AbstractStatisticsOperation {
         }
 
         public double getPValue() {
-            double zScore = this.getZScore();
-            return SSUtils.zProb(zScore, StatEnum.BOTH);
+            return SSUtils.zProb(this.getZScore(), StatEnum.BOTH);
         }
 
         public SpatialConcept getConceptualization() {

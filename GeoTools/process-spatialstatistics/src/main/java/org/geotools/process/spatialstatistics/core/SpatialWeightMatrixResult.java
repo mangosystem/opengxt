@@ -64,7 +64,11 @@ public class SpatialWeightMatrixResult {
     }
 
     public void setUniqueField(String uniqueField) {
-        this.uniqueField = uniqueField;
+        if (uniqueField == null || uniqueField.isEmpty()) {
+            this.uniqueField = "FeatureID";
+        } else {
+            this.uniqueField = uniqueField;
+        }
     }
 
     public String getTypeName() {
@@ -97,12 +101,12 @@ public class SpatialWeightMatrixResult {
     }
 
     public void setupVariables(String typeName, String uniqueField) {
-        this.uniqueField = uniqueField;
-        this.typeName = typeName;
+        this.setUniqueField(uniqueField);
+        this.setTypeName(typeName);
     }
 
     public void visit(Object primaryID, Object secondaryID) {
-        this.visit(primaryID, secondaryID, Double.valueOf(0d));
+        this.visit(primaryID, secondaryID, Double.valueOf(1.0));
     }
 
     public void visit(Object primaryID, Object secondaryID, Double distance) {
@@ -110,6 +114,13 @@ public class SpatialWeightMatrixResult {
             items.put(primaryID, new Hashtable<Object, Double>());
         }
         items.get(primaryID).put(secondaryID, distance);
+    }
+
+    public boolean isNeighbor(Object primaryID, Object secondaryID) {
+        if (items.containsKey(primaryID)) {
+            return items.get(primaryID).containsKey(secondaryID);
+        }
+        return false;
     }
 
     public void save(File outputFile, Charset charset) throws IOException {

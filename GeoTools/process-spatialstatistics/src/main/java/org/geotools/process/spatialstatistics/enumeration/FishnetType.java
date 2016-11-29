@@ -24,7 +24,13 @@ package org.geotools.process.spatialstatistics.enumeration;
  * @source $URL$
  */
 public enum FishnetType {
+    /**
+     * Rectangular grid
+     */
     Rectangle,
     
+    /**
+     * Circular grid
+     */
     Circle
 }

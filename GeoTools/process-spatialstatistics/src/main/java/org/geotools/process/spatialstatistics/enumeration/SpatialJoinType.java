@@ -24,7 +24,14 @@ package org.geotools.process.spatialstatistics.enumeration;
  * @source $URL$
  */
 public enum SpatialJoinType {
+    /**
+     * All target features will be maintained in the output (outer join). This is the default.
+     */
     KeepAllRecord,
-    
+
+    /**
+     * Only those target features that have the specified spatial relationship with the join features will be maintained in the output feature class
+     * (inner join).
+     */
     OnlyMatchingRecord
 }

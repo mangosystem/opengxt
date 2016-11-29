@@ -24,5 +24,13 @@ package org.geotools.process.spatialstatistics.enumeration;
  * @source $URL$
  */
 public enum DistanceMethod {
-    Euclidean, Manhattan
+    /**
+     * The straight-line distance between two points (as the crow flies) in Euclidean space
+     */
+    Euclidean,
+
+    /**
+     * The distance between two points in a grid based on a strictly horizontal and/or vertical path (that is, along the grid lines)
+     */
+    Manhattan
 }

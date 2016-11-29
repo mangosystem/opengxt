@@ -46,19 +46,17 @@ import org.opengis.feature.simple.SimpleFeatureType;
 public class LocalLeesSOperation extends AbstractStatisticsOperation {
     protected static final Logger LOGGER = Logging.getLogger(LocalLeesSOperation.class);
 
-    public DistanceMethod DistanceType = DistanceMethod.Euclidean;
+    private SpatialWeightMatrix swMatrix = null;
 
-    SpatialWeightMatrix swMatrix = null;
+    private double[] dcIndex;
 
-    double[] dcIndex;
-
-    double[] dcZScore;
+    private double[] dcZScore;
 
     public LocalLeesSOperation() {
         // Default Setting
         this.setDistanceType(DistanceMethod.Euclidean);
-        this.setSpatialConceptType(SpatialConcept.INVERSEDISTANCE);
-        this.setStandardizationType(StandardizationMethod.NONE);
+        this.setSpatialConceptType(SpatialConcept.InverseDistance);
+        this.setStandardizationType(StandardizationMethod.None);
     }
 
     public double[] getZScore() {
@@ -72,19 +70,20 @@ public class LocalLeesSOperation extends AbstractStatisticsOperation {
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, String inputField)
             throws IOException {
         swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
-        swMatrix.distanceBandWidth = this.getDistanceBand();
-        swMatrix.buildWeightMatrix(inputFeatures, inputField, this.getDistanceType());
+        swMatrix.setDistanceMethod(getDistanceType());
+        swMatrix.setDistanceBandWidth(getDistanceBand());
+        swMatrix.buildWeightMatrix(inputFeatures, inputField);
 
         // calculate the mean and standard deviation for this data set.
-        int featureCount = swMatrix.Events.size();
-        double n = swMatrix.Events.size() * 1.0;
+        int featureCount = swMatrix.getEvents().size();
+        double n = swMatrix.getEvents().size() * 1.0;
         double dZMean = swMatrix.dZSum / n;
 
         double dM2 = 0.0;
         double dM4 = 0.0;
 
         // calculate deviation from the mean sums.
-        for (SpatialEvent curE : swMatrix.Events) {
+        for (SpatialEvent curE : swMatrix.getEvents()) {
             dM2 += Math.pow(curE.weight - dZMean, 2.0);
             dM4 += Math.pow(curE.weight - dZMean, 4.0);
         }
@@ -97,7 +96,7 @@ public class LocalLeesSOperation extends AbstractStatisticsOperation {
         dcIndex = new double[featureCount];
         dcZScore = new double[featureCount];
         for (int i = 0; i < featureCount; i++) {
-            SpatialEvent curE = swMatrix.Events.get(i);
+            SpatialEvent curE = swMatrix.getEvents().get(i);
             double dLocalZDevSum = 0.0;
             double dWijSum = 0.0;
             double dWij2Sum = 0.0;
@@ -105,20 +104,14 @@ public class LocalLeesSOperation extends AbstractStatisticsOperation {
 
             // look for i's local neighbors
             for (int j = 0; j < featureCount; j++) {
-                SpatialEvent destE = swMatrix.Events.get(j);
+                SpatialEvent destE = swMatrix.getEvents().get(j);
                 if (curE.oid == destE.oid)
                     continue;
 
                 // calculate the weight (dWij)
-                double dWij = 0.0;
-                if (this.getSpatialConceptType() == SpatialConcept.POLYGONCONTIGUITY) {
-                    dWij = 0.0;
-                    // if (destE is neighbor ) dWeight = 1.0;
-                } else {
-                    dWij = swMatrix.getWeight(curE, destE);
-                }
+                double dWij = swMatrix.getWeight(curE, destE);
 
-                if (getStandardizationType() == StandardizationMethod.ROW) {
+                if (getStandardizationType() == StandardizationMethod.Row) {
                     dWij = swMatrix.standardizeWeight(curE, dWij);
                 }
 
@@ -134,7 +127,7 @@ public class LocalLeesSOperation extends AbstractStatisticsOperation {
             dcIndex[i] = Double.NaN;
             dcZScore[i] = Double.NaN;
             try {
-                // TODO correct 
+                // TODO correct
                 dcIndex[i] = Math.pow(dLocalZDevSum, 2.0) / dM2;
 
                 double dExpected = -1.0 * (dWijSum / (n - 1.0));
@@ -175,7 +168,7 @@ public class LocalLeesSOperation extends AbstractStatisticsOperation {
                 final SimpleFeature feature = featureIter.next();
 
                 // create feature and set geometry
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature(feature.getID());
                 featureWriter.copyAttributes(feature, newFeature, true);
 
                 double localIndex = this.dcIndex[idx];

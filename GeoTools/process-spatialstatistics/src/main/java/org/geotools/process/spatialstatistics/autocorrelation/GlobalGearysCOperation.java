@@ -40,40 +40,39 @@ import org.geotools.util.logging.Logging;
 public class GlobalGearysCOperation extends AbstractStatisticsOperation {
     protected static final Logger LOGGER = Logging.getLogger(GlobalGearysCOperation.class);
 
-    SpatialWeightMatrix swMatrix = null;
+    private SpatialWeightMatrix swMatrix = null;
 
     public GlobalGearysCOperation() {
         // Default Setting
         this.setDistanceType(DistanceMethod.Euclidean);
-        this.setSpatialConceptType(SpatialConcept.INVERSEDISTANCE);
-        this.setStandardizationType(StandardizationMethod.NONE);
+        this.setSpatialConceptType(SpatialConcept.InverseDistance);
+        this.setStandardizationType(StandardizationMethod.None);
     }
 
     public GearysC execute(SimpleFeatureCollection inputFeatures, String inputField) {
         swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
-        swMatrix.distanceBandWidth = this.getDistanceBand();
-        swMatrix.buildWeightMatrix(inputFeatures, inputField, this.getDistanceType());
+        swMatrix.setDistanceMethod(getDistanceType());
+        swMatrix.setDistanceBandWidth(getDistanceBand());
+        swMatrix.buildWeightMatrix(inputFeatures, inputField);
 
-        double dSumWC = 0.0; // summation of weighted co-variance (dWij * dCij)
-        double dSumW = 0.0; // summation of all weights (dWij)
+        double dSumWC = 0.0;
+        double dSumW = 0.0;
         double dM2 = 0.0;
         double dM4 = 0.0;
         double dSumS1 = 0.0;
         double dSumS2 = 0.0;
 
-        // # Calculate sample mean.
-        double n = swMatrix.Events.size() * 1.0;
+        double n = swMatrix.getEvents().size() * 1.0;
         double dZMean = swMatrix.dZSum / n;
 
-        for (SpatialEvent curE : swMatrix.Events) {
+        for (SpatialEvent curE : swMatrix.getEvents()) {
             double dWijS2Sum = 0.0;
             double dWjiS2Sum = 0.0;
-            double dZiDeviation = curE.weight - dZMean; // Calculate deviation from mean
+            double dZiDeviation = curE.weight - dZMean;
             dM2 += Math.pow(dZiDeviation, 2.0);
             dM4 += Math.pow(dZiDeviation, 4.0);
 
-            // # Look for i's local neighbors
-            for (SpatialEvent destE : swMatrix.Events) {
+            for (SpatialEvent destE : swMatrix.getEvents()) {
                 if (curE.oid == destE.oid)
                     continue;
 
@@ -82,19 +81,10 @@ public class GlobalGearysCOperation extends AbstractStatisticsOperation {
                 double dCij = Math.pow(curE.weight - destE.weight, 2.0);
 
                 // Calculate the weight (dWij)
-                double dWij = 0.0;
-                double dWji = 0.0;
+                double dWij = swMatrix.getWeight(curE, destE);
+                double dWji = dWij;
 
-                if (this.getSpatialConceptType() == SpatialConcept.POLYGONCONTIGUITY) {
-                    dWij = 0.0;
-                    // if (destE is neighbor ) dWij = 1.0;
-                    dWji = dWij;
-                } else {
-                    dWij = swMatrix.getWeight(curE, destE);
-                    dWji = dWij;
-                }
-
-                if (getStandardizationType() == StandardizationMethod.ROW) {
+                if (getStandardizationType() == StandardizationMethod.Row) {
                     dWij = swMatrix.standardizeWeight(curE, dWij);
                     dWji = swMatrix.standardizeWeight(destE, dWji);
                 }
@@ -119,8 +109,14 @@ public class GlobalGearysCOperation extends AbstractStatisticsOperation {
         double b2 = dM4 / (dM2 * dM2);
         double dExpected = 1.0;
 
-        if (dSumW <= 0.0)
-            return new GearysC();
+        if (dSumW <= 0.0) {
+            GearysC gearysC = new GearysC(0d, dExpected, 0d);
+            gearysC.setConceptualization(getSpatialConceptType());
+            gearysC.setDistanceMethod(getDistanceType());
+            gearysC.setRowStandardization(getStandardizationType());
+            gearysC.setDistanceThreshold(swMatrix.getDistanceBandWidth());
+            return gearysC;
+        }
 
         // Finally, we can calculate
         double dGearysC = dSumWC / (2.0 * dM2 * dSumW);
@@ -141,7 +137,7 @@ public class GlobalGearysCOperation extends AbstractStatisticsOperation {
         gearysC.setConceptualization(getSpatialConceptType());
         gearysC.setDistanceMethod(getDistanceType());
         gearysC.setRowStandardization(getStandardizationType());
-        gearysC.setDistanceThreshold(swMatrix.distanceBandWidth);
+        gearysC.setDistanceThreshold(swMatrix.getDistanceBandWidth());
 
         return gearysC;
     }
@@ -154,11 +150,11 @@ public class GlobalGearysCOperation extends AbstractStatisticsOperation {
 
         double zVariance = 0.0;
 
-        SpatialConcept conceptualization = SpatialConcept.INVERSEDISTANCE;
+        SpatialConcept conceptualization = SpatialConcept.InverseDistance;
 
         DistanceMethod distanceMethod = DistanceMethod.Euclidean;
 
-        StandardizationMethod rowStandardization = StandardizationMethod.NONE;
+        StandardizationMethod rowStandardization = StandardizationMethod.None;
 
         double distanceThreshold = 0.0;
 
@@ -205,8 +201,7 @@ public class GlobalGearysCOperation extends AbstractStatisticsOperation {
         }
 
         public double getPValue() {
-            double zScore = this.getZScore();
-            return SSUtils.zProb(zScore, StatEnum.BOTH);
+            return SSUtils.zProb(this.getZScore(), StatEnum.BOTH);
         }
 
         public SpatialConcept getConceptualization() {

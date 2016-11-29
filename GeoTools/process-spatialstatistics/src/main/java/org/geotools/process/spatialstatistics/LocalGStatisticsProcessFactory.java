@@ -88,7 +88,7 @@ public class LocalGStatisticsProcessFactory extends SpatialStatisticsProcessFact
             "spatialConcept", SpatialConcept.class,
             getResource("LocalGStatistics.spatialConcept.title"),
             getResource("LocalGStatistics.spatialConcept.description"), false, 0, 1,
-            SpatialConcept.INVERSEDISTANCE, null);
+            SpatialConcept.InverseDistance, null);
 
     /** distanceMethod */
     public static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
@@ -102,7 +102,7 @@ public class LocalGStatisticsProcessFactory extends SpatialStatisticsProcessFact
             "standardization", StandardizationMethod.class,
             getResource("LocalGStatistics.standardization.title"),
             getResource("LocalGStatistics.standardization.description"), false, 0, 1,
-            StandardizationMethod.NONE, null);
+            StandardizationMethod.None, null);
 
     /** searchDistance */
     public static final Parameter<Double> searchDistance = new Parameter<Double>("searchDistance",

@@ -87,7 +87,7 @@ public class LocalLeesSProcessFactory extends SpatialStatisticsProcessFactory {
     public static final Parameter<SpatialConcept> spatialConcept = new Parameter<SpatialConcept>(
             "spatialConcept", SpatialConcept.class, getResource("LocalLeesS.spatialConcept.title"),
             getResource("LocalLeesS.spatialConcept.description"), false, 0, 1,
-            SpatialConcept.INVERSEDISTANCE, null);
+            SpatialConcept.InverseDistance, null);
 
     /** distanceMethod */
     public static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
@@ -100,7 +100,7 @@ public class LocalLeesSProcessFactory extends SpatialStatisticsProcessFactory {
             "standardization", StandardizationMethod.class,
             getResource("LocalLeesS.standardization.title"),
             getResource("LocalLeesS.standardization.description"), false, 0, 1,
-            StandardizationMethod.NONE, null);
+            StandardizationMethod.None, null);
 
     /** searchDistance */
     public static final Parameter<Double> searchDistance = new Parameter<Double>("searchDistance",

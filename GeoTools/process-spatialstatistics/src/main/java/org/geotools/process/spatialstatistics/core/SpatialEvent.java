@@ -27,7 +27,7 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class SpatialEvent {
 
-    public int oid = 0;
+    public Object oid = 0;
 
     public double x = Double.NaN;
 
@@ -45,18 +45,18 @@ public class SpatialEvent {
         this.oid = objectID;
     }
 
-    public SpatialEvent(int objectID, Coordinate coordinate) {
+    public SpatialEvent(Object objectID, Coordinate coordinate) {
         this.oid = objectID;
         this.x = coordinate.x;
         this.y = coordinate.y;
     }
 
-    public SpatialEvent(int objectID, Coordinate coordinate, double obsValue) {
+    public SpatialEvent(Object objectID, Coordinate coordinate, double obsValue) {
         this(objectID, coordinate);
         this.weight = obsValue;
     }
 
-    public SpatialEvent(int objectID, Coordinate coordinate, double obsValue, double popValue) {
+    public SpatialEvent(Object objectID, Coordinate coordinate, double obsValue, double popValue) {
         this(objectID, coordinate, obsValue);
         this.population = popValue;
     }

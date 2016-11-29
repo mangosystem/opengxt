@@ -120,11 +120,11 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
 
     private double[] zScore;
 
-    private SpatialConcept spatialConcept = SpatialConcept.INVERSEDISTANCE;
+    private SpatialConcept spatialConcept = SpatialConcept.InverseDistance;
 
     private DistanceMethod distanceMethod = DistanceMethod.Euclidean;
 
-    private StandardizationMethod standardization = StandardizationMethod.NONE;
+    private StandardizationMethod standardization = StandardizationMethod.None;
 
     private Double searchDistance = Double.valueOf(0d);
 
@@ -503,13 +503,13 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
                 SpatialEvent curE = new SpatialEvent(0, coordinate);
                 int neighborCount = 0;
                 double zScoreSum = 0d;
-                for (int j = 0; j < swMatrix.Events.size(); j++) {
-                    SpatialEvent destE = swMatrix.Events.get(j);
+                for (int j = 0; j < swMatrix.getEvents().size(); j++) {
+                    SpatialEvent destE = swMatrix.getEvents().get(j);
                     Coordinate destCoord = new Coordinate(destE.x, destE.y);
                     if (destCoord.equals(coordinate))
                         continue;
 
-                    if (spatialConcept == SpatialConcept.FIXEDDISTANCEBAND) {
+                    if (spatialConcept == SpatialConcept.FixedDistance) {
                         if (destE.getDistance(curE) > searchDistance) {
                             continue;
                         }
@@ -548,7 +548,7 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
                 .get(GlobalMoransIProcessFactory.standardization.key);
         searchDistance = (Double) params.get(GlobalMoransIProcessFactory.searchDistance.key);
 
-        if (spatialConcept == SpatialConcept.FIXEDDISTANCEBAND
+        if (spatialConcept == SpatialConcept.FixedDistance
                 && (searchDistance == null || searchDistance == 0)) {
             openInformation(getShell(), "FIXEDDISTANCEBAND option requires Distance Band"); //$NON-NLS-1$
             return;
@@ -605,7 +605,7 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
             opertor.setStandardizationType(standardization);
 
             if (searchDistance != null && searchDistance > 0 && !Double.isNaN(searchDistance)) {
-                spatialConcept = SpatialConcept.FIXEDDISTANCEBAND;
+                spatialConcept = SpatialConcept.FixedDistance;
                 opertor.setDistanceBand(searchDistance);
                 opertor.setSpatialConceptType(spatialConcept);
             }

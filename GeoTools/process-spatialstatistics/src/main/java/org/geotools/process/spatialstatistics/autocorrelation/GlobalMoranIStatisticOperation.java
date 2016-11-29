@@ -38,66 +38,57 @@ import org.geotools.util.logging.Logging;
 public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation {
     protected static final Logger LOGGER = Logging.getLogger(GlobalMoranIStatisticOperation.class);
 
-    SpatialWeightMatrix swMatrix = null;
+    private SpatialWeightMatrix swMatrix = null;
 
     public GlobalMoranIStatisticOperation() {
         // Default Setting
         this.setDistanceType(DistanceMethod.Euclidean);
-        this.setSpatialConceptType(SpatialConcept.INVERSEDISTANCE);
-        this.setStandardizationType(StandardizationMethod.NONE);
+        this.setSpatialConceptType(SpatialConcept.InverseDistance);
+        this.setStandardizationType(StandardizationMethod.None);
     }
 
     public MoransI execute(SimpleFeatureCollection inputFeatures, String inputField) {
         swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
-        swMatrix.distanceBandWidth = this.getDistanceBand();
-        swMatrix.buildWeightMatrix(inputFeatures, inputField, this.getDistanceType());
+        swMatrix.setDistanceMethod(getDistanceType());
+        swMatrix.setDistanceBandWidth(getDistanceBand());
+        swMatrix.buildWeightMatrix(inputFeatures, inputField);
 
-        // """Calculate Moran's Index and Z Score."""
-        double dSumWC = 0.0; // # summation of weighted co-variance (dWij * dCij)
-        double dSumW = 0.0; // # summation of all weights (dWij)
+        double dSumWC = 0.0;
+        double dSumW = 0.0;
         double dM2 = 0.0;
         double dM4 = 0.0;
         double dSumS1 = 0.0;
         double dSumS2 = 0.0;
 
         // Calculate sample mean.
-        double n = swMatrix.Events.size() * 1.0;
+        double n = swMatrix.getEvents().size() * 1.0;
         double dZMean = swMatrix.dZSum / n;
 
-        for (SpatialEvent curE : swMatrix.Events) {
+        for (SpatialEvent curE : swMatrix.getEvents()) {
             double dWijS2Sum = 0.0;
             double dWjiS2Sum = 0.0;
-            double dZiDeviation = curE.weight - dZMean; // # Calculate deviation from mean
+            double dZiDeviation = curE.weight - dZMean;
             dM2 += Math.pow(dZiDeviation, 2.0);
             dM4 += Math.pow(dZiDeviation, 4.0);
 
-            // # Look for i's local neighbors
-            for (SpatialEvent destE : swMatrix.Events) {
-                if (curE.oid == destE.oid)
+            for (SpatialEvent destE : swMatrix.getEvents()) {
+                if (curE.oid == destE.oid) {
                     continue;
-
-                double dZjDeviation = destE.weight - dZMean;
-                double dCij = dZiDeviation * dZjDeviation; // # Calculate ij co-variance
-
-                // # Calculate the weight (dWij)
-                double dWij = 0.0;
-                double dWji = 0.0;
-
-                if (this.getSpatialConceptType() == SpatialConcept.POLYGONCONTIGUITY) {
-                    dWij = 0.0;
-                    // if (destE is neighbor ) dWij = 1.0;
-                    dWji = dWij;
-                } else {
-                    dWij = swMatrix.getWeight(curE, destE);
-                    dWji = dWij;
                 }
 
-                if (getStandardizationType() == StandardizationMethod.ROW) {
+                double dZjDeviation = destE.weight - dZMean;
+                double dCij = dZiDeviation * dZjDeviation;
+
+                // Calculate the weight (dWij)
+                double dWij = swMatrix.getWeight(curE, destE);
+                double dWji = dWij;
+
+                if (getStandardizationType() == StandardizationMethod.Row) {
                     dWij = swMatrix.standardizeWeight(curE, dWij);
                     dWji = swMatrix.standardizeWeight(destE, dWji);
                 }
 
-                // # Create sums needed to calculate Moran's I
+                // Create sums needed to calculate Moran's I
                 dSumWC += dWij * dCij;
                 dSumW += dWij;
                 dWijS2Sum += dWij;
@@ -109,15 +100,21 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
         }
         dSumS1 = 0.5 * dSumS1;
 
-        // # we need a few more working variables:
+        // we need a few more working variables:
         dM2 = (dM2 * 1.0) / n; // # standard deviation
         dM4 = (dM4 * 1.0) / n;
 
-        double dB2 = dM4 / (dM2 * dM2); // # sample kurtosis
-        double dExpected = -1.0 / (n - 1.0); // # Expected Moran's I
+        double dB2 = dM4 / (dM2 * dM2); // sample kurtosis
+        double dExpected = -1.0 / (n - 1.0); // Expected Moran's I
 
-        if (dSumW <= 0.0)
-            return new MoransI();
+        if (dSumW <= 0.0) {
+            MoransI moransI = new MoransI(0d, dExpected, 0d);
+            moransI.setConceptualization(getSpatialConceptType());
+            moransI.setDistanceMethod(getDistanceType());
+            moransI.setRowStandardization(getStandardizationType());
+            moransI.setDistanceThreshold(swMatrix.getDistanceBandWidth());
+            return moransI;
+        }
 
         // Finally, we can calculate Moran's I and its significance (Z Score).
         // This Z Score is based on the calculated RANDOMIZATION null hypothesis.
@@ -138,7 +135,7 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
         moransI.setConceptualization(getSpatialConceptType());
         moransI.setDistanceMethod(getDistanceType());
         moransI.setRowStandardization(getStandardizationType());
-        moransI.setDistanceThreshold(swMatrix.distanceBandWidth);
+        moransI.setDistanceThreshold(swMatrix.getDistanceBandWidth());
 
         return moransI;
     }
@@ -151,11 +148,11 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
 
         double zVariance = 0.0;
 
-        SpatialConcept conceptualization = SpatialConcept.INVERSEDISTANCE;
+        SpatialConcept conceptualization = SpatialConcept.InverseDistance;
 
         DistanceMethod distanceMethod = DistanceMethod.Euclidean;
 
-        StandardizationMethod rowStandardization = StandardizationMethod.NONE;
+        StandardizationMethod rowStandardization = StandardizationMethod.None;
 
         double distanceThreshold = 0.0;
 
@@ -193,7 +190,6 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
         }
 
         public double getZScore() {
-            // dMoranZScore = (dMoranI - dExpected) / (rVariance**0.5)
             double dX = observedIndex - expectedIndex;
             double dY = Math.pow(getZVariance(), 0.5);
             if (dY == 0)
@@ -203,10 +199,7 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
         }
 
         public double getPValue() {
-            // dPVal = STATS.zProb(dZScore, type = 2)
-            double zScore = this.getZScore();
-
-            return SSUtils.zProb(zScore, StatEnum.BOTH);
+            return SSUtils.zProb(this.getZScore(), StatEnum.BOTH);
         }
 
         public SpatialConcept getConceptualization() {

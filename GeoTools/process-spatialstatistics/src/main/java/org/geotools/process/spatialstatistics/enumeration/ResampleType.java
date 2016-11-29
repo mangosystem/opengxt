@@ -25,17 +25,20 @@ package org.geotools.process.spatialstatistics.enumeration;
  */
 public enum ResampleType {
     /**
-     * NEAREST.
+     * Performs a nearest neighbor assignment and is the fastest of the interpolation methods. It is used primarily for discrete data, such as a
+     * land-use classification, since it will not change the values of the cells.
      */
     NEAREST,
 
     /**
-     * BILINEAR.
+     * Performs a bilinear interpolation and determines the new value of a cell based on a weighted distance average of the four nearest input cell
+     * centers. It is useful for continuous data and will cause some smoothing of the data.
      */
     BILINEAR,
 
     /**
-     * BICUBIC.
+     * Performs a cubic convolution and determines the new value of a cell based on fitting a smooth curve through the 16 nearest input cell centers.
+     * It is appropriate for continuous data, although it may result in the output raster containing values outside the range of the input raster.
      */
     BICUBIC
 }

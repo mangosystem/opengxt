@@ -45,30 +45,29 @@ import org.opengis.feature.simple.SimpleFeatureType;
 public class LocalGStatisticOperation extends AbstractStatisticsOperation {
     protected static final Logger LOGGER = Logging.getLogger(LocalGStatisticOperation.class);
 
-    public DistanceMethod DistanceType = DistanceMethod.Euclidean;
+    private SpatialWeightMatrix swMatrix = null;
 
-    SpatialWeightMatrix swMatrix = null;
+    private double[] dcGiValue;
 
-    double[] dcGiValue;
+    private double[] dcMeanValue;
 
-    double[] dcMeanValue;
-
-    double[] dcVarValue;
+    private double[] dcVarValue;
 
     public LocalGStatisticOperation() {
-        // Gi* Default Setting
-        this.setSpatialConceptType(SpatialConcept.FIXEDDISTANCEBAND);
-        // #### Changed to Default to No Standardization ####
-        this.setStandardizationType(StandardizationMethod.NONE);
+        // Default Setting
+        this.setSpatialConceptType(SpatialConcept.FixedDistance);
+        this.setStandardizationType(StandardizationMethod.None);
         this.setDistanceType(DistanceMethod.Euclidean);
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, String inputField)
             throws IOException {
         swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
-        swMatrix.distanceBandWidth = this.getDistanceBand();
-        swMatrix.buildWeightMatrix(inputFeatures, inputField, this.getDistanceType());
-        int featureCount = swMatrix.Events.size();
+        swMatrix.setDistanceMethod(getDistanceType());
+        swMatrix.setDistanceBandWidth(getDistanceBand());
+        swMatrix.buildWeightMatrix(inputFeatures, inputField);
+
+        int featureCount = swMatrix.getEvents().size();
         if (featureCount < 3) {
             LOGGER.warning("inputFeatures's feature count < " + featureCount);
             return null;
@@ -76,7 +75,7 @@ public class LocalGStatisticOperation extends AbstractStatisticsOperation {
             LOGGER.warning("inputFeatures's feature count < " + featureCount);
         }
 
-        // # Calculate the mean and standard deviation for this data set.
+        // Calculate the mean and standard deviation for this data set.
         double rN = featureCount * 1.0;
         double dZMean = swMatrix.dZSum / rN;
         double dZVar = Math.pow((swMatrix.dZ2Sum / rN) - Math.pow(dZMean, 2.0), 0.5);
@@ -84,49 +83,40 @@ public class LocalGStatisticOperation extends AbstractStatisticsOperation {
             LOGGER.warning("ERROR Zero variance:  all of the values for your input field are likely the same.");
         }
 
-        // """Calculate a Gi* Z Score for each feature in the data set."""
+        // Calculate a Gi* Z Score for each feature in the data set.
         dcGiValue = new double[featureCount];
         dcMeanValue = new double[featureCount];
         dcVarValue = new double[featureCount];
 
-        // # Calculate Gi* for each feature i.
+        // Calculate Gi* for each feature i.
         for (int i = 0; i < featureCount; i++) {
-            SpatialEvent curE = swMatrix.Events.get(i);
+            SpatialEvent curE = swMatrix.getEvents().get(i);
 
-            // # Initialize working variables.
+            // Initialize working variables.
             double dLocalZSum = 0.0;
             double dWijSum = 0.0;
             double dWij2Sum = 0.0;
 
-            // # Look for i's local neighbors
+            // Look for i's local neighbors
             for (int j = 0; j < featureCount; j++) {
-                SpatialEvent destE = swMatrix.Events.get(j);
+                SpatialEvent destE = swMatrix.getEvents().get(j);
 
-                // # Calculate the weight (dWij)
-                double dWeight = 0.0;
-                if (this.getSpatialConceptType() == SpatialConcept.POLYGONCONTIGUITY) {
-                    dWeight = 0.0;
-                    // if (destE is neighbor ) dWeight = 1.0;
-                } else {
-                    // # calculate distance between i and j
-                    dWeight = swMatrix.getWeight(curE, destE);
+                // Calculate the weight (dWij)
+                double dWij = swMatrix.getWeight(curE, destE);
+
+                if (getStandardizationType() == StandardizationMethod.Row) {
+                    dWij = swMatrix.standardizeWeight(curE, dWij);
                 }
 
-                // #### Self Potential Adjustment ####
-                // if (i == j && sSelfPotential) dWeight = dcSelf[iKey]
-
-                if (dWeight != 0) {
-                    final double dWij = dWeight;
-                    dLocalZSum += dWij * destE.weight;
-                    dWijSum += dWij;
-                    dWij2Sum += Math.pow(dWij, 2.0);
-                }
+                dLocalZSum += dWij * destE.weight;
+                dWijSum += dWij;
+                dWij2Sum += Math.pow(dWij, 2.0);
             }
 
             dcMeanValue[i] = dWijSum / (rN * (rN - 1.0));
             dcVarValue[i] = Math.pow((dWij2Sum / rN) - Math.pow(dcMeanValue[i], 2), 0.5);
 
-            // # Calculate Gi*
+            // Calculate Gi*
             dcGiValue[i] = Double.NaN;
             try {
                 dcGiValue[i] = ((dLocalZSum - (dWijSum * dZMean)) / (dZVar * Math.pow(
@@ -152,7 +142,7 @@ public class LocalGStatisticOperation extends AbstractStatisticsOperation {
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
-        
+
         // insert features
         int idx = 0;
         SimpleFeatureIterator featureIter = null;
@@ -162,7 +152,7 @@ public class LocalGStatisticOperation extends AbstractStatisticsOperation {
                 final SimpleFeature feature = featureIter.next();
 
                 // create feature and set geometry
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature(feature.getID());
                 featureWriter.copyAttributes(feature, newFeature, true);
 
                 // "GiZScore", "GiMean", "GiVar", "GiPValue"

@@ -160,7 +160,7 @@ public class FeatureInserter implements IFeatureInserter {
             simpleFeature = this.writer.next();
         } else {
             if (id == null) {
-                id = String.valueOf(featureCount + 1);
+                id = Integer.toString(featureCount + 1);
             }
             simpleFeature = this.builder.buildFeature(id);
         }

@@ -18,14 +18,12 @@ package org.geotools.process.spatialstatistics.core;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.GeoTools;
-import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
 import org.geotools.util.logging.Logging;
@@ -58,43 +56,23 @@ public class SpatialWeightMatrix2 extends SpatialWeightMatrix {
     }
 
     public SpatialWeightMatrix2(SpatialConcept spatialConcept,
-            StandardizationMethod standardizationType) {
+            StandardizationMethod standardizationMethod) {
         this.spatialConcept = spatialConcept;
-        this.standardizationMethod = standardizationType;
-
-        if (spatialConcept == SpatialConcept.INVERSEDISTANCESQUARED) {
-            beta = 2.0;
-        } else {
-            beta = 1.0;
-        }
+        this.standardizationMethod = standardizationMethod;
+        this.beta = spatialConcept == SpatialConcept.InverseDistanceSquared ? 2.0 : 1.0;
     }
 
     public void buildWeightMatrix(SimpleFeatureCollection inputFeatures, String obsField,
-            String popField, DistanceMethod distanceMethod) {
-        this.distanceMethod = distanceMethod;
+            String popField) {
 
-        Events = loadEvents(inputFeatures, obsField, popField);
+        this.events = loadEvents(inputFeatures, obsField, popField);
 
-        // Find Maximum Nearest Neighbor Distance
         if (distanceBandWidth == 0) {
-            factory.DistanceType = distanceMethod;
-            double threshold = Double.MIN_VALUE;
-            for (SpatialEvent curEvent : Events) {
-                double nnDist = factory.getMinimumDistance(Events, curEvent);
-                threshold = Math.max(nnDist, threshold);
-            }
-
-            // #### Increase For Rounding Error #### 2369.39576291193
-            distanceBandWidth = threshold * 1.0001;
-            LOGGER.log(Level.WARNING, "The default neighborhood search threshold was "
-                    + distanceBandWidth);
+            calculateDistanceBand();
         }
 
-        if (standardizationMethod == StandardizationMethod.ROW) {
-            this.rowSum = new double[Events.size()];
-            for (SpatialEvent curE : Events) {
-                this.rowSum[curE.oid] = getRowSum(curE);
-            }
+        if (standardizationMethod == StandardizationMethod.Row) {
+            calculateRowSum();
         }
     }
 
@@ -112,8 +90,6 @@ public class SpatialWeightMatrix2 extends SpatialWeightMatrix {
         Expression obsExpression = ff.property(obsField);
         Expression popExpression = ff.property(popField);
 
-        int oid = 0;
-
         SimpleFeatureIterator featureIter = features.features();
         try {
             while (featureIter.hasNext()) {
@@ -121,7 +97,7 @@ public class SpatialWeightMatrix2 extends SpatialWeightMatrix {
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
                 Coordinate coordinate = geometry.getCentroid().getCoordinate();
 
-                SpatialEvent sEvent = new SpatialEvent(oid++, coordinate);
+                SpatialEvent sEvent = new SpatialEvent(feature.getID(), coordinate);
                 sEvent.weight = getValue(feature, obsExpression);
 
                 dZSum += sEvent.weight;

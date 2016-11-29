@@ -89,7 +89,7 @@ public class GlobalMoransIProcessFactory extends SpatialStatisticsProcessFactory
             "spatialConcept", SpatialConcept.class,
             getResource("GlobalMoransI.spatialConcept.title"),
             getResource("GlobalMoransI.spatialConcept.description"), false, 0, 1,
-            SpatialConcept.INVERSEDISTANCE, null);
+            SpatialConcept.InverseDistance, null);
 
     /** distanceMethod */
     public static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
@@ -103,7 +103,7 @@ public class GlobalMoransIProcessFactory extends SpatialStatisticsProcessFactory
             "standardization", StandardizationMethod.class,
             getResource("GlobalMoransI.standardization.title"),
             getResource("GlobalMoransI.standardization.description"), false, 0, 1,
-            StandardizationMethod.NONE, null);
+            StandardizationMethod.None, null);
 
     /** searchDistance */
     public static final Parameter<Double> searchDistance = new Parameter<Double>("searchDistance",

@@ -88,7 +88,7 @@ public class LocalGearysCProcessFactory extends SpatialStatisticsProcessFactory 
             "spatialConcept", SpatialConcept.class,
             getResource("LocalGearysC.spatialConcept.title"),
             getResource("LocalGearysC.spatialConcept.description"), false, 0, 1,
-            SpatialConcept.INVERSEDISTANCE, null);
+            SpatialConcept.InverseDistance, null);
 
     /** distanceMethod */
     public static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
@@ -102,7 +102,7 @@ public class LocalGearysCProcessFactory extends SpatialStatisticsProcessFactory 
             "standardization", StandardizationMethod.class,
             getResource("LocalGearysC.standardization.title"),
             getResource("LocalGearysC.standardization.description"), false, 0, 1,
-            StandardizationMethod.NONE, null);
+            StandardizationMethod.None, null);
 
     /** searchDistance */
     public static final Parameter<Double> searchDistance = new Parameter<Double>("searchDistance",

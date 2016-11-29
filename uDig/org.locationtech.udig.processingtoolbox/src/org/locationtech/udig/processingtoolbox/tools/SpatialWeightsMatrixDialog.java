@@ -300,7 +300,7 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
         if (cboDistMethod.getSelectionIndex() == 1) {
             distanceType = DistanceMethod.Manhattan;
         }
-        factory.DistanceType = distanceType;
+        factory.setDistanceType(distanceType);;
         return factory.getThresholDistance(features);
     }
     

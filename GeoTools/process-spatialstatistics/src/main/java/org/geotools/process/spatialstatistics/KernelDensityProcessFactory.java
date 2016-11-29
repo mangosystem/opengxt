@@ -30,7 +30,7 @@ import org.geotools.feature.NameImpl;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.gridcoverage.RasterKernelDensityOperation.KernelType;
+import org.geotools.process.spatialstatistics.enumeration.KernelType;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -81,7 +81,7 @@ public class KernelDensityProcessFactory extends SpatialStatisticsProcessFactory
     /** kernelType */
     public static final Parameter<KernelType> kernelType = new Parameter<KernelType>("kernelType",
             KernelType.class, getResource("KernelDensity.kernelType.title"),
-            getResource("KernelDensity.kernelType.description"), false, 0, 1, KernelType.QUADRATIC,
+            getResource("KernelDensity.kernelType.description"), false, 0, 1, KernelType.Quadratic,
             null);
 
     /** populationField */

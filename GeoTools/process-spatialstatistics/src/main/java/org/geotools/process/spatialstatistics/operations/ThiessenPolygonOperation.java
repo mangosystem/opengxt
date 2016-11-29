@@ -56,7 +56,7 @@ public class ThiessenPolygonOperation extends GeneralOperation {
 
     private Geometry clipArea = null;
 
-    private ThiessenAttributeMode attributeMode = ThiessenAttributeMode.ONLY_FID;
+    private ThiessenAttributeMode attributeMode = ThiessenAttributeMode.OnlyFID;
 
     public void setAttributeMode(ThiessenAttributeMode attributeMode) {
         this.attributeMode = attributeMode;
@@ -108,12 +108,12 @@ public class ThiessenPolygonOperation extends GeneralOperation {
 
         SimpleFeatureType featureType = null;
         switch (attributeMode) {
-        case ONLY_FID:
+        case OnlyFID:
             String shapeFieldName = pointSchema.getGeometryDescriptor().getLocalName();
             featureType = FeatureTypes.getDefaultType(getOutputTypeName(), shapeFieldName,
                     Polygon.class, crs);
             break;
-        case ALL:
+        case All:
             featureType = FeatureTypes.build(pointSchema, getOutputTypeName(), Polygon.class);
             break;
         }
@@ -121,9 +121,9 @@ public class ThiessenPolygonOperation extends GeneralOperation {
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = pointFeatures.features();
         try {
-            featureIter = pointFeatures.features();
+            int fid = 0;
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
@@ -144,14 +144,12 @@ public class ThiessenPolygonOperation extends GeneralOperation {
                     }
 
                     // create feature
-                    SimpleFeature newFeature = featureWriter.buildFeature(null);
-                    if (attributeMode == ThiessenAttributeMode.ALL) {
+                    SimpleFeature newFeature = featureWriter.buildFeature(feature.getID());
+                    if (attributeMode == ThiessenAttributeMode.All) {
                         featureWriter.copyAttributes(feature, newFeature, false);
                     }
 
-                    int fid = FeatureTypes.getFID(feature);
-                    newFeature.setAttribute(FID_FIELD, fid);
-
+                    newFeature.setAttribute(FID_FIELD, fid++);
                     newFeature.setDefaultGeometry(finalVoronoi);
 
                     featureWriter.write(newFeature);

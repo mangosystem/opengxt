@@ -25,7 +25,6 @@ import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.filter.IsLessThenOrEqualToImpl;
 import org.geotools.filter.LiteralExpressionImpl;
 import org.geotools.util.logging.Logging;
-import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
@@ -49,11 +48,11 @@ import com.vividsolutions.jts.geom.Polygon;
  */
 public class FeatureTypes {
     protected static final Logger LOGGER = Logging.getLogger(FeatureTypes.class);
-    
+
     public static final int DBF_LIMIT = 10;
 
     public static final String SHAPE_FIELD = "geom";
-    
+
     public static String NAMESPACE = "feature";
 
     public static String NAMESPACE_URL = "http://www.mangosystem.com";
@@ -83,21 +82,6 @@ public class FeatureTypes {
         }
 
         return SimpleShapeType.POINT;
-    }
-
-    public static int getFID(SimpleFeature sFeature) {
-        String fid = sFeature.getID();
-        if (fid.contains(".")) {
-            fid = fid.substring(fid.lastIndexOf(".") + 1);
-        }
-
-        int id = -1;
-        try {
-            id = Integer.parseInt(fid);
-        } catch (NumberFormatException e) {
-            LOGGER.log(Level.WARNING, e.getMessage(), e);
-        }
-        return id;
     }
 
     public static boolean isSupportedShapefile(PropertyType type) {

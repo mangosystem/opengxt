@@ -89,7 +89,7 @@ public class GlobalGStatisticsProcessFactory extends SpatialStatisticsProcessFac
             "spatialConcept", SpatialConcept.class,
             getResource("GlobalGStatistics.spatialConcept.title"),
             getResource("GlobalGStatistics.spatialConcept.description"), false, 0, 1,
-            SpatialConcept.INVERSEDISTANCE, null);
+            SpatialConcept.InverseDistance, null);
 
     /** distanceMethod */
     public static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
@@ -103,7 +103,7 @@ public class GlobalGStatisticsProcessFactory extends SpatialStatisticsProcessFac
             "standardization", StandardizationMethod.class,
             getResource("GlobalGStatistics.standardization.title"),
             getResource("GlobalGStatistics.standardization.description"), false, 0, 1,
-            StandardizationMethod.NONE, null);
+            StandardizationMethod.None, null);
 
     /** searchDistance */
     public static final Parameter<Double> searchDistance = new Parameter<Double>("searchDistance",

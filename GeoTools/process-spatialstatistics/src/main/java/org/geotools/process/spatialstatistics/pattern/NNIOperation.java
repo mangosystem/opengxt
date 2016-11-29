@@ -86,7 +86,7 @@ public class NNIOperation extends GeneralOperation {
     public NearestNeighborResult execute(List<SpatialEvent> events, double studyArea) {
         observedMeanDist = 0.0;
 
-        factory.DistanceType = distanceMethod;
+        factory.setDistanceType(distanceMethod);
 
         featureCount = events.size();
         if (studyArea == 0) {

@@ -55,6 +55,10 @@ public class SpatialWeightMatrixDistance extends AbstractSpatialWeightMatrix {
 
     private int exponent = 1;
 
+    public SpatialWeightMatrixDistance() {
+
+    }
+
     public double getThresholdDistance() {
         return thresholdDistance;
     }
@@ -95,51 +99,35 @@ public class SpatialWeightMatrixDistance extends AbstractSpatialWeightMatrix {
         this.exponent = exponent;
     }
 
-    public SpatialWeightMatrixDistance() {
-
-    }
-
     @Override
     public SpatialWeightMatrixResult execute(SimpleFeatureCollection features, String uniqueField) {
+        uniqueField = FeatureTypes.validateProperty(features.getSchema(), uniqueField);
+        this.uniqueFieldIsFID = uniqueField == null || uniqueField.isEmpty();
+        
         SpatialWeightMatrixResult swm = new SpatialWeightMatrixResult(
                 SpatialWeightMatrixType.Distance);
         swm.setupVariables(features.getSchema().getTypeName(), uniqueField);
 
-        uniqueField = FeatureTypes.validateProperty(features.getSchema(), uniqueField);
-
         if (thresholdDistance == 0) {
             DistanceFactory factory = DistanceFactory.newInstance();
-            factory.DistanceType = distanceMethod;
+            factory.setDistanceType(distanceMethod);
             thresholdDistance = factory.getThresholDistance(features);
             LOGGER.log(Level.WARNING, "The default neighborhood search threshold was "
                     + thresholdDistance);
         }
 
         // 1. extract centroid and build spatial index
-        KdTree spatialIndex = new KdTree(0.0d);
-        SimpleFeatureIterator featureIter = features.features();
-        try {
-            while (featureIter.hasNext()) {
-                SimpleFeature feature = featureIter.next();
-                Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                Coordinate coordinate = geometry.getCentroid().getCoordinate();
-                Object primaryID = feature.getAttribute(uniqueField);
-
-                spatialIndex.insert(coordinate, primaryID);
-            }
-        } finally {
-            featureIter.close();
-        }
+        KdTree spatialIndex = buildSpatialIndex(features, uniqueField);
 
         List<KdNode> result = new ArrayList<KdNode>();
-        featureIter = features.features();
+        SimpleFeatureIterator featureIter = features.features();
         try {
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
                 Point centroid = geometry.getCentroid();
                 Coordinate coordinate = centroid.getCoordinate();
-                Object primaryID = feature.getAttribute(uniqueField);
+                Object primaryID = getFeatureID(feature, uniqueField);
 
                 Envelope env = centroid.buffer(thresholdDistance).getEnvelopeInternal();
                 result.clear();
@@ -162,4 +150,21 @@ public class SpatialWeightMatrixDistance extends AbstractSpatialWeightMatrix {
         return swm;
     }
 
+    private KdTree buildSpatialIndex(SimpleFeatureCollection features, String uniqueField) {
+        KdTree spatialIndex = new KdTree(0.0d);
+        SimpleFeatureIterator featureIter = features.features();
+        try {
+            while (featureIter.hasNext()) {
+                SimpleFeature feature = featureIter.next();
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                Coordinate coordinate = geometry.getCentroid().getCoordinate();
+                Object primaryID = getFeatureID(feature, uniqueField);
+
+                spatialIndex.insert(coordinate, primaryID);
+            }
+        } finally {
+            featureIter.close();
+        }
+        return spatialIndex;
+    }
 }

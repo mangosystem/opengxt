@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.util.logging.Logging;
+import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.FilterFactory2;
 
 /**
@@ -32,14 +33,16 @@ import org.opengis.filter.FilterFactory2;
  */
 public abstract class AbstractSpatialWeightMatrix {
     protected static final Logger LOGGER = Logging.getLogger(AbstractSpatialWeightMatrix.class);
-    
+
     public enum SpatialWeightMatrixType {
         Distance, Contiguity
     }
 
     protected final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
-    
+
     protected boolean selfContains = false;
+
+    protected boolean uniqueFieldIsFID = false;
 
     public boolean isSelfContains() {
         return selfContains;
@@ -52,4 +55,10 @@ public abstract class AbstractSpatialWeightMatrix {
     public abstract SpatialWeightMatrixResult execute(SimpleFeatureCollection features,
             String uniqueField);
 
+    protected Object getFeatureID(SimpleFeature feature, String uniqueField) {
+        if (uniqueFieldIsFID || uniqueField == null) {
+            return feature.getID();
+        }
+        return feature.getAttribute(uniqueField);
+    }
 }

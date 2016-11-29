@@ -17,8 +17,7 @@
 package org.geotools.process.spatialstatistics.enumeration;
 
 /**
- * Determines which attributes from the point input features will be transferred to the output
- * feature class.
+ * Determines which attributes from the point input features will be transferred to the output feature class.
  * 
  * @author Minpa Lee, MangoSystem
  * 
@@ -26,13 +25,12 @@ package org.geotools.process.spatialstatistics.enumeration;
  */
 public enum ThiessenAttributeMode {
     /**
-     * Only the FID field from the input features will be transferred to the output feature class.
-     * This is the default.
+     * Only the FID field from the input features will be transferred to the output feature class. This is the default.
      */
-    ONLY_FID,
+    OnlyFID,
 
     /**
      * All attributes from the input features will be transferred to the output feature class.
      */
-    ALL
+    All
 }

@@ -40,9 +40,11 @@ public abstract class AbstractStatisticsOperation extends GeneralOperation {
 
     private DistanceMethod distanceType = DistanceMethod.Euclidean;
 
-    private StandardizationMethod standardizationType = StandardizationMethod.NONE;
+    private StandardizationMethod standardizationType = StandardizationMethod.None;
 
-    private SpatialConcept spatialConceptType = SpatialConcept.INVERSEDISTANCE;
+    private SpatialConcept spatialConceptType = SpatialConcept.InverseDistance;
+
+    private boolean isContiguity = false;
 
     private File spatialWeightsFile = null;
 
@@ -82,10 +84,17 @@ public abstract class AbstractStatisticsOperation extends GeneralOperation {
 
     public void setSpatialConceptType(SpatialConcept spatialConcept) {
         this.spatialConceptType = spatialConcept;
+        this.isContiguity = spatialConcept == SpatialConcept.ContiguityEdgesNodes
+                || spatialConcept == SpatialConcept.ContiguityEdgesOnly
+                || spatialConcept == SpatialConcept.ContiguityNodesOnly;
     }
 
     public SpatialConcept getSpatialConceptType() {
         return spatialConceptType;
+    }
+
+    public boolean isContiguity() {
+        return isContiguity;
     }
 
 }

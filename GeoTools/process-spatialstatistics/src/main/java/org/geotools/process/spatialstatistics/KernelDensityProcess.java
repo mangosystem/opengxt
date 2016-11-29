@@ -21,8 +21,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.media.jai.JAI;
-
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -30,8 +28,8 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.KernelType;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterKernelDensityOperation;
-import org.geotools.process.spatialstatistics.gridcoverage.RasterKernelDensityOperation.KernelType;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
@@ -94,7 +92,7 @@ public class KernelDensityProcess extends AbstractStatisticsProcess {
             }
 
             KernelType kernelType = (KernelType) Params.getValue(input,
-                    KernelDensityProcessFactory.kernelType, KernelType.QUADRATIC);
+                    KernelDensityProcessFactory.kernelType, KernelType.Quadratic);
             String populationField = (String) Params.getValue(input,
                     KernelDensityProcessFactory.populationField, null);
             Double searchRadius = (Double) Params.getValue(input,
@@ -120,9 +118,6 @@ public class KernelDensityProcess extends AbstractStatisticsProcess {
                 searchRadius = Math.min(boundingBox.getWidth(), boundingBox.getHeight()) / 30.0;
                 LOGGER.warning("default neighborhood = Circle + Radius(" + searchRadius + ")");
             }
-
-            String version = JAI.getBuildVersion();
-            LOGGER.warning(version);
 
             GridCoverage2D resultGc = null;
             RasterKernelDensityOperation process = new RasterKernelDensityOperation();

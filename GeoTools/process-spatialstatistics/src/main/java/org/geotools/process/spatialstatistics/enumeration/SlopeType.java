@@ -25,12 +25,12 @@ package org.geotools.process.spatialstatistics.enumeration;
  */
 public enum SlopeType {
     /**
-     * DEGREE.
+     * The inclination of slope will be calculated in degrees.
      */
-    DEGREE, 
+    DEGREE,
 
     /**
-     * PERCENTRISE.
+     * Keyword to output the percent rise, also referred to as the percent slope.
      */
     PERCENTRISE
 }

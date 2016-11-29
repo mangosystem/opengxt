@@ -44,6 +44,10 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
 
     private ContiguityType contiguityType = ContiguityType.Queen;
 
+    public SpatialWeightMatrixContiguity() {
+
+    }
+
     public int getOrderOfContiguity() {
         return orderOfContiguity;
     }
@@ -60,12 +64,11 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
         this.contiguityType = contiguityType;
     }
 
-    public SpatialWeightMatrixContiguity() {
-
-    }
-
     @Override
     public SpatialWeightMatrixResult execute(SimpleFeatureCollection features, String uniqueField) {
+        uniqueField = FeatureTypes.validateProperty(features.getSchema(), uniqueField);
+        this.uniqueFieldIsFID = uniqueField == null || uniqueField.isEmpty();
+        
         switch (contiguityType) {
         case Queen:
             return queen(features, uniqueField);
@@ -85,7 +88,6 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
                 SpatialWeightMatrixType.Contiguity);
         swm.setupVariables(features.getSchema().getTypeName(), uniqueField);
 
-        uniqueField = FeatureTypes.validateProperty(features.getSchema(), uniqueField);
         final String the_geom = features.getSchema().getGeometryDescriptor().getLocalName();
 
         SimpleFeatureIterator featureIter = features.features();
@@ -93,7 +95,7 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
             while (featureIter.hasNext()) {
                 SimpleFeature primaryFeature = featureIter.next();
                 Geometry primaryGeometry = (Geometry) primaryFeature.getDefaultGeometry();
-                Object primaryID = primaryFeature.getAttribute(uniqueField);
+                Object primaryID = getFeatureID(primaryFeature, uniqueField);
 
                 // spatial query
                 // TODO orderOfContiguity
@@ -102,7 +104,7 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
                 try {
                     while (subIter.hasNext()) {
                         SimpleFeature secondaryFeature = subIter.next();
-                        Object secondaryID = secondaryFeature.getAttribute(uniqueField);
+                        Object secondaryID = getFeatureID(secondaryFeature, uniqueField);
                         if (!this.isSelfContains() && primaryID.equals(secondaryID)) {
                             continue;
                         }
@@ -134,7 +136,7 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
             while (featureIter.hasNext()) {
                 SimpleFeature primaryFeature = featureIter.next();
                 Geometry primaryGeometry = (Geometry) primaryFeature.getDefaultGeometry();
-                Object primaryID = primaryFeature.getAttribute(uniqueField);
+                Object primaryID = getFeatureID(primaryFeature, uniqueField);
 
                 // spatial query
                 Filter filter = ff.intersects(ff.property(the_geom), ff.literal(primaryGeometry));
@@ -142,7 +144,7 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
                 try {
                     while (subIter.hasNext()) {
                         SimpleFeature secondaryFeature = subIter.next();
-                        Object secondaryID = secondaryFeature.getAttribute(uniqueField);
+                        Object secondaryID = getFeatureID(secondaryFeature, uniqueField);
                         if (primaryID.equals(secondaryID)) {
                             continue;
                         }
@@ -180,7 +182,7 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
             while (featureIter.hasNext()) {
                 SimpleFeature primaryFeature = featureIter.next();
                 Geometry primaryGeometry = (Geometry) primaryFeature.getDefaultGeometry();
-                Object primaryID = primaryFeature.getAttribute(uniqueField);
+                Object primaryID = getFeatureID(primaryFeature, uniqueField);
 
                 // spatial query
                 Filter filter = ff.intersects(ff.property(the_geom), ff.literal(primaryGeometry));
@@ -188,7 +190,7 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
                 try {
                     while (subIter.hasNext()) {
                         SimpleFeature secondaryFeature = subIter.next();
-                        Object secondaryID = secondaryFeature.getAttribute(uniqueField);
+                        Object secondaryID = getFeatureID(secondaryFeature, uniqueField);
                         if (primaryID.equals(secondaryID)) {
                             continue;
                         }

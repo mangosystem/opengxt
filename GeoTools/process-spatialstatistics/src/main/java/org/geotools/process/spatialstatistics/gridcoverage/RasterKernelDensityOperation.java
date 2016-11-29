@@ -30,6 +30,7 @@ import javax.media.jai.PlanarImage;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.spatialstatistics.enumeration.KernelType;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.jaitools.media.jai.kernel.KernelFactory;
@@ -47,13 +48,7 @@ import org.opengis.referencing.crs.GeographicCRS;
 public class RasterKernelDensityOperation extends RasterDensityOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterKernelDensityOperation.class);
 
-    // http://support.sas.com/documentation/cdl/en/procstat/63104/HTML/default/viewer.htm#procstat_univariate_sect038.htm
-
-    public enum KernelType {
-        BINARY, COSINE, DISTANCE, EPANECHNIKOV, GAUSSIAN, INVERSE_DISTANCE, QUADRATIC, QUARTIC, TRIANGULAR, TRIWEIGHT, TRICUBE;
-    }
-
-    private KernelType kernelType = KernelType.QUADRATIC;
+    private KernelType kernelType = KernelType.Quadratic;
 
     public KernelType getKernelType() {
         return kernelType;
@@ -143,25 +138,25 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
 
         KernelJAI kernel = null;
         switch (this.kernelType) {
-        case BINARY:
+        case Binary:
             kernel = KernelFactory.createCircle(radius, ValueType.BINARY);
             break;
-        case COSINE:
+        case Cosine:
             kernel = KernelFactory.createCircle(radius, ValueType.COSINE);
             break;
-        case DISTANCE:
+        case Distance:
             kernel = KernelFactory.createCircle(radius, ValueType.DISTANCE);
             break;
-        case EPANECHNIKOV:
+        case Epanechnikov:
             kernel = KernelFactory.createCircle(radius, ValueType.EPANECHNIKOV);
             break;
-        case GAUSSIAN:
+        case Gaussian:
             kernel = KernelFactory.createCircle(radius, ValueType.GAUSSIAN);
             break;
-        case INVERSE_DISTANCE:
+        case InverseDistance:
             kernel = KernelFactory.createCircle(radius, ValueType.INVERSE_DISTANCE);
             break;
-        case QUADRATIC:
+        case Quadratic:
             float[] weights = new float[width * width];
             for (int dY = -radius; dY <= radius; dY++) {
                 final double dy2 = dY * dY;
@@ -181,16 +176,16 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
             }
             kernel = new KernelJAI(width, width, weights);
             break;
-        case QUARTIC:
+        case Quartic:
             kernel = KernelFactory.createCircle(radius, ValueType.QUARTIC);
             break;
-        case TRIANGULAR:
+        case Triangular:
             kernel = KernelFactory.createCircle(radius, ValueType.TRIANGULAR);
             break;
-        case TRIWEIGHT:
-            kernel = KernelFactory.createCircle(radius, ValueType.TRIANGULAR);
+        case Triweight:
+            kernel = KernelFactory.createCircle(radius, ValueType.TRIWEIGHT);
             break;
-        case TRICUBE:
+        case Tricube:
             // http://en.wikipedia.org/wiki/Kernel_(statistics)
             final double C_TRICUBE = 70.0 / 81.0;
             float[] tcWeights = new float[width * width];

@@ -48,6 +48,16 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
 
     private int numberOfNeighbors = 4; // default value
 
+    private KdTree spatialIndex;
+
+    private int featureCount = 0;
+
+    private Envelope envelope = new Envelope();
+
+    public SpatialWeightMatrixKNearestNeighbors() {
+
+    }
+
     public int getNumberOfNeighbors() {
         return numberOfNeighbors;
     }
@@ -56,45 +66,24 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
         this.numberOfNeighbors = numberOfNeighbors;
     }
 
-    public SpatialWeightMatrixKNearestNeighbors() {
-
-    }
-
     @Override
     public SpatialWeightMatrixResult execute(SimpleFeatureCollection features, String uniqueField) {
+        uniqueField = FeatureTypes.validateProperty(features.getSchema(), uniqueField);
+        this.uniqueFieldIsFID = uniqueField == null || uniqueField.isEmpty();
+        
         SpatialWeightMatrixResult swm = new SpatialWeightMatrixResult(
                 SpatialWeightMatrixType.Distance);
         swm.setupVariables(features.getSchema().getTypeName(), uniqueField);
 
-        uniqueField = FeatureTypes.validateProperty(features.getSchema(), uniqueField);
-
-        int featureCount = 0;
-        Envelope env = new Envelope();
-
         // 1. extract centroid and build spatial index
-        KdTree spatialIndex = new KdTree(0.0d);
-        SimpleFeatureIterator featureIter = features.features();
-        try {
-            while (featureIter.hasNext()) {
-                SimpleFeature feature = featureIter.next();
-                Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                Coordinate coordinate = geometry.getCentroid().getCoordinate();
-                Object primaryID = feature.getAttribute(uniqueField);
-
-                spatialIndex.insert(coordinate, primaryID);
-                featureCount++;
-                env.expandToInclude(coordinate);
-            }
-        } finally {
-            featureIter.close();
-        }
+        buildSpatialIndex(features, uniqueField);
 
         if (numberOfNeighbors >= featureCount) {
-            featureIter = features.features();
+            SimpleFeatureIterator featureIter = features.features();
             try {
                 while (featureIter.hasNext()) {
                     SimpleFeature feature = featureIter.next();
-                    Object primaryID = feature.getAttribute(uniqueField);
+                    Object primaryID = getFeatureID(feature, uniqueField);
                     Geometry geometry = (Geometry) feature.getDefaultGeometry();
                     Coordinate coordinate = geometry.getCentroid().getCoordinate();
 
@@ -102,7 +91,7 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
                     try {
                         while (subIter.hasNext()) {
                             SimpleFeature secondaryFeature = subIter.next();
-                            Object secondaryID = secondaryFeature.getAttribute(uniqueField);
+                            Object secondaryID = getFeatureID(secondaryFeature, uniqueField);
                             if (!this.isSelfContains() && primaryID.equals(secondaryID)) {
                                 continue;
                             }
@@ -120,7 +109,8 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
             }
         } else {
             // 2. evaluate envelope
-            double maxWidth = env.getWidth() > env.getHeight() ? env.getWidth() : env.getHeight();
+            double maxWidth = envelope.getWidth() > envelope.getHeight() ? envelope.getWidth()
+                    : envelope.getHeight();
             final double initDistance = maxWidth / Math.sqrt(featureCount);
 
             // 3.create spatial weight matrix
@@ -128,26 +118,27 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
             TreeMap<Double, Object> sortedMap = new TreeMap<Double, Object>();
             int count = 0;
 
-            featureIter = features.features();
+            SimpleFeatureIterator featureIter = features.features();
             try {
+                Envelope queryEnv = new Envelope();
                 while (featureIter.hasNext()) {
                     SimpleFeature feature = featureIter.next();
                     Geometry geometry = (Geometry) feature.getDefaultGeometry();
                     Coordinate coordinate = geometry.getCentroid().getCoordinate();
-                    Object primaryID = feature.getAttribute(uniqueField);
+                    Object primaryID = getFeatureID(feature, uniqueField);
 
                     // init
-                    env.init(coordinate);
+                    queryEnv.init(coordinate);
                     sortedMap.clear();
 
                     // query
                     count = 0;
                     while (numberOfNeighbors > sortedMap.size()) {
                         double expandDistance = initDistance * ++count;
-                        env.expandBy(expandDistance);
+                        queryEnv.expandBy(expandDistance);
 
                         result.clear();
-                        spatialIndex.query(env, result);
+                        spatialIndex.query(queryEnv, result);
                         for (KdNode node : result) {
                             double distance = coordinate.distance(node.getCoordinate());
                             if (distance > expandDistance) {
@@ -181,5 +172,24 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
         }
 
         return swm;
+    }
+
+    private void buildSpatialIndex(SimpleFeatureCollection features, String uniqueField) {
+        spatialIndex = new KdTree(0.0d);
+        SimpleFeatureIterator featureIter = features.features();
+        try {
+            while (featureIter.hasNext()) {
+                SimpleFeature feature = featureIter.next();
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                Coordinate coordinate = geometry.getCentroid().getCoordinate();
+                Object primaryID = getFeatureID(feature, uniqueField);
+
+                spatialIndex.insert(coordinate, primaryID);
+                featureCount++;
+                envelope.expandToInclude(coordinate);
+            }
+        } finally {
+            featureIter.close();
+        }
     }
 }

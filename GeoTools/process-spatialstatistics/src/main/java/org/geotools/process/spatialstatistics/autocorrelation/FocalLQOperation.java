@@ -49,30 +49,31 @@ public class FocalLQOperation extends AbstractStatisticsOperation {
 
     private double locationQuotient = 0.0;
 
-    public double getLQ() {
-        return locationQuotient;
-    }
+    private double[] dcLocalLQ;
 
-    double[] dcLocalLQ;
+    private double[] localLQ;
 
-    double[] localLQ;
-
-    double[] dcZValue;
+    private double[] dcZValue;
 
     public FocalLQOperation() {
-        this.setSpatialConceptType(SpatialConcept.FIXEDDISTANCEBAND);
-        this.setStandardizationType(StandardizationMethod.NONE);
+        this.setSpatialConceptType(SpatialConcept.FixedDistance);
+        this.setStandardizationType(StandardizationMethod.None);
         this.setDistanceType(DistanceMethod.Euclidean);
         this.setDistanceBand(0.0);
     }
 
-    public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, String fieldName1,
-            String fieldName2) throws IOException {
-        swMatrix = new SpatialWeightMatrix2(getSpatialConceptType(), getStandardizationType());
-        swMatrix.distanceBandWidth = this.getDistanceBand();
-        swMatrix.buildWeightMatrix(inputFeatures, fieldName1, fieldName2, this.getDistanceType());
+    public double getLQ() {
+        return locationQuotient;
+    }
 
-        int featureCount = swMatrix.Events.size();
+    public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
+            String fieldName1, String fieldName2) throws IOException {
+        swMatrix = new SpatialWeightMatrix2(getSpatialConceptType(), getStandardizationType());
+        swMatrix.setDistanceMethod(getDistanceType());
+        swMatrix.setDistanceBandWidth(getDistanceBand());
+        swMatrix.buildWeightMatrix(inputFeatures, fieldName1, fieldName2);
+
+        int featureCount = swMatrix.getEvents().size();
 
         // Calculate a spatial LQ for each feature in the data set.
         dcLocalLQ = new double[featureCount];
@@ -85,7 +86,7 @@ public class FocalLQOperation extends AbstractStatisticsOperation {
 
         // # Calculate LQ for each feature i.
         for (int i = 0; i < featureCount; i++) {
-            SpatialEvent curE = swMatrix.Events.get(i);
+            SpatialEvent curE = swMatrix.getEvents().get(i);
 
             // # Initialize working variables.
             double dLocalObsSum = 0.0; // All Count
@@ -93,12 +94,12 @@ public class FocalLQOperation extends AbstractStatisticsOperation {
 
             // # Look for local neighbors
             for (int j = 0; j < featureCount; j++) {
-                SpatialEvent destE = swMatrix.Events.get(j);
+                SpatialEvent destE = swMatrix.getEvents().get(j);
 
-                if (swMatrix.distanceBandWidth > 0) {
+                if (swMatrix.getDistanceBandWidth() > 0) {
                     // apply search radius
                     double dDist = factory.getDistance(curE, destE, getDistanceType());
-                    if (dDist <= swMatrix.distanceBandWidth) {
+                    if (dDist <= swMatrix.getDistanceBandWidth()) {
                         dLocalObsSum += destE.weight;
                         dLocalPopSum += destE.population;
                     }

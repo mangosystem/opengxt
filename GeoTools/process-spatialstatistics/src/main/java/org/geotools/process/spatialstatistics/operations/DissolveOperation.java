@@ -96,7 +96,7 @@ public class DissolveOperation extends GeneralOperation {
         }
 
         String geomName = schema.getGeometryDescriptor().getLocalName();
-        SimpleFeatureType featureType = FeatureTypes.getDefaultType(getOutputTypeName(), geomName,
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType(schema.getTypeName(), geomName,
                 binding, crs);
         featureType = FeatureTypes.add(featureType, schema.getDescriptor(dissolveField));
         featureType = addAttributes(featureType, statisticsList);
@@ -155,7 +155,7 @@ public class DissolveOperation extends GeneralOperation {
                 Geometry unionGeometry = unionOp.union();
 
                 if (useMultiPart) {
-                    SimpleFeature newFeature = writer.buildFeature(Integer.toString(++index));
+                    SimpleFeature newFeature = writer.buildFeature();
                     newFeature.setDefaultGeometry(unionGeometry);
                     newFeature.setAttribute(dissolveField, entry.getKey());
 
@@ -171,12 +171,12 @@ public class DissolveOperation extends GeneralOperation {
                     String geom = points.getSchema().getGeometryDescriptor().getLocalName();
                     for (int idx = 0; idx < unionGeometry.getNumGeometries(); idx++) {
                         Geometry geometry = unionGeometry.getGeometryN(idx);
-                        Filter filter = ff.intersects(ff.property(geom), ff.literal(geometry));
+                        Filter filter = getIntersectsFilter(geom, geometry);
 
                         // TODO calculate statistics
 
                         // create feature
-                        SimpleFeature newFeature = writer.buildFeature(Integer.toString(++index));
+                        SimpleFeature newFeature = writer.buildFeature();
                         newFeature.setDefaultGeometry(geometry);
                         newFeature.setAttribute(dissolveField, entry.getKey());
 

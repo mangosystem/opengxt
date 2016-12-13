@@ -50,7 +50,7 @@ public class GlobalMoransIProcessFactory extends SpatialStatisticsProcessFactory
 
     /*
      * GlobalMoransI(SimpleFeatureCollection inputFeatures, String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-     * StandardizationMethod standardization, Double searchDistance) : MoransI
+     * StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors) : MoransI
      */
 
     public GlobalMoransIProcessFactory() {
@@ -111,6 +111,12 @@ public class GlobalMoransIProcessFactory extends SpatialStatisticsProcessFactory
             getResource("GlobalMoransI.searchDistance.description"), false, 0, 1,
             Double.valueOf(0.0), null);
 
+    /** selfNeighbors */
+    public static final Parameter<Boolean> selfNeighbors = new Parameter<Boolean>("selfNeighbors",
+            Boolean.class, getResource("GlobalMoransI.selfNeighbors.title"),
+            getResource("GlobalMoransI.selfNeighbors.description"), false, 0, 1, Boolean.FALSE,
+            null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
@@ -120,6 +126,7 @@ public class GlobalMoransIProcessFactory extends SpatialStatisticsProcessFactory
         parameterInfo.put(distanceMethod.key, distanceMethod);
         parameterInfo.put(standardization.key, standardization);
         parameterInfo.put(searchDistance.key, searchDistance);
+        parameterInfo.put(selfNeighbors.key, selfNeighbors);
         return parameterInfo;
     }
 

@@ -57,7 +57,8 @@ public class LocalMoransIProcess extends AbstractStatisticsProcess {
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
             String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-            StandardizationMethod standardization, Double searchDistance, ProgressListener monitor) {
+            StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(LocalMoransIProcessFactory.inputFeatures.key, inputFeatures);
         map.put(LocalMoransIProcessFactory.inputField.key, inputField);
@@ -65,6 +66,7 @@ public class LocalMoransIProcess extends AbstractStatisticsProcess {
         map.put(LocalMoransIProcessFactory.distanceMethod.key, distanceMethod);
         map.put(LocalMoransIProcessFactory.standardization.key, standardization);
         map.put(LocalMoransIProcessFactory.searchDistance.key, searchDistance);
+        map.put(LocalMoransIProcessFactory.selfNeighbors.key, selfNeighbors);
 
         Process process = new LocalMoransIProcess(null);
         Map<String, Object> resultMap;
@@ -115,6 +117,10 @@ public class LocalMoransIProcess extends AbstractStatisticsProcess {
                     LocalMoransIProcessFactory.searchDistance,
                     LocalMoransIProcessFactory.searchDistance.sample);
 
+            Boolean selfNeighbors = (Boolean) Params.getValue(input,
+                    LocalMoransIProcessFactory.selfNeighbors,
+                    LocalMoransIProcessFactory.selfNeighbors.sample);
+
             // start process
             SimpleFeatureCollection resultFc = null;
             try {
@@ -122,6 +128,7 @@ public class LocalMoransIProcess extends AbstractStatisticsProcess {
                 process.setSpatialConceptType(spatialConcept);
                 process.setDistanceType(distanceMethod);
                 process.setStandardizationType(standardization);
+                process.setSelfNeighbors(selfNeighbors);
 
                 // searchDistance
                 if (searchDistance > 0 && !Double.isNaN(searchDistance)) {

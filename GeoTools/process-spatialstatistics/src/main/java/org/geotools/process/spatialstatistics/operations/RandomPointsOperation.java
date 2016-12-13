@@ -88,14 +88,15 @@ public class RandomPointsOperation extends GeneralOperation {
     private SimpleFeatureCollection execute(int pointCount) throws IOException {
         builder.setNumPoints(pointCount);
 
-        IFeatureInserter featureWriter = getFeatureWriter(createSchema(false));
+        SimpleFeatureType schema = createSchema(false);
+        IFeatureInserter featureWriter = getFeatureWriter(schema);
         try {
             Geometry multiPoints = builder.getGeometry();
             for (int i = 0; i < multiPoints.getNumGeometries(); i++) {
                 Point point = (Point) multiPoints.getGeometryN(i);
 
                 // create feature and set geometry
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 newFeature.setAttribute("weight", 1);
                 newFeature.setDefaultGeometry(point);
 
@@ -126,11 +127,11 @@ public class RandomPointsOperation extends GeneralOperation {
         builder = new RandomPointsBuilder(gf);
         crs = polygonFeatures.getSchema().getCoordinateReferenceSystem();
 
-        IFeatureInserter featureWriter = getFeatureWriter(createSchema(true));
+        SimpleFeatureType schema = createSchema(true);
+        IFeatureInserter featureWriter = getFeatureWriter(schema);
 
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = polygonFeatures.features();
         try {
-            featureIter = polygonFeatures.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
@@ -156,7 +157,7 @@ public class RandomPointsOperation extends GeneralOperation {
                     Point point = (Point) multiPoints.getGeometryN(i);
 
                     // create feature and set geometry
-                    SimpleFeature newFeature = featureWriter.buildFeature(null);
+                    SimpleFeature newFeature = featureWriter.buildFeature();
                     newFeature.setAttribute("id", feature.getID());
                     newFeature.setAttribute("weight", 1);
                     newFeature.setDefaultGeometry(point);

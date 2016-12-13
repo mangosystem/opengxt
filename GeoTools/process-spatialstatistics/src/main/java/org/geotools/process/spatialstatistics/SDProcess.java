@@ -102,8 +102,6 @@ public class SDProcess extends AbstractStatisticsProcess {
 
             StandardDistanceOperation process = new StandardDistanceOperation();
             process.setStdDeviation(stdDeviation);
-            process.setOutputTypeName("StandardDistanceEllipse");
-
             resultFc = process.execute(inputFeatures, weightField, caseField);
             // end process
 

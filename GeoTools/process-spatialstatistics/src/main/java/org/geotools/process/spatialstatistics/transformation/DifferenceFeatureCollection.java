@@ -165,7 +165,7 @@ public class DifferenceFeatureCollection extends GXTSimpleFeatureCollection {
 
                 Geometry diffGeom = geometry; // default
                 if (bounds.intersects(geometry.getEnvelopeInternal())) {
-                    Filter filter = ff.intersects(ff.property(geomField), ff.literal(geometry));
+                    Filter filter = getIntersectsFilter(geomField, geometry);
 
                     // finally difference using union geometries(intersection features)
                     List<Geometry> geometries = new ArrayList<Geometry>();

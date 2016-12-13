@@ -49,7 +49,7 @@ public class LocalGearysCProcessFactory extends SpatialStatisticsProcessFactory 
 
     /*
      * LocalGearysC(SimpleFeatureCollection inputFeatures, String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-     * StandardizationMethod standardization, Double searchDistance) : SimpleFeatureCollection
+     * StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors) : SimpleFeatureCollection
      */
 
     public LocalGearysCProcessFactory() {
@@ -110,6 +110,11 @@ public class LocalGearysCProcessFactory extends SpatialStatisticsProcessFactory 
             getResource("LocalGearysC.searchDistance.description"), false, 0, 1,
             Double.valueOf(0.0), null);
 
+    /** selfNeighbors */
+    public static final Parameter<Boolean> selfNeighbors = new Parameter<Boolean>("selfNeighbors",
+            Boolean.class, getResource("LocalGearysC.selfNeighbors.title"),
+            getResource("LocalGearysC.selfNeighbors.description"), false, 0, 1, Boolean.FALSE, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
@@ -119,6 +124,7 @@ public class LocalGearysCProcessFactory extends SpatialStatisticsProcessFactory 
         parameterInfo.put(distanceMethod.key, distanceMethod);
         parameterInfo.put(standardization.key, standardization);
         parameterInfo.put(searchDistance.key, searchDistance);
+        parameterInfo.put(selfNeighbors.key, selfNeighbors);
         return parameterInfo;
     }
 

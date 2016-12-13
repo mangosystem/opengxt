@@ -108,7 +108,7 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
                 }
 
                 // create & insert feature
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 if (preserveAttributes) {
                     featureWriter.copyAttributes(spokeFeature, newFeature, false);
                 }
@@ -133,7 +133,6 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
         List<Hub> hubs = new ArrayList<Hub>();
 
         boolean hasHubID = hubIdField != null && hubFeatures.getSchema().indexOf(hubIdField) != -1;
-        int serialID = 0;
 
         SimpleFeatureIterator spokeIter = hubFeatures.features();
         try {
@@ -147,7 +146,7 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
                 if (hasHubID) {
                     hubs.add(new Hub(spokeGeom, spokebFeature.getAttribute(hubIdField)));
                 } else {
-                    hubs.add(new Hub(spokeGeom, Integer.valueOf(++serialID)));
+                    hubs.add(new Hub(spokeGeom, spokebFeature.getID()));
                 }
             }
         } finally {

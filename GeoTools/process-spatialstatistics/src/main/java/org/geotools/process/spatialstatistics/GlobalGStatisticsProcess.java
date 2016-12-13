@@ -58,7 +58,7 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
 
     public static GStatisticsProcessResult process(SimpleFeatureCollection inputFeatures,
             String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-            StandardizationMethod standardization, Double searchDistance, ProgressListener monitor) {
+            StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(GlobalGStatisticsProcessFactory.inputFeatures.key, inputFeatures);
         map.put(GlobalGStatisticsProcessFactory.inputField.key, inputField);
@@ -66,6 +66,7 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
         map.put(GlobalGStatisticsProcessFactory.distanceMethod.key, distanceMethod);
         map.put(GlobalGStatisticsProcessFactory.standardization.key, standardization);
         map.put(GlobalGStatisticsProcessFactory.searchDistance.key, searchDistance);
+        map.put(GlobalGStatisticsProcessFactory.selfNeighbors.key, selfNeighbors);
 
         Process process = new GlobalGStatisticsProcess(null);
         Map<String, Object> resultMap;
@@ -118,6 +119,10 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
                     GlobalGStatisticsProcessFactory.searchDistance,
                     GlobalGStatisticsProcessFactory.searchDistance.sample);
 
+            Boolean selfNeighbors = (Boolean) Params.getValue(input,
+                    GlobalGStatisticsProcessFactory.selfNeighbors,
+                    GlobalGStatisticsProcessFactory.selfNeighbors.sample);
+
             // start process
             String typeName = inputFeatures.getSchema().getTypeName();
             GStatisticsProcessResult processResult = null;
@@ -126,6 +131,7 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
                 process.setSpatialConceptType(spatialConcept);
                 process.setDistanceType(distanceMethod);
                 process.setStandardizationType(standardization);
+                process.setSelfNeighbors(selfNeighbors);
 
                 // searchDistance
                 if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
@@ -159,9 +165,9 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
 
         String expected_Index;
 
-        String Variance;
+        String variance;
 
-        String Z_Score;
+        String z_Score;
 
         String p_Value;
 
@@ -179,8 +185,8 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
 
             this.observed_Index = FormatUtils.format(ret.getObservedIndex());
             this.expected_Index = FormatUtils.format(ret.getExpectedIndex());
-            this.Variance = FormatUtils.format(ret.getZVariance());
-            this.Z_Score = FormatUtils.format(ret.getZScore());
+            this.variance = FormatUtils.format(ret.getZVariance());
+            this.z_Score = FormatUtils.format(ret.getZScore());
             this.p_Value = FormatUtils.format(ret.getPValue());
             this.conceptualization = ret.getConceptualization().toString();
             this.distanceMethod = ret.getDistanceMethod().toString();
@@ -221,19 +227,19 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
         }
 
         public String getVariance() {
-            return Variance;
+            return variance;
         }
 
         public void setVariance(String variance) {
-            Variance = variance;
+            this.variance = variance;
         }
 
         public String getZ_Score() {
-            return Z_Score;
+            return z_Score;
         }
 
         public void setZ_Score(String z_Score) {
-            Z_Score = z_Score;
+            this.z_Score = z_Score;
         }
 
         public String getP_Value() {
@@ -281,13 +287,14 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
             final String separator = System.getProperty("line.separator");
 
             StringBuffer sb = new StringBuffer();
+            sb.append("Getis-Ord General G").append(separator);
             sb.append("TypeName: ").append(typeName).append(separator);
             sb.append("PropertyName: ").append(propertyName).append(separator);
-            sb.append("Observed_General_G: ").append(observed_Index).append(separator);
-            sb.append("Expected_General_G: ").append(expected_Index).append(separator);
-            sb.append("Variance: ").append(Variance).append(separator);
-            sb.append("Z_Score: ").append(Z_Score).append(separator);
-            sb.append("P_Value: ").append(p_Value).append(separator);
+            sb.append("Observed Index: ").append(observed_Index).append(separator);
+            sb.append("Expected Index: ").append(expected_Index).append(separator);
+            sb.append("Variance: ").append(variance).append(separator);
+            sb.append("z Score: ").append(z_Score).append(separator);
+            sb.append("p Value: ").append(p_Value).append(separator);
             sb.append("Conceptualization: ").append(conceptualization).append(separator);
             sb.append("DistanceMethod: ").append(distanceMethod).append(separator);
             sb.append("RowStandardization: ").append(rowStandardization).append(separator);

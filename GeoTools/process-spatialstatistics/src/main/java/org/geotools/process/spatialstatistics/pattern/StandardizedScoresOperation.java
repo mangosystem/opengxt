@@ -47,15 +47,14 @@ public class StandardizedScoresOperation extends GeneralOperation {
 
     private int count = 0;
 
-    private double X = 0;
+    private double X = 0.0;
 
-    private double Y = 0;
+    private double Y = 0.0;
 
     private List<SpatialEvent> events = new ArrayList<SpatialEvent>();
 
     private void preCalculate(SimpleFeatureCollection features, Expression xExpression,
             Expression yExpression) {
-        int oid = 0;
         SimpleFeatureIterator featureIter = features.features();
         try {
             while (featureIter.hasNext()) {
@@ -73,7 +72,7 @@ public class StandardizedScoresOperation extends GeneralOperation {
                 X += xVal;
                 Y += yVal;
 
-                events.add(new SpatialEvent(oid++, coordinate, xVal, yVal));
+                events.add(new SpatialEvent(feature.getID(), coordinate, xVal, yVal));
             }
         } finally {
             featureIter.close();
@@ -84,17 +83,16 @@ public class StandardizedScoresOperation extends GeneralOperation {
             String yField, String targetField) throws IOException {
         xField = FeatureTypes.validateProperty(features.getSchema(), xField);
         yField = FeatureTypes.validateProperty(features.getSchema(), yField);
-        
+
         Expression xExpression = ff.property(xField);
         Expression yExpression = ff.property(yField);
         return execute(features, xExpression, yExpression, targetField);
     }
-    
-    public SimpleFeatureCollection execute(SimpleFeatureCollection features, Expression xExpression,
-            Expression yExpression, String targetField) throws IOException {
-        String typeName = features.getSchema().getTypeName();
-        SimpleFeatureType schema = FeatureTypes.build(features.getSchema(), typeName);
-        schema = FeatureTypes.add(schema, targetField, Double.class);
+
+    public SimpleFeatureCollection execute(SimpleFeatureCollection features,
+            Expression xExpression, Expression yExpression, String targetField) throws IOException {
+        SimpleFeatureType schema = FeatureTypes
+                .add(features.getSchema(), targetField, Double.class);
 
         // 1. pre calculation
         preCalculate(features, xExpression, yExpression);
@@ -115,8 +113,8 @@ public class StandardizedScoresOperation extends GeneralOperation {
 
                     double dZSum = 0.0d;
                     for (SpatialEvent curE : events) {
-                        double xx = curE.weight / X;
-                        double yy = curE.population / Y;
+                        double xx = curE.xVal / X;
+                        double yy = curE.yVal / Y;
                         double dZ = Math.pow(xx - yy, 2) / count;
                         dZSum += dZ;
                     }
@@ -124,7 +122,7 @@ public class StandardizedScoresOperation extends GeneralOperation {
                 }
 
                 // create & insert feature
-                SimpleFeature newFeature = featureWriter.buildFeature(feature.getID());
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
                 newFeature.setAttribute(targetField, stdscr);
                 featureWriter.write(newFeature);

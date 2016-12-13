@@ -58,7 +58,8 @@ public class GlobalGearysCProcess extends AbstractStatisticsProcess {
 
     public static GearysCProcessResult process(SimpleFeatureCollection inputFeatures,
             String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-            StandardizationMethod standardization, Double searchDistance, ProgressListener monitor) {
+            StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(GlobalGearysCProcessFactory.inputFeatures.key, inputFeatures);
         map.put(GlobalGearysCProcessFactory.inputField.key, inputField);
@@ -66,6 +67,7 @@ public class GlobalGearysCProcess extends AbstractStatisticsProcess {
         map.put(GlobalGearysCProcessFactory.distanceMethod.key, distanceMethod);
         map.put(GlobalGearysCProcessFactory.standardization.key, standardization);
         map.put(GlobalGearysCProcessFactory.searchDistance.key, searchDistance);
+        map.put(GlobalGearysCProcessFactory.selfNeighbors.key, selfNeighbors);
 
         Process process = new GlobalGearysCProcess(null);
         Map<String, Object> resultMap;
@@ -117,6 +119,10 @@ public class GlobalGearysCProcess extends AbstractStatisticsProcess {
                     GlobalGearysCProcessFactory.searchDistance,
                     GlobalGearysCProcessFactory.searchDistance.sample);
 
+            Boolean selfNeighbors = (Boolean) Params.getValue(input,
+                    GlobalGearysCProcessFactory.selfNeighbors,
+                    GlobalGearysCProcessFactory.selfNeighbors.sample);
+
             // start process
             String typeName = inputFeatures.getSchema().getTypeName();
             GearysCProcessResult processResult = null;
@@ -125,6 +131,7 @@ public class GlobalGearysCProcess extends AbstractStatisticsProcess {
                 process.setSpatialConceptType(spatialConcept);
                 process.setDistanceType(distanceMethod);
                 process.setStandardizationType(standardization);
+                process.setSelfNeighbors(selfNeighbors);
 
                 // searchDistance
                 if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
@@ -273,6 +280,27 @@ public class GlobalGearysCProcess extends AbstractStatisticsProcess {
 
         public void setDistanceThreshold(String distanceThreshold) {
             this.distanceThreshold = distanceThreshold;
+        }
+
+        @Override
+        public String toString() {
+            final String separator = System.getProperty("line.separator");
+
+            StringBuffer sb = new StringBuffer();
+            sb.append("Global Geary's c").append(separator);
+            sb.append("TypeName: ").append(typeName).append(separator);
+            sb.append("PropertyName: ").append(propertyName).append(separator);
+            sb.append("Observed Index: ").append(observed_Index).append(separator);
+            sb.append("Expected Index: ").append(expected_Index).append(separator);
+            sb.append("Variance: ").append(variance).append(separator);
+            sb.append("z Score: ").append(z_Score).append(separator);
+            sb.append("p Value: ").append(p_Value).append(separator);
+            sb.append("Conceptualization: ").append(conceptualization).append(separator);
+            sb.append("DistanceMethod: ").append(distanceMethod).append(separator);
+            sb.append("RowStandardization: ").append(rowStandardization).append(separator);
+            sb.append("DistanceThreshold: ").append(distanceThreshold).append(separator);
+
+            return sb.toString();
         }
     }
 }

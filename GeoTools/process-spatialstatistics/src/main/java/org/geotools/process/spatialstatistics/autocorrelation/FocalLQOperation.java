@@ -24,7 +24,7 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.SpatialEvent;
-import org.geotools.process.spatialstatistics.core.SpatialWeightMatrix2;
+import org.geotools.process.spatialstatistics.core.WeightMatrixBuilder;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -43,17 +43,13 @@ import org.opengis.feature.simple.SimpleFeatureType;
 public class FocalLQOperation extends AbstractStatisticsOperation {
     protected static final Logger LOGGER = Logging.getLogger(FocalLQOperation.class);
 
-    // Wong(2005) Location Quotient
+    private double globalLQ = 0.0;
 
-    private SpatialWeightMatrix2 swMatrix = null;
+    private double[] localLQ; // LQ
 
-    private double locationQuotient = 0.0;
+    private double[] lqD; // LQD
 
-    private double[] dcLocalLQ;
-
-    private double[] localLQ;
-
-    private double[] dcZValue;
+    private double[] lqZ; // LQZ
 
     public FocalLQOperation() {
         this.setSpatialConceptType(SpatialConcept.FixedDistance);
@@ -63,66 +59,64 @@ public class FocalLQOperation extends AbstractStatisticsOperation {
     }
 
     public double getLQ() {
-        return locationQuotient;
+        return globalLQ;
     }
 
-    public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
-            String fieldName1, String fieldName2) throws IOException {
-        swMatrix = new SpatialWeightMatrix2(getSpatialConceptType(), getStandardizationType());
+    public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, String xField,
+            String yField) throws IOException {
+        swMatrix = new WeightMatrixBuilder(getSpatialConceptType(), getStandardizationType());
         swMatrix.setDistanceMethod(getDistanceType());
         swMatrix.setDistanceBandWidth(getDistanceBand());
-        swMatrix.buildWeightMatrix(inputFeatures, fieldName1, fieldName2);
+        swMatrix.buildWeightMatrix(inputFeatures, xField, yField);
 
         int featureCount = swMatrix.getEvents().size();
 
         // Calculate a spatial LQ for each feature in the data set.
-        dcLocalLQ = new double[featureCount];
+        globalLQ = 0.0;
         localLQ = new double[featureCount];
-        dcZValue = new double[featureCount];
-        locationQuotient = 0.0;
+        lqD = new double[featureCount];
+        lqZ = new double[featureCount];
 
         // Y / X
-        final double dXY = swMatrix.dZSum / swMatrix.dPopSum;
+        final double dXY = swMatrix.sumX / swMatrix.sumY;
 
-        // # Calculate LQ for each feature i.
+        // Calculate LQ for each feature i.
         for (int i = 0; i < featureCount; i++) {
-            SpatialEvent curE = swMatrix.getEvents().get(i);
+            SpatialEvent source = swMatrix.getEvents().get(i);
 
-            // # Initialize working variables.
-            double dLocalObsSum = 0.0; // All Count
-            double dLocalPopSum = 0.0; // Count
+            // Initialize working variables.
+            double sumX = 0.0;
+            double sumY = 0.0;
 
-            // # Look for local neighbors
+            // Look for local neighbors
             for (int j = 0; j < featureCount; j++) {
-                SpatialEvent destE = swMatrix.getEvents().get(j);
+                SpatialEvent target = swMatrix.getEvents().get(j);
 
                 if (swMatrix.getDistanceBandWidth() > 0) {
-                    // apply search radius
-                    double dDist = factory.getDistance(curE, destE, getDistanceType());
+                    double dDist = factory.getDistance(source, target, getDistanceType());
                     if (dDist <= swMatrix.getDistanceBandWidth()) {
-                        dLocalObsSum += destE.weight;
-                        dLocalPopSum += destE.population;
+                        sumX += target.xVal;
+                        sumY += target.yVal;
                     }
                 } else {
-                    // apply all features
-                    dLocalObsSum += destE.weight;
-                    dLocalPopSum += destE.population;
+                    sumX += target.xVal;
+                    sumY += target.yVal;
                 }
             }
 
-            double dxy = dLocalPopSum == 0.0 ? 0.0 : dLocalObsSum / dLocalPopSum; // y / x
-            double tmpval2 = dLocalObsSum * dXY; // x * Y/X
+            double dxy = sumY == 0.0 ? 0.0 : sumX / sumY; // y / x
+            double tmpval2 = sumX * dXY; // x * Y/X
             double tmpval4 = 0.0;
-            if (curE.weight != 0.0) {
-                tmpval4 = curE.population / curE.weight; // y / x
+            if (source.xVal != 0.0) {
+                tmpval4 = source.yVal / source.xVal; // y / x
             }
 
             localLQ[i] = validateDouble(tmpval4 / dXY);
-            dcLocalLQ[i] = validateDouble(dxy / dXY);
-            dcZValue[i] = validateDouble((dLocalPopSum - tmpval2) / Math.sqrt(tmpval2));
+            lqD[i] = validateDouble(dxy / dXY);
+            lqZ[i] = validateDouble((sumY - tmpval2) / Math.sqrt(tmpval2));
 
             // global LQ += ABS(local lq)
-            locationQuotient += Math.abs(dcLocalLQ[i]);
+            globalLQ += Math.abs(lqD[i]);
         }
 
         return buildFeatureCollection(inputFeatures);
@@ -138,9 +132,10 @@ public class FocalLQOperation extends AbstractStatisticsOperation {
     private SimpleFeatureCollection buildFeatureCollection(SimpleFeatureCollection inputFeatures)
             throws IOException {
         // prepare feature type
-        SimpleFeatureType featureType = FeatureTypes.build(inputFeatures, getOutputTypeName());
+        String typeName = inputFeatures.getSchema().getTypeName();
+        SimpleFeatureType featureType = FeatureTypes.build(inputFeatures, typeName);
 
-        // FLQ(Double), FLQD(Double), FZ(Double)
+        // flq(Double), flqd(Double), fz(Double)
         String[] fieldList = new String[] { "flq", "flqd", "fz" };
         for (int k = 0; k < fieldList.length; k++) {
             featureType = FeatureTypes.add(featureType, fieldList[k], Double.class);
@@ -157,16 +152,14 @@ public class FocalLQOperation extends AbstractStatisticsOperation {
                 final SimpleFeature feature = featureIter.next();
 
                 // create feature and set geometry
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
 
-                // FLQ(Double), FLQD(Double), FZ(Double)
                 newFeature.setAttribute(fieldList[0], FormatUtils.round(localLQ[idx]));
-                newFeature.setAttribute(fieldList[1], FormatUtils.round(dcLocalLQ[idx]));
-                newFeature.setAttribute(fieldList[2], FormatUtils.round(dcZValue[idx]));
+                newFeature.setAttribute(fieldList[1], FormatUtils.round(lqD[idx]));
+                newFeature.setAttribute(fieldList[2], FormatUtils.round(lqZ[idx]));
 
                 featureWriter.write(newFeature);
-
                 idx++;
             }
         } catch (Exception e) {
@@ -174,8 +167,6 @@ public class FocalLQOperation extends AbstractStatisticsOperation {
         } finally {
             featureWriter.close(featureIter);
         }
-
         return featureWriter.getFeatureCollection();
     }
-
 }

@@ -154,7 +154,7 @@ public class RasterToPolygonOperation extends GeneralOperation {
                 }
 
                 // create feature and set geometry
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 newFeature.setDefaultGeometry(polygon);
                 newFeature.setAttribute("area", polygon.getArea());
 

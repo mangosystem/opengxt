@@ -22,7 +22,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.core.SSUtils.StatEnum;
 import org.geotools.process.spatialstatistics.core.SpatialEvent;
-import org.geotools.process.spatialstatistics.core.SpatialWeightMatrix;
+import org.geotools.process.spatialstatistics.core.WeightMatrixBuilder;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -38,8 +38,6 @@ import org.geotools.util.logging.Logging;
 public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation {
     protected static final Logger LOGGER = Logging.getLogger(GlobalMoranIStatisticOperation.class);
 
-    private SpatialWeightMatrix swMatrix = null;
-
     public GlobalMoranIStatisticOperation() {
         // Default Setting
         this.setDistanceType(DistanceMethod.Euclidean);
@@ -48,66 +46,61 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
     }
 
     public MoransI execute(SimpleFeatureCollection inputFeatures, String inputField) {
-        swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
+        swMatrix = new WeightMatrixBuilder(getSpatialConceptType(), getStandardizationType());
         swMatrix.setDistanceMethod(getDistanceType());
         swMatrix.setDistanceBandWidth(getDistanceBand());
+        swMatrix.setSelfNeighbors(isSelfNeighbors());
         swMatrix.buildWeightMatrix(inputFeatures, inputField);
 
-        double dSumWC = 0.0;
-        double dSumW = 0.0;
-        double dM2 = 0.0;
-        double dM4 = 0.0;
-        double dSumS1 = 0.0;
-        double dSumS2 = 0.0;
+        double zijWSum = 0.0;
+        double wijSum = 0.0; // sum of all weights (wij)
+        double ziSum2 = 0.0;
+        double ziSum4 = 0.0;
+        double sumS1 = 0.0;
+        double sumS2 = 0.0;
 
-        // Calculate sample mean.
-        double n = swMatrix.getEvents().size() * 1.0;
-        double dZMean = swMatrix.dZSum / n;
+        double n = swMatrix.getEvents().size();
+        double meanX = swMatrix.sumX / n;
 
-        for (SpatialEvent curE : swMatrix.getEvents()) {
-            double dWijS2Sum = 0.0;
-            double dWjiS2Sum = 0.0;
-            double dZiDeviation = curE.weight - dZMean;
-            dM2 += Math.pow(dZiDeviation, 2.0);
-            dM4 += Math.pow(dZiDeviation, 4.0);
+        for (SpatialEvent source : swMatrix.getEvents()) {
+            double jwijSum = 0.0;
+            double jwjiSum = 0.0;
 
-            for (SpatialEvent destE : swMatrix.getEvents()) {
-                if (curE.oid == destE.oid) {
+            double zi = source.xVal - meanX;
+            ziSum2 += Math.pow(zi, 2.0);
+            ziSum4 += Math.pow(zi, 4.0);
+
+            for (SpatialEvent target : swMatrix.getEvents()) {
+                if (!isSelfNeighbors() && source.id == target.id) {
                     continue;
                 }
 
-                double dZjDeviation = destE.weight - dZMean;
-                double dCij = dZiDeviation * dZjDeviation;
-
-                // Calculate the weight (dWij)
-                double dWij = swMatrix.getWeight(curE, destE);
-                double dWji = dWij;
-
-                if (getStandardizationType() == StandardizationMethod.Row) {
-                    dWij = swMatrix.standardizeWeight(curE, dWij);
-                    dWji = swMatrix.standardizeWeight(destE, dWji);
+                double wij = swMatrix.getWeight(source, target);
+                double wji = wij;
+                wij = swMatrix.standardizeWeight(source, wij);
+                wji = swMatrix.standardizeWeight(target, wji);
+                if (wij == 0) {
+                    continue;
                 }
 
-                // Create sums needed to calculate Moran's I
-                dSumWC += dWij * dCij;
-                dSumW += dWij;
-                dWijS2Sum += dWij;
-                dWjiS2Sum += dWji;
-                dSumS1 += Math.pow(dWij + dWji, 2.0);
+                double zj = target.xVal - meanX;
+
+                zijWSum += wij * zi * zj;
+                wijSum += wij;
+                jwijSum += wij;
+                jwjiSum += wji;
+                sumS1 += Math.pow(wij + wji, 2.0);
             }
 
-            dSumS2 += Math.pow(dWijS2Sum + dWjiS2Sum, 2.0);
+            sumS2 += Math.pow(jwijSum + jwjiSum, 2.0);
         }
-        dSumS1 = 0.5 * dSumS1;
 
-        // we need a few more working variables:
-        dM2 = (dM2 * 1.0) / n; // # standard deviation
-        dM4 = (dM4 * 1.0) / n;
+        ziSum2 = ziSum2 / n; // standard deviation
+        ziSum4 = ziSum4 / n;
 
-        double dB2 = dM4 / (dM2 * dM2); // sample kurtosis
-        double dExpected = -1.0 / (n - 1.0); // Expected Moran's I
+        double dExpected = -1.0 / (n - 1.0);
 
-        if (dSumW <= 0.0) {
+        if (wijSum <= 0.0) {
             MoransI moransI = new MoransI(0d, dExpected, 0d);
             moransI.setConceptualization(getSpatialConceptType());
             moransI.setDistanceMethod(getDistanceType());
@@ -116,22 +109,19 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
             return moransI;
         }
 
-        // Finally, we can calculate Moran's I and its significance (Z Score).
-        // This Z Score is based on the calculated RANDOMIZATION null hypothesis.
-        double dMoranI = dSumWC / (dM2 * dSumW);
+        double dObserved = zijWSum / (ziSum2 * wijSum);
 
-        double dDiv = ((n - 1.0) * (n - 2.0) * (n - 3.0) * (Math.pow(dSumW, 2.0)));
-        double dTmp1 = n
-                * ((Math.pow(n, 2.0) - (3.0 * n) + 3.0) * dSumS1 - (n * dSumS2) + 3.0 * (Math.pow(
-                        dSumW, 2.0)));
-        double dTmp2 = dB2
-                * ((Math.pow(n, 2.0) - n) * dSumS1 - (2.0 * n * dSumS2) + 6.0 * (Math.pow(dSumW,
-                        2.0)));
+        double s1 = 0.5 * sumS1;
+        double wijSum2 = Math.pow(wijSum, 2.0);
+        double b2 = ziSum4 / (ziSum2 * ziSum2); // sample kurtosis
+        double a = n * ((Math.pow(n, 2.0) - (3.0 * n) + 3.0) * s1 - (n * sumS2) + 3.0 * wijSum2);
+        double b = b2 * ((Math.pow(n, 2.0) - n) * s1 - (2.0 * n * sumS2) + 6.0 * wijSum2);
+        double c = ((n - 1.0) * (n - 2.0) * (n - 3.0) * (Math.pow(wijSum, 2.0)));
 
-        double rVariance = (dTmp1 / dDiv) - (dTmp2 / dDiv) - (Math.pow(dExpected, 2.0));
+        double zVariance = (a / c) - (b / c) - Math.pow(dExpected, 2.0);
 
         // finally build result
-        MoransI moransI = new MoransI(dMoranI, dExpected, rVariance);
+        MoransI moransI = new MoransI(dObserved, dExpected, zVariance);
         moransI.setConceptualization(getSpatialConceptType());
         moransI.setDistanceMethod(getDistanceType());
         moransI.setRowStandardization(getStandardizationType());

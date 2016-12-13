@@ -25,11 +25,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.geotools.process.spatialstatistics.core.AbstractSpatialWeightMatrix.SpatialWeightMatrixType;
+import org.geotools.process.spatialstatistics.core.AbstractWeightMatrix.SpatialWeightMatrixType;
 import org.geotools.util.logging.Logging;
 
 /**
@@ -39,8 +40,8 @@ import org.geotools.util.logging.Logging;
  * 
  * @source $URL$
  */
-public class SpatialWeightMatrixResult {
-    protected static final Logger LOGGER = Logging.getLogger(SpatialWeightMatrixResult.class);
+public class WeightMatrix {
+    protected static final Logger LOGGER = Logging.getLogger(WeightMatrix.class);
 
     private final String newLine = System.getProperty("line.separator");
 
@@ -53,7 +54,7 @@ public class SpatialWeightMatrixResult {
     private SpatialWeightMatrixType spatialWeightMatrixType = SpatialWeightMatrixType.Distance;
 
     // primaryID, <secondaryID, distance>
-    private Hashtable<Object, Hashtable<Object, Double>> items;
+    private LinkedHashMap<Object, Hashtable<Object, Double>> items;
 
     public int getFeatureCount() {
         return this.items.size();
@@ -87,17 +88,17 @@ public class SpatialWeightMatrixResult {
         this.spatialWeightMatrixType = spatialWeightMatrixType;
     }
 
-    public Hashtable<Object, Hashtable<Object, Double>> getItems() {
+    public LinkedHashMap<Object, Hashtable<Object, Double>> getItems() {
         return items;
     }
 
-    public void setItems(Hashtable<Object, Hashtable<Object, Double>> items) {
+    public void setItems(LinkedHashMap<Object, Hashtable<Object, Double>> items) {
         this.items = items;
     }
 
-    public SpatialWeightMatrixResult(SpatialWeightMatrixType spatialWeightMatrixType) {
+    public WeightMatrix(SpatialWeightMatrixType spatialWeightMatrixType) {
         this.setSpatialWeightMatrixType(spatialWeightMatrixType);
-        this.setItems(new Hashtable<Object, Hashtable<Object, Double>>());
+        this.setItems(new LinkedHashMap<Object, Hashtable<Object, Double>>());
     }
 
     public void setupVariables(String typeName, String uniqueField) {

@@ -103,7 +103,6 @@ public class ExtractValuesToPointsProcess extends AbstractStatisticsProcess {
             SimpleFeatureCollection resultSfc = null;
             try {
                 RasterExtractValuesToPointsOperation process = new RasterExtractValuesToPointsOperation();
-                process.setOutputTypeName(pointFeatures.getSchema().getTypeName());
                 resultSfc = process.execute(pointFeatures, valueField, valueCoverage, valueType);
             } catch (Exception ee) {
                 monitor.exceptionOccurred(ee);

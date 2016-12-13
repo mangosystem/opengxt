@@ -189,7 +189,7 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
 
         private SimpleFeature next;
 
-        private SimpleFeature currentFeature;
+        private SimpleFeature feature;
 
         private String typeName;
 
@@ -220,17 +220,17 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
                     || (next == null && !delegate.hasNext() && features.size() > 0)) {
                 if (features.size() == 0) {
                     // query intersected features
-                    currentFeature = delegate.next();
-                    Geometry currentGeom = (Geometry) currentFeature.getDefaultGeometry();
-                    if (currentGeom == null || currentGeom.isEmpty()) {
+                    feature = delegate.next();
+                    Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                    if (geometry == null || geometry.isEmpty()) {
                         continue;
                     }
 
-                    if (!bounds.intersects(currentGeom.getEnvelopeInternal())) {
+                    if (!bounds.intersects(geometry.getEnvelopeInternal())) {
                         continue;
                     }
 
-                    Filter filter = ff.intersects(ff.property(geomField), ff.literal(currentGeom));
+                    Filter filter = getIntersectsFilter(geomField, geometry);
                     SimpleFeatureIterator difIter = overlays.subCollection(filter).features();
                     try {
                         while (difIter.hasNext()) {
@@ -245,17 +245,17 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
                     continue;
                 }
 
-                Geometry currentGeom = (Geometry) currentFeature.getDefaultGeometry();
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
                 SimpleFeature overlayFeature = features.get(0);
                 Geometry overlayGeom = (Geometry) overlayFeature.getDefaultGeometry();
-                Geometry result = intersect(currentGeom, overlayGeom, target);
+                Geometry result = intersect(geometry, overlayGeom, target);
                 if (result == null || result.isEmpty()) {
                     features.remove(0);
                     continue;
                 }
 
                 // input feature
-                for (Object attribute : currentFeature.getAttributes()) {
+                for (Object attribute : feature.getAttributes()) {
                     if (attribute instanceof Geometry) {
                         builder.add(result);
                     } else {

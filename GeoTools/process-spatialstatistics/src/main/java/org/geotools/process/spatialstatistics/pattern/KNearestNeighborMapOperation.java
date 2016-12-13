@@ -55,7 +55,7 @@ public class KNearestNeighborMapOperation extends GeneralOperation {
         Coordinate[] coordinates = new Coordinate[events.size()];
         for (int k = 0; k < events.size(); k++) {
             SpatialEvent event = events.get(k);
-            coordinates[k] = new Coordinate(event.x, event.y);
+            coordinates[k] = event.getCoordinate();
         }
 
         ConvexHull cvxBuidler = new ConvexHull(coordinates, new GeometryFactory());
@@ -64,18 +64,22 @@ public class KNearestNeighborMapOperation extends GeneralOperation {
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection features, int neighbor,
             boolean convexHull) throws IOException {
-        CoordinateReferenceSystem crs = features.getSchema().getCoordinateReferenceSystem();
-        SimpleFeatureType schema = FeatureTypes.getDefaultType("knearest", LineString.class, crs);
-        schema = FeatureTypes.add(schema, FIELDS[0], Integer.class, 19);
-        schema = FeatureTypes.add(schema, FIELDS[1], Integer.class, 19);
-        schema = FeatureTypes.add(schema, FIELDS[2], Double.class, 38);
-        schema = FeatureTypes.add(schema, FIELDS[3], String.class, 20);
-
         // 1. pre calculation
         List<SpatialEvent> events = DistanceFactory.loadEvents(features, null);
 
-        // 2. build feature
-        int featureID = 1;
+        // 2. create schema
+        String typeName = features.getSchema().getTypeName();
+        CoordinateReferenceSystem crs = features.getSchema().getCoordinateReferenceSystem();
+        SimpleFeatureType schema = FeatureTypes.getDefaultType(typeName, LineString.class, crs);
+
+        int length = typeName.length() + String.valueOf(events.size()).length() + 2;
+        schema = FeatureTypes.add(schema, FIELDS[0], String.class, length);
+        schema = FeatureTypes.add(schema, FIELDS[1], String.class, length);
+
+        schema = FeatureTypes.add(schema, FIELDS[2], Double.class, 38);
+        schema = FeatureTypes.add(schema, FIELDS[3], String.class, 20);
+
+        // 3. build feature
         IFeatureInserter featureWriter = getFeatureWriter(schema);
         try {
             // k nearest neighbor = neighbor
@@ -83,11 +87,11 @@ public class KNearestNeighborMapOperation extends GeneralOperation {
             for (SpatialEvent start : events) {
                 map.clear();
                 for (SpatialEvent end : events) {
-                    if (end.oid == start.oid) {
+                    if (end.id == start.id) {
                         continue;
                     }
 
-                    double currentDist = start.getDistance(end);
+                    double currentDist = start.distance(end);
                     if (map.size() < neighbor) {
                         map.put(currentDist, end);
                     } else {
@@ -100,17 +104,16 @@ public class KNearestNeighborMapOperation extends GeneralOperation {
 
                 // build line
                 for (SpatialEvent nearest : map.values()) {
-                    Geometry line = gf.createLineString(new Coordinate[] { start.getCoordinate(),
-                            nearest.getCoordinate() });
+                    Geometry line = createLineString(start, nearest);
                     double distance = line.getLength();
                     if (distance == 0) {
                         continue;
                     }
-                    SimpleFeature newFeature = featureWriter.buildFeature(Integer
-                            .toString(featureID++));
+
+                    SimpleFeature newFeature = featureWriter.buildFeature();
                     newFeature.setDefaultGeometry(line);
-                    newFeature.setAttribute(FIELDS[0], start.oid);
-                    newFeature.setAttribute(FIELDS[1], nearest.oid);
+                    newFeature.setAttribute(FIELDS[0], start.id);
+                    newFeature.setAttribute(FIELDS[1], nearest.id);
                     newFeature.setAttribute(FIELDS[2], distance);
                     newFeature.setAttribute(FIELDS[3], "Nearest");
                     featureWriter.write(newFeature);
@@ -120,8 +123,7 @@ public class KNearestNeighborMapOperation extends GeneralOperation {
             // convexhull
             if (convexHull) {
                 Geometry convexHullGeom = getConvexHull(events);
-                SimpleFeature newFeature = featureWriter
-                        .buildFeature(Integer.toString(featureID++));
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 newFeature.setDefaultGeometry(convexHullGeom.getBoundary());
                 newFeature.setAttribute(FIELDS[3], "ConvexHull");
                 featureWriter.write(newFeature);
@@ -133,6 +135,10 @@ public class KNearestNeighborMapOperation extends GeneralOperation {
         }
 
         return featureWriter.getFeatureCollection();
+    }
+
+    private Geometry createLineString(SpatialEvent start, SpatialEvent end) {
+        return gf.createLineString(new Coordinate[] { start.getCoordinate(), end.getCoordinate() });
     }
 
 }

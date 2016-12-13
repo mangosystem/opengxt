@@ -75,14 +75,6 @@ public abstract class AbstractHubLinesOperation extends GeneralOperation {
         return maximumDistance;
     }
 
-    protected int getFeatureID(String id) {
-        if (id.contains(".")) {
-            int pos = id.lastIndexOf(".");
-            return Integer.valueOf(id.substring(pos + 1));
-        }
-        return Integer.valueOf(id);
-    }
-
     protected LineString getShortestLine(Geometry from, Geometry to, boolean centroid) {
         Geometry from_geom = from;
         Geometry to_geom = to;

@@ -57,14 +57,15 @@ public class KMeansClusterOperation extends GeneralOperation {
         cluster.cluster(numClusters);
         PointEvent[] originPoints = cluster.getPoints();
 
-        SimpleFeatureType featureType = FeatureTypes.build(features, this.getOutputTypeName());
+        String typeName = features.getSchema().getTypeName();
+        SimpleFeatureType featureType = FeatureTypes.build(features, typeName);
         featureType = FeatureTypes.add(featureType, targetField, Integer.class, 10);
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
         try {
             for (PointEvent cp : originPoints) {
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(cp.feature, newFeature, true);
                 newFeature.setAttribute(targetField, cp.cluster);
                 featureWriter.write(newFeature);
@@ -94,14 +95,16 @@ public class KMeansClusterOperation extends GeneralOperation {
         }
 
         CoordinateReferenceSystem crs = features.getSchema().getCoordinateReferenceSystem();
+        String typeName = features.getSchema().getTypeName();
         String the_geom = features.getSchema().getGeometryDescriptor().getLocalName();
-        SimpleFeatureType featureType = FeatureTypes.getDefaultType(this.getOutputTypeName(),
-                the_geom, Polygon.class, crs);
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType(typeName, the_geom,
+                Polygon.class, crs);
         featureType = FeatureTypes.add(featureType, targetField, Integer.class, 10);
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
         try {
+            int featureID = 0;
             for (Entry<Integer, List<Geometry>> entry : clusters.entrySet()) {
                 if (entry.getValue().size() == 0) {
                     continue;
@@ -110,7 +113,7 @@ public class KMeansClusterOperation extends GeneralOperation {
                 GeometryCollection geomCol = gf.createGeometryCollection(geometries);
                 Geometry circle = new MinimumBoundingCircle(geomCol).getCircle();
 
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 newFeature.setDefaultGeometry(circle);
                 newFeature.setAttribute(targetField, entry.getKey());
                 featureWriter.write(newFeature);
@@ -147,14 +150,16 @@ public class KMeansClusterOperation extends GeneralOperation {
         }
 
         CoordinateReferenceSystem crs = clusterFeatures.getSchema().getCoordinateReferenceSystem();
+        String typeName = clusterFeatures.getSchema().getTypeName();
         String the_geom = clusterFeatures.getSchema().getGeometryDescriptor().getLocalName();
-        SimpleFeatureType featureType = FeatureTypes.getDefaultType(this.getOutputTypeName(),
-                the_geom, Polygon.class, crs);
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType(typeName, the_geom,
+                Polygon.class, crs);
         featureType = FeatureTypes.add(featureType, clusterField, Integer.class, 10);
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
         try {
+            int featureID = 0;
             for (Entry<Integer, List<Geometry>> entry : clusters.entrySet()) {
                 if (entry.getValue().size() == 0) {
                     continue;
@@ -163,7 +168,7 @@ public class KMeansClusterOperation extends GeneralOperation {
                 GeometryCollection geomCol = gf.createGeometryCollection(geometries);
                 Geometry circle = new MinimumBoundingCircle(geomCol).getCircle();
 
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 newFeature.setDefaultGeometry(circle);
                 newFeature.setAttribute(clusterField, entry.getKey());
                 featureWriter.write(newFeature);

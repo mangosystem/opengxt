@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.enumeration.ContiguityType;
+import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
@@ -39,7 +40,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @source $URL$
  */
-public class JoinCountStatisticsOperation extends AbstractStatisticsOperation {
+public class JoinCountStatisticsOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(JoinCountStatisticsOperation.class);
 
     public JoinCountStatisticsOperation() {
@@ -67,7 +68,7 @@ public class JoinCountStatisticsOperation extends AbstractStatisticsOperation {
                     whiteCount++;
                 }
 
-                Filter filter = ff.intersects(ff.property(the_geom), ff.literal(pGeometry));
+                Filter filter = getIntersectsFilter(the_geom, pGeometry);
                 SimpleFeatureIterator subIter = features.subCollection(filter).features();
                 int neighborCount = 0;
                 try {

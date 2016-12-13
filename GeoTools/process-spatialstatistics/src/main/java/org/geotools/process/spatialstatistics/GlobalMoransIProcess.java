@@ -58,7 +58,7 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
 
     public static MoransIProcessResult process(SimpleFeatureCollection inputFeatures,
             String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-            StandardizationMethod standardization, Double searchDistance, ProgressListener monitor) {
+            StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(GlobalMoransIProcessFactory.inputFeatures.key, inputFeatures);
         map.put(GlobalMoransIProcessFactory.inputField.key, inputField);
@@ -66,6 +66,7 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
         map.put(GlobalMoransIProcessFactory.distanceMethod.key, distanceMethod);
         map.put(GlobalMoransIProcessFactory.standardization.key, standardization);
         map.put(GlobalMoransIProcessFactory.searchDistance.key, searchDistance);
+        map.put(GlobalMoransIProcessFactory.selfNeighbors.key, selfNeighbors);
 
         Process process = new GlobalMoransIProcess(null);
         Map<String, Object> resultMap;
@@ -117,6 +118,10 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
                     GlobalMoransIProcessFactory.searchDistance,
                     GlobalMoransIProcessFactory.searchDistance.sample);
 
+            Boolean selfNeighbors = (Boolean) Params.getValue(input,
+                    GlobalMoransIProcessFactory.selfNeighbors,
+                    GlobalMoransIProcessFactory.selfNeighbors.sample);
+
             // start process
             String typeName = inputFeatures.getSchema().getTypeName();
             MoransIProcessResult processResult = null;
@@ -125,6 +130,7 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
                 process.setSpatialConceptType(spatialConcept);
                 process.setDistanceType(distanceMethod);
                 process.setStandardizationType(standardization);
+                process.setSelfNeighbors(selfNeighbors);
 
                 // searchDistance
                 if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
@@ -280,9 +286,10 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
             final String separator = System.getProperty("line.separator");
 
             StringBuffer sb = new StringBuffer();
+            sb.append("Global Moran's I").append(separator);
             sb.append("TypeName: ").append(typeName).append(separator);
             sb.append("PropertyName: ").append(propertyName).append(separator);
-            sb.append("Moran Index: ").append(observed_Index).append(separator);
+            sb.append("Observed Index: ").append(observed_Index).append(separator);
             sb.append("Expected Index: ").append(expected_Index).append(separator);
             sb.append("Variance: ").append(variance).append(separator);
             sb.append("z Score: ").append(z_Score).append(separator);

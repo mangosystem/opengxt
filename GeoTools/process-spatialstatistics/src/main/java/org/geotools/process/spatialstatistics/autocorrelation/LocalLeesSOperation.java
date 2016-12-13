@@ -27,7 +27,7 @@ import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.core.SSUtils.StatEnum;
 import org.geotools.process.spatialstatistics.core.SpatialEvent;
-import org.geotools.process.spatialstatistics.core.SpatialWeightMatrix;
+import org.geotools.process.spatialstatistics.core.WeightMatrixBuilder;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -46,8 +46,6 @@ import org.opengis.feature.simple.SimpleFeatureType;
 public class LocalLeesSOperation extends AbstractStatisticsOperation {
     protected static final Logger LOGGER = Logging.getLogger(LocalLeesSOperation.class);
 
-    private SpatialWeightMatrix swMatrix = null;
-
     private double[] dcIndex;
 
     private double[] dcZScore;
@@ -56,87 +54,81 @@ public class LocalLeesSOperation extends AbstractStatisticsOperation {
         // Default Setting
         this.setDistanceType(DistanceMethod.Euclidean);
         this.setSpatialConceptType(SpatialConcept.InverseDistance);
-        this.setStandardizationType(StandardizationMethod.None);
+        this.setStandardizationType(StandardizationMethod.Row);
+        this.setSelfNeighbors(true);
     }
 
     public double[] getZScore() {
         return dcZScore;
     }
 
-    public SpatialWeightMatrix getSpatialWeightMatrix() {
+    public WeightMatrixBuilder getSpatialWeightMatrix() {
         return swMatrix;
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, String inputField)
             throws IOException {
-        swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
+        swMatrix = new WeightMatrixBuilder(getSpatialConceptType(), getStandardizationType());
         swMatrix.setDistanceMethod(getDistanceType());
         swMatrix.setDistanceBandWidth(getDistanceBand());
+        swMatrix.setSelfNeighbors(isSelfNeighbors());
         swMatrix.buildWeightMatrix(inputFeatures, inputField);
 
         // calculate the mean and standard deviation for this data set.
         int featureCount = swMatrix.getEvents().size();
-        double n = swMatrix.getEvents().size() * 1.0;
-        double dZMean = swMatrix.dZSum / n;
-
-        double dM2 = 0.0;
-        double dM4 = 0.0;
+        double n = swMatrix.getEvents().size();
+        double meanX = swMatrix.sumX / n;
+        double m2 = 0.0;
+        double wij2Sum = 0.0;
 
         // calculate deviation from the mean sums.
-        for (SpatialEvent curE : swMatrix.getEvents()) {
-            dM2 += Math.pow(curE.weight - dZMean, 2.0);
-            dM4 += Math.pow(curE.weight - dZMean, 4.0);
+        for (SpatialEvent source : swMatrix.getEvents()) {
+            m2 += Math.pow(source.xVal - meanX, 2.0);
+            double jwijSum = 0.0;
+            for (SpatialEvent target : swMatrix.getEvents()) {
+                if (!isSelfNeighbors() && source.id == target.id) {
+                    continue;
+                }
+                jwijSum += swMatrix.getWeight(source, target);
+            }
+            wij2Sum += Math.pow(jwijSum, 2);
         }
-
-        dM2 = dM2 / (n - 1.0);
-        dM4 = dM4 / (n - 1.0);
-        double dB2 = dM4 / Math.pow(dM2, 2.0);
 
         // calculate local index for each feature i.
         dcIndex = new double[featureCount];
         dcZScore = new double[featureCount];
         for (int i = 0; i < featureCount; i++) {
-            SpatialEvent curE = swMatrix.getEvents().get(i);
-            double dLocalZDevSum = 0.0;
-            double dWijSum = 0.0;
-            double dWij2Sum = 0.0;
-            double dWijWihSum = 0.0;
+            SpatialEvent source = swMatrix.getEvents().get(i);
+
+            // initialize working variables.
+            double zxjWSum = 0.0;
 
             // look for i's local neighbors
             for (int j = 0; j < featureCount; j++) {
-                SpatialEvent destE = swMatrix.getEvents().get(j);
-                if (curE.oid == destE.oid)
+                SpatialEvent target = swMatrix.getEvents().get(j);
+                if (!isSelfNeighbors() && source.id == target.id) {
                     continue;
+                }
 
                 // calculate the weight (dWij)
-                double dWij = swMatrix.getWeight(curE, destE);
-
-                if (getStandardizationType() == StandardizationMethod.Row) {
-                    dWij = swMatrix.standardizeWeight(curE, dWij);
+                double wij = swMatrix.getWeight(source, target);
+                wij = swMatrix.standardizeWeight(source, wij);
+                if (wij == 0) {
+                    continue;
                 }
 
                 // lee's s
-                dLocalZDevSum += dWij * (destE.weight - dZMean);
-                dWijSum += dWij;
-                dWij2Sum += Math.pow(dWij, 2.0);
+                zxjWSum += wij * (target.xVal - meanX);
             }
-
-            dWijWihSum = Math.pow(dWijSum, 2.0) - dWij2Sum;
 
             // calculate local index
             dcIndex[i] = Double.NaN;
             dcZScore[i] = Double.NaN;
             try {
-                // TODO correct
-                dcIndex[i] = Math.pow(dLocalZDevSum, 2.0) / dM2;
+                dcIndex[i] = (Math.pow(n, 2) / wij2Sum) * (Math.pow(zxjWSum, 2.0) / m2);
 
-                double dExpected = -1.0 * (dWijSum / (n - 1.0));
-                double v1 = (dWij2Sum * (n - dB2)) / (n - 1.0);
-                double v2 = Math.pow(dWijSum, 2.0) / Math.pow((n - 1.0), 2.0);
-                double v3 = dWijWihSum * ((2.0 * dB2) - n);
-                double v4 = (n - 1.0) * (n - 2.0);
-                double dVariance = v1 + v3 / v4 - v2;
-                dcZScore[i] = (dcIndex[i] - dExpected) / Math.pow(dVariance, 0.5);
+                // TODO correct
+                dcZScore[i] = 0.0;
             } catch (Exception e) {
                 LOGGER.log(Level.FINE, e.getMessage(), e);
             }
@@ -168,7 +160,7 @@ public class LocalLeesSOperation extends AbstractStatisticsOperation {
                 final SimpleFeature feature = featureIter.next();
 
                 // create feature and set geometry
-                SimpleFeature newFeature = featureWriter.buildFeature(feature.getID());
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
 
                 double localIndex = this.dcIndex[idx];
@@ -187,8 +179,8 @@ public class LocalLeesSOperation extends AbstractStatisticsOperation {
                 newFeature.setAttribute(fieldList[1], FormatUtils.round(zScore));
                 newFeature.setAttribute(fieldList[2], FormatUtils.round(pValue));
 
-                idx++;
                 featureWriter.write(newFeature);
+                idx++;
             }
         } catch (Exception e) {
             featureWriter.rollback(e);

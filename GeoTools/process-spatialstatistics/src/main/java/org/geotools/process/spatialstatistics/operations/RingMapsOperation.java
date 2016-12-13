@@ -155,7 +155,6 @@ public class RingMapsOperation extends GeneralOperation {
                     SimpleFeature newFeature = ringWriter.buildFeature();
                     ringWriter.copyAttributes(nearestFeature, newFeature, false);
                     newFeature.setDefaultGeometry(cell);
-                    // update attributes
                     newFeature.setAttribute(RING_NUM, idxRadius + 1);
 
                     if (valueFields.size() == 0) {

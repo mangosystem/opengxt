@@ -21,18 +21,14 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.geotools.data.Query;
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.factory.Hints;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
-import org.geotools.process.RenderingProcess;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.pattern.CircularBinningOperation;
 import org.geotools.util.logging.Logging;
-import org.opengis.coverage.grid.GridGeometry;
 import org.opengis.filter.expression.Expression;
 import org.opengis.util.ProgressListener;
 
@@ -43,7 +39,7 @@ import org.opengis.util.ProgressListener;
  * 
  * @source $URL$
  */
-public class CircularBinningProcess extends AbstractStatisticsProcess implements RenderingProcess {
+public class CircularBinningProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(CircularBinningProcess.class);
 
     private boolean started = false;
@@ -127,37 +123,5 @@ public class CircularBinningProcess extends AbstractStatisticsProcess implements
         } finally {
             started = false;
         }
-    }
-
-    /**
-     * Given a target query and a target grid geometry returns the grid geometry to be used to read the input data of the process involved in
-     * rendering. This method will be called only if the input data is a grid coverage or a grid coverage reader
-     */
-    @Override
-    public GridGeometry invertGridGeometry(Map<String, Object> input, Query targetQuery,
-            GridGeometry targetGridGeometry) throws ProcessException {
-        return targetGridGeometry;
-    }
-
-    /**
-     * Given a target query and a target grid geometry returns the query to be used to read the input data of the process involved in rendering. This
-     * method will be called only if the input data is a feature collection.
-     */
-
-    @Override
-    public Query invertQuery(Map<String, Object> input, Query targetQuery,
-            GridGeometry targetGridGeometry) throws ProcessException {
-        Double radius = (Double) input.get(CircularBinningProcessFactory.radius.key);
-        if (radius == null || radius <= 0) {
-            return targetQuery;
-        }
-
-        if (radius > 0) {
-            targetQuery.setFilter(expandBBox(targetQuery.getFilter(), radius));
-            targetQuery.setProperties(null);
-            targetQuery.getHints().put(Hints.GEOMETRY_DISTANCE, 0.0);
-        }
-
-        return targetQuery;
     }
 }

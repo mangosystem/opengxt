@@ -30,7 +30,7 @@ import java.text.NumberFormat;
  */
 public class FormatUtils {
 
-    static final int DEFAULT_NUMBER_DIGIT = 6;
+    static final int DEFAULT_NUMBER_DIGIT = 8;
 
     static final DecimalFormat df = new DecimalFormat("#.######");
 

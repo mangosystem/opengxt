@@ -75,7 +75,8 @@ public class CalculateSumLineLengthOperation extends GeneralOperation {
             countField = COUNT;
         }
 
-        SimpleFeatureType featureType = FeatureTypes.build(polygons, getOutputTypeName());
+        String typeName = polygons.getSchema().getTypeName();
+        SimpleFeatureType featureType = FeatureTypes.build(polygons, typeName);
         featureType = FeatureTypes.add(featureType, lengthField, Double.class, 38);
         featureType = FeatureTypes.add(featureType, countField, Integer.class, 5);
 
@@ -99,7 +100,7 @@ public class CalculateSumLineLengthOperation extends GeneralOperation {
                     continue;
                 }
 
-                Filter filter = ff.intersects(ff.property(the_geom), ff.literal(clipGeometry));
+                Filter filter = getIntersectsFilter(the_geom, clipGeometry);
 
                 double sumLength = 0d;
                 int lineCount = 0;
@@ -118,7 +119,7 @@ public class CalculateSumLineLengthOperation extends GeneralOperation {
                     lineIter.close();
                 }
 
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
                 newFeature.setAttribute(lengthField, Converters.convert(sumLength, lengthBinding));
                 newFeature.setAttribute(countField, Converters.convert(lineCount, countBinding));

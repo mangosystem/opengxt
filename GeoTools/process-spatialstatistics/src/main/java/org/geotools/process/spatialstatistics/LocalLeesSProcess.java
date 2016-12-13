@@ -64,7 +64,8 @@ public class LocalLeesSProcess extends AbstractStatisticsProcess {
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
             String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-            StandardizationMethod standardization, Double searchDistance, ProgressListener monitor) {
+            StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(LocalLeesSProcessFactory.inputFeatures.key, inputFeatures);
         map.put(LocalLeesSProcessFactory.inputField.key, inputField);
@@ -72,6 +73,7 @@ public class LocalLeesSProcess extends AbstractStatisticsProcess {
         map.put(LocalLeesSProcessFactory.distanceMethod.key, distanceMethod);
         map.put(LocalLeesSProcessFactory.standardization.key, standardization);
         map.put(LocalLeesSProcessFactory.searchDistance.key, searchDistance);
+        map.put(LocalLeesSProcessFactory.selfNeighbors.key, selfNeighbors);
 
         Process process = new LocalLeesSProcess(null);
         Map<String, Object> resultMap;
@@ -122,6 +124,10 @@ public class LocalLeesSProcess extends AbstractStatisticsProcess {
                     LocalLeesSProcessFactory.searchDistance,
                     LocalLeesSProcessFactory.searchDistance.sample);
 
+            Boolean selfNeighbors = (Boolean) Params.getValue(input,
+                    LocalLeesSProcessFactory.selfNeighbors,
+                    LocalLeesSProcessFactory.selfNeighbors.sample);
+
             // start process
             SimpleFeatureCollection resultFc = null;
             try {
@@ -129,6 +135,7 @@ public class LocalLeesSProcess extends AbstractStatisticsProcess {
                 process.setSpatialConceptType(spatialConcept);
                 process.setDistanceType(distanceMethod);
                 process.setStandardizationType(standardization);
+                process.setSelfNeighbors(selfNeighbors);
 
                 // searchDistance
                 if (searchDistance > 0 && !Double.isNaN(searchDistance)) {

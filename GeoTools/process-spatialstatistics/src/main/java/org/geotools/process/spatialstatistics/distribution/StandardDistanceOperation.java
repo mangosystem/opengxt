@@ -46,6 +46,8 @@ import com.vividsolutions.jts.geom.Polygon;
 public class StandardDistanceOperation extends AbstractDisributionOperator {
     protected static final Logger LOGGER = Logging.getLogger(StandardDistanceOperation.class);
 
+    static final String TYPE_NAME = "StandardDistance";
+
     final String[] FIELDS = { "CenterX", "CenterY", "StdDist" };
 
     /**
@@ -58,6 +60,9 @@ public class StandardDistanceOperation extends AbstractDisributionOperator {
     }
 
     public void setStdDeviation(double stdDeviation) {
+        if (stdDeviation > 3) {
+            stdDeviation = 3;
+        }
         this.stdDeviation = stdDeviation;
     }
 
@@ -82,7 +87,6 @@ public class StandardDistanceOperation extends AbstractDisributionOperator {
                 }
 
                 Coordinate coordinate = getTrueCentroid(geometry);
-
                 Object caseVal = idxCase == -1 ? ALL : feature.getAttribute(idxCase);
 
                 double weightVal = 1.0;
@@ -100,8 +104,8 @@ public class StandardDistanceOperation extends AbstractDisributionOperator {
         CoordinateReferenceSystem crs = schema.getCoordinateReferenceSystem();
         String geomName = schema.getGeometryDescriptor().getLocalName();
 
-        SimpleFeatureType featureType = FeatureTypes.getDefaultType(this.getOutputTypeName(),
-                geomName, Polygon.class, crs);
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType(TYPE_NAME, geomName,
+                Polygon.class, crs);
         for (String field : FIELDS) {
             featureType = FeatureTypes.add(featureType, field, Double.class, 38);
         }
@@ -121,15 +125,13 @@ public class StandardDistanceOperation extends AbstractDisributionOperator {
                 Object caseVal = iter.next();
                 StandardDistance curSd = resultMap.get(caseVal);
 
-                final Point cenPoint = curSd.getMeanCenter();
-                final double stdDist = curSd.getStdDist(this.stdDeviation);
-
-                final Geometry sdCircle = cenPoint.buffer(stdDist, 90, 1);
-
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
-                newFeature.setDefaultGeometry(sdCircle);
+                Point cenPoint = curSd.getMeanCenter();
+                double stdDist = curSd.getStdDist(this.stdDeviation);
+                Geometry sdCircle = cenPoint.buffer(stdDist, 90, 1);
 
                 // create feature and set geometry
+                SimpleFeature newFeature = featureWriter.buildFeature();
+                newFeature.setDefaultGeometry(sdCircle);
                 newFeature.setAttribute(FIELDS[0], cenPoint.getX());
                 newFeature.setAttribute(FIELDS[1], cenPoint.getY());
 
@@ -150,5 +152,4 @@ public class StandardDistanceOperation extends AbstractDisributionOperator {
 
         return featureWriter.getFeatureCollection();
     }
-
 }

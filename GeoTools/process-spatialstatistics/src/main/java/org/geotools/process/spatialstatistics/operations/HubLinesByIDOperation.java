@@ -102,7 +102,7 @@ public class HubLinesByIDOperation extends AbstractHubLinesOperation {
                         }
 
                         // insert features
-                        SimpleFeature newFeature = featureWriter.buildFeature(null);
+                        SimpleFeature newFeature = featureWriter.buildFeature();
                         if (preserveAttributes) {
                             featureWriter.copyAttributes(spokeFeature, newFeature, false);
                         } else {

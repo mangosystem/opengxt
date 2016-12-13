@@ -27,51 +27,40 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class SpatialEvent {
 
-    public Object oid = 0;
+    public Object id = 0;
 
-    public double x = Double.NaN;
+    public Coordinate coordinate;
 
-    public double y = Double.NaN;
+    public double xVal = 1.0;
 
-    public double weight = 1.0;
+    public double yVal = 1.0;
 
-    public Object tagValue = null;
+    public Object tagVal = null;
 
-    public boolean hasNeighbor = true;
-
-    public double population = 1.0;
-
-    public SpatialEvent(int objectID) {
-        this.oid = objectID;
+    public SpatialEvent(Object id) {
+        this.id = id;
     }
 
-    public SpatialEvent(Object objectID, Coordinate coordinate) {
-        this.oid = objectID;
-        this.x = coordinate.x;
-        this.y = coordinate.y;
+    public SpatialEvent(Object id, Coordinate coordinate) {
+        this.id = id;
+        this.coordinate = coordinate;
     }
 
-    public SpatialEvent(Object objectID, Coordinate coordinate, double obsValue) {
-        this(objectID, coordinate);
-        this.weight = obsValue;
+    public SpatialEvent(Object id, Coordinate coordinate, double xVal) {
+        this(id, coordinate);
+        this.xVal = xVal;
     }
 
-    public SpatialEvent(Object objectID, Coordinate coordinate, double obsValue, double popValue) {
-        this(objectID, coordinate, obsValue);
-        this.population = popValue;
+    public SpatialEvent(Object id, Coordinate coordinate, double xVal, double yVal) {
+        this(id, coordinate, xVal);
+        this.yVal = yVal;
     }
 
-    public double getDistance(SpatialEvent other) {
-        double dx = this.x - other.x;
-        double dy = this.y - other.y;
-        return Math.sqrt((dx * dx) + (dy * dy));
-    }
-
-    public double getDistance(Coordinate other) {
-        return other.distance(new Coordinate(this.x, this.y));
+    public double distance(SpatialEvent other) {
+        return this.coordinate.distance(other.getCoordinate());
     }
 
     public Coordinate getCoordinate() {
-        return new Coordinate(x, y);
+        return this.coordinate;
     }
 }

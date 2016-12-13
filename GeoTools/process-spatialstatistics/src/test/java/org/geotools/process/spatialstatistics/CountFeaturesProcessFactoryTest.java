@@ -11,7 +11,7 @@ public class CountFeaturesProcessFactoryTest extends SpatialStatisticsTestCase {
     CountFeaturesProcessFactory factory = new CountFeaturesProcessFactory();
 
     @Test
-    public void testLookup() {
+    public void test() {
         Set<Name> names = factory.getNames();
         assertFalse(names.isEmpty());
         assertTrue(names.contains(new NameImpl("statistics", "CountFeatures")));

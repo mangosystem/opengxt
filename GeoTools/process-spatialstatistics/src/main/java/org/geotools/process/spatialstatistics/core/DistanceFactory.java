@@ -69,7 +69,7 @@ public class DistanceFactory {
     public double getMeanDistance(List<SpatialEvent> spatialEventSet, SpatialEvent curEvent) {
         double sumDistance = 0.0;
         for (SpatialEvent destEvent : spatialEventSet) {
-            if (destEvent.oid != curEvent.oid) {
+            if (destEvent.id != curEvent.id) {
                 sumDistance += getDistance(curEvent, destEvent, distanceType);
             }
         }
@@ -86,23 +86,19 @@ public class DistanceFactory {
     }
 
     public double getThresholDistance(SimpleFeatureCollection features) {
-        List<SpatialEvent> spatialEventSet = DistanceFactory.loadEvents(features, null);
-        double threshold = Double.MIN_VALUE;
-        for (SpatialEvent curEvent : spatialEventSet) {
-            double nnDist = getMinimumDistance(spatialEventSet, curEvent);
-            threshold = Math.max(nnDist, threshold);
-        }
-        return threshold * 1.0001;
+        return getThresholDistance(DistanceFactory.loadEvents(features, null));
     }
 
     public double getMinimumDistance(List<SpatialEvent> srcEvents, SpatialEvent curEvent) {
         double minDistance = Double.MAX_VALUE;
         for (SpatialEvent destEvent : srcEvents) {
-            if (destEvent.oid != curEvent.oid) {
-                minDistance = Math.min(minDistance, getDistance(curEvent, destEvent, distanceType));
-                if (minDistance == 0d) {
-                    return minDistance;
-                }
+            if (destEvent.id == curEvent.id) {
+                continue;
+            }
+
+            minDistance = Math.min(minDistance, getDistance(curEvent, destEvent, distanceType));
+            if (minDistance == 0d) {
+                return minDistance;
             }
         }
         return minDistance;
@@ -111,7 +107,7 @@ public class DistanceFactory {
     public double getMaximumDistance(List<SpatialEvent> srcEvents, SpatialEvent curEvent) {
         double maxDistance = Double.MIN_VALUE;
         for (SpatialEvent destEvent : srcEvents) {
-            if (destEvent.oid != curEvent.oid) {
+            if (destEvent.id != curEvent.id) {
                 maxDistance = Math.max(maxDistance, getDistance(curEvent, destEvent, distanceType));
             }
         }
@@ -123,10 +119,10 @@ public class DistanceFactory {
         double weight = 1;
 
         for (SpatialEvent curEvent : spatialEventSet) {
-            weight = useWeight ? curEvent.weight : 1;
+            weight = useWeight ? curEvent.xVal : 1;
             sumWeight += weight;
-            sumX += (curEvent.x * weight);
-            sumY += (curEvent.y * weight);
+            sumX += (curEvent.getCoordinate().x * weight);
+            sumY += (curEvent.getCoordinate().y * weight);
         }
 
         double centerX = sumX / sumWeight;
@@ -149,10 +145,10 @@ public class DistanceFactory {
                 double curDistance = 0;
 
                 for (SpatialEvent destEvent : spatialEventSet) {
-                    if (curEvent.oid != destEvent.oid) {
+                    if (curEvent.id != destEvent.id) {
                         if (useWeight) {
                             curDistance += getDistance(curEvent, destEvent, distanceType)
-                                    * destEvent.weight;
+                                    * destEvent.xVal;
                         } else {
                             curDistance += getDistance(curEvent, destEvent, distanceType);
                         }
@@ -179,28 +175,26 @@ public class DistanceFactory {
         SpatialEvent centerPoint = getMeanCenter(spatialEventSet, useWeight);
 
         for (SpatialEvent curEvent : spatialEventSet) {
-            weight = useWeight ? curEvent.weight : 1.0;
+            weight = useWeight ? curEvent.xVal : 1.0;
             sumWeight += weight;
 
-            diffX = curEvent.x - centerPoint.x;
-            diffY = curEvent.y - centerPoint.y;
+            diffX = curEvent.getCoordinate().x - centerPoint.getCoordinate().x;
+            diffY = curEvent.getCoordinate().y - centerPoint.getCoordinate().y;
 
             diffDist += (diffX * diffX * weight) + (diffY * diffY * weight);
         }
         double stdDistance = Math.sqrt(diffDist / sumWeight) * standardDeviation;
 
-        return new SpatialEvent(0, new Coordinate(centerPoint.x, centerPoint.y), stdDistance);
+        return new SpatialEvent(0, centerPoint.getCoordinate(), stdDistance);
     }
 
     public Geometry getStandardDistanceAsCircle(List<SpatialEvent> spatialEventSet,
             double standardDeviation, boolean useWeight) {
         SpatialEvent sdtPoint = getStandardDistance(spatialEventSet, standardDeviation, useWeight);
-
-        Coordinate coord = new Coordinate(sdtPoint.x, sdtPoint.y);
-        Point centerPoint = gf.createPoint(coord);
+        Point centerPoint = gf.createPoint(sdtPoint.getCoordinate());
 
         // for degree in NUM.arange(0, 360):
-        return centerPoint.buffer(sdtPoint.weight * standardDeviation, 90, 1);
+        return centerPoint.buffer(sdtPoint.xVal * standardDeviation, 90, 1);
     }
 
     public double getDistance(SpatialEvent origEvent, SpatialEvent destEvent) {
@@ -225,7 +219,7 @@ public class DistanceFactory {
     }
 
     public double getEuclideanDistance(SpatialEvent origEvent, SpatialEvent destEvent) {
-        return getEuclideanDistance(origEvent.x, origEvent.y, destEvent.x, destEvent.y);
+        return origEvent.distance(destEvent);
     }
 
     public double getEuclideanDistance(double x1, double y1, double x2, double y2) {
@@ -236,8 +230,8 @@ public class DistanceFactory {
 
     public double getManhattanDistance(SpatialEvent origEvent, SpatialEvent destEvent) {
         // it is |x1 - x2| + |y1 - y2|.
-        double dx = Math.abs(origEvent.x - destEvent.x);
-        double dy = Math.abs(origEvent.y - destEvent.y);
+        double dx = Math.abs(origEvent.getCoordinate().x - destEvent.getCoordinate().x);
+        double dy = Math.abs(origEvent.getCoordinate().y - destEvent.getCoordinate().y);
         return dx + dy;
     }
 
@@ -271,7 +265,7 @@ public class DistanceFactory {
                 Double weight = expression.evaluate(feature, Double.class);
 
                 SpatialEvent sEvent = new SpatialEvent(feature.getID(), coordinate);
-                sEvent.weight = weight == null ? 1.0 : weight;
+                sEvent.xVal = weight == null ? 1.0 : weight;
                 events.add(sEvent);
             }
         } finally {

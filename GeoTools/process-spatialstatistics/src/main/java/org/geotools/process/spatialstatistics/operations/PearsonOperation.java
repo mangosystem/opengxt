@@ -18,7 +18,6 @@ package org.geotools.process.spatialstatistics.operations;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -30,6 +29,7 @@ import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.expression.Expression;
+import org.opengis.parameter.InvalidParameterValueException;
 
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
@@ -53,8 +53,8 @@ public class PearsonOperation extends GeneralOperation {
         // inputFields = A, B, C, D, E
         List<String> fieldList = parseFields(inputFeatures.getSchema(), inputFields);
         if (fieldList.size() < 2) {
-            LOGGER.log(Level.FINEST, "Invalid inputFields values");
-            return result;
+            throw new InvalidParameterValueException("Invalid parameters", "inputFields",
+                    inputFields);
         }
 
         // calculate
@@ -141,15 +141,14 @@ public class PearsonOperation extends GeneralOperation {
             return 0;
         }
 
-        double den = ((sumXSq - Math.pow(sumX, 2) / rowCount) * (sumYSq - Math.pow(sumY, 2)
-                / rowCount));
-        den = Math.pow(den, 0.5);
+        double x = (sumXSq - Math.pow(sumX, 2) / rowCount);
+        double y = (sumYSq - Math.pow(sumY, 2) / rowCount);
+        double den = Math.pow(x * y, 0.5);
         if (den == 0) {
             return 0;
         }
 
         double num = pSum - ((sumX * sumY) / rowCount);
-
         return num / den;
     }
 

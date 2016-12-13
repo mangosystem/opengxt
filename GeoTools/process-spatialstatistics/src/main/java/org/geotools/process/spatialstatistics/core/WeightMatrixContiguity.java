@@ -16,10 +16,12 @@
  */
 package org.geotools.process.spatialstatistics.core;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.process.spatialstatistics.enumeration.ContiguityType;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
@@ -36,15 +38,15 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @source $URL$
  */
-public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
-    protected static final Logger LOGGER = Logging
-            .getLogger(SpatialWeightMatrixKNearestNeighbors.class);
+public class WeightMatrixContiguity extends AbstractWeightMatrix {
+    protected static final Logger LOGGER = Logging.getLogger(WeightMatrixKNearestNeighbors.class);
 
-    private int orderOfContiguity = 1; // Queen's default order
+    // Queen's default order, maximum = 12
+    private int orderOfContiguity = 1;
 
     private ContiguityType contiguityType = ContiguityType.Queen;
 
-    public SpatialWeightMatrixContiguity() {
+    public WeightMatrixContiguity() {
 
     }
 
@@ -53,6 +55,10 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
     }
 
     public void setOrderOfContiguity(int orderOfContiguity) {
+        if (orderOfContiguity > 12) {
+            orderOfContiguity = 12;
+            LOGGER.log(Level.WARNING, "Maximum Order Of Contiguity is 12!");
+        }
         this.orderOfContiguity = orderOfContiguity;
     }
 
@@ -65,10 +71,10 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
     }
 
     @Override
-    public SpatialWeightMatrixResult execute(SimpleFeatureCollection features, String uniqueField) {
+    public WeightMatrix execute(SimpleFeatureCollection features, String uniqueField) {
         uniqueField = FeatureTypes.validateProperty(features.getSchema(), uniqueField);
         this.uniqueFieldIsFID = uniqueField == null || uniqueField.isEmpty();
-        
+
         switch (contiguityType) {
         case Queen:
             return queen(features, uniqueField);
@@ -83,10 +89,9 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
 
     // Polygon Contiguity (Edges and Corners)—A queen weights matrix defines a location's
     // neighbors as those with either a shared border or vertex
-    private SpatialWeightMatrixResult queen(SimpleFeatureCollection features, String uniqueField) {
-        SpatialWeightMatrixResult swm = new SpatialWeightMatrixResult(
-                SpatialWeightMatrixType.Contiguity);
-        swm.setupVariables(features.getSchema().getTypeName(), uniqueField);
+    private WeightMatrix queen(SimpleFeatureCollection features, String uniqueField) {
+        WeightMatrix matrix = new WeightMatrix(SpatialWeightMatrixType.Contiguity);
+        matrix.setupVariables(features.getSchema().getTypeName(), uniqueField);
 
         final String the_geom = features.getSchema().getGeometryDescriptor().getLocalName();
 
@@ -99,17 +104,17 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
 
                 // spatial query
                 // TODO orderOfContiguity
-                Filter filter = ff.intersects(ff.property(the_geom), ff.literal(primaryGeometry));
+                Filter filter = getIntersectsFilter(the_geom, primaryGeometry);
                 SimpleFeatureIterator subIter = features.subCollection(filter).features();
                 try {
                     while (subIter.hasNext()) {
                         SimpleFeature secondaryFeature = subIter.next();
                         Object secondaryID = getFeatureID(secondaryFeature, uniqueField);
-                        if (!this.isSelfContains() && primaryID.equals(secondaryID)) {
+                        if (!this.isSelfNeighbors() && primaryID.equals(secondaryID)) {
                             continue;
                         }
 
-                        swm.visit(primaryID, secondaryID);
+                        matrix.visit(primaryID, secondaryID);
                     }
                 } finally {
                     subIter.close();
@@ -118,15 +123,14 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
         } finally {
             featureIter.close();
         }
-        return swm;
+        return matrix;
     }
 
     // Polygon Contiguity (Edges Only)—A rook weights matrix defines a location's neighbors as
     // those areas with shared borders
-    private SpatialWeightMatrixResult rook(SimpleFeatureCollection features, String uniqueField) {
-        SpatialWeightMatrixResult swm = new SpatialWeightMatrixResult(
-                SpatialWeightMatrixType.Contiguity);
-        swm.setupVariables(features.getSchema().getTypeName(), uniqueField);
+    private WeightMatrix rook(SimpleFeatureCollection features, String uniqueField) {
+        WeightMatrix matrix = new WeightMatrix(SpatialWeightMatrixType.Contiguity);
+        matrix.setupVariables(features.getSchema().getTypeName(), uniqueField);
 
         uniqueField = FeatureTypes.validateProperty(features.getSchema(), uniqueField);
         final String the_geom = features.getSchema().getGeometryDescriptor().getLocalName();
@@ -139,13 +143,13 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
                 Object primaryID = getFeatureID(primaryFeature, uniqueField);
 
                 // spatial query
-                Filter filter = ff.intersects(ff.property(the_geom), ff.literal(primaryGeometry));
+                Filter filter = getIntersectsFilter(the_geom, primaryGeometry);
                 SimpleFeatureIterator subIter = features.subCollection(filter).features();
                 try {
                     while (subIter.hasNext()) {
                         SimpleFeature secondaryFeature = subIter.next();
                         Object secondaryID = getFeatureID(secondaryFeature, uniqueField);
-                        if (primaryID.equals(secondaryID)) {
+                        if (!this.isSelfNeighbors() && primaryID.equals(secondaryID)) {
                             continue;
                         }
 
@@ -155,7 +159,7 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
                             continue;
                         }
 
-                        swm.visit(primaryID, secondaryID);
+                        matrix.visit(primaryID, secondaryID);
                     }
                 } finally {
                     subIter.close();
@@ -164,15 +168,14 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
         } finally {
             featureIter.close();
         }
-        return swm;
+        return matrix;
     }
 
     // Polygon Contiguity (Corners Only)—A rook weights matrix defines a location's neighbors as
     // those areas with shared vertex
-    private SpatialWeightMatrixResult bishops(SimpleFeatureCollection features, String uniqueField) {
-        SpatialWeightMatrixResult swm = new SpatialWeightMatrixResult(
-                SpatialWeightMatrixType.Contiguity);
-        swm.setupVariables(features.getSchema().getTypeName(), uniqueField);
+    private WeightMatrix bishops(SimpleFeatureCollection features, String uniqueField) {
+        WeightMatrix matrix = new WeightMatrix(SpatialWeightMatrixType.Contiguity);
+        matrix.setupVariables(features.getSchema().getTypeName(), uniqueField);
 
         uniqueField = FeatureTypes.validateProperty(features.getSchema(), uniqueField);
         final String the_geom = features.getSchema().getGeometryDescriptor().getLocalName();
@@ -185,20 +188,20 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
                 Object primaryID = getFeatureID(primaryFeature, uniqueField);
 
                 // spatial query
-                Filter filter = ff.intersects(ff.property(the_geom), ff.literal(primaryGeometry));
+                Filter filter = getIntersectsFilter(the_geom, primaryGeometry);
                 SimpleFeatureIterator subIter = features.subCollection(filter).features();
                 try {
                     while (subIter.hasNext()) {
                         SimpleFeature secondaryFeature = subIter.next();
                         Object secondaryID = getFeatureID(secondaryFeature, uniqueField);
-                        if (primaryID.equals(secondaryID)) {
+                        if (!this.isSelfNeighbors() && primaryID.equals(secondaryID)) {
                             continue;
                         }
 
                         Geometry secondaryGeom = (Geometry) secondaryFeature.getDefaultGeometry();
                         Geometry intersects = primaryGeometry.intersection(secondaryGeom);
                         if (intersects instanceof Point || intersects instanceof MultiPoint) {
-                            swm.visit(primaryID, secondaryID);
+                            matrix.visit(primaryID, secondaryID);
                         }
                     }
                 } finally {
@@ -208,6 +211,11 @@ public class SpatialWeightMatrixContiguity extends AbstractSpatialWeightMatrix {
         } finally {
             featureIter.close();
         }
-        return swm;
+        return matrix;
+    }
+
+    private Filter getIntersectsFilter(String geomField, Geometry searchGeometry) {
+        return ff.and(ff.bbox(ff.property(geomField), JTS.toEnvelope(searchGeometry)),
+                ff.intersects(ff.property(geomField), ff.literal(searchGeometry)));
     }
 }

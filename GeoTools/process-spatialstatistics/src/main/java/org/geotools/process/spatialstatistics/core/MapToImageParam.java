@@ -30,9 +30,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 /**
  * Map To Image Parameters
  * 
- * @author Minpa Lee
- * @since 1.0
- * @version $Id: DataHistogram.java 1 2016-11-14 11:22:29Z minpa.lee $
+ * @author Minpa Lee, MangoSystem
+ * 
+ * @source $URL$
  */
 public class MapToImageParam {
     protected static final Logger LOGGER = Logging.getLogger(MapToImageParam.class);

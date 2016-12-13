@@ -81,8 +81,12 @@ public class SpatialClumpFeatureCollection extends GXTSimpleFeatureCollection {
             featureIter.close();
         }
 
-        CascadedPolygonUnion unionOp = new CascadedPolygonUnion(geometries);
-        this.multiPart = unionOp.union();
+        if (geometries.size() > 0) {
+            CascadedPolygonUnion unionOp = new CascadedPolygonUnion(geometries);
+            this.multiPart = unionOp.union();
+        } else {
+            this.multiPart = null;
+        }
     }
 
     @Override
@@ -105,13 +109,20 @@ public class SpatialClumpFeatureCollection extends GXTSimpleFeatureCollection {
 
     @Override
     public int size() {
+        if (multiPart == null) {
+            return 0;
+        }
         return multiPart.getNumGeometries();
     }
 
     @Override
     public ReferencedEnvelope getBounds() {
-        return new ReferencedEnvelope(multiPart.getEnvelopeInternal(),
-                schema.getCoordinateReferenceSystem());
+        if (multiPart == null) {
+            return delegate.getBounds();
+        } else {
+            return new ReferencedEnvelope(multiPart.getEnvelopeInternal(),
+                    schema.getCoordinateReferenceSystem());
+        }
     }
 
     static class SpatialClumpFeatureIterator implements SimpleFeatureIterator {
@@ -129,7 +140,7 @@ public class SpatialClumpFeatureCollection extends GXTSimpleFeatureCollection {
 
         public SpatialClumpFeatureIterator(Geometry multiPart, SimpleFeatureType schema) {
             this.multiPart = multiPart;
-            this.count = multiPart.getNumGeometries();
+            this.count = multiPart == null ? 0 : multiPart.getNumGeometries();
             this.builder = new SimpleFeatureBuilder(schema);
             this.typeName = schema.getTypeName();
         }

@@ -103,12 +103,16 @@ public class DelaunayTrangulationOperation extends GeneralOperation {
         Geometry triangleGeoms = vdBuilder.getTriangles(gf);
         coordinateList.clear();
 
+        String typeName = pointFeatures.getSchema().getTypeName();
         String geomName = pointFeatures.getSchema().getGeometryDescriptor().getLocalName();
-        SimpleFeatureType featureType = FeatureTypes.getDefaultType(getOutputTypeName(), geomName,
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType(typeName, geomName,
                 Polygon.class, crs);
-        for (String field : FIELDS) {
-            featureType = FeatureTypes.add(featureType, field, Integer.class);
-        }
+
+        int length = typeName.length() + String.valueOf(coordinateList).length() + 2;
+        featureType = FeatureTypes.add(featureType, FIELDS[0], Integer.class);
+        featureType = FeatureTypes.add(featureType, FIELDS[1], String.class, length);
+        featureType = FeatureTypes.add(featureType, FIELDS[2], String.class, length);
+        featureType = FeatureTypes.add(featureType, FIELDS[3], String.class, length);
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
@@ -155,16 +159,16 @@ public class DelaunayTrangulationOperation extends GeneralOperation {
                 // get neighbor point
                 nodeList.clear();
                 spatialIndex.query(triangle.getEnvelopeInternal(), nodeList);
-                List<Integer> fidList = new ArrayList<Integer>();
+                List<String> fidList = new ArrayList<String>();
                 for (KdNode node : nodeList) {
                     if (triangle.disjoint(gf.createPoint(node.getCoordinate()))) {
                         continue;
                     }
-                    fidList.add((Integer) node.getData());
+                    fidList.add((String) node.getData());
                 }
 
                 // create feature
-                SimpleFeature newFeature = featureWriter.buildFeature(Integer.toString(index));
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 newFeature.setAttribute(FIELDS[0], index);
                 if (fidList.size() >= 3) {
                     newFeature.setAttribute(FIELDS[1], fidList.get(0));
@@ -183,15 +187,6 @@ public class DelaunayTrangulationOperation extends GeneralOperation {
         return featureWriter.getFeatureCollection();
     }
 
-    private Integer getFeatureID(String id) {
-        int pos = id.indexOf(".");
-        if (pos == -1) {
-            return Integer.valueOf(id);
-        } else {
-            return Integer.valueOf(id.substring(pos + 1));
-        }
-    }
-
     private List<Coordinate> getCoordinateList(SimpleFeatureCollection inputFeatures) {
         spatialIndex = new KdTree(0.0d);
         List<Coordinate> coordinateList = new ArrayList<Coordinate>();
@@ -202,7 +197,7 @@ public class DelaunayTrangulationOperation extends GeneralOperation {
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
 
                 Coordinate coord = geometry.getCentroid().getCoordinate();
-                spatialIndex.insert(coord, getFeatureID(feature.getID()));
+                spatialIndex.insert(coord, feature.getID());
                 coordinateList.add(coord);
             }
         } finally {

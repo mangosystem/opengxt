@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.logging.Logger;
 
 import org.geotools.process.spatialstatistics.core.DistanceFactory;
+import org.geotools.process.spatialstatistics.core.WeightMatrixBuilder;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -36,6 +37,8 @@ import org.geotools.util.logging.Logging;
 public abstract class AbstractStatisticsOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(AbstractStatisticsOperation.class);
 
+    protected WeightMatrixBuilder swMatrix = null;
+
     private double distanceBand = 0.0;
 
     private DistanceMethod distanceType = DistanceMethod.Euclidean;
@@ -46,9 +49,15 @@ public abstract class AbstractStatisticsOperation extends GeneralOperation {
 
     private boolean isContiguity = false;
 
+    private boolean selfNeighbors = false;
+
     private File spatialWeightsFile = null;
 
     protected final DistanceFactory factory = DistanceFactory.newInstance();
+
+    public WeightMatrixBuilder getSwMatrix() {
+        return swMatrix;
+    }
 
     public void setDistanceType(DistanceMethod distanceType) {
         this.distanceType = distanceType;
@@ -97,4 +106,11 @@ public abstract class AbstractStatisticsOperation extends GeneralOperation {
         return isContiguity;
     }
 
+    public boolean isSelfNeighbors() {
+        return selfNeighbors;
+    }
+
+    public void setSelfNeighbors(boolean selfNeighbors) {
+        this.selfNeighbors = selfNeighbors;
+    }
 }

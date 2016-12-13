@@ -145,7 +145,7 @@ public class RasterHighLowPointsOperation extends GeneralOperation {
             HighLowPosition item) throws IOException {
         double value = item.value;
         for (DirectPosition pos : item.points) {
-            SimpleFeature newFeature = featureWriter.buildFeature(null);
+            SimpleFeature newFeature = featureWriter.buildFeature();
             newFeature.setAttribute("cat", category);
             newFeature.setAttribute("val", Converters.convert(value, Double.class));
 

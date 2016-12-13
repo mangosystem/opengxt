@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.FilterFactory2;
@@ -31,8 +32,8 @@ import org.opengis.filter.FilterFactory2;
  * 
  * @source $URL$
  */
-public abstract class AbstractSpatialWeightMatrix {
-    protected static final Logger LOGGER = Logging.getLogger(AbstractSpatialWeightMatrix.class);
+public abstract class AbstractWeightMatrix {
+    protected static final Logger LOGGER = Logging.getLogger(AbstractWeightMatrix.class);
 
     public enum SpatialWeightMatrixType {
         Distance, Contiguity
@@ -40,19 +41,29 @@ public abstract class AbstractSpatialWeightMatrix {
 
     protected final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
 
-    protected boolean selfContains = false;
+    private StandardizationMethod standardizationMethod = StandardizationMethod.None;
+
+    private boolean selfNeighbors = false;
 
     protected boolean uniqueFieldIsFID = false;
 
-    public boolean isSelfContains() {
-        return selfContains;
+    public boolean isSelfNeighbors() {
+        return selfNeighbors;
     }
 
-    public void setSelfContains(boolean selfContains) {
-        this.selfContains = selfContains;
+    public void setSelfNeighbors(boolean selfNeighbors) {
+        this.selfNeighbors = selfNeighbors;
     }
 
-    public abstract SpatialWeightMatrixResult execute(SimpleFeatureCollection features,
+    public StandardizationMethod getStandardizationMethod() {
+        return standardizationMethod;
+    }
+
+    public void setStandardizationMethod(StandardizationMethod standardizationMethod) {
+        this.standardizationMethod = standardizationMethod;
+    }
+
+    public abstract WeightMatrix execute(SimpleFeatureCollection features,
             String uniqueField);
 
     protected Object getFeatureID(SimpleFeature feature, String uniqueField) {

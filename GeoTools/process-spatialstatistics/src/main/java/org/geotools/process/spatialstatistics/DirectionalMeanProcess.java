@@ -93,8 +93,6 @@ public class DirectionalMeanProcess extends AbstractStatisticsProcess {
             SimpleFeatureCollection resultFc = null;
 
             LinearDirectionalMeanOperation process = new LinearDirectionalMeanOperation();
-            process.setOutputTypeName("LinearDirectionalMean");
-
             resultFc = process.execute(inputFeatures, orientationOnly, caseField);
             // end process
 

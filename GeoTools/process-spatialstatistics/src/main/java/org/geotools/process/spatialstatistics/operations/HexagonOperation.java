@@ -77,7 +77,7 @@ public class HexagonOperation extends GeneralOperation {
             throws IOException {
         // expand bbox
         gridBounds.expandBy(sideLen);
-        
+
         CoordinateReferenceSystem crs = gridBounds.getCoordinateReferenceSystem();
         SimpleFeatureType featureType = FeatureTypes.getDefaultType("hexagon", Polygon.class, crs);
         featureType = FeatureTypes.add(featureType, UID, Integer.class, 19);
@@ -157,8 +157,7 @@ public class HexagonOperation extends GeneralOperation {
 
         @Override
         public boolean getCreateFeature(GridElement gridElement) {
-            Filter filter = ff.intersects(ff.property(the_geom),
-                    ff.literal(gridElement.toGeometry()));
+            Filter filter = getIntersectsFilter(the_geom, gridElement.toGeometry());
             return !featureSource.subCollection(filter).isEmpty();
         }
     }

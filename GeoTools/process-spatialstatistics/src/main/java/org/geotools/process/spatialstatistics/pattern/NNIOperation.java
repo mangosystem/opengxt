@@ -65,7 +65,7 @@ public class NNIOperation extends GeneralOperation {
         Coordinate[] coordinates = new Coordinate[srcEvents.size()];
         for (int k = 0; k < srcEvents.size(); k++) {
             SpatialEvent srcEvent = srcEvents.get(k);
-            coordinates[k] = new Coordinate(srcEvent.x, srcEvent.y);
+            coordinates[k] = srcEvent.getCoordinate();
         }
 
         ConvexHull cbxBuidler = new ConvexHull(coordinates, new GeometryFactory());
@@ -122,12 +122,8 @@ public class NNIOperation extends GeneralOperation {
             zScore = 0.0;
             pValue = 0.0;
         } else {
-            // ArcGIS & CrimeStat
-            // expectedMeanDist = 1.0 / (2.0 * ((N / studyArea)**0.5))
             expectedMeanDist = 0.5 * Math.sqrt(studyArea / featureCount);
             nearestNeighborIndex = observedMeanDist / expectedMeanDist;
-            // double variance = (1.0 / Math.PI - 0.25) * studyArea / Math.pow(N, 2.0);
-            // standardError = 0.26136 / ((N**2.0 / studyArea)**0.5)
             standardError = Math.sqrt(((4 - Math.PI) * studyArea)
                     / (4 * Math.PI * featureCount * featureCount));
             zScore = (observedMeanDist - expectedMeanDist) / standardError;

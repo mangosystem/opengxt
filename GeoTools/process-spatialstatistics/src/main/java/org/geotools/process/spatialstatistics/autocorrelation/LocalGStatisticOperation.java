@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics.autocorrelation;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -26,7 +27,7 @@ import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.core.SSUtils.StatEnum;
 import org.geotools.process.spatialstatistics.core.SpatialEvent;
-import org.geotools.process.spatialstatistics.core.SpatialWeightMatrix;
+import org.geotools.process.spatialstatistics.core.WeightMatrixBuilder;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -45,26 +46,26 @@ import org.opengis.feature.simple.SimpleFeatureType;
 public class LocalGStatisticOperation extends AbstractStatisticsOperation {
     protected static final Logger LOGGER = Logging.getLogger(LocalGStatisticOperation.class);
 
-    private SpatialWeightMatrix swMatrix = null;
+    private double[] dcGiZScore;
 
-    private double[] dcGiValue;
+    private double[] dcMean;
 
-    private double[] dcMeanValue;
-
-    private double[] dcVarValue;
+    private double[] dcVar;
 
     public LocalGStatisticOperation() {
         // Default Setting
-        this.setSpatialConceptType(SpatialConcept.FixedDistance);
-        this.setStandardizationType(StandardizationMethod.None);
         this.setDistanceType(DistanceMethod.Euclidean);
+        this.setSpatialConceptType(SpatialConcept.InverseDistance);
+        this.setStandardizationType(StandardizationMethod.None);
+        this.setSelfNeighbors(true);
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, String inputField)
             throws IOException {
-        swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
+        swMatrix = new WeightMatrixBuilder(getSpatialConceptType(), getStandardizationType());
         swMatrix.setDistanceMethod(getDistanceType());
         swMatrix.setDistanceBandWidth(getDistanceBand());
+        swMatrix.setSelfNeighbors(isSelfNeighbors());
         swMatrix.buildWeightMatrix(inputFeatures, inputField);
 
         int featureCount = swMatrix.getEvents().size();
@@ -75,54 +76,57 @@ public class LocalGStatisticOperation extends AbstractStatisticsOperation {
             LOGGER.warning("inputFeatures's feature count < " + featureCount);
         }
 
-        // Calculate the mean and standard deviation for this data set.
-        double rN = featureCount * 1.0;
-        double dZMean = swMatrix.dZSum / rN;
-        double dZVar = Math.pow((swMatrix.dZ2Sum / rN) - Math.pow(dZMean, 2.0), 0.5);
-        if (Math.abs(dZVar) <= 0.0) {
+        // calculate the mean and standard deviation for this data set.
+        double n = swMatrix.getEvents().size();
+        double meanX = swMatrix.sumX / n;
+        double varX = Math.pow((swMatrix.sumX2 / n) - Math.pow(meanX, 2.0), 0.5);
+        if (Math.abs(varX) <= 0.0) {
             LOGGER.warning("ERROR Zero variance:  all of the values for your input field are likely the same.");
         }
 
-        // Calculate a Gi* Z Score for each feature in the data set.
-        dcGiValue = new double[featureCount];
-        dcMeanValue = new double[featureCount];
-        dcVarValue = new double[featureCount];
+        dcGiZScore = new double[featureCount];
+        dcMean = new double[featureCount];
+        dcVar = new double[featureCount];
 
-        // Calculate Gi* for each feature i.
+        // calculate Gi* for each feature i.
         for (int i = 0; i < featureCount; i++) {
-            SpatialEvent curE = swMatrix.getEvents().get(i);
+            SpatialEvent source = swMatrix.getEvents().get(i);
 
-            // Initialize working variables.
-            double dLocalZSum = 0.0;
-            double dWijSum = 0.0;
-            double dWij2Sum = 0.0;
+            // initialize working variables.
+            double localSum = 0.0;
+            double wijSum = 0.0;
+            double wij2Sum = 0.0;
 
-            // Look for i's local neighbors
+            // look for i's local neighbors
             for (int j = 0; j < featureCount; j++) {
-                SpatialEvent destE = swMatrix.getEvents().get(j);
-
-                // Calculate the weight (dWij)
-                double dWij = swMatrix.getWeight(curE, destE);
-
-                if (getStandardizationType() == StandardizationMethod.Row) {
-                    dWij = swMatrix.standardizeWeight(curE, dWij);
+                SpatialEvent target = swMatrix.getEvents().get(j);
+                if (!isSelfNeighbors() && source.id == target.id) {
+                    continue;
                 }
 
-                dLocalZSum += dWij * destE.weight;
-                dWijSum += dWij;
-                dWij2Sum += Math.pow(dWij, 2.0);
+                // calculate the weight (wij)
+                double wij = swMatrix.getWeight(source, target);
+                wij = swMatrix.standardizeWeight(source, wij);
+                if (wij == 0) {
+                    continue;
+                }
+
+                localSum += wij * target.xVal;
+                wijSum += wij;
+                wij2Sum += Math.pow(wij, 2.0);
             }
 
-            dcMeanValue[i] = dWijSum / (rN * (rN - 1.0));
-            dcVarValue[i] = Math.pow((dWij2Sum / rN) - Math.pow(dcMeanValue[i], 2), 0.5);
+            dcMean[i] = wijSum / (n * (n - 1.0));
+            dcVar[i] = Math.pow((wij2Sum / n) - Math.pow(dcMean[i], 2), 0.5);
 
-            // Calculate Gi*
-            dcGiValue[i] = Double.NaN;
+            // calculate Gi / Gi*
+            dcGiZScore[i] = Double.NaN;
             try {
-                dcGiValue[i] = ((dLocalZSum - (dWijSum * dZMean)) / (dZVar * Math.pow(
-                        (((rN * dWij2Sum) - Math.pow(dWijSum, 2.0)) / (rN - 1.0)), 0.5)));
+                double wijSum2 = Math.pow(wijSum, 2.0);
+                double b = (varX * Math.pow((((n * wij2Sum) - wijSum2) / (n - 1.0)), 0.5));
+                dcGiZScore[i] = (localSum - (wijSum * meanX)) / b;
             } catch (Exception e) {
-                dcGiValue[i] = Double.NaN;
+                LOGGER.log(Level.FINE, e.getMessage(), e);
             }
         }
 
@@ -135,7 +139,7 @@ public class LocalGStatisticOperation extends AbstractStatisticsOperation {
         String typeName = inputFeatures.getSchema().getTypeName();
         SimpleFeatureType featureType = FeatureTypes.build(inputFeatures.getSchema(), typeName);
 
-        String[] fieldList = new String[] { "GiZScore", "GiMean", "GiVar", "GiPValue" };
+        String[] fieldList = new String[] { "GiZScore", "GiPValue", "GiMean", "GiVar" };
         for (int k = 0; k < fieldList.length; k++) {
             featureType = FeatureTypes.add(featureType, fieldList[k], Double.class);
         }
@@ -152,11 +156,11 @@ public class LocalGStatisticOperation extends AbstractStatisticsOperation {
                 final SimpleFeature feature = featureIter.next();
 
                 // create feature and set geometry
-                SimpleFeature newFeature = featureWriter.buildFeature(feature.getID());
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
 
-                // "GiZScore", "GiMean", "GiVar", "GiPValue"
-                double zScore = this.dcGiValue[idx];
+                // "GiZScore", "GiPValue", "GiMean", "GiVar"
+                double zScore = dcGiZScore[idx];
                 double pValue = 0.0;
 
                 if (Double.isNaN(zScore) || Double.isInfinite(zScore)) {
@@ -167,12 +171,12 @@ public class LocalGStatisticOperation extends AbstractStatisticsOperation {
                 }
 
                 newFeature.setAttribute(fieldList[0], FormatUtils.round(zScore));
-                newFeature.setAttribute(fieldList[1], FormatUtils.round(dcMeanValue[idx]));
-                newFeature.setAttribute(fieldList[2], FormatUtils.round(dcVarValue[idx]));
-                newFeature.setAttribute(fieldList[3], FormatUtils.round(pValue));
+                newFeature.setAttribute(fieldList[1], FormatUtils.round(pValue));
+                newFeature.setAttribute(fieldList[2], FormatUtils.round(dcMean[idx]));
+                newFeature.setAttribute(fieldList[3], FormatUtils.round(dcVar[idx]));
 
-                idx++;
                 featureWriter.write(newFeature);
+                idx++;
             }
         } catch (Exception e) {
             featureWriter.rollback(e);

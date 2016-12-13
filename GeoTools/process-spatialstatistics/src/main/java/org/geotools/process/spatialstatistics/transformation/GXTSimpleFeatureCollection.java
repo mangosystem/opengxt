@@ -22,10 +22,14 @@ import java.util.List;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.collection.DecoratingSimpleFeatureCollection;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.process.gs.WrappingIterator;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * A FeatureCollection which completely delegates to another FeatureCollection.
@@ -65,5 +69,10 @@ public class GXTSimpleFeatureCollection extends DecoratingSimpleFeatureCollectio
             }
             target.setAttribute(attributeName, source.getAttribute(attributeName));
         }
+    }
+
+    protected static Filter getIntersectsFilter(String geomField, Geometry searchGeometry) {
+        return ff.and(ff.bbox(ff.property(geomField), JTS.toEnvelope(searchGeometry)),
+                ff.intersects(ff.property(geomField), ff.literal(searchGeometry)));
     }
 }

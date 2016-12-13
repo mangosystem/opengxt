@@ -58,6 +58,8 @@ import com.vividsolutions.jts.io.WKTReader;
 public class TextfileToPointOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(TextfileToPointOperation.class);
 
+    static final String TYPE_NAME = "TextfileToPoint";
+
     private StringBuffer errorBuffer = new StringBuffer();
 
     private WKTReader wktReader;
@@ -87,10 +89,10 @@ public class TextfileToPointOperation extends GeneralOperation {
             if (xColumn == null || yColumn == null) {
                 throw new Exception("X or Y Column does not exist!");
             } else {
-                schema = FeatureTypes.getDefaultType(getOutputTypeName(), Point.class, crs);
+                schema = FeatureTypes.getDefaultType(TYPE_NAME, Point.class, crs);
             }
         } else {
-            schema = FeatureTypes.getDefaultType(getOutputTypeName(), geomColumn.getBinding(), crs);
+            schema = FeatureTypes.getDefaultType(TYPE_NAME, geomColumn.getBinding(), crs);
         }
 
         for (TextColumn col : columns) {
@@ -162,7 +164,8 @@ public class TextfileToPointOperation extends GeneralOperation {
                 Double x = null;
                 Double y = null;
                 Geometry geometry = null;
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+
+                SimpleFeature newFeature = featureWriter.buildFeature();
 
                 for (TextColumn col : columns) {
                     Object value = null;

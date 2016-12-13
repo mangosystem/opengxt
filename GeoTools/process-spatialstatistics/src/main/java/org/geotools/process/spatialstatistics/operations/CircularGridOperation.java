@@ -132,16 +132,15 @@ public class CircularGridOperation extends GeneralOperation {
                         }
 
                         if (boundsSource != null) {
-                            Filter filter = ff.intersects(ff.property(the_geom),
-                                    ff.literal(geometry));
+                            Filter filter = getIntersectsFilter(the_geom, geometry);
                             if (boundsSource.subCollection(filter).isEmpty()) {
                                 currentX += diameter;
                                 continue;
                             }
                         }
 
-                        SimpleFeature newFeature = featureWriter.buildFeature(null);
-                        newFeature.setAttribute(UID, ++featureID);
+                        SimpleFeature newFeature = featureWriter.buildFeature();
+                        newFeature.setAttribute(UID, featureID);
                         newFeature.setDefaultGeometry(geometry);
                         featureWriter.write(newFeature);
 

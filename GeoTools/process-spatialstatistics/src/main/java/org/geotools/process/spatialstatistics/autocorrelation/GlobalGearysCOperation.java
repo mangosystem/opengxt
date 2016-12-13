@@ -22,7 +22,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.core.SSUtils.StatEnum;
 import org.geotools.process.spatialstatistics.core.SpatialEvent;
-import org.geotools.process.spatialstatistics.core.SpatialWeightMatrix;
+import org.geotools.process.spatialstatistics.core.WeightMatrixBuilder;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -40,8 +40,6 @@ import org.geotools.util.logging.Logging;
 public class GlobalGearysCOperation extends AbstractStatisticsOperation {
     protected static final Logger LOGGER = Logging.getLogger(GlobalGearysCOperation.class);
 
-    private SpatialWeightMatrix swMatrix = null;
-
     public GlobalGearysCOperation() {
         // Default Setting
         this.setDistanceType(DistanceMethod.Euclidean);
@@ -50,66 +48,67 @@ public class GlobalGearysCOperation extends AbstractStatisticsOperation {
     }
 
     public GearysC execute(SimpleFeatureCollection inputFeatures, String inputField) {
-        swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
+        swMatrix = new WeightMatrixBuilder(getSpatialConceptType(), getStandardizationType());
         swMatrix.setDistanceMethod(getDistanceType());
         swMatrix.setDistanceBandWidth(getDistanceBand());
+        swMatrix.setSelfNeighbors(isSelfNeighbors());
         swMatrix.buildWeightMatrix(inputFeatures, inputField);
 
-        double dSumWC = 0.0;
-        double dSumW = 0.0;
-        double dM2 = 0.0;
-        double dM4 = 0.0;
-        double dSumS1 = 0.0;
-        double dSumS2 = 0.0;
+        double cijWSum = 0.0;
+        double wijSum = 0.0; // sum of all weights (wij)
+        double m2 = 0.0;
+        double m4 = 0.0;
+        double sumS1 = 0.0;
+        double sumS2 = 0.0;
 
-        double n = swMatrix.getEvents().size() * 1.0;
-        double dZMean = swMatrix.dZSum / n;
+        double n = swMatrix.getEvents().size();
+        double meanX = swMatrix.sumX / n;
 
-        for (SpatialEvent curE : swMatrix.getEvents()) {
-            double dWijS2Sum = 0.0;
-            double dWjiS2Sum = 0.0;
-            double dZiDeviation = curE.weight - dZMean;
-            dM2 += Math.pow(dZiDeviation, 2.0);
-            dM4 += Math.pow(dZiDeviation, 4.0);
+        for (SpatialEvent source : swMatrix.getEvents()) {
+            double jwijSum = 0.0;
+            double jwjiSum = 0.0;
 
-            for (SpatialEvent destE : swMatrix.getEvents()) {
-                if (curE.oid == destE.oid)
+            double zi = source.xVal - meanX;
+            m2 += Math.pow(zi, 2.0);
+            m4 += Math.pow(zi, 4.0);
+
+            for (SpatialEvent target : swMatrix.getEvents()) {
+                if (!isSelfNeighbors() && source.id == target.id) {
                     continue;
-
-                // For Geary, the cross-product uses the actual values themselves at each location
-                // (xi - xj)^2
-                double dCij = Math.pow(curE.weight - destE.weight, 2.0);
-
-                // Calculate the weight (dWij)
-                double dWij = swMatrix.getWeight(curE, destE);
-                double dWji = dWij;
-
-                if (getStandardizationType() == StandardizationMethod.Row) {
-                    dWij = swMatrix.standardizeWeight(curE, dWij);
-                    dWji = swMatrix.standardizeWeight(destE, dWji);
                 }
 
-                // Create sums needed to calculate
-                dSumWC += dWij * dCij;
-                dSumW += dWij;
-                dWijS2Sum += dWij;
-                dWjiS2Sum += dWji;
-                dSumS1 += Math.pow(dWij + dWji, 2.0);
-            }
-            dSumS2 += Math.pow(dWijS2Sum + dWjiS2Sum, 2.0);
-        }
-        dSumS1 = 0.5 * dSumS1;
+                double wij = swMatrix.getWeight(source, target);
+                double wji = wij;
+                wij = swMatrix.standardizeWeight(source, wij);
+                wji = swMatrix.standardizeWeight(target, wji);
+                if (wij == 0) {
+                    continue;
+                }
 
-        dM2 = dM2 / (n - 1.0);
-        dM4 = dM4 / (n - 1.0);
+                double cij = Math.pow(source.xVal - target.xVal, 2.0);
+
+                cijWSum += wij * cij;
+                wijSum += wij;
+                jwijSum += wij;
+                jwjiSum += wji;
+                sumS1 += Math.pow(wij + wji, 2.0);
+            }
+
+            sumS2 += Math.pow(jwijSum + jwjiSum, 2.0);
+        }
+
+        double dS1 = 0.5 * sumS1;
+
+        m2 = m2 / (n - 1.0);
+        m4 = m4 / (n - 1.0);
 
         // Geary’s c ranges from zero to infinity, with an expected value of 1 under no autocorrelation.
         // Values from zero to one indicate positive spatial autocorrelation,
         // values above 1 negative spatial autocorrelation.
-        double b2 = dM4 / (dM2 * dM2);
+        double b2 = m4 / (m2 * m2);
         double dExpected = 1.0;
 
-        if (dSumW <= 0.0) {
+        if (wijSum <= 0.0) {
             GearysC gearysC = new GearysC(0d, dExpected, 0d);
             gearysC.setConceptualization(getSpatialConceptType());
             gearysC.setDistanceMethod(getDistanceType());
@@ -118,22 +117,21 @@ public class GlobalGearysCOperation extends AbstractStatisticsOperation {
             return gearysC;
         }
 
-        // Finally, we can calculate
-        double dGearysC = dSumWC / (2.0 * dM2 * dSumW);
+        double dObserved = cijWSum / (2.0 * m2 * wijSum);
 
         // variance of c
-        double W2 = Math.pow(dSumW, 2.0);
+        double W2 = Math.pow(wijSum, 2.0);
         double n2 = Math.pow(n, 2.0);
         double div = n * (n - 2.0) * (n - 3.0);
-        double A = ((n - 1) * dSumS1 * (n2 - (3.0 * n) + 3.0 - ((n - 1) * b2))) / (div * W2);
-        double B = ((n - 1) * dSumS2 * (n2 + (3.0 * n) - 6.0 - ((n2 - n + 2) * b2)))
+        double A = ((n - 1) * dS1 * (n2 - (3.0 * n) + 3.0 - ((n - 1) * b2))) / (div * W2);
+        double B = ((n - 1) * sumS2 * (n2 + (3.0 * n) - 6.0 - ((n2 - n + 2) * b2)))
                 / (4.0 * div * W2);
         double C = (n2 - 3.0 - (Math.pow(n - 1, 2.0) * b2)) / div;
 
-        double rVariance = A - B + C;
+        double zVariance = A - B + C;
 
         // finally build result
-        GearysC gearysC = new GearysC(dGearysC, dExpected, rVariance);
+        GearysC gearysC = new GearysC(dObserved, dExpected, zVariance);
         gearysC.setConceptualization(getSpatialConceptType());
         gearysC.setDistanceMethod(getDistanceType());
         gearysC.setRowStandardization(getStandardizationType());

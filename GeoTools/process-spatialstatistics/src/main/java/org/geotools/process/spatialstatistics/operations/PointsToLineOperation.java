@@ -61,14 +61,14 @@ public class PointsToLineOperation extends GeneralOperation {
 
         // prepare feature type
         SimpleFeatureType inputSchema = inputFeatures.getSchema();
+        String typeName = inputSchema.getTypeName();
         CoordinateReferenceSystem crs = inputSchema.getCoordinateReferenceSystem();
         String geomName = inputFeatures.getSchema().getGeometryDescriptor().getLocalName();
-        SimpleFeatureType featureType = FeatureTypes.getDefaultType(getOutputTypeName(), geomName,
+        
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType(typeName, geomName,
                 LineString.class, crs);
-
         if (closeLine) {
-            featureType = FeatureTypes.getDefaultType(getOutputTypeName(), geomName, Polygon.class,
-                    crs);
+            featureType = FeatureTypes.getDefaultType(typeName, geomName, Polygon.class, crs);
         }
 
         boolean hasLineField = lineField != null && lineField.length() > 0;

@@ -103,7 +103,7 @@ public class CollectEventsOperation extends GeneralOperation {
                 }
 
                 // create & insert feature
-                SimpleFeature newFeature = featureWriter.buildFeature(featureID);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
                 Object countVal = Converters.convert(featureCount, outputBinding);
                 newFeature.setAttribute(countField, countVal);

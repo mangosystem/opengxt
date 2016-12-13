@@ -21,11 +21,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
-import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -46,7 +45,7 @@ import com.vividsolutions.jts.geom.Point;
 public class MeanCenterOperation extends AbstractDisributionOperator {
     protected static final Logger LOGGER = Logging.getLogger(MeanCenterOperation.class);
 
-    final String TYPE_NAME = "MeanCenter";
+    static final String TYPE_NAME = "MeanCenter";
 
     final String[] FIELDS = { "XCoord", "YCoord" };
 
@@ -108,36 +107,38 @@ public class MeanCenterOperation extends AbstractDisributionOperator {
             featureType = FeatureTypes.add(featureType, schema.getDescriptor(dimensionField));
         }
 
-        ListFeatureCollection meanCenterFC = new ListFeatureCollection(featureType);
-        SimpleFeatureBuilder builder = new SimpleFeatureBuilder(featureType);
+        IFeatureInserter featureWriter = getFeatureWriter(featureType);
+        try {
+            @SuppressWarnings("unchecked")
+            HashMap<Object, MeanCenter> resultMap = visitor.getResult();
+            Iterator<Object> iterator = resultMap.keySet().iterator();
+            while (iterator.hasNext()) {
+                Object caseVal = iterator.next();
+                MeanCenter meanCenter = resultMap.get(caseVal);
+                Point centroid = meanCenter.getMeanCenter();
 
-        int featureID = 0;
-        @SuppressWarnings("unchecked")
-        HashMap<Object, MeanCenter> resultMap = visitor.getResult();
-        Iterator<Object> iterator = resultMap.keySet().iterator();
-        while (iterator.hasNext()) {
-            Object caseVal = iterator.next();
-            MeanCenter meanCenter = resultMap.get(caseVal);
-            Point centroid = meanCenter.getMeanCenter();
+                // create feature and set geometry
+                SimpleFeature newFeature = featureWriter.buildFeature();
+                newFeature.setDefaultGeometry(centroid);
+                newFeature.setAttribute(FIELDS[0], centroid.getX());
+                newFeature.setAttribute(FIELDS[1], centroid.getY());
 
-            // create feature and set geometry
-            builder.reset();
-            SimpleFeature newFeature = builder.buildFeature(TYPE_NAME + "." + ++featureID);
-            newFeature.setDefaultGeometry(centroid);
-            newFeature.setAttribute(FIELDS[0], centroid.getX());
-            newFeature.setAttribute(FIELDS[1], centroid.getY());
+                if (idxCase != -1) {
+                    newFeature.setAttribute(caseField, caseVal);
+                }
 
-            if (idxCase != -1) {
-                newFeature.setAttribute(caseField, caseVal);
+                if (idxDim != -1) {
+                    newFeature.setAttribute(dimensionField, meanCenter.getDimension());
+                }
+
+                featureWriter.write(newFeature);
             }
-
-            if (idxDim != -1) {
-                newFeature.setAttribute(dimensionField, meanCenter.getDimension());
-            }
-
-            meanCenterFC.add(newFeature);
+        } catch (IOException e) {
+            featureWriter.rollback(e);
+        } finally {
+            featureWriter.close();
         }
 
-        return meanCenterFC;
+        return featureWriter.getFeatureCollection();
     }
 }

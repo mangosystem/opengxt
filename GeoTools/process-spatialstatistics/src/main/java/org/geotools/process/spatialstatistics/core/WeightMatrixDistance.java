@@ -18,19 +18,18 @@ package org.geotools.process.spatialstatistics.core;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
+import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.index.kdtree.KdNode;
 import com.vividsolutions.jts.index.kdtree.KdTree;
 
@@ -41,21 +40,20 @@ import com.vividsolutions.jts.index.kdtree.KdTree;
  * 
  * @source $URL$
  */
-public class SpatialWeightMatrixDistance extends AbstractSpatialWeightMatrix {
-    protected static final Logger LOGGER = Logging
-            .getLogger(SpatialWeightMatrixKNearestNeighbors.class);
+public class WeightMatrixDistance extends AbstractWeightMatrix {
+    protected static final Logger LOGGER = Logging.getLogger(WeightMatrixKNearestNeighbors.class);
 
     private double thresholdDistance = 0.0d;
 
     private DistanceMethod distanceMethod = DistanceMethod.Euclidean;
 
-    private boolean rowStandardization = true;
+    private SpatialConcept spatialConcept = SpatialConcept.InverseDistance;
 
-    private boolean useExponent = false;
+    private double exponent = 1.0; // 1 or 2
 
-    private int exponent = 1;
+    private KdTree spatialIndex;
 
-    public SpatialWeightMatrixDistance() {
+    public WeightMatrixDistance() {
 
     }
 
@@ -75,83 +73,61 @@ public class SpatialWeightMatrixDistance extends AbstractSpatialWeightMatrix {
         this.distanceMethod = distanceMethod;
     }
 
-    public boolean isRowStandardization() {
-        return rowStandardization;
+    public SpatialConcept getSpatialConcept() {
+        return spatialConcept;
     }
 
-    public void setRowStandardization(boolean rowStandardization) {
-        this.rowStandardization = rowStandardization;
-    }
-
-    public boolean isUseExponent() {
-        return useExponent;
-    }
-
-    public void setUseExponent(boolean useExponent) {
-        this.useExponent = useExponent;
-    }
-
-    public int getExponent() {
-        return exponent;
-    }
-
-    public void setExponent(int exponent) {
-        this.exponent = exponent;
+    public void setSpatialConcept(SpatialConcept spatialConcept) {
+        this.spatialConcept = spatialConcept;
+        this.exponent = spatialConcept == SpatialConcept.InverseDistanceSquared ? 2.0 : 1.0;
     }
 
     @Override
-    public SpatialWeightMatrixResult execute(SimpleFeatureCollection features, String uniqueField) {
+    public WeightMatrix execute(SimpleFeatureCollection features, String uniqueField) {
         uniqueField = FeatureTypes.validateProperty(features.getSchema(), uniqueField);
         this.uniqueFieldIsFID = uniqueField == null || uniqueField.isEmpty();
+
+        WeightMatrix matrix = new WeightMatrix(SpatialWeightMatrixType.Distance);
+        matrix.setupVariables(features.getSchema().getTypeName(), uniqueField);
         
-        SpatialWeightMatrixResult swm = new SpatialWeightMatrixResult(
-                SpatialWeightMatrixType.Distance);
-        swm.setupVariables(features.getSchema().getTypeName(), uniqueField);
-
-        if (thresholdDistance == 0) {
-            DistanceFactory factory = DistanceFactory.newInstance();
-            factory.setDistanceType(distanceMethod);
-            thresholdDistance = factory.getThresholDistance(features);
-            LOGGER.log(Level.WARNING, "The default neighborhood search threshold was "
-                    + thresholdDistance);
-        }
-
         // 1. extract centroid and build spatial index
-        KdTree spatialIndex = buildSpatialIndex(features, uniqueField);
+        this.buildSpatialIndex(features, uniqueField);
 
         List<KdNode> result = new ArrayList<KdNode>();
         SimpleFeatureIterator featureIter = features.features();
         try {
+            Envelope queryEnv = new Envelope();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                Point centroid = geometry.getCentroid();
-                Coordinate coordinate = centroid.getCoordinate();
+                Coordinate coordinate = geometry.getCentroid().getCoordinate();
                 Object primaryID = getFeatureID(feature, uniqueField);
 
-                Envelope env = centroid.buffer(thresholdDistance).getEnvelopeInternal();
+                queryEnv.init(coordinate);
+                queryEnv.expandBy(thresholdDistance);
+
                 result.clear();
-                spatialIndex.query(env, result);
+                spatialIndex.query(queryEnv, result);
                 for (KdNode node : result) {
                     Object secondaryID = node.getData();
                     double distance = coordinate.distance(node.getCoordinate());
-                    if (!this.isSelfContains()
+                    if (!this.isSelfNeighbors()
                             && (primaryID.equals(secondaryID) || distance > thresholdDistance)) {
                         continue;
                     }
 
-                    swm.visit(primaryID, secondaryID, distance);
+                    matrix.visit(primaryID, secondaryID, distance);
                 }
             }
         } finally {
             featureIter.close();
         }
 
-        return swm;
+        return matrix;
     }
 
-    private KdTree buildSpatialIndex(SimpleFeatureCollection features, String uniqueField) {
-        KdTree spatialIndex = new KdTree(0.0d);
+    private void buildSpatialIndex(SimpleFeatureCollection features, String uniqueField) {
+        spatialIndex = new KdTree(0.0d);
         SimpleFeatureIterator featureIter = features.features();
         try {
             while (featureIter.hasNext()) {
@@ -165,6 +141,5 @@ public class SpatialWeightMatrixDistance extends AbstractSpatialWeightMatrix {
         } finally {
             featureIter.close();
         }
-        return spatialIndex;
     }
 }

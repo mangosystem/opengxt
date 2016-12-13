@@ -103,8 +103,6 @@ public class SDEProcess extends AbstractStatisticsProcess {
 
             StandardDeviationalEllipseOperation process = new StandardDeviationalEllipseOperation();
             process.setStdDeviation(stdDeviation);
-            process.setOutputTypeName("StandardDistanceEllipse");
-
             resultFc = process.execute(inputFeatures, weightField, caseField);
             // end process
 

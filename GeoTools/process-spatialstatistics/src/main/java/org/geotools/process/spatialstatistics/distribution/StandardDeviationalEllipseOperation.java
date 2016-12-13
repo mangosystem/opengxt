@@ -48,6 +48,8 @@ public class StandardDeviationalEllipseOperation extends AbstractDisributionOper
     protected static final Logger LOGGER = Logging
             .getLogger(StandardDeviationalEllipseOperation.class);
 
+    static final String TYPE_NAME = "StandardDeviationalEllipse";
+
     String[] FIELDS = { "CenterX", "CenterY", "XStdDist", "YStdDist", "Rotation" };
 
     /**
@@ -60,6 +62,9 @@ public class StandardDeviationalEllipseOperation extends AbstractDisributionOper
     }
 
     public void setStdDeviation(double stdDeviation) {
+        if (stdDeviation > 3) {
+            stdDeviation = 3;
+        }
         this.stdDeviation = stdDeviation;
     }
 
@@ -84,7 +89,6 @@ public class StandardDeviationalEllipseOperation extends AbstractDisributionOper
                 }
 
                 Coordinate coordinate = getTrueCentroid(geometry);
-
                 Object caseVal = idxCase == -1 ? ALL : feature.getAttribute(idxCase);
 
                 double weightVal = 1.0;
@@ -102,8 +106,8 @@ public class StandardDeviationalEllipseOperation extends AbstractDisributionOper
         CoordinateReferenceSystem crs = schema.getCoordinateReferenceSystem();
         String geomName = schema.getGeometryDescriptor().getLocalName();
 
-        SimpleFeatureType featureType = FeatureTypes.getDefaultType(this.getOutputTypeName(),
-                geomName, Polygon.class, crs);
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType(TYPE_NAME, geomName,
+                Polygon.class, crs);
         for (String field : FIELDS) {
             featureType = FeatureTypes.add(featureType, field, Double.class, 38);
         }
@@ -127,13 +131,11 @@ public class StandardDeviationalEllipseOperation extends AbstractDisributionOper
                 if (ellipseCircle != null) {
                     final Point cenPoint = curSd.getMeanCenter();
 
-                    SimpleFeature newFeature = featureWriter.buildFeature(null);
-                    newFeature.setDefaultGeometry(ellipseCircle);
-
                     // create feature and set geometry
+                    SimpleFeature newFeature = featureWriter.buildFeature();
+                    newFeature.setDefaultGeometry(ellipseCircle);
                     newFeature.setAttribute(FIELDS[0], cenPoint.getX());
                     newFeature.setAttribute(FIELDS[1], cenPoint.getY());
-
                     newFeature.setAttribute(FIELDS[2], curSd.seX);
                     newFeature.setAttribute(FIELDS[3], curSd.seY);
                     newFeature.setAttribute(FIELDS[4], curSd.radianRotation2);
@@ -153,5 +155,4 @@ public class StandardDeviationalEllipseOperation extends AbstractDisributionOper
 
         return featureWriter.getFeatureCollection();
     }
-
 }

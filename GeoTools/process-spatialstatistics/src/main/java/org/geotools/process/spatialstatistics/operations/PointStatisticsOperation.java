@@ -115,9 +115,8 @@ public class PointStatisticsOperation extends GeneralOperation {
         final String the_geom = points.getSchema().getGeometryDescriptor().getLocalName();
         IFeatureInserter featureWriter = getFeatureWriter(schema);
 
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = polygons.features();
         try {
-            featureIter = polygons.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
@@ -129,7 +128,8 @@ public class PointStatisticsOperation extends GeneralOperation {
                 if (bufferDistance > 0) {
                     geometry = geometry.buffer(bufferDistance);
                 }
-                Filter filter = ff.intersects(ff.property(the_geom), ff.literal(geometry));
+
+                Filter filter = getIntersectsFilter(the_geom, geometry);
 
                 int featureCount = 0;
                 if (statFields.size() > 0) {
@@ -151,7 +151,7 @@ public class PointStatisticsOperation extends GeneralOperation {
                 }
 
                 // create & insert feature
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
 
                 if (hasCountField) {

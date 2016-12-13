@@ -48,7 +48,7 @@ import com.vividsolutions.jts.geom.Polygon;
 public class PolarGridsOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(PolarGridsOperation.class);
 
-    // http://gis.stackexchange.com/questions/31274/polar-grids-in-arcgis
+    static final String TYPE_NAME = "PolarGrids";
 
     static final int DEFAULT_SIDES = 8;
 
@@ -101,8 +101,7 @@ public class PolarGridsOperation extends GeneralOperation {
         Arrays.sort(radius);
 
         SimpleFeatureType inputSchema = features.getSchema();
-        SimpleFeatureType featureType = FeatureTypes.build(inputSchema, getOutputTypeName(),
-                Polygon.class);
+        SimpleFeatureType featureType = FeatureTypes.build(inputSchema, TYPE_NAME, Polygon.class);
         featureType = FeatureTypes.add(featureType, ANGLE_FIELD, Double.class, 38);
         featureType = FeatureTypes.add(featureType, RADIUS_FIELD, Double.class, 38);
         if (sides == 8) {
@@ -111,10 +110,8 @@ public class PolarGridsOperation extends GeneralOperation {
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
-
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            featureIter = features.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
@@ -156,8 +153,7 @@ public class PolarGridsOperation extends GeneralOperation {
             crs = (CoordinateReferenceSystem) center.getUserData();
         }
 
-        SimpleFeatureType featureType = FeatureTypes.getDefaultType(getOutputTypeName(),
-                Polygon.class, crs);
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType(TYPE_NAME, Polygon.class, crs);
         featureType = FeatureTypes.add(featureType, ANGLE_FIELD, Double.class, 38);
         featureType = FeatureTypes.add(featureType, RADIUS_FIELD, Double.class, 38);
         if (sides == 8) {

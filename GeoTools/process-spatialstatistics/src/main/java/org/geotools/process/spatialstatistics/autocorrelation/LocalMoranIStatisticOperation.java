@@ -27,7 +27,7 @@ import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.core.SSUtils.StatEnum;
 import org.geotools.process.spatialstatistics.core.SpatialEvent;
-import org.geotools.process.spatialstatistics.core.SpatialWeightMatrix;
+import org.geotools.process.spatialstatistics.core.WeightMatrixBuilder;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -47,119 +47,111 @@ import org.opengis.feature.simple.SimpleFeatureType;
 public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
     protected static final Logger LOGGER = Logging.getLogger(LocalMoranIStatisticOperation.class);
 
-    private SpatialWeightMatrix swMatrix = null;
-
     private double[] dcIndex;
 
     private double[] dcZScore;
 
     private String[] moranBins;
 
-    private double[] dczValue;
-
-    private double[] dcwzValue;
-
     public LocalMoranIStatisticOperation() {
         // Default Setting
         this.setDistanceType(DistanceMethod.Euclidean);
         this.setSpatialConceptType(SpatialConcept.InverseDistance);
         this.setStandardizationType(StandardizationMethod.None);
+        this.setSelfNeighbors(false);
     }
 
     public double[] getZScore() {
         return dcZScore;
     }
 
-    public SpatialWeightMatrix getSpatialWeightMatrix() {
+    public WeightMatrixBuilder getSpatialWeightMatrix() {
         return swMatrix;
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, String inputField)
             throws IOException {
-        swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
+        swMatrix = new WeightMatrixBuilder(getSpatialConceptType(), getStandardizationType());
         swMatrix.setDistanceMethod(getDistanceType());
         swMatrix.setDistanceBandWidth(getDistanceBand());
+        swMatrix.setSelfNeighbors(isSelfNeighbors());
         swMatrix.buildWeightMatrix(inputFeatures, inputField);
 
         // Calculate the mean and standard deviation for this data set.
         int featureCount = swMatrix.getEvents().size();
-        double n = featureCount * 1.0;
-        double dZMean = swMatrix.dZSum / n;
-
-        double dM2 = 0.0;
-        double dM4 = 0.0;
+        double n = swMatrix.getEvents().size();
+        double meanX = swMatrix.sumX / n;
+        double m2 = 0.0;
+        double m4 = 0.0;
 
         // calculate deviation from the mean sums.
-        for (SpatialEvent curE : swMatrix.getEvents()) {
-            dM2 += Math.pow(curE.weight - dZMean, 2.0);
-            dM4 += Math.pow(curE.weight - dZMean, 4.0);
+        for (SpatialEvent source : swMatrix.getEvents()) {
+            m2 += Math.pow(source.xVal - meanX, 2.0);
+            m4 += Math.pow(source.xVal - meanX, 4.0);
         }
 
-        dM2 = dM2 / (n - 1.0);
-        dM4 = dM4 / (n - 1.0);
-        double dB2 = dM4 / Math.pow(dM2, 2.0);
+        m2 = m2 / (n - 1.0);
+        m4 = m4 / (n - 1.0);
+        double b2 = m4 / Math.pow(m2, 2.0);
 
-        // calculate Local Index for each feature i.
+        // calculate local index for each feature i.
         dcIndex = new double[featureCount];
         dcZScore = new double[featureCount];
         moranBins = new String[featureCount];
-        dczValue = new double[featureCount];
-        dcwzValue = new double[featureCount];
         for (int i = 0; i < featureCount; i++) {
-            SpatialEvent curE = swMatrix.getEvents().get(i);
-            double dLocalZDevSum = 0.0;
-            double dWijSum = 0.0;
-            double dWij2Sum = 0.0;
-            double dWijWihSum = 0.0;
-            double localBinTotal = 0.0;
-            int numNeighs = 0;
+            SpatialEvent source = swMatrix.getEvents().get(i);
 
-            // Look for i's local neighbors
+            // initialize working variables.
+            double zxjWSum = 0.0;
+            double wijSum = 0.0;
+            double wij2Sum = 0.0;
+            double localBinSum = 0.0;
+            int numNeighbors = 0;
+
+            // look for i's local neighbors
             for (int j = 0; j < featureCount; j++) {
-                SpatialEvent destE = swMatrix.getEvents().get(j);
-                if (curE.oid == destE.oid)
+                SpatialEvent target = swMatrix.getEvents().get(j);
+                if (!isSelfNeighbors() && source.id == target.id) {
                     continue;
-
-                // Calculate the weight (dWij)
-                double dWij = swMatrix.getWeight(curE, destE);
-
-                if (getStandardizationType() == StandardizationMethod.Row) {
-                    dWij = swMatrix.standardizeWeight(curE, dWij);
                 }
 
-                // moran's i
-                dLocalZDevSum += dWij * (destE.weight - dZMean);
-                if (dWij > 0) {
-                    localBinTotal += dWij * destE.weight;
-                    numNeighs++;
+                // calculate the weight (wij)
+                double wij = swMatrix.getWeight(source, target);
+                wij = swMatrix.standardizeWeight(source, wij);
+                if (wij == 0) {
+                    continue;
                 }
 
-                dWijSum += dWij;
-                dWij2Sum += Math.pow(dWij, 2.0);
+                if (wij > 0) {
+                    localBinSum += wij * target.xVal;
+                    numNeighbors++;
+                }
+
+                zxjWSum += wij * (target.xVal - meanX);
+                wijSum += wij;
+                wij2Sum += Math.pow(wij, 2.0);
             }
 
-            dWijWihSum = Math.pow(dWijSum, 2.0) - dWij2Sum;
-
-            // Calculate Local I
+            // calculate Local i
             dcIndex[i] = Double.NaN;
             dcZScore[i] = Double.NaN;
             moranBins[i] = "";
+
             try {
-                dcIndex[i] = ((curE.weight - dZMean) / dM2) * dLocalZDevSum;
+                dcIndex[i] = ((source.xVal - meanX) / m2) * zxjWSum;
 
-                dczValue[i] = ((curE.weight - dZMean) / dM2);
-                dcwzValue[i] = dLocalZDevSum;
-
-                double dExpected = -1.0 * (dWijSum / (n - 1.0));
-                double v1 = (dWij2Sum * (n - dB2)) / (n - 1.0);
-                double v2 = Math.pow(dWijSum, 2.0) / Math.pow((n - 1.0), 2.0);
-                double v3 = dWijWihSum * ((2.0 * dB2) - n);
-                double v4 = (n - 1.0) * (n - 2.0);
-                double dVariance = v1 + v3 / v4 - v2;
+                double dExpected = (-1.0 * wijSum) / (n - 1);
+                double wijWihSum = Math.pow(wijSum, 2.0) - wij2Sum;
+                double v1 = (wij2Sum * (n - b2)) / (n - 1);
+                double v2 = Math.pow(wijSum, 2.0) / Math.pow(n - 1, 2.0);
+                double v3 = wijWihSum * ((2.0 * b2) - n);
+                double v4 = (n - 1) * (n - 2);
+                double dVariance = v1 + (v3 / v4) - v2;
                 dcZScore[i] = (dcIndex[i] - dExpected) / Math.pow(dVariance, 0.5);
-                if (numNeighs > 0) {
-                    double localMean = localBinTotal / (dWijSum * 1.0);
-                    moranBins[i] = this.returnMoranBin(dcZScore[i], curE.weight, dZMean, localMean);
+
+                if (numNeighbors > 0) {
+                    double localMean = localBinSum / wijSum;
+                    moranBins[i] = returnMoranBin(dcZScore[i], source.xVal, meanX, localMean);
                 }
             } catch (Exception e) {
                 LOGGER.log(Level.FINE, e.getMessage(), e);
@@ -176,12 +168,11 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
         SimpleFeatureType featureType = FeatureTypes.build(inputFeatures.getSchema(), typeName);
 
         // Build results field name.
-        String[] fieldList = { "LMiIndex", "LMiZScore", "LMiPValue", "LMizValue", "LMiwzValue",
-                "COType" };
-        for (int k = 0; k < fieldList.length - 1; k++) {
-            featureType = FeatureTypes.add(featureType, fieldList[k], Double.class);
+        String[] fields = { "LMiIndex", "LMiZScore", "LMiPValue", "COType" };
+        for (int k = 0; k < fields.length - 1; k++) {
+            featureType = FeatureTypes.add(featureType, fields[k], Double.class);
         }
-        featureType = FeatureTypes.add(featureType, fieldList[5], String.class, 10);
+        featureType = FeatureTypes.add(featureType, fields[fields.length - 1], String.class, 10);
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
@@ -195,18 +186,15 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
                 final SimpleFeature feature = featureIter.next();
 
                 // create feature and set geometry
-                SimpleFeature newFeature = featureWriter.buildFeature(feature.getID());
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
 
                 // "LMiIndex", "LMiZScore", "LMiPValue", "COType"
                 double localI = this.dcIndex[idx];
                 double zScore = this.dcZScore[idx];
-                double pValue = 0.0;
                 String coType = this.moranBins[idx];
 
-                double dczv = this.dczValue[idx];
-                double dcwv = this.dcwzValue[idx];
-
+                double pValue = 0.0;
                 if (Double.isNaN(zScore) || Double.isInfinite(zScore)) {
                     localI = 0.0;
                     zScore = 0.0;
@@ -216,15 +204,13 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
                     pValue = SSUtils.zProb(zScore, StatEnum.BOTH);
                 }
 
-                newFeature.setAttribute(fieldList[0], FormatUtils.round(localI));
-                newFeature.setAttribute(fieldList[1], FormatUtils.round(zScore));
-                newFeature.setAttribute(fieldList[2], FormatUtils.round(pValue));
-                newFeature.setAttribute(fieldList[3], FormatUtils.round(dczv));
-                newFeature.setAttribute(fieldList[4], FormatUtils.round(dcwv));
-                newFeature.setAttribute(fieldList[5], coType);
+                newFeature.setAttribute(fields[0], FormatUtils.round(localI));
+                newFeature.setAttribute(fields[1], FormatUtils.round(zScore));
+                newFeature.setAttribute(fields[2], FormatUtils.round(pValue));
+                newFeature.setAttribute(fields[3], coType);
 
-                idx++;
                 featureWriter.write(newFeature);
+                idx++;
             }
         } catch (Exception e) {
             featureWriter.rollback(e);
@@ -253,13 +239,10 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
                     moranBin = "HL";
                 } else if (featureVal <= globalMean && localMean >= globalMean) {
                     moranBin = "LH";
-                } else {
-                    moranBin = "";
                 }
             }
         }
 
         return moranBin;
     }
-
 }

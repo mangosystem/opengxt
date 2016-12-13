@@ -331,11 +331,9 @@ public class TextColumn {
         return columns;
     }
 
-    // 시작 및 끝 문자열이 "~"로 구성된 문자 패턴
     private static final Pattern pattern = Pattern.compile("^\"|\"$");
 
     public static String removeDoubleQuote(String value) {
-        // http://stackoverflow.com/questions/1441556/parsing-csv-input-with-a-regex-in-java
         Matcher matcher = pattern.matcher(value);
         if (matcher.find()) {
             return matcher.replaceAll("").trim();

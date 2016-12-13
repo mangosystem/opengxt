@@ -46,6 +46,8 @@ import com.vividsolutions.jts.geom.Point;
 public class CentralFeatureOperation extends AbstractDisributionOperator {
     protected static final Logger LOGGER = Logging.getLogger(CentralFeatureOperation.class);
 
+    static final String TYPE_NAME = "LinearDirectionalMean";
+
     private DistanceMethod distanceMethod = DistanceMethod.Euclidean;
 
     public DistanceMethod getDistanceMethod() {
@@ -100,9 +102,9 @@ public class CentralFeatureOperation extends AbstractDisributionOperator {
             featureIter.close();
         }
 
-        SimpleFeatureType featureType = FeatureTypes.build(schema, getOutputTypeName());
-        IFeatureInserter featureWriter = getFeatureWriter(featureType);
         String the_geom = schema.getGeometryDescriptor().getLocalName();
+        SimpleFeatureType featureType = FeatureTypes.build(schema, TYPE_NAME);
+        IFeatureInserter featureWriter = getFeatureWriter(featureType);
 
         @SuppressWarnings("unchecked")
         HashMap<Object, CentralFeature> resultMap = visitor.getResult();
@@ -113,20 +115,23 @@ public class CentralFeatureOperation extends AbstractDisributionOperator {
                 CentralFeature cf = resultMap.get(caseVal);
                 Point cenPt = cf.getCentralEvent();
 
-                Filter finalFilter = null;
-                Filter filterIntersect = ff.intersects(ff.property(the_geom), ff.literal(cenPt));
+                Filter filter = null;
+                Filter intersects = ff.intersects(ff.property(the_geom), ff.literal(cenPt));
 
                 if (idxCase == -1) {
-                    finalFilter = filterIntersect;
+                    filter = intersects;
                 } else {
                     Filter equalFilter = ff.equals(ff.property(caseField), ff.literal(caseVal));
-                    finalFilter = ff.and(equalFilter, filterIntersect);
+                    filter = ff.and(equalFilter, intersects);
                 }
 
-                featureIter = features.subCollection(finalFilter).features();
+                featureIter = features.subCollection(filter).features();
                 while (featureIter.hasNext()) {
                     SimpleFeature feature = featureIter.next();
-                    featureWriter.write(feature);
+
+                    SimpleFeature newFeature = featureWriter.buildFeature();
+                    newFeature.setAttributes(feature.getAttributes());
+                    featureWriter.write(newFeature);
                 }
                 featureIter.close();
             }

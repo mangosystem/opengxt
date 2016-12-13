@@ -46,6 +46,8 @@ import com.vividsolutions.jts.geom.Point;
 public class MedianCenterOperation extends AbstractDisributionOperator {
     protected static final Logger LOGGER = Logging.getLogger(MedianCenterOperation.class);
 
+    static final String TYPE_NAME = "MedianCenter";
+
     final String[] FIELDS = { "XCoord", "YCoord" };
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection features, String weightField,
@@ -72,7 +74,7 @@ public class MedianCenterOperation extends AbstractDisributionOperator {
             }
         }
 
-        MedianCenterVisitor fVisitor = new MedianCenterVisitor();
+        MedianCenterVisitor visitor = new MedianCenterVisitor();
         SimpleFeatureIterator featureIter = features.features();
         try {
             while (featureIter.hasNext()) {
@@ -83,7 +85,6 @@ public class MedianCenterOperation extends AbstractDisributionOperator {
                 }
 
                 Coordinate coordinate = getTrueCentroid(geometry);
-
                 Object caseVal = idxCase == -1 ? ALL : feature.getAttribute(idxCase);
 
                 double weightVal = 1.0;
@@ -105,7 +106,7 @@ public class MedianCenterOperation extends AbstractDisributionOperator {
                     }
                 }
 
-                fVisitor.visit(coordinate, caseVal, weightVal, attVals);
+                visitor.visit(coordinate, caseVal, weightVal, attVals);
             }
         } finally {
             featureIter.close();
@@ -115,8 +116,8 @@ public class MedianCenterOperation extends AbstractDisributionOperator {
         CoordinateReferenceSystem crs = schema.getCoordinateReferenceSystem();
         String geomName = schema.getGeometryDescriptor().getLocalName();
 
-        SimpleFeatureType featureType = FeatureTypes.getDefaultType(this.getOutputTypeName(),
-                geomName, Point.class, crs);
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType(TYPE_NAME, geomName,
+                Point.class, crs);
         featureType = FeatureTypes.add(featureType, FIELDS[0], Double.class, 38);
         featureType = FeatureTypes.add(featureType, FIELDS[1], Double.class, 38);
 
@@ -134,19 +135,18 @@ public class MedianCenterOperation extends AbstractDisributionOperator {
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
 
         @SuppressWarnings("unchecked")
-        HashMap<Object, MedianCenter> resultMap = fVisitor.getResult();
+        HashMap<Object, MedianCenter> resultMap = visitor.getResult();
         Iterator<Object> iter = resultMap.keySet().iterator();
         try {
             while (iter.hasNext()) {
                 Object caseVal = iter.next();
                 MedianCenter curCenter = resultMap.get(caseVal);
-
                 Point cenPoint = curCenter.getMedianCenter();
 
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                // Median Center
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 newFeature.setDefaultGeometry(cenPoint);
 
-                // Median Center
                 newFeature.setAttribute(FIELDS[0], cenPoint.getX());
                 newFeature.setAttribute(FIELDS[1], cenPoint.getY());
 
@@ -187,5 +187,4 @@ public class MedianCenterOperation extends AbstractDisributionOperator {
 
         return featureWriter.getFeatureCollection();
     }
-
 }

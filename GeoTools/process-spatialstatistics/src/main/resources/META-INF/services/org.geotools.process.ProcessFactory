@@ -19,11 +19,13 @@ org.geotools.process.spatialstatistics.GlobalMoransIProcessFactory
 org.geotools.process.spatialstatistics.GlobalGStatisticsProcessFactory
 org.geotools.process.spatialstatistics.GlobalGearysCProcessFactory
 org.geotools.process.spatialstatistics.GlobalLeesSProcessFactory
+org.geotools.process.spatialstatistics.GlobalLeesLProcessFactory
 
 org.geotools.process.spatialstatistics.LocalMoransIProcessFactory
 org.geotools.process.spatialstatistics.LocalGStatisticsProcessFactory
 org.geotools.process.spatialstatistics.LocalGearysCProcessFactory
 org.geotools.process.spatialstatistics.LocalLeesSProcessFactory
+org.geotools.process.spatialstatistics.LocalLeesLProcessFactory
 
 org.geotools.process.spatialstatistics.MeanCenterProcessFactory
 org.geotools.process.spatialstatistics.MedianCenterProcessFactory

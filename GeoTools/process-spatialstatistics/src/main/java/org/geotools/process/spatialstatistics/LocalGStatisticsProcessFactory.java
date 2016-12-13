@@ -49,7 +49,7 @@ public class LocalGStatisticsProcessFactory extends SpatialStatisticsProcessFact
 
     /*
      * LocalGStatistics(SimpleFeatureCollection inputFeatures, String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-     * StandardizationMethod standardization, Double searchDistance) : SimpleFeatureCollection
+     * StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors) : SimpleFeatureCollection
      */
 
     public LocalGStatisticsProcessFactory() {
@@ -110,6 +110,12 @@ public class LocalGStatisticsProcessFactory extends SpatialStatisticsProcessFact
             getResource("LocalGStatistics.searchDistance.description"), false, 0, 1,
             Double.valueOf(0.0), null);
 
+    /** selfNeighbors */
+    public static final Parameter<Boolean> selfNeighbors = new Parameter<Boolean>("selfNeighbors",
+            Boolean.class, getResource("LocalGStatistics.selfNeighbors.title"),
+            getResource("LocalGStatistics.selfNeighbors.description"), false, 0, 1, Boolean.TRUE,
+            null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
@@ -119,6 +125,7 @@ public class LocalGStatisticsProcessFactory extends SpatialStatisticsProcessFact
         parameterInfo.put(distanceMethod.key, distanceMethod);
         parameterInfo.put(standardization.key, standardization);
         parameterInfo.put(searchDistance.key, searchDistance);
+        parameterInfo.put(selfNeighbors.key, selfNeighbors);
         return parameterInfo;
     }
 

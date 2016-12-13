@@ -22,7 +22,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.core.SSUtils.StatEnum;
 import org.geotools.process.spatialstatistics.core.SpatialEvent;
-import org.geotools.process.spatialstatistics.core.SpatialWeightMatrix;
+import org.geotools.process.spatialstatistics.core.WeightMatrixBuilder;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -38,87 +38,62 @@ import org.geotools.util.logging.Logging;
 public class GlobalLeesSOperation extends AbstractStatisticsOperation {
     protected static final Logger LOGGER = Logging.getLogger(GlobalLeesSOperation.class);
 
-    private SpatialWeightMatrix swMatrix = null;
-
     public GlobalLeesSOperation() {
         // Default Setting
         this.setDistanceType(DistanceMethod.Euclidean);
         this.setSpatialConceptType(SpatialConcept.InverseDistance);
         this.setStandardizationType(StandardizationMethod.None);
+        this.setSelfNeighbors(false);
     }
 
     public LeesS execute(SimpleFeatureCollection inputFeatures, String inputField) {
-        swMatrix = new SpatialWeightMatrix(getSpatialConceptType(), getStandardizationType());
+        swMatrix = new WeightMatrixBuilder(getSpatialConceptType(), getStandardizationType());
         swMatrix.setDistanceMethod(getDistanceType());
         swMatrix.setDistanceBandWidth(getDistanceBand());
+        swMatrix.setSelfNeighbors(isSelfNeighbors());
         swMatrix.buildWeightMatrix(inputFeatures, inputField);
 
-        double dSumWC = 0.0; // sum of weighted co-variance (dWij * dCij)
-        double dSumW = 0.0; // sum of all weights (dWij)
-        double dSumWC2 = 0.0;
-        double dSumW2 = 0.0;
-        double dM2 = 0.0;
-        double dM4 = 0.0;
-        double dSumS1 = 0.0;
-        double dSumS2 = 0.0;
+        double wijSum = 0.0; // sum of all weights (wij)
+        double zjWSum2 = 0.0;
+        double wijSum2 = 0.0;
+        double ziSum2 = 0.0;
 
         double n = swMatrix.getEvents().size();
-        double dZMean = swMatrix.dZSum / n;
+        double meanX = swMatrix.sumX / n;
 
-        for (SpatialEvent curE : swMatrix.getEvents()) {
-            double dWijS2Sum = 0.0;
-            double dWjiS2Sum = 0.0;
-            double dWCijSum = 0.0;
-            double dZiDeviation = curE.weight - dZMean;
-            dM2 += Math.pow(dZiDeviation, 2.0);
-            dM4 += Math.pow(dZiDeviation, 4.0);
+        for (SpatialEvent source : swMatrix.getEvents()) {
+            double jwijSum = 0.0;
+            double zjWSum = 0.0;
 
-            for (SpatialEvent destE : swMatrix.getEvents()) {
-                if (curE.oid == destE.oid)
+            double zi = source.xVal - meanX;
+            ziSum2 += Math.pow(zi, 2.0);
+
+            for (SpatialEvent target : swMatrix.getEvents()) {
+                if (!isSelfNeighbors() && source.id == target.id) {
                     continue;
-
-                double dCij = destE.weight - dZMean;
-
-                // Calculate the weight (dWij)
-                double dWij = swMatrix.getWeight(curE, destE);
-                double dWji = dWij;
-
-                if (getStandardizationType() == StandardizationMethod.Row) {
-                    dWij = swMatrix.standardizeWeight(curE, dWij);
-                    dWji = swMatrix.standardizeWeight(destE, dWji);
                 }
 
-                // Create sums needed to calculate
-                dSumWC += dWij * dCij;
-                dWCijSum += dWij * dCij;
-                dSumW += dWij;
-                dWijS2Sum += dWij;
-                dWjiS2Sum += dWji;
-                dSumS1 += Math.pow(dWij + dWji, 2.0);
-            }
-            dSumS2 += Math.pow(dWijS2Sum + dWjiS2Sum, 2.0);
-            dSumW2 += Math.pow(dWijS2Sum, 2.0);
-            dSumWC2 += Math.pow(dWCijSum, 2.0);
-        }
-        dSumS1 = 0.5 * dSumS1;
+                double wij = swMatrix.getWeight(source, target);
+                wij = swMatrix.standardizeWeight(source, wij);
+                if (wij == 0) {
+                    continue;
+                }
 
-        dM2 = dM2 / n;
-        dM4 = dM4 / n;
+                double zj = target.xVal - meanX;
+
+                zjWSum += wij * zj;
+                jwijSum += wij;
+            }
+
+            wijSum += jwijSum;
+            wijSum2 += Math.pow(jwijSum, 2.0);
+            zjWSum2 += Math.pow(zjWSum, 2.0);
+        }
 
         // TODO modify
-        // Expected values = 0.1711
-        // E.S.off = (f0.off * g0.off) / (n * (n - 1))
-        // E.S.on = (f0.on * g0.on) / n
-        // E.S = E.S.off + E.S.on
-        double f0off = dSumW;
-        double f0on = 0.0;
-        double g0off = dSumWC;
-        double g0on = 0.0;
-        double eoff = (f0off * g0off) / (n * (n - 1));
-        double eon = (f0on * g0on) / n;
-        double dExpected = (eoff) + (eon);
+        double dExpected = 0.0;
 
-        if (dSumW <= 0.0) {
+        if (wijSum <= 0.0) {
             LeesS leesS = new LeesS(0d, dExpected, 0d);
             leesS.setConceptualization(getSpatialConceptType());
             leesS.setDistanceMethod(getDistanceType());
@@ -127,24 +102,13 @@ public class GlobalLeesSOperation extends AbstractStatisticsOperation {
             return leesS;
         }
 
-        // Finally, we can calculate
-        double dLeesS = dSumWC2 / (dM2 * dSumW2);
+        double dObserved = (n / wijSum2) * (zjWSum2 / ziSum2);
 
         // TODO modify
-        // variance
-        double f1off = dSumS1;
-        double f2off = 0;
-        double g1off = 0;
-        double g2off = 0;
-        double rVariance = ((2 * f1off * g1off) / (n * (n - 1)))
-                + ((4 * (f2off - f1off) * (g2off - g1off)) / (n * (n - 1) * (n - 2)))
-                + ((((f0off * f0off) + (2 * f1off) - (4 * f2off)) * ((g0off * g0off) + (2 * g1off) - (4 * g2off))) / (n
-                        * (n - 1) * (n - 2) * (n - 3))) - (eoff * eoff);
-
-        rVariance = 0.0; // temp
+        double zVariance = 0.0;
 
         // finally build result
-        LeesS leesS = new LeesS(dLeesS, dExpected, rVariance);
+        LeesS leesS = new LeesS(dObserved, dExpected, zVariance);
         leesS.setConceptualization(getSpatialConceptType());
         leesS.setDistanceMethod(getDistanceType());
         leesS.setRowStandardization(getStandardizationType());

@@ -99,14 +99,14 @@ public class SpatialJoinOperation extends GeneralOperation {
                     continue;
                 }
 
-                SimpleFeature joinFeature = searchNearestFeature(joinFeatures, geometry);
+                SimpleFeature joinFeature = searchNearestFeature(joinFeatures, feature);
 
                 // create & insert feature
                 if (joinType == SpatialJoinType.OnlyMatchingRecord && joinFeature == null) {
                     continue;
                 }
 
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
 
                 if (joinFeature != null) {
@@ -126,13 +126,14 @@ public class SpatialJoinOperation extends GeneralOperation {
     }
 
     private SimpleFeature searchNearestFeature(SimpleFeatureCollection joinFeatures,
-            Geometry geometry) {
+            SimpleFeature feature) {
         String the_geom = joinFeatures.getSchema().getGeometryDescriptor().getLocalName();
+        Geometry geometry = (Geometry) feature.getDefaultGeometry();
 
-        Filter filter = ff.intersects(ff.property(the_geom), ff.literal(geometry));
+        Filter filter = getIntersectsFilter(the_geom, geometry);
         if (searchRadius > 0) {
             Geometry buffered = geometry.buffer(searchRadius);
-            filter = ff.intersects(ff.property(the_geom), ff.literal(buffered));
+            filter = getIntersectsFilter(the_geom, buffered);
         }
 
         SimpleFeature nearestFeature = null;
@@ -140,20 +141,20 @@ public class SpatialJoinOperation extends GeneralOperation {
         try {
             double minDistance = Double.MAX_VALUE;
             while (joinIter.hasNext()) {
-                SimpleFeature feature = joinIter.next();
+                SimpleFeature joinF = joinIter.next();
                 if (searchRadius == 0) {
-                    nearestFeature = feature;
+                    nearestFeature = joinF; // first one
                     break;
                 } else {
                     // find nearest features
-                    Geometry joinGeometry = (Geometry) feature.getDefaultGeometry();
+                    Geometry joinGeometry = (Geometry) joinF.getDefaultGeometry();
                     double distance = geometry.distance(joinGeometry);
                     if (distance == 0) {
-                        nearestFeature = feature;
+                        nearestFeature = joinF;
                         break;
                     } else {
                         if (minDistance > distance) {
-                            nearestFeature = feature;
+                            nearestFeature = joinF;
                             minDistance = distance;
                         }
                     }

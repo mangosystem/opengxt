@@ -50,7 +50,9 @@ import com.vividsolutions.jts.triangulate.VoronoiDiagramBuilder;
 public class ThiessenPolygonOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(ThiessenPolygonOperation.class);
 
-    private static final String FID_FIELD = "TAGVALUE";
+    static final String TYPE_NAME = "ThiessenPolygon";
+
+    static final String FID_FIELD = "TAGVALUE";
 
     private double proximalTolerance = 0d;
 
@@ -110,11 +112,11 @@ public class ThiessenPolygonOperation extends GeneralOperation {
         switch (attributeMode) {
         case OnlyFID:
             String shapeFieldName = pointSchema.getGeometryDescriptor().getLocalName();
-            featureType = FeatureTypes.getDefaultType(getOutputTypeName(), shapeFieldName,
+            featureType = FeatureTypes.getDefaultType(pointSchema.getTypeName(), shapeFieldName,
                     Polygon.class, crs);
             break;
         case All:
-            featureType = FeatureTypes.build(pointSchema, getOutputTypeName(), Polygon.class);
+            featureType = FeatureTypes.build(pointSchema, pointSchema.getTypeName(), Polygon.class);
             break;
         }
         featureType = FeatureTypes.add(featureType, FID_FIELD, Integer.class);
@@ -144,7 +146,7 @@ public class ThiessenPolygonOperation extends GeneralOperation {
                     }
 
                     // create feature
-                    SimpleFeature newFeature = featureWriter.buildFeature(feature.getID());
+                    SimpleFeature newFeature = featureWriter.buildFeature();
                     if (attributeMode == ThiessenAttributeMode.All) {
                         featureWriter.copyAttributes(feature, newFeature, false);
                     }
@@ -169,10 +171,9 @@ public class ThiessenPolygonOperation extends GeneralOperation {
         return featureWriter.getFeatureCollection();
     }
 
-    public SimpleFeatureCollection execute(List<Coordinate> coordinateList) throws IOException {
-        CoordinateReferenceSystem crs = null;
-        SimpleFeatureType featureType = FeatureTypes.getDefaultType(getOutputTypeName(),
-                Polygon.class, crs);
+    public SimpleFeatureCollection execute(List<Coordinate> coordinateList,
+            CoordinateReferenceSystem crs) throws IOException {
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType(TYPE_NAME, Polygon.class, crs);
         featureType = FeatureTypes.add(featureType, FID_FIELD, Integer.class);
 
         // prepare transactional feature store
@@ -218,7 +219,7 @@ public class ThiessenPolygonOperation extends GeneralOperation {
             for (int k = 0; k < triangleGeoms.getNumGeometries(); k++) {
                 Geometry curGeometry = triangleGeoms.getGeometryN(k);
 
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 newFeature.setAttribute(FID_FIELD, k);
 
                 if (clipArea == null) {

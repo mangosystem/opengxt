@@ -155,7 +155,7 @@ public class FishnetOperation extends GeneralOperation {
                     }
 
                     if (boundsSource != null) {
-                        Filter filter = ff.intersects(ff.property(the_geom), ff.literal(cellGeom));
+                        Filter filter = getIntersectsFilter(the_geom, cellGeom);
                         if (boundaryInside) {
                             filter = ff.within(ff.property(the_geom), ff.literal(cellGeom));
                         }
@@ -166,8 +166,8 @@ public class FishnetOperation extends GeneralOperation {
                     }
 
                     // create feature and set geometry
-                    SimpleFeature newFeature = featureWriter.buildFeature(null);
-                    newFeature.setAttribute(UID, ++featureID);
+                    SimpleFeature newFeature = featureWriter.buildFeature();
+                    newFeature.setAttribute(UID, featureID);
                     newFeature.setDefaultGeometry(cellGeom);
 
                     featureWriter.write(newFeature);

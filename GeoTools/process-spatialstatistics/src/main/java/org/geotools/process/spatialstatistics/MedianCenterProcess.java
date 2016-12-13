@@ -100,7 +100,6 @@ public class MedianCenterProcess extends AbstractStatisticsProcess {
             }
 
             MedianCenterOperation operation = new MedianCenterOperation();
-            operation.setOutputTypeName("MedianCenter");
             SimpleFeatureCollection resultFc = operation.execute(inputFeatures, weightField,
                     caseField, attFields);
             // end process

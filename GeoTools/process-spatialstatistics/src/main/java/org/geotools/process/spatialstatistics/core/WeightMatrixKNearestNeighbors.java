@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -42,11 +43,11 @@ import com.vividsolutions.jts.index.kdtree.KdTree;
  * 
  * @source $URL$
  */
-public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightMatrix {
-    protected static final Logger LOGGER = Logging
-            .getLogger(SpatialWeightMatrixKNearestNeighbors.class);
+public class WeightMatrixKNearestNeighbors extends AbstractWeightMatrix {
+    protected static final Logger LOGGER = Logging.getLogger(WeightMatrixKNearestNeighbors.class);
 
-    private int numberOfNeighbors = 4; // default value
+    // default number of neighbors = 8, maximum = 24
+    private int numberOfNeighbors = 8;
 
     private KdTree spatialIndex;
 
@@ -54,7 +55,7 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
 
     private Envelope envelope = new Envelope();
 
-    public SpatialWeightMatrixKNearestNeighbors() {
+    public WeightMatrixKNearestNeighbors() {
 
     }
 
@@ -63,17 +64,20 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
     }
 
     public void setNumberOfNeighbors(int numberOfNeighbors) {
+        if (numberOfNeighbors > 24) {
+            numberOfNeighbors = 24;
+            LOGGER.log(Level.WARNING, "Maximum number of neighbors is 24!");
+        }
         this.numberOfNeighbors = numberOfNeighbors;
     }
 
     @Override
-    public SpatialWeightMatrixResult execute(SimpleFeatureCollection features, String uniqueField) {
+    public WeightMatrix execute(SimpleFeatureCollection features, String uniqueField) {
         uniqueField = FeatureTypes.validateProperty(features.getSchema(), uniqueField);
         this.uniqueFieldIsFID = uniqueField == null || uniqueField.isEmpty();
-        
-        SpatialWeightMatrixResult swm = new SpatialWeightMatrixResult(
-                SpatialWeightMatrixType.Distance);
-        swm.setupVariables(features.getSchema().getTypeName(), uniqueField);
+
+        WeightMatrix matrix = new WeightMatrix(SpatialWeightMatrixType.Distance);
+        matrix.setupVariables(features.getSchema().getTypeName(), uniqueField);
 
         // 1. extract centroid and build spatial index
         buildSpatialIndex(features, uniqueField);
@@ -92,13 +96,13 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
                         while (subIter.hasNext()) {
                             SimpleFeature secondaryFeature = subIter.next();
                             Object secondaryID = getFeatureID(secondaryFeature, uniqueField);
-                            if (!this.isSelfContains() && primaryID.equals(secondaryID)) {
+                            if (!this.isSelfNeighbors() && primaryID.equals(secondaryID)) {
                                 continue;
                             }
 
                             Geometry secGeom = (Geometry) secondaryFeature.getDefaultGeometry();
                             Coordinate secCoord = secGeom.getCentroid().getCoordinate();
-                            swm.visit(primaryID, secondaryID, coordinate.distance(secCoord));
+                            matrix.visit(primaryID, secondaryID, coordinate.distance(secCoord));
                         }
                     } finally {
                         subIter.close();
@@ -109,8 +113,7 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
             }
         } else {
             // 2. evaluate envelope
-            double maxWidth = envelope.getWidth() > envelope.getHeight() ? envelope.getWidth()
-                    : envelope.getHeight();
+            double maxWidth = Math.max(envelope.getWidth(), envelope.getHeight());
             final double initDistance = maxWidth / Math.sqrt(featureCount);
 
             // 3.create spatial weight matrix
@@ -146,7 +149,7 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
                             }
 
                             Object secondaryID = node.getData();
-                            if (!this.isSelfContains()
+                            if (!this.isSelfNeighbors()
                                     && (primaryID.equals(secondaryID) || sortedMap
                                             .containsValue(secondaryID))) {
                                 continue;
@@ -159,7 +162,7 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
                     // build weight matrix
                     count = 0;
                     for (Entry<Double, Object> entry : sortedMap.entrySet()) {
-                        swm.visit(primaryID, entry.getValue(), entry.getKey());
+                        matrix.visit(primaryID, entry.getValue(), entry.getKey());
                         count++;
                         if (count == numberOfNeighbors) {
                             break;
@@ -171,7 +174,7 @@ public class SpatialWeightMatrixKNearestNeighbors extends AbstractSpatialWeightM
             }
         }
 
-        return swm;
+        return matrix;
     }
 
     private void buildSpatialIndex(SimpleFeatureCollection features, String uniqueField) {

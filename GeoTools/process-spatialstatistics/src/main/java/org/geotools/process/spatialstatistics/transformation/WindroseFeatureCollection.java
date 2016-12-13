@@ -150,7 +150,7 @@ public class WindroseFeatureCollection extends GXTSimpleFeatureCollection {
         private void init(SimpleFeatureBuilder builder) {
             String the_geom = delegate.getSchema().getGeometryDescriptor().getLocalName();
             String typeName = builder.getFeatureType().getTypeName();
-            
+
             ListFeatureCollection result = new ListFeatureCollection(builder.getFeatureType());
 
             double minValue = Double.MAX_VALUE;
@@ -165,9 +165,8 @@ public class WindroseFeatureCollection extends GXTSimpleFeatureCollection {
                 double endDeg = ((index + 1) * stepAngle) - halfStep;
                 Geometry cell = createCell(center, startDeg, endDeg, radius);
 
-                Filter filter = ff.intersects(ff.property(the_geom), ff.literal(cell));
                 StatisticsVisitor visitor = new StatisticsVisitor(weightExp, null);
-                visitor.visit(delegate.subCollection(filter));
+                visitor.visit(delegate.subCollection(getIntersectsFilter(the_geom, cell)));
                 StatisticsVisitorResult ret = visitor.getResult();
 
                 // { "uid", "count", "min", "max", "sum", "mean", "std_dev", "var" };

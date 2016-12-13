@@ -46,8 +46,6 @@ public interface IFeatureInserter {
 
     public abstract int getFeatureCount();
 
-    public abstract SimpleFeature buildFeature(String id) throws IOException;
-
     public abstract SimpleFeature buildFeature() throws IOException;
 
     public abstract void write(SimpleFeatureCollection featureCollection) throws IOException;

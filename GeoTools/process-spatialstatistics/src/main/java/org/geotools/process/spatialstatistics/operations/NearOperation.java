@@ -103,7 +103,7 @@ public class NearOperation extends GeneralOperation {
                 }
 
                 // create & insert feature
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
 
                 // create line: direction = spoke --> hub

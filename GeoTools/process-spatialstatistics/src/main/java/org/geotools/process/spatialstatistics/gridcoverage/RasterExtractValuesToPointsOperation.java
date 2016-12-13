@@ -59,7 +59,8 @@ public class RasterExtractValuesToPointsOperation extends GeneralOperation {
         SimpleFeatureType inputSchema = inputFeatures.getSchema();
 
         // prepare feature type
-        SimpleFeatureType featureType = FeatureTypes.build(inputSchema, getOutputTypeName());
+        String typeName = inputSchema.getTypeName();
+        SimpleFeatureType featureType = FeatureTypes.build(inputSchema, typeName);
 
         Class<?> fieldBinding = Double.class; // default
         if (FeatureTypes.existProeprty(inputSchema, valueField)) {
@@ -102,7 +103,7 @@ public class RasterExtractValuesToPointsOperation extends GeneralOperation {
                 }
 
                 // copy feature and set value
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
                 newFeature.setAttribute(valueField, Converters.convert(val, fieldBinding));
 

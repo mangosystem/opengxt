@@ -49,6 +49,8 @@ import com.vividsolutions.jts.geom.Polygon;
 public class CircularBinningOperation extends BinningOperation {
     protected static final Logger LOGGER = Logging.getLogger(CircularBinningOperation.class);
 
+    static final String TYPE_NAME = "CircularBinning";
+
     public SimpleFeatureCollection execute(SimpleFeatureCollection features,
             ReferencedEnvelope bbox, Double radius) throws IOException {
         return execute(features, null, bbox, radius);
@@ -89,7 +91,7 @@ public class CircularBinningOperation extends BinningOperation {
         GeometryCoordinateSequenceTransformer transformer = new GeometryCoordinateSequenceTransformer();
 
         // create feature type
-        SimpleFeatureType schema = FeatureTypes.getDefaultType("Binning", Polygon.class, sourceCRS);
+        SimpleFeatureType schema = FeatureTypes.getDefaultType(TYPE_NAME, Polygon.class, sourceCRS);
         schema = FeatureTypes.add(schema, UID, Integer.class, 19);
         schema = FeatureTypes.add(schema, AGG_FIELD, Double.class, 38);
 
@@ -168,7 +170,7 @@ public class CircularBinningOperation extends BinningOperation {
             Point center = gf.createPoint(new Coordinate(minX + radius, minY + radius));
             final Geometry circle = center.buffer(radius, quadrantSegments);
 
-            int fid = 0;
+            int featureID = 0;
             double ypos = minRow * diameter;
             for (int row = minRow; row < maxRow; row++) {
                 double xpos = minCol * diameter;
@@ -189,8 +191,8 @@ public class CircularBinningOperation extends BinningOperation {
                     }
 
                     // create feature and set geometry
-                    SimpleFeature newFeature = featureWriter.buildFeature(Integer.toString(++fid));
-                    newFeature.setAttribute(UID, fid);
+                    SimpleFeature newFeature = featureWriter.buildFeature();
+                    newFeature.setAttribute(UID, ++featureID);
                     newFeature.setAttribute(AGG_FIELD, gridValue);
                     newFeature.setDefaultGeometry(grid);
 

@@ -17,8 +17,6 @@
 package org.geotools.process.spatialstatistics.operations;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,12 +28,14 @@ import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.process.spatialstatistics.storage.FeatureInserter;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -55,8 +55,6 @@ public abstract class GeneralOperation {
 
     protected final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
 
-    private String outputTypeName = null;
-
     private DataStore outputDataStore = null;
 
     public void setOutputDataStore(DataStore outputDataStore) {
@@ -68,20 +66,6 @@ public abstract class GeneralOperation {
             outputDataStore = new MemoryDataStore();
         }
         return outputDataStore;
-    }
-
-    public void setOutputTypeName(String outputTypeName) {
-        this.outputTypeName = outputTypeName;
-    }
-
-    public String getOutputTypeName() {
-        if (outputTypeName == null) {
-            SimpleDateFormat dataFormat = new SimpleDateFormat("yyyyMMdd_hhmmss_S");
-            String serialID = dataFormat.format(Calendar.getInstance().getTime());
-            outputTypeName = "gp_" + serialID;
-        }
-
-        return outputTypeName;
     }
 
     protected boolean isShapefileDataStore(DataStore dataStore) {
@@ -113,10 +97,15 @@ public abstract class GeneralOperation {
 
     protected void insertFeature(IFeatureInserter featureWriter, SimpleFeature origFeature,
             Geometry geometry) throws IOException {
-        SimpleFeature newFeature = featureWriter.buildFeature(null);
+        SimpleFeature newFeature = featureWriter.buildFeature();
         featureWriter.copyAttributes(origFeature, newFeature, false);
         newFeature.setDefaultGeometry(geometry);
 
         featureWriter.write(newFeature);
+    }
+
+    protected Filter getIntersectsFilter(String geomField, Geometry searchGeometry) {
+        return ff.and(ff.bbox(ff.property(geomField), JTS.toEnvelope(searchGeometry)),
+                ff.intersects(ff.property(geomField), ff.literal(searchGeometry)));
     }
 }

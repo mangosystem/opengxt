@@ -63,16 +63,13 @@ public class FeatureInserter implements IFeatureInserter {
 
     SimpleFeatureStore sfStore = null;
 
-    // ==== FeatureWriter mode ======
-    Boolean isWriteMode = Boolean.FALSE;
+    Boolean writeMode = Boolean.FALSE;
 
     FeatureWriter<SimpleFeatureType, SimpleFeature> writer;
 
     DataStore dataStore;
 
     Transaction transaction;
-
-    // ===============================
 
     List<FieldMap> fieldMaps = new ArrayList<FieldMap>();
 
@@ -92,7 +89,7 @@ public class FeatureInserter implements IFeatureInserter {
             dataStore.getFeatureSource(typeName);
             this.transaction = new DefaultTransaction(typeName); // Transaction.AUTO_COMMIT
             this.writer = dataStore.getFeatureWriterAppend(typeName, transaction);
-            this.isWriteMode = Boolean.TRUE;
+            this.writeMode = Boolean.TRUE;
         } catch (IOException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
@@ -104,7 +101,7 @@ public class FeatureInserter implements IFeatureInserter {
         this.transaction = featureStore.getTransaction();
         this.builder = new SimpleFeatureBuilder(featureStore.getSchema());
         this.featureBuffer = new ListFeatureCollection(featureStore.getSchema());
-        this.isWriteMode = Boolean.FALSE;
+        this.writeMode = Boolean.FALSE;
 
         if (featureStore.getDataStore() instanceof MemoryDataStore) {
             isMemoryDataStore = Boolean.TRUE;
@@ -115,7 +112,7 @@ public class FeatureInserter implements IFeatureInserter {
 
     @Override
     public SimpleFeatureSource getFeatureSource() {
-        if (isWriteMode) {
+        if (writeMode) {
             try {
                 return dataStore.getFeatureSource(writer.getFeatureType().getTypeName());
             } catch (IOException e) {
@@ -154,14 +151,13 @@ public class FeatureInserter implements IFeatureInserter {
     }
 
     @Override
-    public SimpleFeature buildFeature(String id) throws IOException {
+    public SimpleFeature buildFeature() throws IOException {
         SimpleFeature simpleFeature = null;
-        if (isWriteMode) {
+        if (writeMode) {
             simpleFeature = this.writer.next();
         } else {
-            if (id == null) {
-                id = Integer.toString(featureCount + 1);
-            }
+            StringBuilder sb = new StringBuilder().append(typeName).append(".");
+            String id = sb.append(featureCount + 1).toString();
             simpleFeature = this.builder.buildFeature(id);
         }
 
@@ -169,31 +165,14 @@ public class FeatureInserter implements IFeatureInserter {
     }
 
     @Override
-    public SimpleFeature buildFeature() throws IOException {
-        return buildFeature(null);
-    }
-
-    @Override
     public void write(SimpleFeatureCollection featureCollection) throws IOException {
-        if (isWriteMode) {
-            SimpleFeatureIterator iter = featureCollection.features();
-            try {
-                while (iter.hasNext()) {
-                    final SimpleFeature sf = iter.next();
-                    SimpleFeature newFeature = this.buildFeature();
-                    this.copyAttributes(sf, newFeature, true);
-                    this.writer.write();
-                }
-            } finally {
-                iter.close();
+        SimpleFeatureIterator iter = featureCollection.features();
+        try {
+            while (iter.hasNext()) {
+                this.write(iter.next());
             }
-        } else {
-            featureCount += featureCollection.size();
-            sfStore.addFeatures(featureCollection);
-
-            if (!isMemoryDataStore) {
-                transaction.commit();
-            }
+        } finally {
+            iter.close();
         }
     }
 
@@ -201,7 +180,7 @@ public class FeatureInserter implements IFeatureInserter {
     public void write(SimpleFeature newFeature) throws IOException {
         featureCount++;
 
-        if (isWriteMode) {
+        if (writeMode) {
             this.writer.write();
             if ((featureCount % flushInterval) == 0) {
                 transaction.commit();
@@ -211,32 +190,23 @@ public class FeatureInserter implements IFeatureInserter {
             if (flushInterval == featureBuffer.size()) {
                 sfStore.addFeatures(featureBuffer);
                 featureBuffer.clear();
-
-                if (!isMemoryDataStore) {
-                    transaction.commit();
-                }
+                transaction.commit();
             }
         }
     }
 
     private void flush() throws IOException {
-        if (isWriteMode) {
-            transaction.commit();
-        } else {
-            if (featureBuffer.size() > 0) {
-                sfStore.addFeatures(featureBuffer);
-                featureBuffer.clear();
-            }
-            transaction.commit();
+        if (!writeMode && featureBuffer.size() > 0) {
+            sfStore.addFeatures(featureBuffer);
+            featureBuffer.clear();
         }
+        transaction.commit();
     }
 
     @Override
     public void rollback() throws IOException {
-        if (isWriteMode) {
-            // skip
-        } else {
-            transaction.rollback();
+        transaction.rollback();
+        if (!writeMode) {
             featureBuffer.clear();
         }
     }
@@ -249,23 +219,22 @@ public class FeatureInserter implements IFeatureInserter {
 
     @Override
     public void close() throws IOException {
-        if (isWriteMode) {
-            transaction.commit();
+        flush();
+        transaction.close();
+
+        if (writeMode) {
             writer.close();
-            transaction.close();
         } else {
-            flush();
-            transaction.close();
             sfStore.setTransaction(Transaction.AUTO_COMMIT);
         }
     }
 
     @Override
-    public void close(SimpleFeatureIterator srcIter) throws IOException {
+    public void close(SimpleFeatureIterator iterator) throws IOException {
         close();
 
-        if (srcIter != null) {
-            srcIter.close();
+        if (iterator != null) {
+            iterator.close();
         }
     }
 

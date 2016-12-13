@@ -168,13 +168,8 @@ public class ShapefileFeatureInserter implements IFeatureInserter {
     }
 
     @Override
-    public SimpleFeature buildFeature(String id) throws IOException {
-        return sfBuilder.buildFeature(id);
-    }
-
-    @Override
     public SimpleFeature buildFeature() throws IOException {
-        return buildFeature(null);
+        return sfBuilder.buildFeature(null);
     }
 
     @Override

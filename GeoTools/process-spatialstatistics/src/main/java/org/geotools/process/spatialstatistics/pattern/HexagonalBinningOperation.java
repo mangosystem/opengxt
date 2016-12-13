@@ -49,6 +49,8 @@ import com.vividsolutions.jts.geom.Polygon;
 public class HexagonalBinningOperation extends BinningOperation {
     protected static final Logger LOGGER = Logging.getLogger(HexagonalBinningOperation.class);
 
+    static final String TYPE_NAME = "HexagonalBinning";
+
     public SimpleFeatureCollection execute(SimpleFeatureCollection features,
             ReferencedEnvelope bbox, Double size) throws IOException {
         return execute(features, null, bbox, size);
@@ -67,11 +69,11 @@ public class HexagonalBinningOperation extends BinningOperation {
         GeometryCoordinateSequenceTransformer transformer = new GeometryCoordinateSequenceTransformer();
 
         // create feature type
-        SimpleFeatureType schema = FeatureTypes.getDefaultType("Binning", Polygon.class, sourceCRS);
+        SimpleFeatureType schema = FeatureTypes.getDefaultType(TYPE_NAME, Polygon.class, sourceCRS);
         schema = FeatureTypes.add(schema, UID, Integer.class, 19);
         schema = FeatureTypes.add(schema, AGG_FIELD, Double.class, 38);
 
-        final double yoffset = size * 1.5;            // height = size * 2
+        final double yoffset = size * 1.5; // height = size * 2
         final double xoffset = Math.sqrt(3.0) * size; // width = sqrt(3)/2 * height
         final double half_xoffset = 0.5 * xoffset;
 
@@ -96,7 +98,7 @@ public class HexagonalBinningOperation extends BinningOperation {
                 transformer.setCoordinateReferenceSystem(targetCRS);
             }
 
-            final double yOrigin = minY + (size * 0.25); 
+            final double yOrigin = minY + (size * 0.25);
             while (featureIter.hasNext()) {
                 SimpleFeature feat = featureIter.next();
                 Double val = weight == null ? Double.valueOf(1.0) : weight.evaluate(feat,
@@ -120,7 +122,7 @@ public class HexagonalBinningOperation extends BinningOperation {
                 if ((row % 2) == 1) {
                     col = (int) Math.floor((coordinate.x - minX - half_xoffset) / xoffset);
                 }
-                
+
                 if (col < 0 || row < 0 || col >= columns || row >= rows) {
                     continue;
                 }
@@ -160,7 +162,7 @@ public class HexagonalBinningOperation extends BinningOperation {
             // create hexagon
             final Geometry hexogon = createHexagon(minX, minY, size);
 
-            int fid = 0;
+            int featureID = 0;
             double ypos = minRow * yoffset;
             for (int row = minRow; row < maxRow; row++) {
                 double xpos = minCol * xoffset;
@@ -184,8 +186,8 @@ public class HexagonalBinningOperation extends BinningOperation {
                     }
 
                     // create feature and set geometry
-                    SimpleFeature newFeature = featureWriter.buildFeature(Integer.toString(++fid));
-                    newFeature.setAttribute(UID, fid);
+                    SimpleFeature newFeature = featureWriter.buildFeature();
+                    newFeature.setAttribute(UID, ++featureID);
                     newFeature.setAttribute(AGG_FIELD, gridValue);
                     newFeature.setDefaultGeometry(grid);
 

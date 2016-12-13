@@ -45,6 +45,8 @@ import com.vividsolutions.jts.geom.LineString;
 public class LinearDirectionalMeanOperation extends AbstractDisributionOperator {
     protected static final Logger LOGGER = Logging.getLogger(LinearDirectionalMeanOperation.class);
 
+    static final String TYPE_NAME = "LinearDirectionalMean";
+
     String[] FIELDS = { "CompassA", "DirMean", "CirVar", "AveX", "AveY", "AveLen" };
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection features,
@@ -66,12 +68,12 @@ public class LinearDirectionalMeanOperation extends AbstractDisributionOperator 
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                if (geometry == null || geometry.isEmpty())
+                if (geometry == null || geometry.isEmpty()) {
                     continue;
+                }
 
                 // Case Field
                 Object caseVal = idxCase == -1 ? ALL : feature.getAttribute(idxCase);
-
                 visitor.visit(geometry, caseVal);
             }
         } finally {
@@ -82,8 +84,8 @@ public class LinearDirectionalMeanOperation extends AbstractDisributionOperator 
         CoordinateReferenceSystem crs = schema.getCoordinateReferenceSystem();
         String geomName = schema.getGeometryDescriptor().getLocalName();
 
-        SimpleFeatureType featureType = FeatureTypes.getDefaultType(this.getOutputTypeName(),
-                geomName, LineString.class, crs);
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType(TYPE_NAME, geomName,
+                LineString.class, crs);
         for (String field : FIELDS) {
             featureType = FeatureTypes.add(featureType, field, Double.class, 38);
         }
@@ -102,7 +104,7 @@ public class LinearDirectionalMeanOperation extends AbstractDisributionOperator 
                 Object caseVal = iter.next();
                 LinearDirectionalMean curDm = resultMap.get(caseVal);
 
-                SimpleFeature newFeature = featureWriter.buildFeature(null);
+                SimpleFeature newFeature = featureWriter.buildFeature();
                 newFeature.setDefaultGeometry(curDm.getDirectionalLine());
 
                 if (idxCase != -1) {
@@ -131,5 +133,4 @@ public class LinearDirectionalMeanOperation extends AbstractDisributionOperator 
 
         return featureWriter.getFeatureCollection();
     }
-
 }

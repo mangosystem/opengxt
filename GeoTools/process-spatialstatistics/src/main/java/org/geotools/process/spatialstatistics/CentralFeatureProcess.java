@@ -101,7 +101,6 @@ public class CentralFeatureProcess extends AbstractStatisticsProcess {
             SimpleFeatureCollection resultFc = inputFeatures;
 
             CentralFeatureOperation process = new CentralFeatureOperation();
-            process.setOutputTypeName("CentralFeature");
             process.setDistanceMethod(distanceMethod);
 
             resultFc = process.execute(inputFeatures, weightField, selfPotentialWeightField,

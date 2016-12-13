@@ -50,7 +50,7 @@ public class GlobalLeesSProcessFactory extends SpatialStatisticsProcessFactory {
 
     /*
      * GlobalLeesS(SimpleFeatureCollection inputFeatures, String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-     * StandardizationMethod standardization, Double searchDistance) : LeesS
+     * StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors) : LeesS
      */
 
     public GlobalLeesSProcessFactory() {
@@ -111,6 +111,11 @@ public class GlobalLeesSProcessFactory extends SpatialStatisticsProcessFactory {
             getResource("GlobalLeesS.searchDistance.description"), false, 0, 1,
             Double.valueOf(0.0), null);
 
+    /** selfNeighbors */
+    public static final Parameter<Boolean> selfNeighbors = new Parameter<Boolean>("selfNeighbors",
+            Boolean.class, getResource("GlobalLeesS.selfNeighbors.title"),
+            getResource("GlobalLeesS.selfNeighbors.description"), false, 0, 1, Boolean.FALSE, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
@@ -120,6 +125,7 @@ public class GlobalLeesSProcessFactory extends SpatialStatisticsProcessFactory {
         parameterInfo.put(distanceMethod.key, distanceMethod);
         parameterInfo.put(standardization.key, standardization);
         parameterInfo.put(searchDistance.key, searchDistance);
+        parameterInfo.put(selfNeighbors.key, selfNeighbors);
         return parameterInfo;
     }
 

@@ -66,7 +66,7 @@ public class GlobalLeesSProcess extends AbstractStatisticsProcess {
 
     public static LeesSProcessResult process(SimpleFeatureCollection inputFeatures,
             String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-            StandardizationMethod standardization, Double searchDistance, ProgressListener monitor) {
+            StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(GlobalLeesSProcessFactory.inputFeatures.key, inputFeatures);
         map.put(GlobalLeesSProcessFactory.inputField.key, inputField);
@@ -74,6 +74,7 @@ public class GlobalLeesSProcess extends AbstractStatisticsProcess {
         map.put(GlobalLeesSProcessFactory.distanceMethod.key, distanceMethod);
         map.put(GlobalLeesSProcessFactory.standardization.key, standardization);
         map.put(GlobalLeesSProcessFactory.searchDistance.key, searchDistance);
+        map.put(GlobalLeesSProcessFactory.selfNeighbors.key, selfNeighbors);
 
         Process process = new GlobalLeesSProcess(null);
         Map<String, Object> resultMap;
@@ -125,6 +126,10 @@ public class GlobalLeesSProcess extends AbstractStatisticsProcess {
                     GlobalLeesSProcessFactory.searchDistance,
                     GlobalLeesSProcessFactory.searchDistance.sample);
 
+            Boolean selfNeighbors = (Boolean) Params.getValue(input,
+                    GlobalLeesSProcessFactory.selfNeighbors,
+                    GlobalLeesSProcessFactory.selfNeighbors.sample);
+
             // start process
             String typeName = inputFeatures.getSchema().getTypeName();
             LeesSProcessResult processResult = null;
@@ -133,6 +138,7 @@ public class GlobalLeesSProcess extends AbstractStatisticsProcess {
                 process.setSpatialConceptType(spatialConcept);
                 process.setDistanceType(distanceMethod);
                 process.setStandardizationType(standardization);
+                process.setSelfNeighbors(selfNeighbors);
 
                 // searchDistance
                 if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
@@ -281,6 +287,27 @@ public class GlobalLeesSProcess extends AbstractStatisticsProcess {
 
         public void setDistanceThreshold(String distanceThreshold) {
             this.distanceThreshold = distanceThreshold;
+        }
+
+        @Override
+        public String toString() {
+            final String separator = System.getProperty("line.separator");
+
+            StringBuffer sb = new StringBuffer();
+            sb.append("Global Lee's S").append(separator);
+            sb.append("TypeName: ").append(typeName).append(separator);
+            sb.append("PropertyName: ").append(propertyName).append(separator);
+            sb.append("Observed Index: ").append(observed_Index).append(separator);
+            sb.append("Expected Index: ").append(expected_Index).append(separator);
+            sb.append("Variance: ").append(variance).append(separator);
+            sb.append("z Score: ").append(z_Score).append(separator);
+            sb.append("p Value: ").append(p_Value).append(separator);
+            sb.append("Conceptualization: ").append(conceptualization).append(separator);
+            sb.append("DistanceMethod: ").append(distanceMethod).append(separator);
+            sb.append("RowStandardization: ").append(rowStandardization).append(separator);
+            sb.append("DistanceThreshold: ").append(distanceThreshold).append(separator);
+
+            return sb.toString();
         }
     }
 }

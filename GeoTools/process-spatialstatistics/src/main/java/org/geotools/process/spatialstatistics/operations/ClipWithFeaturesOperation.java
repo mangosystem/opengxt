@@ -23,7 +23,6 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTS;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.transformation.ClipWithGeometryFeatureCollection;
 import org.geotools.util.logging.Logging;
@@ -66,8 +65,7 @@ public class ClipWithFeaturesOperation extends GeneralOperation {
                 SimpleFeature feature = clipIter.next();
                 Geometry clipGeometry = (Geometry) feature.getDefaultGeometry();
 
-                ReferencedEnvelope bbox = JTS.toEnvelope(clipGeometry);
-                Filter filter = ff.bbox(ff.property(geomName), bbox);
+                Filter filter = ff.bbox(ff.property(geomName), JTS.toEnvelope(clipGeometry));
                 featureWriter.write(new ClipWithGeometryFeatureCollection(inputFeatures
                         .subCollection(filter), clipGeometry));
             }

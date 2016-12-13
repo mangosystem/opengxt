@@ -6,22 +6,23 @@
     <!-- custom class support -->
     <bean id="MoransIPPIO" class="org.geoserver.wps.spatialstatistics.ppio.MoransIPPIO" />
     <bean id="GStatisticsPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GStatisticsPPIO" />
+    <bean id="GearysCPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GearysCPPIO" />
+    <bean id="LeesSPPIO" class="org.geoserver.wps.spatialstatistics.ppio.LeesSPPIO" />
+    <bean id="LeesLPPIO" class="org.geoserver.wps.spatialstatistics.ppio.LeesLPPIO" />
     <bean id="PearsonPPIO" class="org.geoserver.wps.spatialstatistics.ppio.PearsonPPIO" />
     <bean id="DataStatisticsResultPPIO" class="org.geoserver.wps.spatialstatistics.ppio.DataStatisticsResultPPIO" />
     <bean id="NearestNeighborIndexPPIO" class="org.geoserver.wps.spatialstatistics.ppio.NearestNeighborIndexPPIO" />
     <bean id="JoinCountStatisticsPPIO" class="org.geoserver.wps.spatialstatistics.ppio.JoinCountStatisticsPPIO" />
-    <bean id="LeesSPPIO" class="org.geoserver.wps.spatialstatistics.ppio.LeesSPPIO" />
-    <bean id="GearysCPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GearysCPPIO" />
     <bean id="HistogramGridCoveragePPIO" class="org.geoserver.wps.spatialstatistics.ppio.HistogramGridCoveragePPIO" />
     <bean id="QuadratResultPPIO" class="org.geoserver.wps.spatialstatistics.ppio.QuadratResultPPIO" />
-    <bean id="mapImagePPIO" class="org.geoserver.wps.spatialstatistics.ppio.MapImagePPIO" />
+    <bean id="MapImagePPIO" class="org.geoserver.wps.spatialstatistics.ppio.MapImagePPIO" />
 
     <!-- native format support --> 
     <bean id="FeatureCollectionGML311PPIO" class="org.geoserver.wps.spatialstatistics.ppio.FeatureCollectionGML311PPIO" />
     <bean id="GeometryGeoJSONPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GeometryGeoJSONPPIO" />
     <bean id="ExpressionPPIO" class="org.geoserver.wps.spatialstatistics.ppio.ExpressionPPIO" />
     <bean id="BoundingBoxDataPPIO" class="org.geoserver.wps.spatialstatistics.ppio.BoundingBoxDataPPIO" />
-    <!-- bean id="gridCoverageURLPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GridCoverageURLPPIO">
+    <!-- bean id="GridCoverageURLPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GridCoverageURLPPIO">
         <constructor-arg ref="geoServer" />
         <constructor-arg ref="wpsResourceManager" />
     </bean -->

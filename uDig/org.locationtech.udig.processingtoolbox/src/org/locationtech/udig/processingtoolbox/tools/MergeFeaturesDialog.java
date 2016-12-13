@@ -279,9 +279,9 @@ public class MergeFeaturesDialog extends AbstractGeoProcessingDialog implements
             }
 
             String outputName = FilenameUtils.getBaseName(locationView.getFile());
-            MergeOp op = new MergeOp();
+
+            MergeOp op = new MergeOp(outputName);
             op.setOutputDataStore(locationView.getDataStore());
-            op.setOutputTypeName(outputName);
 
             SimpleFeatureSource sfs = op.merge(fcList, templateFc, monitor);
             if (sfs != null) {
@@ -302,6 +302,12 @@ public class MergeFeaturesDialog extends AbstractGeoProcessingDialog implements
     static final class MergeOp extends GeneralOperation {
         static final Logger LOGGER = Logging.getLogger(MergeOp.class);
 
+        private String outputName = "Merge"; //$NON-NLS-1$
+
+        public MergeOp(String outputName) {
+            this.outputName = outputName;
+        }
+
         public SimpleFeatureSource merge(List<SimpleFeatureCollection> fcList,
                 SimpleFeatureCollection template, IProgressMonitor monitor) throws IOException {
             if (template == null) {
@@ -309,11 +315,10 @@ public class MergeFeaturesDialog extends AbstractGeoProcessingDialog implements
             }
 
             // prepare feature type
-            SimpleFeatureType destSchema = FeatureTypes.build(template, getOutputTypeName());
+            SimpleFeatureType destSchema = FeatureTypes.build(template, outputName);
 
             // prepare transactional feature store
             IFeatureInserter featureWriter = getFeatureWriter(destSchema);
-
             try {
                 for (SimpleFeatureCollection inputFeatures : fcList) {
                     monitor.worked(1);
@@ -324,7 +329,7 @@ public class MergeFeaturesDialog extends AbstractGeoProcessingDialog implements
                             SimpleFeature feature = featureIter.next();
 
                             // create feature and set geometry
-                            SimpleFeature newFeature = featureWriter.buildFeature(null);
+                            SimpleFeature newFeature = featureWriter.buildFeature();
                             for (AttributeDescriptor ad : destSchema.getAttributeDescriptors()) {
                                 if (ad instanceof GeometryDescriptor
                                         || inputSchema.indexOf(ad.getName()) == -1) {

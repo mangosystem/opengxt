@@ -105,20 +105,17 @@ public class MapUtils {
             SimpleFeatureSource sfs = (SimpleFeatureSource) layer.getResource(FeatureSource.class,
                     new NullProgressMonitor());
             Filter filter = Filter.INCLUDE;
-            if (ToolboxView.getSelectedOnly()) {
-                // apply selected features
-                if (layer.getFilter() != Filter.EXCLUDE) {
-                    filter = layer.getFilter();
-                }
+            if (ToolboxView.getSelectedOnly() && layer.getFilter() != Filter.EXCLUDE) {
+                filter = layer.getFilter();
             }
 
             // check layer & FeatureCollection's crs
-            SimpleFeatureCollection sfc = sfs.getFeatures(filter);
-            CoordinateReferenceSystem bCrs = sfc.getSchema().getCoordinateReferenceSystem();
-            if (!CRS.equalsIgnoreMetadata(layer.getCRS(), bCrs)) {
-                sfc = new ForceCRSFeatureCollection(sfc, layer.getCRS());
+            SimpleFeatureCollection features = sfs.getFeatures(filter);
+            CoordinateReferenceSystem crs = features.getSchema().getCoordinateReferenceSystem();
+            if (!CRS.equalsIgnoreMetadata(layer.getCRS(), crs)) {
+                features = new ForceCRSFeatureCollection(features, layer.getCRS());
             }
-            return sfc;
+            return features;
         } catch (IOException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
@@ -135,6 +132,20 @@ public class MapUtils {
         return null;
     }
 
+    public static GridCoverage2D getGridCoverage(ILayer layer) {
+        try {
+            if (layer.hasResource(GridCoverage2D.class)) {
+                return layer.getResource(GridCoverage2D.class, new NullProgressMonitor());
+            } else if (layer.getGeoResource().canResolve(GridCoverageReader.class)) {
+                GridCoverageReader reader = layer.getResource(GridCoverageReader.class, null);
+                return (GridCoverage2D) reader.read(null);
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.FINER, e.getMessage(), e);
+        }
+        return null;
+    }
+
     public static GridCoverage2D getGridCoverage(IMap map, String layerName) {
         for (ILayer layer : map.getMapLayers()) {
             if (layer.getName() != null && layer.getName().equals(layerName)) {
@@ -143,7 +154,7 @@ public class MapUtils {
                         return layer.getResource(GridCoverage2D.class, new NullProgressMonitor());
                     } else if (layer.getGeoResource().canResolve(GridCoverageReader.class)) {
                         GridCoverageReader reader = layer.getResource(GridCoverageReader.class,
-                                null);
+                                new NullProgressMonitor());
                         return (GridCoverage2D) reader.read(null);
                     }
                 } catch (IOException e) {
@@ -152,6 +163,15 @@ public class MapUtils {
             }
         }
         return null;
+    }
+
+    public static boolean isFeatureLayer(ILayer layer) {
+        return layer.hasResource(FeatureSource.class);
+    }
+
+    public static boolean isRatserLayer(ILayer layer) {
+        return layer.hasResource(GridCoverage2D.class)
+                || layer.getGeoResource().canResolve(GridCoverageReader.class);
     }
 
     public static ILayer getLayer(IMap map, String layerName) {

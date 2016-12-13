@@ -48,6 +48,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.spatialstatistics.core.StringHelper;
 import org.geotools.process.spatialstatistics.operations.TextColumn;
 import org.geotools.process.spatialstatistics.operations.TextfileToPointOperation;
+import org.geotools.process.spatialstatistics.storage.ShapeExportOperation;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
@@ -292,7 +293,7 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
         if (cboSource.getSelectionIndex() == -1) {
             return;
         }
-        
+
         if (StringHelper.isNullOrEmpty(delimiter)) {
             return;
         }
@@ -415,11 +416,14 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
 
             monitor.subTask(String.format(Messages.Task_Executing, windowTitle));
             TextfileToPointOperation process = new TextfileToPointOperation();
-            process.setOutputDataStore(locationView.getDataStore());
-            process.setOutputTypeName(outputName);
+            ShapeExportOperation exportOp = new ShapeExportOperation();
 
-            SimpleFeatureCollection features = process.execute(textFile, charset, delimiter,
-                    headerFirst, schema, sourceCRS, targetCRS);
+            exportOp.setOutputDataStore(locationView.getDataStore());
+            exportOp.setOutputTypeName(outputName);
+            SimpleFeatureCollection features = exportOp.execute(
+                    process.execute(textFile, charset, delimiter, headerFirst, schema, sourceCRS,
+                            targetCRS)).getFeatures();
+
             error = process.getError();
             monitor.worked(increment);
 

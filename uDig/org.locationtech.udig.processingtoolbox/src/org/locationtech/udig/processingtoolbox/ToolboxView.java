@@ -349,6 +349,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                 "org.geotools.process.spatialstatistics.GlobalGStatisticsProcessFactory");
         buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalGearysCProcessFactory");
         buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalLeesSProcessFactory");
+        buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalLeesLProcessFactory");
 
         // Local Spatial Autocorrelation: Spatial Cluster and Outlier
         TreeParent clusterTools = new TreeParent(Messages.ToolboxView_Cluster, null, null);
@@ -357,8 +358,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(clusterTools, Messages.MoranScatterPlotDialog_title, "MoranScatterPlotDialog");
         buildTool(clusterTools,
                 "org.geotools.process.spatialstatistics.LocalGStatisticsProcessFactory");
-        buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalLeesSProcessFactory");
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalGearysCProcessFactory");
+        buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalLeesSProcessFactory");
+        buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalLeesLProcessFactory");
 
         // Spatial Distribution
         TreeParent distributionTools = new TreeParent(Messages.ToolboxView_Distribution, null, null);

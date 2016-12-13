@@ -33,10 +33,6 @@ public class OutputStylerFactory {
     }
 
     public static OutputStyler getStyler(Object source, String styleName) {
-        // new KVP(Parameter.OPTIONS, "렌더러유형.필드명")
-        // 렌더러유형 = LISA, Density, Distance, Interpolation
-        // COType, GiZScore
-
         if (source instanceof SimpleFeatureCollection) {
             return new DefaultFeatureStyler(source);
         } else if (source instanceof GridCoverage2D) {

@@ -227,7 +227,9 @@ public class Messages extends NLS {
     public static String SpatialWeightsMatrixDialog_title;
     public static String SpatialWeightsMatrixDialog_description;
     public static String SpatialWeightsMatrixDialog_InputLayer;
+    public static String SpatialWeightsMatrixDialog_ValueField;
     public static String SpatialWeightsMatrixDialog_UniqueField;
+    public static String SpatialWeightsMatrixDialog_Self;
     public static String SpatialWeightsMatrixDialog_WeightType;
     public static String SpatialWeightsMatrixDialog_WeightTypeDistance;
     public static String SpatialWeightsMatrixDialog_WeightTypeContiguity;
@@ -239,7 +241,6 @@ public class Messages extends NLS {
     public static String SpatialWeightsMatrixDialog_kNearestNeighbors;
     public static String SpatialWeightsMatrixDialog_Numberofneighbors;
     public static String SpatialWeightsMatrixDialog_RowStandardization;
-    public static String SpatialWeightsMatrixDialog_Exponent;
     public static String SpatialWeightsMatrixDialog_Queen;
     public static String SpatialWeightsMatrixDialog_OrderofContiguity;
     public static String SpatialWeightsMatrixDialog_Rook;

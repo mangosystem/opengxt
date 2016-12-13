@@ -39,7 +39,6 @@ public class ToolboxSettingAction implements IViewActionDelegate {
             final ToolboxView tbView = (ToolboxView) view;
             final Shell shell = tbView.getSite().getShell();
             MessageDialog.openInformation(shell, "Cancelled", tbView.getTitle()); //$NON-NLS-1$
-
         }
     }
 

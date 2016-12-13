@@ -49,7 +49,7 @@ import org.geotools.process.spatialstatistics.GlobalMoransIProcess.MoransIProces
 import org.geotools.process.spatialstatistics.GlobalMoransIProcessFactory;
 import org.geotools.process.spatialstatistics.autocorrelation.LocalMoranIStatisticOperation;
 import org.geotools.process.spatialstatistics.core.SpatialEvent;
-import org.geotools.process.spatialstatistics.core.SpatialWeightMatrix;
+import org.geotools.process.spatialstatistics.core.WeightMatrixBuilder;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
@@ -116,7 +116,7 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
 
     private boolean crossCenter = true;
 
-    private SpatialWeightMatrix swMatrix;
+    private WeightMatrixBuilder swMatrix;
 
     private double[] zScore;
 
@@ -505,12 +505,11 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
                 double zScoreSum = 0d;
                 for (int j = 0; j < swMatrix.getEvents().size(); j++) {
                     SpatialEvent destE = swMatrix.getEvents().get(j);
-                    Coordinate destCoord = new Coordinate(destE.x, destE.y);
-                    if (destCoord.equals(coordinate))
+                    if (destE.getCoordinate().equals(coordinate))
                         continue;
 
                     if (spatialConcept == SpatialConcept.FixedDistance) {
-                        if (destE.getDistance(curE) > searchDistance) {
+                        if (destE.distance(curE) > searchDistance) {
                             continue;
                         }
                     }

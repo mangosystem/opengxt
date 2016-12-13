@@ -15,6 +15,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.media.jai.PlanarImage;
+import javax.media.jai.iterator.RectIter;
+import javax.media.jai.iterator.RectIterFactory;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -41,12 +45,14 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-import org.geotools.data.FeatureSource;
+import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.visitor.UniqueVisitor;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.text.ecql.ECQL;
+import org.geotools.process.spatialstatistics.core.SSUtils;
+import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
 import org.geotools.util.NullProgressListener;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
@@ -63,7 +69,7 @@ import org.opengis.filter.FilterFactory2;
 /**
  * Query Builder Dialog
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -74,12 +80,14 @@ public class QueryBuilderDialog extends Dialog {
     // Custom Function : http://docs.geotools.org/latest/userguide/library/main/filter.html
 
     private final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
-    
+
     private IMap map = null;
 
     private String initSQL = null;
 
-    private SimpleFeatureCollection source = null;
+    private ILayer source = null;
+
+    private boolean isFeatureLayer = true;
 
     private Table fieldTable, valueTable;
 
@@ -89,7 +97,7 @@ public class QueryBuilderDialog extends Dialog {
 
     private Text txtFilter;
 
-    public QueryBuilderDialog(Shell parentShell, SimpleFeatureCollection source) {
+    public QueryBuilderDialog(Shell parentShell, ILayer source) {
         super(parentShell);
 
         this.source = source;
@@ -97,7 +105,7 @@ public class QueryBuilderDialog extends Dialog {
                 | SWT.RESIZE);
     }
 
-    public QueryBuilderDialog(Shell parentShell, SimpleFeatureCollection source, String initSQL) {
+    public QueryBuilderDialog(Shell parentShell, ILayer source, String initSQL) {
         this(parentShell, source);
         this.initSQL = initSQL;
     }
@@ -154,10 +162,18 @@ public class QueryBuilderDialog extends Dialog {
                     MessageDialog.openInformation(getParentShell(), Messages.QueryDialog_Test, msg);
                     return;
                 }
+
                 try {
-                    int count = source.subCollection(ECQL.toFilter(txtFilter.getText())).size();
-                    String msg = "Evaluated Count: " + count;
-                    MessageDialog.openInformation(getParentShell(), Messages.QueryDialog_Test, msg);
+                    if (isFeatureLayer) {
+                        SimpleFeatureCollection features = MapUtils.getFeatures(source);
+                        Filter filter = ECQL.toFilter(txtFilter.getText());
+                        int count = features.subCollection(filter).size();
+                        MessageDialog.openInformation(getParentShell(), Messages.QueryDialog_Test,
+                                "Evaluated Count: " + count);
+                    } else {
+                        MessageDialog.openInformation(getParentShell(), Messages.QueryDialog_Test,
+                                "Ratser layer not yet available!");
+                    }
                 } catch (CQLException e) {
                     MessageDialog.openInformation(getParentShell(), Messages.QueryDialog_Test,
                             e.getLocalizedMessage());
@@ -204,14 +220,16 @@ public class QueryBuilderDialog extends Dialog {
             widget.createLabel(grpCombo, Messages.QueryDialog_Layer, Messages.QueryDialog_Layer, 1);
             cboLayer = widget.createCombo(grpCombo, 1, true);
             for (ILayer layer : map.getMapLayers()) {
-                if (layer.hasResource(FeatureSource.class)) {
-                    cboLayer.add(layer.getName());
+                if (layer.getName() == null) {
+                    continue;
                 }
+                cboLayer.add(layer.getName());
             }
             cboLayer.addModifyListener(new ModifyListener() {
                 @Override
                 public void modifyText(ModifyEvent e) {
-                    source = MapUtils.getFeatures(map, cboLayer.getText());
+                    source = MapUtils.getLayer(map, cboLayer.getText());
+                    isFeatureLayer = MapUtils.isFeatureLayer(source);
                     updateFields();
                 }
             });
@@ -264,7 +282,6 @@ public class QueryBuilderDialog extends Dialog {
                     updateExpression(selection);
                 }
             }
-
         });
 
         GridData btnLayout = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
@@ -297,9 +314,8 @@ public class QueryBuilderDialog extends Dialog {
 
         // create button
         btnLayout = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
-        final String[] oprs = new String[] { 
-                "=", "<>", "<", ">", "LIKE", "ILIKE", 
-                "%", "<=", ">=", "AND", "OR", "NOT", "IS", "NULL" };
+        final String[] oprs = new String[] { "=", "<>", "<", ">", "LIKE", "ILIKE", "%", "<=", ">=",
+                "AND", "OR", "NOT", "IS", "NULL" };
         Button[] btnOp = new Button[oprs.length];
         for (int idx = 0; idx < oprs.length; idx++) {
             btnOp[idx] = widget.createButton(grpOpr, oprs[idx], oprs[idx], btnLayout);
@@ -364,14 +380,12 @@ public class QueryBuilderDialog extends Dialog {
     private void resizeTableColumn() {
         fieldTable.setRedraw(false);
         for (TableColumn column : fieldTable.getColumns()) {
-            // column.setWidth(fieldTable.getSize().x - fieldTable.getBorderWidth());
             column.setWidth(fieldTable.getSize().x + 35);
         }
         fieldTable.setRedraw(true);
 
         valueTable.setRedraw(false);
         for (TableColumn column : valueTable.getColumns()) {
-            // column.setWidth(valueTable.getSize().x - (2 * fieldTable.getBorderWidth()));
             column.setWidth(valueTable.getSize().x + 35);
         }
         valueTable.setRedraw(true);
@@ -380,13 +394,19 @@ public class QueryBuilderDialog extends Dialog {
     private void updateFields() {
         fieldTable.removeAll();
         valueTable.removeAll();
-        for (AttributeDescriptor descriptor : source.getSchema().getAttributeDescriptors()) {
-            if (descriptor instanceof GeometryDescriptor) {
-                continue;
-            } else {
-                TableItem item = new TableItem(fieldTable, SWT.NULL);
-                item.setText(descriptor.getLocalName());
+
+        if (isFeatureLayer) {
+            for (AttributeDescriptor descriptor : source.getSchema().getAttributeDescriptors()) {
+                if (descriptor instanceof GeometryDescriptor) {
+                    continue;
+                } else {
+                    TableItem item = new TableItem(fieldTable, SWT.NULL);
+                    item.setText(descriptor.getLocalName());
+                }
             }
+        } else {
+            TableItem item = new TableItem(fieldTable, SWT.NULL);
+            item.setText("Value");
         }
     }
 
@@ -396,22 +416,60 @@ public class QueryBuilderDialog extends Dialog {
             @Override
             @SuppressWarnings({ "unchecked", "rawtypes" })
             public void run() {
-                String attribute = fieldTable.getSelection()[0].getText();
-                UniqueVisitor visitor = new UniqueVisitor(attribute);
                 try {
-                    // UniqueVisitor occurs npe if property has a null value
-                    Filter filter = ff.not(ff.isNull(ff.property(attribute)));
-                    if (useSample) {
-                        // TODO:  visitor.setMaxFeatures(1000);
-                        source.subCollection(filter).accepts(visitor, new NullProgressListener());
+                    final int max_sample = 1000;
+                    boolean isNumeric = true;
+                    List values = new ArrayList();
+
+                    if (isFeatureLayer) {
+                        String attribute = fieldTable.getSelection()[0].getText();
+                        
+                        UniqueVisitor visitor = new UniqueVisitor(attribute);
+                        // UniqueVisitor occurs npe if property has a null value
+                        Filter filter = ff.not(ff.isNull(ff.property(attribute)));
+                        if (useSample) {
+                            visitor.setMaxFeatures(max_sample);
+                        }
+
+                        SimpleFeatureCollection features = MapUtils.getFeatures(source);
+                        isNumeric = isNumeric(features.getSchema(), attribute);
+                        features.subCollection(filter).accepts(visitor, new NullProgressListener());
+                        values = new ArrayList(visitor.getUnique());
                     } else {
-                        source.subCollection(filter).accepts(visitor, new NullProgressListener());
+                        // Raster
+                        GridCoverage2D coverage = MapUtils.getGridCoverage(source);
+                        if (coverage == null) {
+                            return;
+                        }
+
+                        double noData = RasterHelper.getNoDataValue(coverage);
+                        PlanarImage image = (PlanarImage) coverage.getRenderedImage();
+                        RectIter iter = RectIterFactory.create(image, image.getBounds());
+
+                        int count = 0;
+                        iter.startLines();
+                        while (!iter.finishedLines()) {
+                            iter.startPixels();
+                            while (!iter.finishedPixels()) {
+                                double sampleValue = iter.getSampleDouble(0);
+                                if (!SSUtils.compareDouble(noData, sampleValue)) {
+                                    if (!values.contains(sampleValue)) {
+                                        values.add(sampleValue);
+                                    }
+                                    count++;
+                                }
+                                iter.nextPixel();
+                            }
+
+                            if (useSample && count > max_sample) {
+                                break;
+                            }
+                            iter.nextLine();
+                        }
                     }
 
-                    boolean isNumeric = isNumeric(source.getSchema(), attribute);
-                    List sortedList = new ArrayList(visitor.getUnique());
-                    Collections.sort(sortedList);
-                    for (Object value : sortedList) {
+                    Collections.sort(values);
+                    for (Object value : values) {
                         TableItem item = new TableItem(valueTable, SWT.NULL);
                         if (isNumeric) {
                             item.setText(value.toString());

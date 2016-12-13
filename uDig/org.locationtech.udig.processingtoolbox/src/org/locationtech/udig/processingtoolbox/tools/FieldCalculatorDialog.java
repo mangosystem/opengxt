@@ -10,6 +10,7 @@
 package org.locationtech.udig.processingtoolbox.tools;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -23,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FilenameUtils;
@@ -120,7 +122,7 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
     private ILayer layer = null;
 
     private SimpleFeatureCollection source = null;
-    
+
     private String geom_field = null;
 
     private Button btnClear, btnTest, chkSelected;
@@ -532,11 +534,9 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
             monitor.worked(increment);
 
             // execute process
-            FieldCalculatorOperation process = new FieldCalculatorOperation();
-
-            outputTypeName = process.getOutputTypeName();
+            String outputName = getUniqueName(folder, "calc_");
+            FieldCalculatorOperation process = new FieldCalculatorOperation(outputName);
             process.setOutputDataStore(outputDataStore);
-            process.setOutputTypeName(process.getOutputTypeName());
             SimpleFeatureCollection features = process.execute(source, expression, field,
                     fieldBinding, length, progress.newChild(70));
 
@@ -559,7 +559,7 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
 
                 File tempFile = new File(dbfFile.getParent(), "fc_" + df.format(now) + ".dbf");
                 if (dbfFile.renameTo(tempFile)) {
-                    File newFile = new File(folder, process.getOutputTypeName() + ".dbf");
+                    File newFile = new File(folder, outputName + ".dbf");
                     org.apache.commons.io.FileUtils.copyFile(newFile, dbfFile);
                     tempFile.delete();
                     updateFields(layer.getSchema());
@@ -589,16 +589,46 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
         }
     }
 
+    private String getUniqueName(final String directory, final String prefix) {
+        File[] files = new File(directory).listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                name = name.toLowerCase();
+                return name.startsWith(prefix.toLowerCase()) && name.endsWith(".shp");
+            }
+        });
+
+        int max = 1;
+        if (files.length > 0) {
+            for (File file : files) {
+                try {
+                    String name = file.getName().toLowerCase().substring(5);
+                    name = name.substring(0, name.length() - 4);
+                    int num = Integer.parseInt(name);
+                    max = Math.max(max, num);
+                } catch (NumberFormatException e) {
+                    LOGGER.log(Level.FINER, e.getMessage());
+                }
+            }
+        }
+
+        return prefix + max;
+    }
+
     static final class FieldCalculatorOperation extends GeneralOperation {
         protected static final Logger LOGGER = Logging.getLogger(FieldCalculatorOperation.class);
+
+        private String outputName = "Merge"; //$NON-NLS-1$
+
+        public FieldCalculatorOperation(String outputName) {
+            this.outputName = outputName;
+        }
 
         public SimpleFeatureCollection execute(SimpleFeatureCollection features,
                 Expression expression, String field, Class<?> fieldBinding, int length,
                 IProgressMonitor monitor) throws IOException {
-            String typeName = getOutputTypeName(); // features.getSchema().getTypeName();
             field = FeatureTypes.validateProperty(features.getSchema(), field);
 
-            SimpleFeatureType schema = FeatureTypes.build(features.getSchema(), typeName);
+            SimpleFeatureType schema = FeatureTypes.build(features.getSchema(), outputName);
             if (FeatureTypes.existProeprty(schema, field)) {
                 AttributeDescriptor attr = schema.getDescriptor(field);
                 fieldBinding = attr.getType().getBinding();
@@ -622,7 +652,7 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
                         continue;
                     }
 
-                    SimpleFeature newFeature = featureWriter.buildFeature(null);
+                    SimpleFeature newFeature = featureWriter.buildFeature();
                     featureWriter.copyAttributes(feature, newFeature, true);
 
                     // expression

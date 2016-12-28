@@ -40,6 +40,7 @@ import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
+import org.opengis.filter.expression.PropertyName;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
@@ -131,28 +132,31 @@ public class SSStyleBuilder {
         FeatureTypeStyle featureTypeStyle = sf.createFeatureTypeStyle();
         featureTypeStyle.setName(styleName);
 
-        for (int k = 0; k <= classBreaks.length; k++) {
+        PropertyName property = ff.property(propertyName);
+        for (int k = 0, length = classBreaks.length - 1; k <= classBreaks.length; k++) {
             Fill fill = sf.createFill(ff.literal(colorList[k]), ff.literal(opacity));
             Symbolizer symbolizer = sf.createPolygonSymbolizer(lineStroke, fill, geometryField);
             if (classDescs != null && classDescs.length > k) {
                 symbolizer.setName(classDescs[k]);
             }
-
+            
             Filter filter = null;
             if (k == 0) {
-                filter = ff.less(ff.property(propertyName), ff.literal(classBreaks[k]));
+                filter = ff.less(property, ff.literal(classBreaks[k]));
             } else if (k >= classBreaks.length) {
-                filter = ff.greater(ff.property(propertyName), ff.literal(classBreaks[k - 1]));
+                filter = ff.greater(property, ff.literal(classBreaks[k - 1]));
             } else {
-                filter = ff.between(ff.property(propertyName), ff.literal(classBreaks[k - 1]),
-                        ff.literal(classBreaks[k]));
+                Filter lower = ff.greaterOrEqual(property, ff.literal(classBreaks[k - 1]));
+                Filter upper = k == length ? ff.lessOrEqual(property, ff.literal(classBreaks[k]))
+                        : ff.less(property, ff.literal(classBreaks[k]));
+                filter = ff.and(lower, upper);
             }
 
             Rule rule = sf.createRule();
             rule.setName(classDescs[k]);
             rule.setFilter(filter);
-
             rule.symbolizers().add(symbolizer);
+            
             featureTypeStyle.rules().add(rule);
         }
 

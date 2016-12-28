@@ -47,8 +47,6 @@ import org.opengis.feature.simple.SimpleFeatureType;
 public class FeatureInserter implements IFeatureInserter {
     protected static final Logger LOGGER = Logging.getLogger(FeatureInserter.class);
 
-    static int FLUSH_INTERVAL = 2500;
-
     int featureCount = 0;
 
     Boolean isMemoryDataStore = Boolean.FALSE;
@@ -59,7 +57,7 @@ public class FeatureInserter implements IFeatureInserter {
 
     ListFeatureCollection featureBuffer;
 
-    int flushInterval = FLUSH_INTERVAL;
+    int flushInterval = 2500;
 
     SimpleFeatureStore sfStore = null;
 
@@ -72,11 +70,6 @@ public class FeatureInserter implements IFeatureInserter {
     Transaction transaction;
 
     List<FieldMap> fieldMaps = new ArrayList<FieldMap>();
-
-    @Override
-    public FeatureWriter<SimpleFeatureType, SimpleFeature> getFeatureWriter() {
-        return writer;
-    }
 
     public FeatureInserter(DataStore dataStore, SimpleFeatureType featureType) {
         try {
@@ -108,6 +101,11 @@ public class FeatureInserter implements IFeatureInserter {
         }
 
         this.typeName = featureStore.getSchema().getTypeName();
+    }
+
+    @Override
+    public FeatureWriter<SimpleFeatureType, SimpleFeature> getFeatureWriter() {
+        return writer;
     }
 
     @Override

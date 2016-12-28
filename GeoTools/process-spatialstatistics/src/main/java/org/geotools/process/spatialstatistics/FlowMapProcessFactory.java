@@ -46,7 +46,7 @@ public class FlowMapProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "FlowMap";
 
     /*
-     * FlowMap(SimpleFeatureCollection inputFeatures, Expression odValue, Expression doValue, Double maxSize): SimpleFeatureCollection
+     * FlowMap(SimpleFeatureCollection lineFeatures, Expression odValue, Expression doValue, Double maxSize): SimpleFeatureCollection
      */
 
     public FlowMapProcessFactory() {

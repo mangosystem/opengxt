@@ -121,6 +121,7 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
                 .getSimpleShapeType(geomDesc.getType().getBinding());
 
         FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+        PropertyName property = ff.property(propertyName);
         for (int k = 0, length = classBreaks.length - 2; k <= length; k++) {
             final Color uvColor = colors[k];
 
@@ -154,8 +155,7 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
                 symbolizer = sf.createPolygonSymbolizer(outlineStroke, fill, geometryPropertyName);
                 break;
             }
-
-            PropertyName property = ff.property(propertyName);
+            
             Filter lower = ff.greaterOrEqual(property, ff.literal(classBreaks[k]));
             Filter upper = k == length ? ff.lessOrEqual(property, ff.literal(classBreaks[k + 1]))
                     : ff.less(property, ff.literal(classBreaks[k + 1]));

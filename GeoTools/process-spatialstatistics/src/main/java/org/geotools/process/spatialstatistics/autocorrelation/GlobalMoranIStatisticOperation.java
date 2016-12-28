@@ -43,6 +43,7 @@ public class GlobalMoranIStatisticOperation extends AbstractStatisticsOperation 
         this.setDistanceType(DistanceMethod.Euclidean);
         this.setSpatialConceptType(SpatialConcept.InverseDistance);
         this.setStandardizationType(StandardizationMethod.None);
+        this.setSelfNeighbors(false);
     }
 
     public MoransI execute(SimpleFeatureCollection inputFeatures, String inputField) {

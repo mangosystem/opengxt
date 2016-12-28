@@ -207,6 +207,7 @@ public class GraduatedSymbolStyleBuilder extends AbstractFeatureStyleBuilder {
         }
 
         DuplicatingStyleVisitor styleVisitor = new DuplicatingStyleVisitor();
+        PropertyName property = ff.property(propertyName);
         for (int k = 0, length = classBreaks.length - 2; k <= length; k++) {
             float size = minSize + (step * k);
 
@@ -233,7 +234,6 @@ public class GraduatedSymbolStyleBuilder extends AbstractFeatureStyleBuilder {
                 symbolizer = sf.createLineSymbolizer(copy, geometryPropertyName);
             }
             
-            PropertyName property = ff.property(propertyName);
             Filter lower = ff.greaterOrEqual(property, ff.literal(classBreaks[k]));
             Filter upper = k == length ? ff.lessOrEqual(property, ff.literal(classBreaks[k + 1]))
                     : ff.less(property, ff.literal(classBreaks[k + 1]));

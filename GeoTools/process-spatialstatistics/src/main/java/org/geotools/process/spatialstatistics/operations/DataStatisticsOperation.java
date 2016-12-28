@@ -237,7 +237,7 @@ public class DataStatisticsOperation extends GeneralOperation {
             for (DataStatisticsItem ex : list) {
                 sb.append(ex.toString()).append(separator);
             }
-            return sb.toString();
+            return sb.toString().trim();
         }
 
         // WPS PPIO output XML for Statistics Process Result
@@ -439,10 +439,9 @@ public class DataStatisticsOperation extends GeneralOperation {
                 sb.append("Mean: ").append(mean).append(separator);
                 sb.append("Variance: ").append(variance).append(separator);
                 sb.append("StandardDeviation: ").append(standardDeviation).append(separator);
-                sb.append("CoefficientOfVariance: ").append(coefficientOfVariance)
-                        .append(separator);
+                sb.append("CoefficientOfVariance: ").append(coefficientOfVariance);
                 if (noData != null) {
-                    sb.append("NoData: ").append(noData).append(separator);
+                    sb.append(separator).append("NoData: ").append(noData);
                 }
 
                 return sb.toString();

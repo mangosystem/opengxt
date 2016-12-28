@@ -117,11 +117,23 @@ public class WeightMatrix {
         items.get(primaryID).put(secondaryID, distance);
     }
 
+    public boolean isNeighbor(SpatialEvent source, SpatialEvent target) {
+        return isNeighbor(source.id, target.id);
+    }
+
     public boolean isNeighbor(Object primaryID, Object secondaryID) {
         if (items.containsKey(primaryID)) {
             return items.get(primaryID).containsKey(secondaryID);
         }
         return false;
+    }
+
+    public double getWeight(SpatialEvent source, SpatialEvent target) {
+        return getWeight(source.id, target.id);
+    }
+
+    public double getWeight(Object primaryID, Object secondaryID) {
+        return isNeighbor(primaryID, secondaryID) ? 1.0 : 0.0;
     }
 
     public void save(File outputFile, Charset charset) throws IOException {

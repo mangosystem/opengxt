@@ -126,7 +126,7 @@ public class GlobalGStatisticsProcessFactory extends SpatialStatisticsProcessFac
         parameterInfo.put(distanceMethod.key, distanceMethod);
         parameterInfo.put(standardization.key, standardization);
         parameterInfo.put(searchDistance.key, searchDistance);
-        parameterInfo.put(selfNeighbors.key, selfNeighbors);
+        // parameterInfo.put(selfNeighbors.key, selfNeighbors);
         return parameterInfo;
     }
 

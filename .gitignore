@@ -68,3 +68,8 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
+
+# uDig
+uDig/org.locationtech.udig.processingtoolbox-site/*.jar
+uDig/org.locationtech.udig.processingtoolbox-site/features/*.jar
+uDig/org.locationtech.udig.processingtoolbox-site/plugins/*.jar

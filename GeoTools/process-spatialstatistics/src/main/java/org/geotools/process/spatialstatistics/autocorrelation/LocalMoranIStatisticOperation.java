@@ -61,6 +61,10 @@ public class LocalMoranIStatisticOperation extends AbstractStatisticsOperation {
         this.setSelfNeighbors(false);
     }
 
+    public double[] getIndex() {
+        return dcIndex;
+    }
+
     public double[] getZScore() {
         return dcZScore;
     }

@@ -130,7 +130,7 @@ public class StandardizedScoresOperation extends GeneralOperation {
         } catch (Exception e) {
             featureWriter.rollback(e);
         } finally {
-            featureWriter.close();
+            featureWriter.close(featureIter);
         }
 
         return featureWriter.getFeatureCollection();

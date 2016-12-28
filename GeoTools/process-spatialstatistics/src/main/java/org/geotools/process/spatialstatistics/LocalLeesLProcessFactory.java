@@ -115,7 +115,7 @@ public class LocalLeesLProcessFactory extends SpatialStatisticsProcessFactory {
     /** selfNeighbors */
     public static final Parameter<Boolean> selfNeighbors = new Parameter<Boolean>("selfNeighbors",
             Boolean.class, getResource("LocalLeesL.selfNeighbors.title"),
-            getResource("LocalLeesL.selfNeighbors.description"), false, 0, 1, Boolean.FALSE, null);
+            getResource("LocalLeesL.selfNeighbors.description"), false, 0, 1, Boolean.TRUE, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

@@ -73,7 +73,7 @@ public class Params {
         Object param = input.get(parameter.key);
 
         if (param == null) {
-            return defaultValue; // input.get(parameter.sample);
+            return defaultValue; // parameter.sample
         }
 
         // check type
@@ -90,7 +90,7 @@ public class Params {
         Object param = input.get(parameter.key);
 
         if (param == null) {
-            return input.get(parameter.sample);
+            return parameter.sample;
         }
 
         // check type

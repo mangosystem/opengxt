@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 import org.geotools.data.DataStore;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.directory.DirectoryDataStore;
-import org.geotools.data.memory.MemoryDataStore;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
@@ -32,8 +31,8 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.process.spatialstatistics.storage.FeatureInserter;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.process.spatialstatistics.storage.MemoryFeatureInserter;
 import org.geotools.util.logging.Logging;
-import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
@@ -62,9 +61,6 @@ public abstract class GeneralOperation {
     }
 
     public DataStore getOutputDataStore() {
-        if (outputDataStore == null) {
-            outputDataStore = new MemoryDataStore();
-        }
         return outputDataStore;
     }
 
@@ -78,30 +74,26 @@ public abstract class GeneralOperation {
     }
 
     protected IFeatureInserter getFeatureWriter(SimpleFeatureType schema) throws IOException {
-        // create schema
-        SimpleFeatureStore featureStore = null;
-        getOutputDataStore().createSchema(schema);
-
-        final String typeName = schema.getTypeName();
-        SimpleFeatureSource featureSource = getOutputDataStore().getFeatureSource(typeName);
-        if (featureSource instanceof SimpleFeatureStore) {
-            featureStore = (SimpleFeatureStore) featureSource;
-            featureStore.setTransaction(new DefaultTransaction(typeName));
+        if (getOutputDataStore() == null) {
+            return new MemoryFeatureInserter(schema);
         } else {
-            LOGGER.log(Level.WARNING, typeName + " does not support SimpleFeatureStore interface!");
-            featureStore = (SimpleFeatureStore) featureSource;
+            // create schema
+            SimpleFeatureStore featureStore = null;
+            getOutputDataStore().createSchema(schema);
+
+            final String typeName = schema.getTypeName();
+            SimpleFeatureSource featureSource = getOutputDataStore().getFeatureSource(typeName);
+            if (featureSource instanceof SimpleFeatureStore) {
+                featureStore = (SimpleFeatureStore) featureSource;
+                featureStore.setTransaction(new DefaultTransaction(typeName));
+            } else {
+                LOGGER.log(Level.WARNING, typeName
+                        + " does not support SimpleFeatureStore interface!");
+                featureStore = (SimpleFeatureStore) featureSource;
+            }
+
+            return new FeatureInserter(featureStore);
         }
-
-        return new FeatureInserter(featureStore);
-    }
-
-    protected void insertFeature(IFeatureInserter featureWriter, SimpleFeature origFeature,
-            Geometry geometry) throws IOException {
-        SimpleFeature newFeature = featureWriter.buildFeature();
-        featureWriter.copyAttributes(origFeature, newFeature, false);
-        newFeature.setDefaultGeometry(geometry);
-
-        featureWriter.write(newFeature);
     }
 
     protected Filter getIntersectsFilter(String geomField, Geometry searchGeometry) {

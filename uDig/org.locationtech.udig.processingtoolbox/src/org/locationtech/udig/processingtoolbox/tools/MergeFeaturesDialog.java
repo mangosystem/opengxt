@@ -176,7 +176,7 @@ public class MergeFeaturesDialog extends AbstractGeoProcessingDialog implements
     private void fillLayersToTable(IMap map, Table table, VectorLayerType layerType) {
         table.removeAll();
         for (ILayer layer : map.getMapLayers()) {
-            if (layer.hasResource(FeatureSource.class)) {
+            if (layer.getName() != null && layer.hasResource(FeatureSource.class)) {
                 GeometryDescriptor descriptor = layer.getSchema().getGeometryDescriptor();
                 Class<?> geometryBinding = descriptor.getType().getBinding();
                 String crs = descriptor.getCoordinateReferenceSystem().toWKT();

@@ -20,6 +20,45 @@ import org.eclipse.osgi.util.NLS;
  */
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.locationtech.udig.processingtoolbox.internal.messages"; //$NON-NLS-1$
+
+    public static String AmoebaWizardDialog_title;
+    public static String AmoebaWizardDialog_description;
+
+    public static String AmoebaWizardFirstPage_title;
+    public static String AmoebaWizardFirstPage_description;
+    public static String AmoebaWizardFirstPage_Algorithm;
+    public static String AmoebaWizardFirstPage_Layer;
+    public static String AmoebaWizardFirstPage_Field;
+    public static String AmoebaWizardFirstPage_Conceptualization;
+    public static String AmoebaWizardFirstPage_DistanceMethod;
+    public static String AmoebaWizardFirstPage_Standardization;
+    public static String AmoebaWizardFirstPage_DistanceBand;
+    public static String AmoebaWizardFirstPage_CalcuateStatistics;
+    public static String AmoebaWizardFirstPage_LocalStatistics;
+    public static String AmoebaWizardFirstPage_ClusteringCriteria;
+    public static String AmoebaWizardFirstPage_ClusteringField;
+    public static String AmoebaWizardFirstPage_GroupTitle;
+    public static String AmoebaWizardFirstPage_Maximization;
+    public static String AmoebaWizardFirstPage_Minimization;
+    public static String AmoebaWizardFirstPage_CustomCriteria;
+
+    public static String AmoebaWizardSecondPage_title;
+    public static String AmoebaWizardSecondPage_description;
+    public static String AmoebaWizardSecondPage_GeneralOptions;
+    public static String AmoebaWizardSecondPage_SeedOptions;
+    public static String AmoebaWizardSecondPage_OverlapClusterOptions;
+    public static String AmoebaWizardSecondPage_ExclusionOptions;
+    public static String AmoebaWizardSecondPage_UseOnlyMax;
+    public static String AmoebaWizardSecondPage_SortDescending;
+    public static String AmoebaWizardSecondPage_AllCells;
+    public static String AmoebaWizardSecondPage_SelectedCells;
+    public static String AmoebaWizardSecondPage_CustomCells;
+    public static String AmoebaWizardSecondPage_OverlapRemove;
+    public static String AmoebaWizardSecondPage_OverlapAvoid;
+    public static String AmoebaWizardSecondPage_ExclusionFilter;
+    public static String AmoebaWizardSecondPage_ExclusionClusters;
+    public static String AmoebaWizardSecondPage_EliminateExclusion;
+    public static String AmoebaWizardSecondPage_EliminateSingleCluster;
     
     public static String Feature_Name;
     public static String Feature_Type;

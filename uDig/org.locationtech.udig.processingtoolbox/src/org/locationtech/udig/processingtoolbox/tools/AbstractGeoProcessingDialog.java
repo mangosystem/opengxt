@@ -225,7 +225,7 @@ public abstract class AbstractGeoProcessingDialog extends TitleAreaDialog {
     protected void fillLayers(IMap map, Combo combo, VectorLayerType layerType) {
         combo.removeAll();
         for (ILayer layer : map.getMapLayers()) {
-            if (layer.hasResource(FeatureSource.class)) {
+            if (layer.getName() != null && layer.hasResource(FeatureSource.class)) {
                 GeometryDescriptor descriptor = layer.getSchema().getGeometryDescriptor();
                 Class<?> geometryBinding = descriptor.getType().getBinding();
                 switch (layerType) {

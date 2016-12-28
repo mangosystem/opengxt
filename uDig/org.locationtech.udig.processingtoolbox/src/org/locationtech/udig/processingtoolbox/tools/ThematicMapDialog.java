@@ -126,7 +126,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
 
         // Ramp
         uiBuilder.createLabel(container, Messages.ThematicMapDialog_ColorRamp, EMPTY, image, 1);
-        cboColorRamp = uiBuilder.createCombo(container, 2, true);
+        cboColorRamp = uiBuilder.createCombo(container, 5, true);
 
         // Reverse color ramp
         uiBuilder.createLabel(container, EMPTY, EMPTY, null, 1);

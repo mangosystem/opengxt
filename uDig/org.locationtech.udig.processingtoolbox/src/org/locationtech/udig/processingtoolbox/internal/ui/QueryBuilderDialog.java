@@ -85,7 +85,9 @@ public class QueryBuilderDialog extends Dialog {
 
     private String initSQL = null;
 
-    private ILayer source = null;
+    private ILayer layer = null;
+
+    private SimpleFeatureCollection features = null;
 
     private boolean isFeatureLayer = true;
 
@@ -97,17 +99,27 @@ public class QueryBuilderDialog extends Dialog {
 
     private Text txtFilter;
 
-    public QueryBuilderDialog(Shell parentShell, ILayer source) {
+    public QueryBuilderDialog(Shell parentShell, ILayer layer) {
         super(parentShell);
 
-        this.source = source;
+        this.layer = layer;
+        this.features = MapUtils.getFeatures(layer);
+        this.isFeatureLayer = MapUtils.isFeatureLayer(layer);
         setShellStyle(SWT.CLOSE | SWT.MIN | SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL
                 | SWT.RESIZE);
     }
 
-    public QueryBuilderDialog(Shell parentShell, ILayer source, String initSQL) {
-        this(parentShell, source);
+    public QueryBuilderDialog(Shell parentShell, ILayer layer, String initSQL) {
+        this(parentShell, layer);
         this.initSQL = initSQL;
+    }
+
+    public QueryBuilderDialog(Shell parentShell, SimpleFeatureCollection features) {
+        super(parentShell);
+        this.features = features;
+        this.isFeatureLayer = true;
+        setShellStyle(SWT.CLOSE | SWT.MIN | SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL
+                | SWT.RESIZE);
     }
 
     public QueryBuilderDialog(Shell parentShell, IMap map) {
@@ -157,15 +169,8 @@ public class QueryBuilderDialog extends Dialog {
         btnTest.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent event) {
-                if (source == null) {
-                    String msg = "No Active Layer!";
-                    MessageDialog.openInformation(getParentShell(), Messages.QueryDialog_Test, msg);
-                    return;
-                }
-
                 try {
                     if (isFeatureLayer) {
-                        SimpleFeatureCollection features = MapUtils.getFeatures(source);
                         Filter filter = ECQL.toFilter(txtFilter.getText());
                         int count = features.subCollection(filter).size();
                         MessageDialog.openInformation(getParentShell(), Messages.QueryDialog_Test,
@@ -228,8 +233,13 @@ public class QueryBuilderDialog extends Dialog {
             cboLayer.addModifyListener(new ModifyListener() {
                 @Override
                 public void modifyText(ModifyEvent e) {
-                    source = MapUtils.getLayer(map, cboLayer.getText());
-                    isFeatureLayer = MapUtils.isFeatureLayer(source);
+                    layer = MapUtils.getLayer(map, cboLayer.getText());
+                    isFeatureLayer = MapUtils.isFeatureLayer(layer);
+                    if (isFeatureLayer) {
+                        features = MapUtils.getFeatures(layer);
+                    } else {
+                        features = null;
+                    }
                     updateFields();
                 }
             });
@@ -243,9 +253,6 @@ public class QueryBuilderDialog extends Dialog {
 
         fieldTable = widget.createListTable(grpFields,
                 new String[] { Messages.QueryDialog_Fields }, 1);
-        if (source != null) {
-            updateFields();
-        }
 
         // select event
         fieldTable.addSelectionListener(new SelectionAdapter() {
@@ -368,11 +375,15 @@ public class QueryBuilderDialog extends Dialog {
             txtFilter.setText(initSQL);
         }
 
-        if (source == null && cboLayer.getItemCount() > 0) {
+        if (map != null && layer == null && cboLayer.getItemCount() > 0) {
             cboLayer.select(0);
         }
         area.pack();
         resizeTableColumn();
+
+        if (features != null) {
+            updateFields();
+        }
 
         return area;
     }
@@ -395,8 +406,8 @@ public class QueryBuilderDialog extends Dialog {
         fieldTable.removeAll();
         valueTable.removeAll();
 
-        if (isFeatureLayer) {
-            for (AttributeDescriptor descriptor : source.getSchema().getAttributeDescriptors()) {
+        if (isFeatureLayer && features != null) {
+            for (AttributeDescriptor descriptor : features.getSchema().getAttributeDescriptors()) {
                 if (descriptor instanceof GeometryDescriptor) {
                     continue;
                 } else {
@@ -423,7 +434,7 @@ public class QueryBuilderDialog extends Dialog {
 
                     if (isFeatureLayer) {
                         String attribute = fieldTable.getSelection()[0].getText();
-                        
+
                         UniqueVisitor visitor = new UniqueVisitor(attribute);
                         // UniqueVisitor occurs npe if property has a null value
                         Filter filter = ff.not(ff.isNull(ff.property(attribute)));
@@ -431,13 +442,12 @@ public class QueryBuilderDialog extends Dialog {
                             visitor.setMaxFeatures(max_sample);
                         }
 
-                        SimpleFeatureCollection features = MapUtils.getFeatures(source);
                         isNumeric = isNumeric(features.getSchema(), attribute);
                         features.subCollection(filter).accepts(visitor, new NullProgressListener());
                         values = new ArrayList(visitor.getUnique());
                     } else {
                         // Raster
-                        GridCoverage2D coverage = MapUtils.getGridCoverage(source);
+                        GridCoverage2D coverage = MapUtils.getGridCoverage(layer);
                         if (coverage == null) {
                             return;
                         }

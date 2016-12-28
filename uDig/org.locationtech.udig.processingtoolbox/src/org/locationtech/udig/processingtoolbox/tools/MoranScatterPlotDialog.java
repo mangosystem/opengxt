@@ -476,8 +476,10 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
         XYSeries xySeries = new XYSeries(features.getSchema().getTypeName());
         minMaxVisitor.reset();
 
+        String typeName = features.getSchema().getTypeName();
         SimpleFeatureIterator featureIter = features.features();
         try {
+            int i = 0;
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
@@ -487,41 +489,33 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
                 // variable (that is, they’ve been standardised to their Z scores, with a mean of
                 // zero, and a standard deviation of 1.)
                 Double x = Converters.convert(feature.getAttribute("LMiZScore"), Double.class);
-                if (x == null) {
+                if (x == null || x.isInfinite() || x.isNaN()) {
                     continue;
                 }
 
-                // TODO: recalculate local moran's i
                 // The Y axis represents the standardised values of the neighbouring values around
                 // your point of interest, that is the lagged values. These are calculated according
                 // to the spatial weights matrix that you specify. So, for instance, if you specify
                 // a contiguous spatial weights matrix, with a first order queen contiguity, the
                 // value of the y axis represents the mean value of the variable for all of the
                 // areas that share a border with the area of interest.
-                // Double y = Converters.convert(feature.getAttribute("LMiIndex"), Double.class);
-
-                SpatialEvent curE = new SpatialEvent(0, coordinate);
-                int neighborCount = 0;
-                double zScoreSum = 0d;
+                SpatialEvent source = new SpatialEvent(typeName + "." + ++i, coordinate);
+                int neighbors = 0;
+                double zSum = 0d;
                 for (int j = 0; j < swMatrix.getEvents().size(); j++) {
-                    SpatialEvent destE = swMatrix.getEvents().get(j);
-                    if (destE.getCoordinate().equals(coordinate))
+                    SpatialEvent target = swMatrix.getEvents().get(j);
+                    if (source.id == target.id) {
                         continue;
-
-                    if (spatialConcept == SpatialConcept.FixedDistance) {
-                        if (destE.distance(curE) > searchDistance) {
-                            continue;
-                        }
                     }
 
-                    double dWeight = swMatrix.getWeight(curE, destE);
-                    if (dWeight > 0) {
-                        neighborCount++;
-                        zScoreSum += zScore[j];
+                    double wij = swMatrix.getWeight(source, target);
+                    if (wij > 0) {
+                        neighbors++;
+                        zSum += zScore[j];
                     }
                 }
 
-                double y = neighborCount == 0 ? 0d : zScoreSum / neighborCount;
+                double y = neighbors == 0 ? 0d : zSum / neighbors;
                 minMaxVisitor.visit(x, y);
                 xySeries.add(new XYDataItem2(feature, x, y));
             }
@@ -630,7 +624,7 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
 
             monitor.subTask("Updating scatter plot...");
             chartComposite.setLayer(outputLayer);
-            updateChart(features, moran.getPropertyName(), moran.getExpected_Index());
+            updateChart(features, moran.getPropertyName(), moran.getObserved_Index());
             plotTab.getParent().setSelection(plotTab);
             monitor.worked(increment);
         } catch (Exception e) {

@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.enumeration.ContiguityType;
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.util.logging.Logging;
@@ -55,8 +56,11 @@ public class JoinCountStatisticsOperation extends GeneralOperation {
         int whiteCount = 0;
         int m = 0;
 
+        // using SpatialIndexFeatureCollection
+        SimpleFeatureCollection indexed = DataUtils.toSpatialIndexFeatureCollection(features);
+
         JoinCount joinCounts = new JoinCount(typeName, contiguityType);
-        SimpleFeatureIterator featureIter = features.features();
+        SimpleFeatureIterator featureIter = indexed.features();
         try {
             while (featureIter.hasNext()) {
                 SimpleFeature pFeature = featureIter.next();
@@ -69,7 +73,7 @@ public class JoinCountStatisticsOperation extends GeneralOperation {
                 }
 
                 Filter filter = getIntersectsFilter(the_geom, pGeometry);
-                SimpleFeatureIterator subIter = features.subCollection(filter).features();
+                SimpleFeatureIterator subIter = indexed.subCollection(filter).features();
                 int neighborCount = 0;
                 try {
                     while (subIter.hasNext()) {

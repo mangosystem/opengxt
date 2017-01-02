@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.SumLineLengthProcessFactory;
+import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.Converters;
@@ -89,6 +90,9 @@ public class CalculateSumLineLengthOperation extends GeneralOperation {
 
         String the_geom = lines.getSchema().getGeometryDescriptor().getLocalName();
 
+        // using SpatialIndexFeatureCollection
+        SimpleFeatureCollection indexed = DataUtils.toSpatialIndexFeatureCollection(lines);
+
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
         SimpleFeatureIterator featureIter = polygons.features();
@@ -104,7 +108,7 @@ public class CalculateSumLineLengthOperation extends GeneralOperation {
 
                 double sumLength = 0d;
                 int lineCount = 0;
-                SimpleFeatureIterator lineIter = lines.subCollection(filter).features();
+                SimpleFeatureIterator lineIter = indexed.subCollection(filter).features();
                 try {
                     while (lineIter.hasNext()) {
                         SimpleFeature lineFeature = lineIter.next();

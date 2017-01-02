@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.grid.hexagon.HexagonOrientation;
+import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
@@ -80,6 +81,9 @@ public class TriangularGridOperation extends GeneralOperation {
             this.the_geom = null;
         } else {
             this.the_geom = boundsSource.getSchema().getGeometryDescriptor().getLocalName();
+
+            // use SpatialIndexFeatureCollection
+            this.boundsSource = DataUtils.toSpatialIndexFeatureCollection(boundsSource);
         }
     }
 

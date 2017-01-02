@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.store.ReprojectingFeatureCollection;
+import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.StatisticsField;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor;
@@ -110,6 +111,9 @@ public class PointStatisticsOperation extends GeneralOperation {
             // reproject joinFeatures to inputFeatures CRS
             points = new ReprojectingFeatureCollection(points, aCrs);
         }
+
+        // use SpatialIndexFeatureCollection
+        points = DataUtils.toSpatialIndexFeatureCollection(points);
 
         // prepare transactional feature store
         final String the_geom = points.getSchema().getGeometryDescriptor().getLocalName();

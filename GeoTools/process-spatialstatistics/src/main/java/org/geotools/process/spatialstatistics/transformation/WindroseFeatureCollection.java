@@ -26,6 +26,7 @@ import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitorResult;
@@ -138,7 +139,8 @@ public class WindroseFeatureCollection extends GXTSimpleFeatureCollection {
 
         public WindroseFeatureIterator(SimpleFeatureCollection delegate, SimpleFeatureType schema,
                 Expression weightExp, Point center, double radius) {
-            this.delegate = delegate;
+            // use SpatialIndexFeatureCollection
+            this.delegate = DataUtils.toSpatialIndexFeatureCollection(delegate);
 
             this.weightExp = weightExp;
             this.center = center.getCoordinate();

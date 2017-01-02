@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.store.ReprojectingFeatureCollection;
+import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.enumeration.SpatialJoinType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
@@ -85,6 +86,9 @@ public class SpatialJoinOperation extends GeneralOperation {
             // reproject joinFeatures to inputFeatures CRS
             joinFeatures = new ReprojectingFeatureCollection(joinFeatures, aCrs);
         }
+
+        // use SpatialIndexFeatureCollection
+        joinFeatures = DataUtils.toSpatialIndexFeatureCollection(joinFeatures);
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(schema);

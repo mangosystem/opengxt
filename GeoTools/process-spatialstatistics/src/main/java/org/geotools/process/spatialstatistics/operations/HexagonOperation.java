@@ -27,6 +27,7 @@ import org.geotools.grid.GridElement;
 import org.geotools.grid.GridFeatureBuilder;
 import org.geotools.grid.hexagon.HexagonOrientation;
 import org.geotools.grid.hexagon.Hexagons;
+import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -71,6 +72,11 @@ public class HexagonOperation extends GeneralOperation {
 
     public void setBoundsSource(SimpleFeatureCollection boundsSource) {
         this.boundsSource = boundsSource;
+
+        if (boundsSource != null) {
+            // use SpatialIndexFeatureCollection
+            this.boundsSource = DataUtils.toSpatialIndexFeatureCollection(boundsSource);
+        }
     }
 
     public SimpleFeatureCollection execute(ReferencedEnvelope gridBounds, double sideLen)

@@ -75,15 +75,18 @@ public class WeightMatrixContiguity extends AbstractWeightMatrix {
         uniqueField = FeatureTypes.validateProperty(features.getSchema(), uniqueField);
         this.uniqueFieldIsFID = uniqueField == null || uniqueField.isEmpty();
 
+        // using SpatialIndexFeatureCollection
+        SimpleFeatureCollection indexed = DataUtils.toSpatialIndexFeatureCollection(features);
+
         switch (contiguityType) {
         case Queen:
-            return queen(features, uniqueField);
+            return queen(indexed, uniqueField);
         case Rook:
-            return rook(features, uniqueField);
+            return rook(indexed, uniqueField);
         case Bishops:
-            return bishops(features, uniqueField);
+            return bishops(indexed, uniqueField);
         default:
-            return queen(features, uniqueField);
+            return queen(indexed, uniqueField);
         }
     }
 

@@ -23,6 +23,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTS;
+import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.transformation.ClipWithGeometryFeatureCollection;
 import org.geotools.util.logging.Logging;
@@ -54,6 +55,9 @@ public class ClipWithFeaturesOperation extends GeneralOperation {
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
             SimpleFeatureCollection clipFeatures) throws IOException {
         SimpleFeatureType featureType = buildTargetSchema(inputFeatures.getSchema());
+
+        // using SpatialIndexFeatureCollection
+        inputFeatures = DataUtils.toSpatialIndexFeatureCollection(inputFeatures);
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);

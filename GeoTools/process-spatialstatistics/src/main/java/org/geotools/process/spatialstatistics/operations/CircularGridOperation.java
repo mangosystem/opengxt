@@ -25,6 +25,7 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.grid.hexagon.HexagonOrientation;
+import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.enumeration.CircularType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
@@ -89,6 +90,9 @@ public class CircularGridOperation extends GeneralOperation {
             this.the_geom = null;
         } else {
             this.the_geom = boundsSource.getSchema().getGeometryDescriptor().getLocalName();
+
+            // using SpatialIndexFeatureCollection
+            this.boundsSource = DataUtils.toSpatialIndexFeatureCollection(boundsSource);
         }
     }
 

@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.enumeration.FishnetType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
@@ -82,6 +83,9 @@ public class FishnetOperation extends GeneralOperation {
             this.the_geom = null;
         } else {
             this.the_geom = boundsSource.getSchema().getGeometryDescriptor().getLocalName();
+
+            // use SpatialIndexFeatureCollection
+            this.boundsSource = DataUtils.toSpatialIndexFeatureCollection(boundsSource);
         }
     }
 

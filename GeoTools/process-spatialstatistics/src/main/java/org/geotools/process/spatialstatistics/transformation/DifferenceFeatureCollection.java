@@ -28,6 +28,7 @@ import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -64,7 +65,8 @@ public class DifferenceFeatureCollection extends GXTSimpleFeatureCollection {
             SimpleFeatureCollection differenceFeatures) {
         super(delegate);
 
-        this.differenceFeatures = differenceFeatures;
+        // use SpatialIndexFeatureCollection
+        this.differenceFeatures = DataUtils.toSpatialIndexFeatureCollection(differenceFeatures);
         this.targetSchema = buildTargetSchema(delegate.getSchema());
     }
 

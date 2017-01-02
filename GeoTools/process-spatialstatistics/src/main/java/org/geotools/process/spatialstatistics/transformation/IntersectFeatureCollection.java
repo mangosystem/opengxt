@@ -30,6 +30,7 @@ import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
@@ -69,7 +70,9 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
         super(delegate);
 
         this.fieldMap = new Hashtable<String, String>();
-        this.overlays = overlays;
+
+        // use SpatialIndexFeatureCollection
+        this.overlays = DataUtils.toSpatialIndexFeatureCollection(overlays);
         this.targetSchema = buildTargetSchema(delegate.getSchema(), overlays.getSchema());
     }
 

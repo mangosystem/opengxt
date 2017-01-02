@@ -52,6 +52,7 @@ public class FocalLQOperation extends AbstractStatisticsOperation {
     private double[] lqZ; // LQZ
 
     public FocalLQOperation() {
+        // Default Setting
         this.setSpatialConceptType(SpatialConcept.FixedDistance);
         this.setStandardizationType(StandardizationMethod.None);
         this.setDistanceType(DistanceMethod.Euclidean);
@@ -91,17 +92,13 @@ public class FocalLQOperation extends AbstractStatisticsOperation {
             // Look for local neighbors
             for (int j = 0; j < featureCount; j++) {
                 SpatialEvent target = swMatrix.getEvents().get(j);
-
-                if (swMatrix.getDistanceBandWidth() > 0) {
-                    double dDist = factory.getDistance(source, target, getDistanceType());
-                    if (dDist <= swMatrix.getDistanceBandWidth()) {
-                        sumX += target.xVal;
-                        sumY += target.yVal;
-                    }
-                } else {
-                    sumX += target.xVal;
-                    sumY += target.yVal;
+                double wij = swMatrix.getWeight(source, target);
+                if (wij == 0) {
+                    continue;
                 }
+
+                sumX += target.xVal;
+                sumY += target.yVal;
             }
 
             double dxy = sumY == 0.0 ? 0.0 : sumX / sumY; // y / x
@@ -115,7 +112,6 @@ public class FocalLQOperation extends AbstractStatisticsOperation {
             lqD[i] = validateDouble(dxy / dXY);
             lqZ[i] = validateDouble((sumY - tmpval2) / Math.sqrt(tmpval2));
 
-            // global LQ += ABS(local lq)
             globalLQ += Math.abs(lqD[i]);
         }
 

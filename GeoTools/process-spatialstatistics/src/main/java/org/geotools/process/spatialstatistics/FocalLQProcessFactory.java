@@ -28,6 +28,8 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
+import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -45,7 +47,8 @@ public class FocalLQProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "FocalLQ";
 
     /*
-     * FocalLQ(SimpleFeatureCollection GML, fieldName1 String, fieldName2 String, searchDistance Double): SimpleFeatureCollection
+     * FocalLQ(SimpleFeatureCollection GML, fieldName1 String, fieldName2 String, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
+     * searchDistance Double): SimpleFeatureCollection
      */
 
     public FocalLQProcessFactory() {
@@ -83,6 +86,18 @@ public class FocalLQProcessFactory extends SpatialStatisticsProcessFactory {
             getResource("FocalLQ.yField.title"), getResource("FocalLQ.yField.description"), true,
             1, 1, null, new KVP(Params.FIELD, "inputFeatures.Number"));
 
+    /** spatialConcept */
+    public static final Parameter<SpatialConcept> spatialConcept = new Parameter<SpatialConcept>(
+            "spatialConcept", SpatialConcept.class, getResource("FocalLQ.spatialConcept.title"),
+            getResource("FocalLQ.spatialConcept.description"), false, 0, 1,
+            SpatialConcept.FixedDistance, null);
+
+    /** distanceMethod */
+    public static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
+            "distanceMethod", DistanceMethod.class, getResource("FocalLQ.distanceMethod.title"),
+            getResource("FocalLQ.distanceMethod.description"), false, 0, 1,
+            DistanceMethod.Euclidean, null);
+
     /** searchDistance */
     public static final Parameter<Double> searchDistance = new Parameter<Double>("searchDistance",
             Double.class, getResource("FocalLQ.searchDistance.title"),
@@ -95,6 +110,8 @@ public class FocalLQProcessFactory extends SpatialStatisticsProcessFactory {
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(xField.key, xField);
         parameterInfo.put(yField.key, yField);
+        parameterInfo.put(spatialConcept.key, spatialConcept);
+        parameterInfo.put(distanceMethod.key, distanceMethod);
         parameterInfo.put(searchDistance.key, searchDistance);
         return parameterInfo;
     }

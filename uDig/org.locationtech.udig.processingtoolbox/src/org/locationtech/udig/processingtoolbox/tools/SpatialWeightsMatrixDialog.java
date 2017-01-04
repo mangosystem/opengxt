@@ -189,11 +189,10 @@ public class SpatialWeightsMatrixDialog extends AbstractGeoProcessingDialog {
         cmpCont.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 
         optQueen = uiBuilder.createRadioButton(cmpCont, Messages.SpatialWeightsMatrixDialog_Queen,
-                EMPTY, 1);
+                EMPTY, 3);
         optQueen.addSelectionListener(selectionListener);
-        uiBuilder.createLabel(cmpCont, Messages.SpatialWeightsMatrixDialog_OrderofContiguity,
-                EMPTY, 1);
-        spnContiguity = uiBuilder.createSpinner(cmpCont, 1, 1, 12, 0, 1, 10, 1);
+        // uiBuilder.createLabel(cmpCont, Messages.SpatialWeightsMatrixDialog_OrderofContiguity, EMPTY, 1);
+        // spnContiguity = uiBuilder.createSpinner(cmpCont, 1, 1, 12, 0, 1, 10, 1);
 
         optRook = uiBuilder.createRadioButton(cmpCont, Messages.SpatialWeightsMatrixDialog_Rook,
                 EMPTY, 3);

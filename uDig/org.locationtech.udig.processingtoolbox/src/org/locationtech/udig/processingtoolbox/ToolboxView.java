@@ -49,6 +49,8 @@ import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;
 import org.locationtech.udig.processingtoolbox.internal.ui.SettingsDialog;
+import org.locationtech.udig.processingtoolbox.tools.AmoebaWizard;
+import org.locationtech.udig.processingtoolbox.tools.AmoebaWizardDialog;
 import org.locationtech.udig.processingtoolbox.tools.BoxPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.BubbleChartDialog;
 import org.locationtech.udig.processingtoolbox.tools.ExportStyleDialog;
@@ -239,6 +241,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                     dialog = new SplitByFeaturesDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("ExportStyleDialog")) {
                                     dialog = new ExportStyleDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("AmoebaWizardDialog")) {
+                                    dialog = new AmoebaWizardDialog(shell, new AmoebaWizard(map));
                                 }
                             } else {
                                 dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
@@ -361,6 +365,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalGearysCProcessFactory");
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalLeesSProcessFactory");
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalLeesLProcessFactory");
+        // buildTool(clusterTools, Messages.AmoebaWizardDialog_title, "AmoebaWizardDialog");
 
         // Spatial Distribution
         TreeParent distributionTools = new TreeParent(Messages.ToolboxView_Distribution, null, null);
@@ -551,12 +556,17 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(utilTool, "org.geotools.process.spatialstatistics.PointsToLineProcessFactory");
         buildTool(utilTool,
                 "org.geotools.process.spatialstatistics.FeatureEnvelopeToPolygonProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToConvexHullProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToMinimumBoundingCircleProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToMinimumRectangleProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToOctagonalEnvelopeProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SimplifyProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.DensifyProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.FlipLineProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.SimplifyProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.PointsAlongLinesProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RemoveHolesProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.RemovePartsProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.OffsetFeaturesProcessFactory");
         buildTool(utilTool,
                 "org.geotools.process.spatialstatistics.SplitLineByDistanceProcessFactory");
         buildTool(utilTool,

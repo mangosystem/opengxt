@@ -199,11 +199,11 @@ public class WidgetBuilder {
     }
 
     public Group createGroup(Composite parent, String text, boolean titleBold, int colspan) {
-        return createGroup(parent, text, titleBold, colspan, 0);
+        return createGroup(parent, text, titleBold, colspan, 0, 2);
     }
 
     public Group createGroup(Composite parent, String text, boolean titleBold, int colspan,
-            int heightHint) {
+            int heightHint, int numColumns) {
         Group group = new Group(parent, SWT.SHADOW_ETCHED_IN);
 
         if (titleBold) {
@@ -220,7 +220,7 @@ public class WidgetBuilder {
         }
 
         group.setLayoutData(gridData);
-        group.setLayout(new GridLayout(2, false));
+        group.setLayout(new GridLayout(numColumns, false));
 
         return group;
     }

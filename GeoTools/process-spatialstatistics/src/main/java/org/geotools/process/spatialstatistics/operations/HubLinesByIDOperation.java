@@ -62,10 +62,10 @@ public class HubLinesByIDOperation extends AbstractHubLinesOperation {
 
         SimpleFeatureType featureType = null;
         if (preserveAttributes) {
-            featureType = FeatureTypes.build(spokeSchema, "HubLines", LineString.class);
+            featureType = FeatureTypes.build(spokeSchema, TYPE_NAME, LineString.class);
         } else {
             String geomName = spokeSchema.getGeometryDescriptor().getLocalName();
-            featureType = FeatureTypes.getDefaultType("HubLines", geomName, LineString.class, crs);
+            featureType = FeatureTypes.getDefaultType(TYPE_NAME, geomName, LineString.class, crs);
             featureType = FeatureTypes.add(featureType, spokeSchema.getDescriptor(spokeIdField));
         }
 

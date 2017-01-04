@@ -24,7 +24,6 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.store.ReprojectingFeatureCollection;
-import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.enumeration.SpatialJoinType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
@@ -34,10 +33,12 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
-import org.opengis.filter.Filter;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.index.strtree.ItemBoundable;
+import com.vividsolutions.jts.index.strtree.ItemDistance;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
  * SpatialJoin : One by One
@@ -87,23 +88,36 @@ public class SpatialJoinOperation extends GeneralOperation {
             joinFeatures = new ReprojectingFeatureCollection(joinFeatures, aCrs);
         }
 
-        // use SpatialIndexFeatureCollection
-        joinFeatures = DataUtils.toSpatialIndexFeatureCollection(joinFeatures);
+        STRtree spatialIndex = loadFeatures(joinFeatures);
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(schema);
 
-        SimpleFeatureIterator featureIter = null;
+        SimpleFeatureIterator featureIter = inputFeatures.features();
         try {
-            featureIter = inputFeatures.features();
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
-                Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                if (geometry == null || geometry.isEmpty()) {
-                    continue;
-                }
+                Geometry source = (Geometry) feature.getDefaultGeometry();
 
-                SimpleFeature joinFeature = searchNearestFeature(joinFeatures, feature);
+                // find nearest features
+                SimpleFeature joinFeature = (SimpleFeature) spatialIndex.nearestNeighbour(
+                        source.getEnvelopeInternal(), feature, new ItemDistance() {
+                            @Override
+                            public double distance(ItemBoundable item1, ItemBoundable item2) {
+                                SimpleFeature s1 = (SimpleFeature) item1.getItem();
+                                SimpleFeature s2 = (SimpleFeature) item2.getItem();
+
+                                Geometry g1 = (Geometry) s1.getDefaultGeometry();
+                                Geometry g2 = (Geometry) s2.getDefaultGeometry();
+                                return g1.distance(g2);
+                            }
+                        });
+
+                Geometry target = (Geometry) joinFeature.getDefaultGeometry();
+                double distance = source.distance(target);
+                if (searchRadius > 0 && searchRadius < distance) {
+                    joinFeature = null;
+                }
 
                 // create & insert feature
                 if (joinType == SpatialJoinType.OnlyMatchingRecord && joinFeature == null) {
@@ -129,45 +143,18 @@ public class SpatialJoinOperation extends GeneralOperation {
         return featureWriter.getFeatureCollection();
     }
 
-    private SimpleFeature searchNearestFeature(SimpleFeatureCollection joinFeatures,
-            SimpleFeature feature) {
-        String the_geom = joinFeatures.getSchema().getGeometryDescriptor().getLocalName();
-        Geometry geometry = (Geometry) feature.getDefaultGeometry();
-
-        Filter filter = getIntersectsFilter(the_geom, geometry);
-        if (searchRadius > 0) {
-            Geometry buffered = geometry.buffer(searchRadius);
-            filter = getIntersectsFilter(the_geom, buffered);
-        }
-
-        SimpleFeature nearestFeature = null;
-        SimpleFeatureIterator joinIter = joinFeatures.subCollection(filter).features();
+    private STRtree loadFeatures(SimpleFeatureCollection joinFeatures) {
+        STRtree spatialIndex = new STRtree();
+        SimpleFeatureIterator featureIter = joinFeatures.features();
         try {
-            double minDistance = Double.MAX_VALUE;
-            while (joinIter.hasNext()) {
-                SimpleFeature joinF = joinIter.next();
-                if (searchRadius == 0) {
-                    nearestFeature = joinF; // first one
-                    break;
-                } else {
-                    // find nearest features
-                    Geometry joinGeometry = (Geometry) joinF.getDefaultGeometry();
-                    double distance = geometry.distance(joinGeometry);
-                    if (distance == 0) {
-                        nearestFeature = joinF;
-                        break;
-                    } else {
-                        if (minDistance > distance) {
-                            nearestFeature = joinF;
-                            minDistance = distance;
-                        }
-                    }
-                }
+            while (featureIter.hasNext()) {
+                SimpleFeature feature = featureIter.next();
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                spatialIndex.insert(geometry.getEnvelopeInternal(), feature);
             }
         } finally {
-            joinIter.close();
+            featureIter.close();
         }
-        return nearestFeature;
+        return spatialIndex;
     }
-
 }

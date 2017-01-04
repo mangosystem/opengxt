@@ -16,30 +16,35 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
+import org.geotools.process.spatialstatistics.core.KnnSearch;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterRadius.SearchRadiusType;
 import org.geotools.util.logging.Logging;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.index.kdtree.KdTree;
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.index.strtree.ItemBoundable;
+import com.vividsolutions.jts.index.strtree.ItemDistance;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
  * Implementation of Inverse Distance Weighted interpolation.
  * 
- * @author Minpa Lee, MangoSystem <br>
- * @see https://github.com/geotools/geotools/blob/master/spike/jan/gsoc-transformations/src/main/java/org/geotools/referencing/operation/builder/
- *      algorithm/IDWInterpolation.java
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
 public class IDWInterpolator extends AbstractInterpolator {
     protected static final Logger LOGGER = Logging.getLogger(IDWInterpolator.class);
 
-    private KdTree spatialIndex = new KdTree(0.0d);
+    private STRtree spatialIndex = null;
+
+    private KnnSearch knnSearch = null;
 
     private RasterRadius radius = new RasterRadius();
 
@@ -59,9 +64,11 @@ public class IDWInterpolator extends AbstractInterpolator {
     }
 
     private void init() {
+        spatialIndex = new STRtree();
         for (Coordinate sample : samples) {
-            spatialIndex.insert(sample);
+            spatialIndex.insert(new Envelope(sample), sample);
         }
+        knnSearch = new KnnSearch(spatialIndex);
     }
 
     @Override
@@ -82,16 +89,20 @@ public class IDWInterpolator extends AbstractInterpolator {
      * @return interpolated value
      */
     private double interpolateVariable(Coordinate p) {
-        // List ret = spatialIndex.query(queryEnv);
-
         Map<Double, Coordinate> sortedMap = new TreeMap<Double, Coordinate>();
-        for (Coordinate sample : samples) {
-            final double distance = p.distance(sample);
-            if (radius.distance > 0 && radius.distance < distance) {
+
+        Envelope searchEnv = new Envelope(p);
+        searchEnv.expandBy(radius.distance);
+
+        for (@SuppressWarnings("unchecked")
+        Iterator<Coordinate> iter = (Iterator<Coordinate>) spatialIndex.query(searchEnv).iterator(); iter
+                .hasNext();) {
+            Coordinate sample = iter.next();
+            double distance = p.distance(sample);
+            if (radius.distance < distance) {
                 continue;
-            } else {
-                sortedMap.put(Double.valueOf(distance), sample);
             }
+            sortedMap.put(Double.valueOf(distance), sample);
         }
 
         return interpolate(sortedMap);
@@ -106,18 +117,35 @@ public class IDWInterpolator extends AbstractInterpolator {
      * @return interpolated value
      */
     private double interpolateFixed(Coordinate p) {
-        /* ============================================= */
-        /* TODO Fix! */
-        /* ============================================= */
         Map<Double, Coordinate> sortedMap = new TreeMap<Double, Coordinate>();
-        for (Coordinate sample : samples) {
-            final double distance = p.distance(sample);
-            if (radius.numberOfPoints > 0) {
-                sortedMap.put(Double.valueOf(distance), sample);
-            } else {
-                if (radius.distance >= distance) {
-                    sortedMap.put(Double.valueOf(distance), sample);
+
+        Envelope searchEnv = new Envelope(p);
+        searchEnv.expandBy(radius.distance);
+
+        if (radius.numberOfPoints > 0) {
+            Object[] knns = knnSearch.kNearestNeighbour(searchEnv, p, new ItemDistance() {
+                @Override
+                public double distance(ItemBoundable item1, ItemBoundable item2) {
+                    Coordinate s1 = (Coordinate) item1.getItem();
+                    Coordinate s2 = (Coordinate) item2.getItem();
+                    return s1.distance(s2);
                 }
+            }, radius.numberOfPoints);
+
+            for (Object object : knns) {
+                Coordinate sample = (Coordinate) object;
+                sortedMap.put(Double.valueOf(p.distance(sample)), sample);
+            }
+        } else {
+            for (@SuppressWarnings("unchecked")
+            Iterator<Coordinate> iter = (Iterator<Coordinate>) spatialIndex.query(searchEnv)
+                    .iterator(); iter.hasNext();) {
+                Coordinate sample = iter.next();
+                double distance = p.distance(sample);
+                if (radius.distance < distance) {
+                    continue;
+                }
+                sortedMap.put(Double.valueOf(distance), sample);
             }
         }
 

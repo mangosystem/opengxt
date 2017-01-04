@@ -17,8 +17,6 @@
 package org.geotools.process.spatialstatistics.operations;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -33,6 +31,9 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.index.strtree.ItemBoundable;
+import com.vividsolutions.jts.index.strtree.ItemDistance;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
  * Creates a line features representing the shortest distance between hub and spoke features by nearest distance.
@@ -63,10 +64,10 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
 
         SimpleFeatureType featureType = null;
         if (preserveAttributes) {
-            featureType = FeatureTypes.build(spokeSchema, "HubLines", LineString.class);
+            featureType = FeatureTypes.build(spokeSchema, TYPE_NAME, LineString.class);
         } else {
             String geomName = spokeSchema.getGeometryDescriptor().getLocalName();
-            featureType = FeatureTypes.getDefaultType("HubLines", geomName, LineString.class, crs);
+            featureType = FeatureTypes.getDefaultType(TYPE_NAME, geomName, LineString.class, crs);
         }
 
         boolean hasHubID = hubIdField != null && hubFeatures.getSchema().indexOf(hubIdField) != -1;
@@ -79,29 +80,30 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
 
-        List<Hub> hubs = loadHubs(hubFeatures, hubIdField);
+        STRtree spatialIndex = loadHubs(hubFeatures, hubIdField);
         SimpleFeatureIterator spokeIter = spokeFeatures.features();
         try {
             while (spokeIter.hasNext()) {
-                SimpleFeature spokeFeature = spokeIter.next();
-                Geometry spokeGeom = (Geometry) spokeFeature.getDefaultGeometry();
+                SimpleFeature feature = spokeIter.next();
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                Object id = hasHubID ? feature.getAttribute(hubIdField) : feature.getID();
                 if (useCentroid) {
-                    spokeGeom = spokeGeom.getCentroid();
+                    geometry = geometry.getCentroid();
                 }
 
                 // find nearest hub
-                Hub nearestHub = null;
-                double minDist = Double.MAX_VALUE;
-                for (Hub currentHub : hubs) {
-                    double currentDist = currentHub.location.distance(spokeGeom);
-                    if (minDist > currentDist) {
-                        minDist = currentDist;
-                        nearestHub = currentHub;
-                    }
-                }
+                Hub nearest = (Hub) spatialIndex.nearestNeighbour(geometry.getEnvelopeInternal(),
+                        new Hub(geometry, id), new ItemDistance() {
+                            @Override
+                            public double distance(ItemBoundable item1, ItemBoundable item2) {
+                                Hub s1 = (Hub) item1.getItem();
+                                Hub s2 = (Hub) item2.getItem();
+                                return s1.location.distance(s2.location);
+                            }
+                        });
 
                 // create line: direction = spoke --> hub
-                Geometry hubLine = getShortestLine(spokeGeom, nearestHub.location, false);
+                Geometry hubLine = getShortestLine(geometry, nearest.location, false);
                 double distance = hubLine.getLength();
                 if (distance == 0 || this.maximumDistance < distance) {
                     continue;
@@ -110,12 +112,12 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
                 // create & insert feature
                 SimpleFeature newFeature = featureWriter.buildFeature();
                 if (preserveAttributes) {
-                    featureWriter.copyAttributes(spokeFeature, newFeature, false);
+                    featureWriter.copyAttributes(feature, newFeature, false);
                 }
 
                 newFeature.setDefaultGeometry(hubLine);
                 if (hasHubID) {
-                    newFeature.setAttribute(hubIdField, nearestHub.id);
+                    newFeature.setAttribute(hubIdField, nearest.id);
                 }
                 newFeature.setAttribute(HUB_DIST, distance);
                 featureWriter.write(newFeature);
@@ -129,30 +131,27 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
         return featureWriter.getFeatureCollection();
     }
 
-    private List<Hub> loadHubs(SimpleFeatureCollection hubFeatures, String hubIdField) {
-        List<Hub> hubs = new ArrayList<Hub>();
+    private STRtree loadHubs(SimpleFeatureCollection features, String idField) {
+        STRtree spatialIndex = new STRtree();
+        boolean hasID = idField != null && features.getSchema().indexOf(idField) != -1;
 
-        boolean hasHubID = hubIdField != null && hubFeatures.getSchema().indexOf(hubIdField) != -1;
-
-        SimpleFeatureIterator spokeIter = hubFeatures.features();
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            while (spokeIter.hasNext()) {
-                SimpleFeature spokebFeature = spokeIter.next();
-                Geometry spokeGeom = (Geometry) spokebFeature.getDefaultGeometry();
+            while (featureIter.hasNext()) {
+                SimpleFeature feature = featureIter.next();
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
                 if (useCentroid) {
-                    spokeGeom = spokeGeom.getCentroid();
+                    geometry = geometry.getCentroid();
                 }
 
-                if (hasHubID) {
-                    hubs.add(new Hub(spokeGeom, spokebFeature.getAttribute(hubIdField)));
-                } else {
-                    hubs.add(new Hub(spokeGeom, spokebFeature.getID()));
-                }
+                Object id = hasID ? feature.getAttribute(idField) : feature.getID();
+                Hub hub = new Hub(geometry, id);
+                spatialIndex.insert(geometry.getEnvelopeInternal(), hub);
             }
         } finally {
-            spokeIter.close();
+            featureIter.close();
         }
-        return hubs;
+        return spatialIndex;
     }
 
     static final class Hub {
@@ -161,14 +160,9 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
 
         public Object id;
 
-        public Hub() {
-
-        }
-
         public Hub(Geometry location, Object id) {
             this.location = location;
             this.id = id;
         }
     }
-
 }

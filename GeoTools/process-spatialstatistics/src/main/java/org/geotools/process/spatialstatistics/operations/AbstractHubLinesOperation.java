@@ -39,6 +39,8 @@ public abstract class AbstractHubLinesOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(AbstractHubLinesOperation.class);
 
     protected static final String HUB_DIST = "hubdist";
+    
+    protected static final String TYPE_NAME = "HubLines";
 
     protected double maximumDistance = Double.MAX_VALUE;
 
@@ -76,21 +78,21 @@ public abstract class AbstractHubLinesOperation extends GeneralOperation {
     }
 
     protected LineString getShortestLine(Geometry from, Geometry to, boolean centroid) {
-        Geometry from_geom = from;
-        Geometry to_geom = to;
+        Geometry start = from;
+        Geometry end = to;
 
         if (centroid) {
             if (from instanceof Polygon || from instanceof MultiPolygon) {
-                from_geom = from.getCentroid();
+                start = from.getCentroid();
             }
 
             if (to instanceof Polygon || to instanceof MultiPolygon) {
-                to_geom = to.getCentroid();
+                end = to.getCentroid();
             }
         }
 
-        Coordinate[] closetCoords = DistanceOp.nearestPoints(from_geom, to_geom);
-        LineString shortestLine = from.getFactory().createLineString(closetCoords);
+        Coordinate[] coordinates = DistanceOp.nearestPoints(start, end);
+        LineString shortestLine = from.getFactory().createLineString(coordinates);
         shortestLine.setUserData(from.getUserData());
         return shortestLine;
     }

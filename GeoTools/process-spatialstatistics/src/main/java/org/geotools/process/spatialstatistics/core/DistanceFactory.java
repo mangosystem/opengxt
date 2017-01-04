@@ -36,9 +36,13 @@ import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.index.strtree.ItemBoundable;
+import com.vividsolutions.jts.index.strtree.ItemDistance;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
  * Help class for distance calculation
@@ -69,30 +73,58 @@ public class DistanceFactory {
     public double getMeanDistance(List<SpatialEvent> spatialEventSet, SpatialEvent curEvent) {
         double sumDistance = 0.0;
         for (SpatialEvent destEvent : spatialEventSet) {
-            if (destEvent.id != curEvent.id) {
-                sumDistance += getDistance(curEvent, destEvent, distanceType);
+            if (destEvent.id.equals(curEvent.id)) {
+                continue;
             }
+            sumDistance += getDistance(curEvent, destEvent, distanceType);
         }
         return sumDistance / spatialEventSet.size();
     }
 
-    public double getThresholDistance(List<SpatialEvent> spatialEventSet) {
-        double threshold = Double.MIN_VALUE;
-        for (SpatialEvent curEvent : spatialEventSet) {
-            double nnDist = getMinimumDistance(spatialEventSet, curEvent);
-            threshold = Math.max(nnDist, threshold);
-        }
-        return threshold * 1.0001;
-    }
-
     public double getThresholDistance(SimpleFeatureCollection features) {
-        return getThresholDistance(DistanceFactory.loadEvents(features, null));
+        // build spatial index
+        final List<SpatialEvent> events = new ArrayList<SpatialEvent>();
+        final STRtree spatialIndex = new STRtree();
+        SimpleFeatureIterator featureIter = features.features();
+        try {
+            while (featureIter.hasNext()) {
+                SimpleFeature feature = featureIter.next();
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                Coordinate centroid = geometry.getCentroid().getCoordinate();
+
+                SpatialEvent event = new SpatialEvent(feature.getID(), centroid);
+                events.add(event);
+                spatialIndex.insert(new Envelope(centroid), event);
+            }
+        } finally {
+            featureIter.close();
+        }
+
+        // calculate nearest neighbor index
+        double threshold = Double.MIN_VALUE;
+        for (SpatialEvent source : events) {
+            SpatialEvent nearest = (SpatialEvent) spatialIndex.nearestNeighbour(new Envelope(
+                    source.coordinate), source, new ItemDistance() {
+                @Override
+                public double distance(ItemBoundable item1, ItemBoundable item2) {
+                    SpatialEvent s1 = (SpatialEvent) item1.getItem();
+                    SpatialEvent s2 = (SpatialEvent) item2.getItem();
+                    if (s1.id.equals(s2.id)) {
+                        return Double.MAX_VALUE;
+                    }
+                    return s1.distance(s2);
+                }
+            });
+            threshold = Math.max(threshold, getDistance(source, nearest));
+        }
+
+        return threshold * 1.0001;
     }
 
     public double getMinimumDistance(List<SpatialEvent> srcEvents, SpatialEvent curEvent) {
         double minDistance = Double.MAX_VALUE;
         for (SpatialEvent destEvent : srcEvents) {
-            if (destEvent.id == curEvent.id) {
+            if (destEvent.id.equals(curEvent.id)) {
                 continue;
             }
 
@@ -107,9 +139,10 @@ public class DistanceFactory {
     public double getMaximumDistance(List<SpatialEvent> srcEvents, SpatialEvent curEvent) {
         double maxDistance = Double.MIN_VALUE;
         for (SpatialEvent destEvent : srcEvents) {
-            if (destEvent.id != curEvent.id) {
-                maxDistance = Math.max(maxDistance, getDistance(curEvent, destEvent, distanceType));
+            if (destEvent.id.equals(curEvent.id)) {
+                continue;
             }
+            maxDistance = Math.max(maxDistance, getDistance(curEvent, destEvent, distanceType));
         }
         return maxDistance;
     }

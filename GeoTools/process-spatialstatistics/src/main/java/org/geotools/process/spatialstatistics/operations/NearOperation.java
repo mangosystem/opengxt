@@ -17,8 +17,6 @@
 package org.geotools.process.spatialstatistics.operations;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -31,6 +29,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.index.strtree.ItemBoundable;
+import com.vividsolutions.jts.index.strtree.ItemDistance;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
  * Calculates distance and additional proximity information between the input features and the closest feature in another features.
@@ -84,29 +85,32 @@ public class NearOperation extends GeneralOperation {
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
 
-        List<NearFeature> hubs = loadNearFeatures(nearFeatures, nearIdField);
+        STRtree spatialIndex = loadNearFeatures(nearFeatures, nearIdField);
         SimpleFeatureIterator featureIter = inputFeatures.features();
         try {
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                Object id = hasID ? feature.getAttribute(nearIdField) : feature.getID();
+                NearFeature source = new NearFeature(geometry, id);
 
                 // find nearest hub
-                NearFeature nearFeature = null;
-                double minumumDistance = Double.MAX_VALUE;
-                for (NearFeature currentHub : hubs) {
-                    double currentDist = geometry.distance(currentHub.location);
-                    if (minumumDistance > currentDist) {
-                        minumumDistance = currentDist;
-                        nearFeature = currentHub;
-                    }
-                }
+                NearFeature nearest = (NearFeature) spatialIndex.nearestNeighbour(
+                        geometry.getEnvelopeInternal(), source, new ItemDistance() {
+                            @Override
+                            public double distance(ItemBoundable item1, ItemBoundable item2) {
+                                NearFeature s1 = (NearFeature) item1.getItem();
+                                NearFeature s2 = (NearFeature) item2.getItem();
+                                return s1.location.distance(s2.location);
+                            }
+                        });
+
+                double minumumDistance = source.location.distance(nearest.location);
 
                 // create & insert feature
                 SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
 
-                // create line: direction = spoke --> hub
                 if (maximumDistance < minumumDistance) {
                     if (hasID) {
                         newFeature.setAttribute(nearIdField, null);
@@ -114,7 +118,7 @@ public class NearOperation extends GeneralOperation {
                     newFeature.setAttribute(DIST_FIELD, null);
                 } else {
                     if (hasID) {
-                        newFeature.setAttribute(nearIdField, nearFeature.id);
+                        newFeature.setAttribute(nearIdField, nearest.id);
                     }
                     newFeature.setAttribute(DIST_FIELD, minumumDistance);
                 }
@@ -130,27 +134,23 @@ public class NearOperation extends GeneralOperation {
         return featureWriter.getFeatureCollection();
     }
 
-    private List<NearFeature> loadNearFeatures(SimpleFeatureCollection features, String idField) {
-        List<NearFeature> nears = new ArrayList<NearFeature>();
-
+    private STRtree loadNearFeatures(SimpleFeatureCollection features, String idField) {
+        STRtree spatialIndex = new STRtree();
         boolean hasID = idField != null && features.getSchema().indexOf(idField) != -1;
-        int serialID = 0;
 
         SimpleFeatureIterator featureIter = features.features();
         try {
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                if (hasID) {
-                    nears.add(new NearFeature(geometry, feature.getAttribute(idField)));
-                } else {
-                    nears.add(new NearFeature(geometry, Integer.valueOf(++serialID)));
-                }
+                Object id = hasID ? feature.getAttribute(idField) : feature.getID();
+                NearFeature nearFeature = new NearFeature(geometry, id);
+                spatialIndex.insert(geometry.getEnvelopeInternal(), nearFeature);
             }
         } finally {
             featureIter.close();
         }
-        return nears;
+        return spatialIndex;
     }
 
     static final class NearFeature {
@@ -159,14 +159,9 @@ public class NearOperation extends GeneralOperation {
 
         public Object id;
 
-        public NearFeature() {
-
-        }
-
         public NearFeature(Geometry location, Object id) {
             this.location = location;
             this.id = id;
         }
     }
-
 }

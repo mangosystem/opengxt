@@ -18,6 +18,7 @@ package org.geotools.process.spatialstatistics.operations;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -34,11 +35,11 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryComponentFilter;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.prep.PreparedGeometry;
 import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
-import com.vividsolutions.jts.index.kdtree.KdNode;
-import com.vividsolutions.jts.index.kdtree.KdTree;
+import com.vividsolutions.jts.index.strtree.STRtree;
 import com.vividsolutions.jts.triangulate.DelaunayTriangulationBuilder;
 
 /**
@@ -57,7 +58,7 @@ public class DelaunayTrangulationOperation extends GeneralOperation {
 
     private double proximalTolerance = 0.0d;
 
-    private KdTree spatialIndex = new KdTree(0.0d);
+    private STRtree spatialIndex = new STRtree();
 
     public Geometry getClipArea() {
         return clipArea;
@@ -119,7 +120,6 @@ public class DelaunayTrangulationOperation extends GeneralOperation {
 
         // insert features
         try {
-            List<KdNode> nodeList = new ArrayList<KdNode>();
             for (int index = 0; index < triangleGeoms.getNumGeometries(); index++) {
                 Geometry triangle = triangleGeoms.getGeometryN(index);
                 if (triangle == null || triangle.isEmpty()) {
@@ -157,14 +157,15 @@ public class DelaunayTrangulationOperation extends GeneralOperation {
                 }
 
                 // get neighbor point
-                nodeList.clear();
-                spatialIndex.query(triangle.getEnvelopeInternal(), nodeList);
                 List<String> fidList = new ArrayList<String>();
-                for (KdNode node : nodeList) {
-                    if (triangle.disjoint(gf.createPoint(node.getCoordinate()))) {
+                for (@SuppressWarnings("unchecked")
+                Iterator<Node> iter = (Iterator<Node>) spatialIndex.query(
+                        triangle.getEnvelopeInternal()).iterator(); iter.hasNext();) {
+                    Node node = iter.next();
+                    if (triangle.disjoint(node.location)) {
                         continue;
                     }
-                    fidList.add((String) node.getData());
+                    fidList.add((String) node.id);
                 }
 
                 // create feature
@@ -188,22 +189,34 @@ public class DelaunayTrangulationOperation extends GeneralOperation {
     }
 
     private List<Coordinate> getCoordinateList(SimpleFeatureCollection inputFeatures) {
-        spatialIndex = new KdTree(0.0d);
+        spatialIndex = new STRtree();
         List<Coordinate> coordinateList = new ArrayList<Coordinate>();
         SimpleFeatureIterator featureIter = inputFeatures.features();
         try {
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
-
-                Coordinate coord = geometry.getCentroid().getCoordinate();
-                spatialIndex.insert(coord, feature.getID());
-                coordinateList.add(coord);
+                Point centroid = geometry.getCentroid();
+                spatialIndex.insert(centroid.getEnvelopeInternal(),
+                        new Node(centroid, feature.getID()));
+                coordinateList.add(centroid.getCoordinate());
             }
         } finally {
             featureIter.close();
         }
 
         return coordinateList;
+    }
+
+    static final class Node {
+
+        public Geometry location;
+
+        public Object id;
+
+        public Node(Geometry location, Object id) {
+            this.location = location;
+            this.id = id;
+        }
     }
 }

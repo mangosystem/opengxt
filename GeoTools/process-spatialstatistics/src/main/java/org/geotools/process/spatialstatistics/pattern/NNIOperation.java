@@ -17,10 +17,12 @@
 package org.geotools.process.spatialstatistics.pattern;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.DistanceFactory;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.SSUtils;
@@ -29,11 +31,16 @@ import org.geotools.process.spatialstatistics.core.SpatialEvent;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.util.logging.Logging;
+import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.algorithm.ConvexHull;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.index.strtree.ItemBoundable;
+import com.vividsolutions.jts.index.strtree.ItemDistance;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
  * Calculates a nearest neighbor index based on the average distance from each feature to its nearest neighboring feature.
@@ -51,9 +58,9 @@ public class NNIOperation extends GeneralOperation {
 
     private int featureCount = 0;
 
-    private double studyArea = 0;
+    private double studyArea = 0d;
 
-    private double observedMeanDist = 0;
+    private double observedMeanDist = 0d;
 
     private String typeName = "Average Nearest Neighbor Ratio";
 
@@ -75,19 +82,32 @@ public class NNIOperation extends GeneralOperation {
     }
 
     public NearestNeighborResult execute(SimpleFeatureCollection features) {
-        return execute(features, features.getBounds().getArea());
+        return execute(features, 0d);
     }
 
     public NearestNeighborResult execute(SimpleFeatureCollection features, double studyArea) {
         typeName = features.getSchema().getTypeName();
-        return execute(DistanceFactory.loadEvents(features, null), studyArea);
-    }
-
-    public NearestNeighborResult execute(List<SpatialEvent> events, double studyArea) {
-        observedMeanDist = 0.0;
-
         factory.setDistanceType(distanceMethod);
 
+        // build spatial index
+        final List<SpatialEvent> events = new ArrayList<SpatialEvent>();
+        final STRtree spatialIndex = new STRtree();
+        SimpleFeatureIterator featureIter = features.features();
+        try {
+            while (featureIter.hasNext()) {
+                SimpleFeature feature = featureIter.next();
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                Coordinate centroid = geometry.getCentroid().getCoordinate();
+
+                SpatialEvent event = new SpatialEvent(feature.getID(), centroid);
+                events.add(event);
+                spatialIndex.insert(new Envelope(centroid), event);
+            }
+        } finally {
+            featureIter.close();
+        }
+
+        // calculate area
         featureCount = events.size();
         if (studyArea == 0) {
             this.studyArea = getConvexHullArea(events);
@@ -95,15 +115,26 @@ public class NNIOperation extends GeneralOperation {
             this.studyArea = studyArea;
         }
 
-        double minDistance = 0.0;
-        double sumNearestDist = 0.0;
+        // calculate nearest neighbor index
+        double distanceSum = 0.0;
+        for (SpatialEvent source : events) {
+            SpatialEvent nearest = (SpatialEvent) spatialIndex.nearestNeighbour(new Envelope(
+                    source.coordinate), source, new ItemDistance() {
+                @Override
+                public double distance(ItemBoundable item1, ItemBoundable item2) {
+                    SpatialEvent s1 = (SpatialEvent) item1.getItem();
+                    SpatialEvent s2 = (SpatialEvent) item2.getItem();
+                    if (s1.id.equals(s2.id)) {
+                        return Double.MAX_VALUE;
+                    }
+                    return s1.distance(s2);
+                }
+            });
 
-        for (SpatialEvent curEvent : events) {
-            minDistance = factory.getMinimumDistance(events, curEvent);
-            sumNearestDist += minDistance;
+            distanceSum += factory.getDistance(source, nearest);
         }
 
-        observedMeanDist = sumNearestDist / (featureCount * 1.0);
+        observedMeanDist = distanceSum / featureCount;
 
         return buildResult();
     }

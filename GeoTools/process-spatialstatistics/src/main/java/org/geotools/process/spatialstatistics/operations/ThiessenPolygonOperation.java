@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -35,9 +36,13 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.prep.PreparedGeometry;
 import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
+import com.vividsolutions.jts.index.strtree.ItemBoundable;
+import com.vividsolutions.jts.index.strtree.ItemDistance;
+import com.vividsolutions.jts.index.strtree.STRtree;
 import com.vividsolutions.jts.triangulate.VoronoiDiagramBuilder;
 
 /**
@@ -103,9 +108,10 @@ public class ThiessenPolygonOperation extends GeneralOperation {
         Geometry thiessenGeoms = vdBuilder.getDiagram(gf);
         coordinateList.clear();
 
-        List<Geometry> thiessenList = new ArrayList<Geometry>();
+        STRtree spatialIndex = new STRtree();
         for (int k = 0; k < thiessenGeoms.getNumGeometries(); k++) {
-            thiessenList.add(thiessenGeoms.getGeometryN(k));
+            Geometry geometry = thiessenGeoms.getGeometryN(k);
+            spatialIndex.insert(geometry.getEnvelopeInternal(), geometry);
         }
 
         SimpleFeatureType featureType = null;
@@ -129,11 +135,20 @@ public class ThiessenPolygonOperation extends GeneralOperation {
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                Point centroid = geometry.getCentroid();
 
                 // get polygon
-                Geometry voronoiPolygon = getIntersectGeometry(thiessenList, geometry);
+                Geometry voronoiPolygon = (Geometry) spatialIndex.nearestNeighbour(
+                        geometry.getEnvelopeInternal(), geometry, new ItemDistance() {
+                            @Override
+                            public double distance(ItemBoundable item1, ItemBoundable item2) {
+                                Geometry s1 = (Geometry) item1.getItem();
+                                Geometry s2 = (Geometry) item2.getItem();
+                                return s1.distance(s2);
+                            }
+                        });
 
-                if (voronoiPolygon != null) {
+                if (voronoiPolygon.contains(centroid)) {
                     Geometry finalVoronoi = voronoiPolygon;
 
                     if (praparedGeom.disjoint(voronoiPolygon)) {
@@ -153,13 +168,9 @@ public class ThiessenPolygonOperation extends GeneralOperation {
 
                     newFeature.setAttribute(FID_FIELD, fid++);
                     newFeature.setDefaultGeometry(finalVoronoi);
-
                     featureWriter.write(newFeature);
-
-                    // remove geometry from geometry list
-                    thiessenList.remove(voronoiPolygon);
                 } else {
-                    // print("duplicated point feature!");
+                    LOGGER.log(Level.WARNING, "duplicated point feature!");
                 }
             }
         } catch (IOException e) {
@@ -254,9 +265,7 @@ public class ThiessenPolygonOperation extends GeneralOperation {
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
-
-                Coordinate coord = geometry.getCentroid().getCoordinate();
-                pointList.add(coord);
+                pointList.add(geometry.getCentroid().getCoordinate());
             }
         } finally {
             featureIter.close();
@@ -264,14 +273,4 @@ public class ThiessenPolygonOperation extends GeneralOperation {
 
         return pointList;
     }
-
-    private Geometry getIntersectGeometry(List<Geometry> geomList, Geometry origPoint) {
-        for (Geometry curGeometry : geomList) {
-            if (curGeometry.intersects(origPoint)) {
-                return curGeometry;
-            }
-        }
-        return null;
-    }
-
 }

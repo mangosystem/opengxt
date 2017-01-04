@@ -16,8 +16,7 @@
  */
 package org.geotools.process.spatialstatistics.core;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -30,8 +29,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.index.kdtree.KdNode;
-import com.vividsolutions.jts.index.kdtree.KdTree;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
  * SpatialWeightMatrix - Distance based weights
@@ -49,9 +47,10 @@ public class WeightMatrixDistance extends AbstractWeightMatrix {
 
     private SpatialConcept spatialConcept = SpatialConcept.InverseDistance;
 
+    @SuppressWarnings("unused")
     private double exponent = 1.0; // 1 or 2
 
-    private KdTree spatialIndex;
+    private STRtree spatialIndex;
 
     public WeightMatrixDistance() {
 
@@ -89,11 +88,10 @@ public class WeightMatrixDistance extends AbstractWeightMatrix {
 
         WeightMatrix matrix = new WeightMatrix(SpatialWeightMatrixType.Distance);
         matrix.setupVariables(features.getSchema().getTypeName(), uniqueField);
-        
+
         // 1. extract centroid and build spatial index
         this.buildSpatialIndex(features, uniqueField);
 
-        List<KdNode> result = new ArrayList<KdNode>();
         SimpleFeatureIterator featureIter = features.features();
         try {
             Envelope queryEnv = new Envelope();
@@ -106,17 +104,18 @@ public class WeightMatrixDistance extends AbstractWeightMatrix {
                 queryEnv.init(coordinate);
                 queryEnv.expandBy(thresholdDistance);
 
-                result.clear();
-                spatialIndex.query(queryEnv, result);
-                for (KdNode node : result) {
-                    Object secondaryID = node.getData();
-                    double distance = coordinate.distance(node.getCoordinate());
+                for (@SuppressWarnings("unchecked")
+                Iterator<SpatialEvent> iter = (Iterator<SpatialEvent>) spatialIndex.query(queryEnv)
+                        .iterator(); iter.hasNext();) {
+                    SpatialEvent sample = iter.next();
+
+                    double distance = coordinate.distance(sample.coordinate);
                     if (!this.isSelfNeighbors()
-                            && (primaryID.equals(secondaryID) || distance > thresholdDistance)) {
+                            && (primaryID.equals(sample.id) || distance > thresholdDistance)) {
                         continue;
                     }
 
-                    matrix.visit(primaryID, secondaryID, distance);
+                    matrix.visit(primaryID, sample.id, distance);
                 }
             }
         } finally {
@@ -127,16 +126,16 @@ public class WeightMatrixDistance extends AbstractWeightMatrix {
     }
 
     private void buildSpatialIndex(SimpleFeatureCollection features, String uniqueField) {
-        spatialIndex = new KdTree(0.0d);
+        spatialIndex = new STRtree();
         SimpleFeatureIterator featureIter = features.features();
         try {
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                Coordinate coordinate = geometry.getCentroid().getCoordinate();
+                Coordinate centroid = geometry.getCentroid().getCoordinate();
                 Object primaryID = getFeatureID(feature, uniqueField);
 
-                spatialIndex.insert(coordinate, primaryID);
+                spatialIndex.insert(new Envelope(centroid), new SpatialEvent(primaryID, centroid));
             }
         } finally {
             featureIter.close();

@@ -17,14 +17,14 @@
 package org.geotools.process.spatialstatistics.pattern;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.process.spatialstatistics.core.DistanceFactory;
+import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.KnnSearch;
 import org.geotools.process.spatialstatistics.core.SpatialEvent;
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
@@ -35,9 +35,14 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.algorithm.ConvexHull;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateArrays;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.index.strtree.ItemBoundable;
+import com.vividsolutions.jts.index.strtree.ItemDistance;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
  * K-Nearest Neighbor Map - Spatial Clustering.
@@ -51,59 +56,57 @@ public class KNearestNeighborMapOperation extends GeneralOperation {
 
     static String[] FIELDS = { "orig", "dest", "distance", "group" };
 
-    private Geometry getConvexHull(List<SpatialEvent> events) {
-        Coordinate[] coordinates = new Coordinate[events.size()];
-        for (int k = 0; k < events.size(); k++) {
-            SpatialEvent event = events.get(k);
-            coordinates[k] = event.getCoordinate();
-        }
-
-        ConvexHull cvxBuidler = new ConvexHull(coordinates, new GeometryFactory());
-        return cvxBuidler.getConvexHull();
-    }
+    private int featureCount = 0;
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection features, int neighbor,
             boolean convexHull) throws IOException {
-        // 1. pre calculation
-        List<SpatialEvent> events = DistanceFactory.loadEvents(features, null);
+        // build spatial index
+        STRtree spatialIndex = buildSpatialIndex(features);
+        List<Coordinate> coordinates = new ArrayList<Coordinate>();
 
-        // 2. create schema
+        // create schema
         String typeName = features.getSchema().getTypeName();
         CoordinateReferenceSystem crs = features.getSchema().getCoordinateReferenceSystem();
         SimpleFeatureType schema = FeatureTypes.getDefaultType(typeName, LineString.class, crs);
 
-        int length = typeName.length() + String.valueOf(events.size()).length() + 2;
+        int length = typeName.length() + String.valueOf(featureCount).length() + 2;
         schema = FeatureTypes.add(schema, FIELDS[0], String.class, length);
         schema = FeatureTypes.add(schema, FIELDS[1], String.class, length);
 
         schema = FeatureTypes.add(schema, FIELDS[2], Double.class, 38);
         schema = FeatureTypes.add(schema, FIELDS[3], String.class, 20);
 
-        // 3. build feature
+        // build feature
         IFeatureInserter featureWriter = getFeatureWriter(schema);
+        SimpleFeatureIterator featureIter = features.features();
         try {
-            // k nearest neighbor = neighbor
-            SortedMap<Double, SpatialEvent> map = new TreeMap<Double, SpatialEvent>();
-            for (SpatialEvent start : events) {
-                map.clear();
-                for (SpatialEvent end : events) {
-                    if (end.id == start.id) {
-                        continue;
-                    }
-
-                    double currentDist = start.distance(end);
-                    if (map.size() < neighbor) {
-                        map.put(currentDist, end);
-                    } else {
-                        if (map.lastKey() > currentDist) {
-                            map.put(currentDist, end);
-                            map.remove(map.lastKey());
-                        }
-                    }
+            KnnSearch knnSearch = new KnnSearch(spatialIndex);
+            while (featureIter.hasNext()) {
+                SimpleFeature feature = featureIter.next();
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                Coordinate coordinate = geometry.getCentroid().getCoordinate();
+                if (convexHull) {
+                    coordinates.add(coordinate);
                 }
 
-                // build line
-                for (SpatialEvent nearest : map.values()) {
+                SpatialEvent start = new SpatialEvent(feature.getID(), coordinate);
+                Object[] knns = knnSearch.kNearestNeighbour(new Envelope(coordinate), start,
+                        new ItemDistance() {
+                            @Override
+                            public double distance(ItemBoundable item1, ItemBoundable item2) {
+                                SpatialEvent s1 = (SpatialEvent) item1.getItem();
+                                SpatialEvent s2 = (SpatialEvent) item2.getItem();
+                                if (s1.id.equals(s2.id)) {
+                                    return Double.MAX_VALUE;
+                                }
+                                return s1.distance(s2);
+                            }
+                        }, neighbor);
+
+                // build line & write feature
+                for (Object object : knns) {
+                    SpatialEvent nearest = (SpatialEvent) object;
+
                     Geometry line = createLineString(start, nearest);
                     double distance = line.getLength();
                     if (distance == 0) {
@@ -120,9 +123,12 @@ public class KNearestNeighborMapOperation extends GeneralOperation {
                 }
             }
 
-            // convexhull
+            // finally convexhull
             if (convexHull) {
-                Geometry convexHullGeom = getConvexHull(events);
+                Coordinate[] coords = CoordinateArrays.toCoordinateArray(coordinates);
+                ConvexHull cvxBuidler = new ConvexHull(coords, new GeometryFactory());
+                Geometry convexHullGeom = cvxBuidler.getConvexHull();
+
                 SimpleFeature newFeature = featureWriter.buildFeature();
                 newFeature.setDefaultGeometry(convexHullGeom.getBoundary());
                 newFeature.setAttribute(FIELDS[3], "ConvexHull");
@@ -131,7 +137,7 @@ public class KNearestNeighborMapOperation extends GeneralOperation {
         } catch (Exception e) {
             featureWriter.rollback(e);
         } finally {
-            featureWriter.close();
+            featureWriter.close(featureIter);
         }
 
         return featureWriter.getFeatureCollection();
@@ -141,4 +147,22 @@ public class KNearestNeighborMapOperation extends GeneralOperation {
         return gf.createLineString(new Coordinate[] { start.getCoordinate(), end.getCoordinate() });
     }
 
+    private STRtree buildSpatialIndex(SimpleFeatureCollection features) {
+        STRtree spatialIndex = new STRtree();
+        SimpleFeatureIterator featureIter = features.features();
+        try {
+            while (featureIter.hasNext()) {
+                SimpleFeature feature = featureIter.next();
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                Coordinate centroid = geometry.getCentroid().getCoordinate();
+
+                SpatialEvent event = new SpatialEvent(feature.getID(), centroid);
+                spatialIndex.insert(new Envelope(centroid), event);
+                featureCount++;
+            }
+        } finally {
+            featureIter.close();
+        }
+        return spatialIndex;
+    }
 }

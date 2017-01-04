@@ -18,6 +18,7 @@ package org.geotools.process.spatialstatistics.operations;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -31,7 +32,9 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
  * Collect Event combines coincident points.
@@ -66,8 +69,7 @@ public class CollectEventsOperation extends GeneralOperation {
         schema = FeatureTypes.add(schema, countField, Integer.class);
         Class<?> outputBinding = schema.getDescriptor(countField).getType().getBinding();
 
-        List<Event> events = buildIndex(points);
-        List<Event> coincidentEvents = new ArrayList<Event>();
+        STRtree spatialIndex = buildIndex(points);
         List<String> processedMap = new ArrayList<String>();
 
         IFeatureInserter featureWriter = getFeatureWriter(schema);
@@ -82,31 +84,30 @@ public class CollectEventsOperation extends GeneralOperation {
 
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
                 Coordinate coordinate = geometry.getCoordinate();
+                Envelope searchEnv = new Envelope(coordinate);
+                searchEnv.expandBy(tolerance);
 
                 // count coincident events
                 int featureCount = 1;
-                for (Event event : events) {
-                    if (processedMap.contains(event.getFID()) || event.equalsFID(featureID)
-                            || event.distance(coordinate) > tolerance) {
+                for (@SuppressWarnings("unchecked")
+                Iterator<Event> iter = (Iterator<Event>) spatialIndex.query(searchEnv).iterator(); iter
+                        .hasNext();) {
+                    Event sample = iter.next();
+                    double distance = coordinate.distance(sample.coordinate);
+                    if (processedMap.contains(sample.getFID()) || sample.equalsFID(featureID)
+                            || distance > tolerance) {
                         continue;
                     }
 
                     featureCount++;
-                    processedMap.add(event.getFID());
-                    coincidentEvents.add(event);
-                }
-
-                // remove coincident events
-                if (coincidentEvents.size() > 0) {
-                    events.removeAll(coincidentEvents);
-                    coincidentEvents.clear();
+                    processedMap.add(sample.getFID());
                 }
 
                 // create & insert feature
                 SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
-                Object countVal = Converters.convert(featureCount, outputBinding);
-                newFeature.setAttribute(countField, countVal);
+                Object count = Converters.convert(featureCount, outputBinding);
+                newFeature.setAttribute(countField, count);
 
                 featureWriter.write(newFeature);
                 processedMap.add(featureID);
@@ -120,19 +121,20 @@ public class CollectEventsOperation extends GeneralOperation {
         return featureWriter.getFeatureCollection();
     }
 
-    private List<Event> buildIndex(SimpleFeatureCollection points) {
-        List<Event> events = new ArrayList<Event>();
+    private STRtree buildIndex(SimpleFeatureCollection points) {
+        STRtree spatialIndex = new STRtree();
         SimpleFeatureIterator featureIter = points.features();
         try {
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                events.add(new Event(feature.getID(), geometry.getCoordinate()));
+                Event event = new Event(feature.getID(), geometry.getCoordinate());
+                spatialIndex.insert(new Envelope(geometry.getCoordinate()), event);
             }
         } finally {
             featureIter.close();
         }
-        return events;
+        return spatialIndex;
     }
 
     final class Event {

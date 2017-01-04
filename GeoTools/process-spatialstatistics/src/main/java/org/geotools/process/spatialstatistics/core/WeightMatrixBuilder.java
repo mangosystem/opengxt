@@ -19,7 +19,6 @@ package org.geotools.process.spatialstatistics.core;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -168,7 +167,7 @@ public class WeightMatrixBuilder {
                 weightMatrix = swmKnearest.execute(inputFeatures, null);
             } else {
                 if (distanceBandWidth == 0) {
-                    calculateDistanceBand();
+                    distanceBandWidth = factory.getThresholDistance(inputFeatures);
                 }
 
                 WeightMatrixDistance wmsDist = new WeightMatrixDistance();
@@ -243,16 +242,6 @@ public class WeightMatrixBuilder {
             return Double.valueOf(1.0);
         }
         return value;
-    }
-
-    private void calculateDistanceBand() {
-        double threshold = Double.MIN_VALUE;
-        for (SpatialEvent curEvent : events) {
-            threshold = Math.max(threshold, factory.getMinimumDistance(events, curEvent));
-        }
-        distanceBandWidth = threshold * 1.0001;
-        String msg = "The default neighborhood search threshold was " + distanceBandWidth;
-        LOGGER.log(Level.WARNING, msg);
     }
 
     private List<SpatialEvent> loadEvents(SimpleFeatureCollection features, String xField) {

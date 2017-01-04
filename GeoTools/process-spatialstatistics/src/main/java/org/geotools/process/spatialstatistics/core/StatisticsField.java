@@ -43,7 +43,7 @@ public class StatisticsField {
     public Object value = null;
 
     public StatisticsField() {
-    };
+    }
 
     public StatisticsField(String srcField, String targetField) {
         setSrcField(srcField);

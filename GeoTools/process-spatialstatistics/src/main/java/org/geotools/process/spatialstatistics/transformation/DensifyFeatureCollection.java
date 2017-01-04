@@ -102,7 +102,11 @@ public class DensifyFeatureCollection extends GXTSimpleFeatureCollection {
                 }
                 builder.add(attribute);
             }
-            return builder.buildFeature(feature.getID());
+
+            SimpleFeature nextFeature = builder.buildFeature(feature.getID());
+            builder.reset();
+
+            return nextFeature;
         }
     }
 }

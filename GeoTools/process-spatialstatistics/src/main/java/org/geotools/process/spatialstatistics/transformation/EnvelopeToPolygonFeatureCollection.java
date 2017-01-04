@@ -46,15 +46,14 @@ public class EnvelopeToPolygonFeatureCollection extends GXTSimpleFeatureCollecti
     protected static final Logger LOGGER = Logging
             .getLogger(EnvelopeToPolygonFeatureCollection.class);
 
-    private boolean singleEnvelope;
+    private boolean singlePart;
 
     private SimpleFeatureType schema;
 
-    public EnvelopeToPolygonFeatureCollection(SimpleFeatureCollection delegate,
-            boolean singleEnvelope) {
+    public EnvelopeToPolygonFeatureCollection(SimpleFeatureCollection delegate, boolean singlePart) {
         super(delegate);
 
-        this.singleEnvelope = singleEnvelope;
+        this.singlePart = singlePart;
 
         String typeName = delegate.getSchema().getTypeName();
         this.schema = FeatureTypes.build(delegate.getSchema(), typeName, Polygon.class);
@@ -62,8 +61,7 @@ public class EnvelopeToPolygonFeatureCollection extends GXTSimpleFeatureCollecti
 
     @Override
     public SimpleFeatureIterator features() {
-        return new EnvelopeToPolygonFeatureIterator(delegate.features(), getSchema(),
-                singleEnvelope);
+        return new EnvelopeToPolygonFeatureIterator(delegate.features(), getSchema(), singlePart);
     }
 
     @Override
@@ -82,15 +80,15 @@ public class EnvelopeToPolygonFeatureCollection extends GXTSimpleFeatureCollecti
     static class EnvelopeToPolygonFeatureIterator implements SimpleFeatureIterator {
         private SimpleFeatureIterator delegate;
 
-        private boolean singleEnvelope = false;
+        private boolean singlePart = false;
 
         private SimpleFeatureBuilder builder;
 
         public EnvelopeToPolygonFeatureIterator(SimpleFeatureIterator delegate,
-                SimpleFeatureType schema, boolean singleEnvelope) {
+                SimpleFeatureType schema, boolean singlePart) {
             this.delegate = delegate;
 
-            this.singleEnvelope = singleEnvelope;
+            this.singlePart = singlePart;
             this.builder = new SimpleFeatureBuilder(schema);
         }
 
@@ -104,23 +102,27 @@ public class EnvelopeToPolygonFeatureCollection extends GXTSimpleFeatureCollecti
 
         public SimpleFeature next() throws NoSuchElementException {
             SimpleFeature sourceFeature = delegate.next();
-            SimpleFeature nextFeature = builder.buildFeature(sourceFeature.getID());
 
-            // transfer attributes
-            transferAttribute(sourceFeature, nextFeature);
-
-            // envelope to polygon geometry
-            Geometry geometry = (Geometry) sourceFeature.getDefaultGeometry();
-            if (!singleEnvelope && geometry.getNumGeometries() > 1) {
-                List<Geometry> geomList = new ArrayList<Geometry>();
-                for (int index = 0; index < geometry.getNumGeometries(); index++) {
-                    Geometry part = geometry.getGeometryN(index);
-                    geomList.add(JTS.toGeometry(part.getEnvelopeInternal()));
+            for (Object attribute : sourceFeature.getAttributes()) {
+                if (attribute instanceof Geometry) {
+                    Geometry geometry = (Geometry) attribute;
+                    if (!singlePart && geometry.getNumGeometries() > 1) {
+                        List<Geometry> geomList = new ArrayList<Geometry>();
+                        for (int index = 0; index < geometry.getNumGeometries(); index++) {
+                            Geometry part = geometry.getGeometryN(index);
+                            geomList.add(JTS.toGeometry(part.getEnvelopeInternal()));
+                        }
+                        attribute = geometry.getFactory().buildGeometry(geomList);
+                    } else {
+                        attribute = JTS.toGeometry(geometry.getEnvelopeInternal());
+                    }
                 }
-                nextFeature.setDefaultGeometry(geometry.getFactory().buildGeometry(geomList));
-            } else {
-                nextFeature.setDefaultGeometry(JTS.toGeometry(geometry.getEnvelopeInternal()));
+                builder.add(attribute);
             }
+
+            SimpleFeature nextFeature = builder.buildFeature(sourceFeature.getID());
+            builder.reset();
+
             return nextFeature;
         }
     }

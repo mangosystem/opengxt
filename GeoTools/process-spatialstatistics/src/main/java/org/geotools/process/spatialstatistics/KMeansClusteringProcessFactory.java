@@ -44,7 +44,8 @@ public class KMeansClusteringProcessFactory extends SpatialStatisticsProcessFact
 
     private static final String PROCESS_NAME = "KMeansClustering";
 
-    // KMeansClustering(SimpleFeatureCollection inputFeatures, String targetField, Integer numberOfClusters): SimpleFeatureCollection
+    // KMeansClustering(SimpleFeatureCollection inputFeatures, String targetField, Integer numberOfClusters, Boolean asCircle):
+    // SimpleFeatureCollection
 
     public KMeansClusteringProcessFactory() {
         super(new NameImpl(NAMESPACE, PROCESS_NAME));
@@ -81,7 +82,13 @@ public class KMeansClusteringProcessFactory extends SpatialStatisticsProcessFact
     public static final Parameter<Integer> numberOfClusters = new Parameter<Integer>(
             "numberOfClusters", Integer.class,
             getResource("KMeansClustering.numberOfClusters.title"),
-            getResource("KMeansClustering.numberOfClusters.description"), true, 1, 1, 5, null);
+            getResource("KMeansClustering.numberOfClusters.description"), true, 1, 1,
+            Integer.valueOf(5), null);
+
+    /** asCircle */
+    public static final Parameter<Boolean> asCircle = new Parameter<Boolean>("asCircle",
+            Boolean.class, getResource("KMeansClustering.asCircle.title"),
+            getResource("KMeansClustering.asCircle.description"), false, 0, 1, Boolean.FALSE, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -89,6 +96,7 @@ public class KMeansClusteringProcessFactory extends SpatialStatisticsProcessFact
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(targetField.key, targetField);
         parameterInfo.put(numberOfClusters.key, numberOfClusters);
+        parameterInfo.put(asCircle.key, asCircle);
         return parameterInfo;
     }
 

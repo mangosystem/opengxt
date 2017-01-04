@@ -52,11 +52,12 @@ public class KMeansClusteringProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            String targetField, Integer numberOfClusters, ProgressListener monitor) {
+            String targetField, Integer numberOfClusters, Boolean asCircle, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(KMeansClusteringProcessFactory.inputFeatures.key, inputFeatures);
         map.put(KMeansClusteringProcessFactory.targetField.key, targetField);
         map.put(KMeansClusteringProcessFactory.numberOfClusters.key, numberOfClusters);
+        map.put(KMeansClusteringProcessFactory.asCircle.key, asCircle);
 
         Process process = new KMeansClusteringProcess(null);
         Map<String, Object> resultMap;
@@ -99,10 +100,18 @@ public class KMeansClusteringProcess extends AbstractStatisticsProcess {
                 throw new NullPointerException("Number of clusters must be greater than 1");
             }
 
+            Boolean asCircle = (Boolean) Params.getValue(input,
+                    KMeansClusteringProcessFactory.asCircle,
+                    KMeansClusteringProcessFactory.asCircle.sample);
+
             // start process
             KMeansClusterOperation operator = new KMeansClusterOperation();
             SimpleFeatureCollection resultFc = null;
-            resultFc = operator.execute(inputFeatures, targetField, numberOfClusters);
+            if (asCircle) {
+                resultFc = operator.executeAsCircle(inputFeatures, targetField, numberOfClusters);
+            } else {
+                resultFc = operator.execute(inputFeatures, targetField, numberOfClusters);
+            }
             // end process
 
             Map<String, Object> resultMap = new HashMap<String, Object>();

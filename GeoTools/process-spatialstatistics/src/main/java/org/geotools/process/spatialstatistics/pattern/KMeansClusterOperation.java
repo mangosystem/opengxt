@@ -104,7 +104,6 @@ public class KMeansClusterOperation extends GeneralOperation {
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
         try {
-            int featureID = 0;
             for (Entry<Integer, List<Geometry>> entry : clusters.entrySet()) {
                 if (entry.getValue().size() == 0) {
                     continue;
@@ -159,7 +158,6 @@ public class KMeansClusterOperation extends GeneralOperation {
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
         try {
-            int featureID = 0;
             for (Entry<Integer, List<Geometry>> entry : clusters.entrySet()) {
                 if (entry.getValue().size() == 0) {
                     continue;

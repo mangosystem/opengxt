@@ -32,11 +32,9 @@ import org.geotools.process.spatialstatistics.core.StatisticsVisitorResult;
 import org.geotools.process.spatialstatistics.core.StringHelper;
 import org.geotools.process.spatialstatistics.core.SummaryFieldBuilder;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
-import org.geotools.process.spatialstatistics.transformation.ToPointFeatureCollection;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -56,6 +54,10 @@ public class DissolveOperation extends GeneralOperation {
     static final String NULL = "NULLVALUE";
 
     private Boolean useMultiPart = Boolean.TRUE;
+
+    private Hashtable<Object, Hashtable<String, StatisticsVisitor>> attMap;
+
+    private Hashtable<Object, List<Geometry>> geoMap;
 
     public boolean isUseMultiPart() {
         return useMultiPart;
@@ -110,8 +112,67 @@ public class DissolveOperation extends GeneralOperation {
         }
 
         // calculate statistics
-        Hashtable<Object, Hashtable<String, StatisticsVisitor>> attMap = new Hashtable<Object, Hashtable<String, StatisticsVisitor>>();
-        Hashtable<Object, List<Geometry>> geoMap = new Hashtable<Object, List<Geometry>>();
+        calculateStatistics(features, dissolveField, schema, uvFields);
+
+        // post process
+        IFeatureInserter writer = getFeatureWriter(featureType);
+        try {
+            for (Entry<Object, List<Geometry>> entry : geoMap.entrySet()) {
+                CascadedPolygonUnion unionOp = new CascadedPolygonUnion(entry.getValue());
+                Geometry unionGeometry = unionOp.union();
+
+                if (useMultiPart) {
+                    // multi part feature
+                    SimpleFeature newFeature = writer.buildFeature();
+                    newFeature.setDefaultGeometry(unionGeometry);
+                    newFeature.setAttribute(dissolveField, entry.getKey());
+
+                    Hashtable<String, StatisticsVisitor> map = attMap.get(entry.getKey());
+                    if (map != null) {
+                        for (StatisticsField field : statisticsList) {
+                            StatisticsVisitorResult ret = map.get(field.getSrcField()).getResult();
+                            if (ret == null) {
+                                continue;
+                            }
+                            Object val = ret.getValue(field.getStatType());
+                            newFeature.setAttribute(field.getTargetField(), val);
+                        }
+                    }
+                    writer.write(newFeature);
+                } else {
+                    // single part feature
+                    for (int idx = 0; idx < unionGeometry.getNumGeometries(); idx++) {
+                        SimpleFeature newFeature = writer.buildFeature();
+                        newFeature.setDefaultGeometry(unionGeometry.getGeometryN(idx));
+                        newFeature.setAttribute(dissolveField, entry.getKey());
+
+                        Hashtable<String, StatisticsVisitor> map = attMap.get(entry.getKey());
+                        if (map != null) {
+                            for (StatisticsField field : statisticsList) {
+                                StatisticsVisitorResult ret = map.get(field.getSrcField())
+                                        .getResult();
+                                if (ret == null) {
+                                    continue;
+                                }
+                                Object val = ret.getValue(field.getStatType());
+                                newFeature.setAttribute(field.getTargetField(), val);
+                            }
+                        }
+                        writer.write(newFeature);
+                    }
+                }
+            }
+        } finally {
+            writer.close();
+        }
+
+        return writer.getFeatureCollection();
+    }
+
+    private void calculateStatistics(SimpleFeatureCollection features, String dissolveField,
+            SimpleFeatureType schema, List<String> uvFields) {
+        attMap = new Hashtable<Object, Hashtable<String, StatisticsVisitor>>();
+        geoMap = new Hashtable<Object, List<Geometry>>();
 
         SimpleFeatureIterator featureIter = features.features();
         try {
@@ -145,56 +206,6 @@ public class DissolveOperation extends GeneralOperation {
         } finally {
             featureIter.close();
         }
-
-        // post process
-        IFeatureInserter writer = getFeatureWriter(featureType);
-        try {
-            int index = 0;
-            for (Entry<Object, List<Geometry>> entry : geoMap.entrySet()) {
-                CascadedPolygonUnion unionOp = new CascadedPolygonUnion(entry.getValue());
-                Geometry unionGeometry = unionOp.union();
-
-                if (useMultiPart) {
-                    SimpleFeature newFeature = writer.buildFeature();
-                    newFeature.setDefaultGeometry(unionGeometry);
-                    newFeature.setAttribute(dissolveField, entry.getKey());
-
-                    Hashtable<String, StatisticsVisitor> map = attMap.get(entry.getKey());
-                    for (StatisticsField field : statisticsList) {
-                        StatisticsVisitorResult ret = map.get(field.getSrcField()).getResult();
-                        Object val = ret.getValue(field.getStatType());
-                        newFeature.setAttribute(field.getTargetField(), val);
-                    }
-                    writer.write(newFeature);
-                } else {
-                    SimpleFeatureCollection points = new ToPointFeatureCollection(features, true);
-                    String geom = points.getSchema().getGeometryDescriptor().getLocalName();
-                    for (int idx = 0; idx < unionGeometry.getNumGeometries(); idx++) {
-                        Geometry geometry = unionGeometry.getGeometryN(idx);
-                        Filter filter = getIntersectsFilter(geom, geometry);
-
-                        // TODO calculate statistics
-
-                        // create feature
-                        SimpleFeature newFeature = writer.buildFeature();
-                        newFeature.setDefaultGeometry(geometry);
-                        newFeature.setAttribute(dissolveField, entry.getKey());
-
-                        Hashtable<String, StatisticsVisitor> map = attMap.get(entry.getKey());
-                        for (StatisticsField field : statisticsList) {
-                            StatisticsVisitorResult ret = map.get(field.getSrcField()).getResult();
-                            Object val = ret.getValue(field.getStatType());
-                            newFeature.setAttribute(field.getTargetField(), val);
-                        }
-                        writer.write(newFeature);
-                    }
-                }
-            }
-        } finally {
-            writer.close();
-        }
-
-        return writer.getFeatureCollection();
     }
 
     private SimpleFeatureType addAttributes(SimpleFeatureType featureType,

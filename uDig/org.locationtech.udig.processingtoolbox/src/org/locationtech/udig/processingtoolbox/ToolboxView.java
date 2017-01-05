@@ -556,10 +556,14 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(utilTool, "org.geotools.process.spatialstatistics.PointsToLineProcessFactory");
         buildTool(utilTool,
                 "org.geotools.process.spatialstatistics.FeatureEnvelopeToPolygonProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToConvexHullProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToMinimumBoundingCircleProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToMinimumRectangleProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToOctagonalEnvelopeProcessFactory");
+        buildTool(utilTool,
+                "org.geotools.process.spatialstatistics.FeatureToConvexHullProcessFactory");
+        buildTool(utilTool,
+                "org.geotools.process.spatialstatistics.FeatureToMinimumBoundingCircleProcessFactory");
+        buildTool(utilTool,
+                "org.geotools.process.spatialstatistics.FeatureToMinimumRectangleProcessFactory");
+        buildTool(utilTool,
+                "org.geotools.process.spatialstatistics.FeatureToOctagonalEnvelopeProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SimplifyProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.DensifyProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.FlipLineProcessFactory");
@@ -567,11 +571,13 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RemoveHolesProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RemovePartsProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.OffsetFeaturesProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.SnapPointsToLinesProcessFactory");
+        buildTool(utilTool,
+                "org.geotools.process.spatialstatistics.SnapPointsToLinesProcessFactory");
         buildTool(utilTool,
                 "org.geotools.process.spatialstatistics.SplitLineByDistanceProcessFactory");
         buildTool(utilTool,
                 "org.geotools.process.spatialstatistics.SplitLineAtVerticesProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.SplitLineAtPointProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.FlowMapProcessFactory");
     }
 

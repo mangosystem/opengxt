@@ -23,6 +23,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -56,6 +57,13 @@ public class OffsetFeatureCollection extends GXTSimpleFeatureCollection {
     @Override
     public SimpleFeatureIterator features() {
         return new OffsetFeatureIterator(delegate.features(), getSchema(), offsetX, offsetY);
+    }
+
+    @Override
+    public ReferencedEnvelope getBounds() {
+        ReferencedEnvelope bounds = delegate.getBounds();
+        bounds.translate(offsetY, offsetY);
+        return bounds;
     }
 
     @Override

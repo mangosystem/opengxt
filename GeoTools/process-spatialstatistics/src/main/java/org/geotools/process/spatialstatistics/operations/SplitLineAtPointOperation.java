@@ -58,12 +58,12 @@ public class SplitLineAtPointOperation extends GeneralOperation {
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection lineFeatures,
             SimpleFeatureCollection pointFeatures, double tolerance) throws IOException {
-        SimpleFeatureType featureType = lineFeatures.getSchema();
+        STRtree spatialIndex = loadNearFeatures(pointFeatures);
 
         // prepare transactional feature store
+        SimpleFeatureType featureType = lineFeatures.getSchema();
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
 
-        STRtree spatialIndex = loadNearFeatures(pointFeatures);
         SimpleFeatureIterator featureIter = lineFeatures.features();
         try {
             while (featureIter.hasNext()) {
@@ -134,23 +134,23 @@ public class SplitLineAtPointOperation extends GeneralOperation {
         // sort point along line
         SortedMap<Integer, Coordinate> sortedMap = new TreeMap<Integer, Coordinate>();
         for (Coordinate locator : coordinates) {
-            LinearLocation midLoc = liLine.indexOf(locator);
-            sortedMap.put(Integer.valueOf(midLoc.getSegmentIndex()), locator);
+            LinearLocation index = liLine.indexOf(locator);
+            sortedMap.put(Integer.valueOf(index.getSegmentIndex()), locator);
         }
 
         // split
-        LinearLocation lastIndex = liLine.getStartIndex();
+        LinearLocation startIndex = liLine.getStartIndex();
         for (Entry<Integer, Coordinate> entrySet : sortedMap.entrySet()) {
-            LinearLocation midIndex = liLine.indexOf(entrySet.getValue());
-            Geometry left = liLine.extractLine(lastIndex, midIndex);
+            LinearLocation endIndex = liLine.indexOf(entrySet.getValue());
+            Geometry left = liLine.extractLine(startIndex, endIndex);
             if (left != null && !left.isEmpty()) {
                 splits.add(left);
             }
-            lastIndex = midIndex;
+            startIndex = endIndex;
         }
 
         // add last segment
-        Geometry left = liLine.extractLine(lastIndex, liLine.getEndIndex());
+        Geometry left = liLine.extractLine(startIndex, liLine.getEndIndex());
         if (left != null && !left.isEmpty()) {
             splits.add(left);
         }

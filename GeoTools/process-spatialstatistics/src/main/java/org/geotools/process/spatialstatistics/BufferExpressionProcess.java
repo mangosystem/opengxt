@@ -47,8 +47,6 @@ import org.opengis.util.ProgressListener;
 public class BufferExpressionProcess extends AbstractStatisticsProcess implements RenderingProcess {
     protected static final Logger LOGGER = Logging.getLogger(BufferExpressionProcess.class);
 
-    private boolean started = false;
-
     public BufferExpressionProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -80,37 +78,26 @@ public class BufferExpressionProcess extends AbstractStatisticsProcess implement
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, BufferExpressionProcessFactory.inputFeatures, null);
-            Expression distance = (Expression) Params.getValue(input,
-                    BufferExpressionProcessFactory.distance, null);
-            Integer quadrantSegments = (Integer) Params.getValue(input,
-                    BufferExpressionProcessFactory.quadrantSegments,
-                    BufferExpressionProcessFactory.quadrantSegments.sample);
-            if (inputFeatures == null || distance == null) {
-                throw new NullPointerException("All parameters required");
-            }
-
-            // start process
-            // Expression filter = ECQL.toExpression(expression);
-            SimpleFeatureCollection resultFc = DataUtilities
-                    .simple(new BufferExpressionFeatureCollection(inputFeatures, distance,
-                            quadrantSegments));
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(BufferExpressionProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                BufferExpressionProcessFactory.inputFeatures, null);
+        Expression distance = (Expression) Params.getValue(input,
+                BufferExpressionProcessFactory.distance, null);
+        Integer quadrantSegments = (Integer) Params.getValue(input,
+                BufferExpressionProcessFactory.quadrantSegments,
+                BufferExpressionProcessFactory.quadrantSegments.sample);
+        if (inputFeatures == null || distance == null) {
+            throw new NullPointerException("All parameters required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities
+                .simple(new BufferExpressionFeatureCollection(inputFeatures, distance,
+                        quadrantSegments));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(BufferExpressionProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
     /**

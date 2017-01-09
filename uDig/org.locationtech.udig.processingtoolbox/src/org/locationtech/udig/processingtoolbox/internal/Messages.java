@@ -389,6 +389,7 @@ public class Messages extends NLS {
     public static String ToolboxView_Conditional;
     public static String ToolboxView_Conversion;
     public static String ToolboxView_Reclass;
+    public static String ToolboxView_Editing;
 
     static {
         // initialize resource bundle

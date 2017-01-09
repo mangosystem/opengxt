@@ -56,12 +56,12 @@ public class SnapPointsToLinesOperation extends GeneralOperation {
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection pointFeatures,
             SimpleFeatureCollection lineFeatures, double tolerance) throws IOException {
-        SimpleFeatureType featureType = pointFeatures.getSchema();
+        STRtree spatialIndex = loadNearFeatures(lineFeatures);
 
         // prepare transactional feature store
+        SimpleFeatureType featureType = pointFeatures.getSchema();
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
 
-        STRtree spatialIndex = loadNearFeatures(lineFeatures);
         SimpleFeatureIterator featureIter = pointFeatures.features();
         try {
             while (featureIter.hasNext()) {

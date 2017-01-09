@@ -41,11 +41,13 @@ org.geotools.process.spatialstatistics.UnionPolygonProcessFactory
 org.geotools.process.spatialstatistics.MultipartToSinglepartProcessFactory
 org.geotools.process.spatialstatistics.SinglepartToMultipartProcessFactory
 org.geotools.process.spatialstatistics.FeatureToPointProcessFactory
+org.geotools.process.spatialstatistics.FeatureToLineProcessFactory
 org.geotools.process.spatialstatistics.FeatureEnvelopeToPolygonProcessFactory
 org.geotools.process.spatialstatistics.PointsToLineProcessFactory
 org.geotools.process.spatialstatistics.VerticesToPointsProcessFactory
 org.geotools.process.spatialstatistics.SplitLineByDistanceProcessFactory
 org.geotools.process.spatialstatistics.SplitLineAtVerticesProcessFactory
+org.geotools.process.spatialstatistics.SplitLineAtPointProcessFactory
 org.geotools.process.spatialstatistics.PointsAlongLinesProcessFactory
 org.geotools.process.spatialstatistics.FlowMapProcessFactory
 org.geotools.process.spatialstatistics.FeatureToConvexHullProcessFactory
@@ -54,7 +56,8 @@ org.geotools.process.spatialstatistics.FeatureToMinimumRectangleProcessFactory
 org.geotools.process.spatialstatistics.FeatureToOctagonalEnvelopeProcessFactory
 org.geotools.process.spatialstatistics.OffsetFeaturesProcessFactory
 org.geotools.process.spatialstatistics.SnapPointsToLinesProcessFactory
-org.geotools.process.spatialstatistics.SplitLineAtPointProcessFactory
+org.geotools.process.spatialstatistics.TrimLineProcessFactory
+org.geotools.process.spatialstatistics.ExtendLineProcessFactory
 
 org.geotools.process.spatialstatistics.DissolveProcessFactory
 org.geotools.process.spatialstatistics.SimplifyProcessFactory
@@ -62,6 +65,7 @@ org.geotools.process.spatialstatistics.DensifyProcessFactory
 org.geotools.process.spatialstatistics.RemoveHolesProcessFactory
 org.geotools.process.spatialstatistics.RemovePartsProcessFactory
 org.geotools.process.spatialstatistics.FlipLineProcessFactory
+org.geotools.process.spatialstatistics.EliminateProcessFactory
 
 org.geotools.process.spatialstatistics.ClipWithGeometryProcessFactory
 org.geotools.process.spatialstatistics.ClipWithFeaturesProcessFactory
@@ -94,6 +98,7 @@ org.geotools.process.spatialstatistics.PolarGridsFromFeaturesProcessFactory
 org.geotools.process.spatialstatistics.PolarGridsFromGeometryProcessFactory
 org.geotools.process.spatialstatistics.MultipleRingBufferProcessFactory
 org.geotools.process.spatialstatistics.BufferExpressionProcessFactory
+org.geotools.process.spatialstatistics.SingleSidedBufferProcessFactory
 org.geotools.process.spatialstatistics.RingMapProcessFactory
 org.geotools.process.spatialstatistics.HubLinesByDistanceProcessFactory
 org.geotools.process.spatialstatistics.HubLinesByIDProcessFactory

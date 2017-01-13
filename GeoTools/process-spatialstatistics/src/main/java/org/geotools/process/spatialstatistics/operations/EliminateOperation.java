@@ -234,6 +234,20 @@ public class EliminateOperation extends GeneralOperation {
 
         if (owns.size() > 0) {
             eliminated = source.union(CascadedPolygonUnion.union(owns));
+
+            // post process
+            List<Geometry> interiors = new ArrayList<Geometry>();
+            for (int index = 0; index < source.getNumGeometries(); index++) {
+                Polygon poly = (Polygon) source.getGeometryN(index);
+                for (int i = 0; i < poly.getNumInteriorRing(); i++) {
+                    LinearRing hole = (LinearRing) poly.getInteriorRingN(i);
+                    interiors.add(factory.createPolygon((LinearRing) hole.reverse()));
+                }
+            }
+
+            if (interiors.size() > 0) {
+                eliminated = eliminated.difference(source.getFactory().buildGeometry(interiors));
+            }
         }
 
         return eliminated;

@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Widget;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.feature.FeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
@@ -302,7 +303,45 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
         insertParamTitle(container, param);
 
         // process value
-        if (SimpleFeatureCollection.class.isAssignableFrom(param.type)) {
+        if (param.maxOccurs > 1) {
+            if (SimpleFeatureCollection.class.isAssignableFrom(param.type)
+                    || FeatureCollection.class.isAssignableFrom(param.type)) {
+                // vector layers parameters
+                FeatureCollectionsDataWidget featuresView = new FeatureCollectionsDataWidget(map);
+                featuresView.create(container, SWT.NONE, inputParams, param);
+            } else if (GridCoverage2D.class.isAssignableFrom(param.type)) {
+                // raster layers parameters
+                GridCoveragesDataWidget gridCoverageView = new GridCoveragesDataWidget(map);
+                gridCoverageView.create(container, SWT.NONE, inputParams, param);
+            } else if (Geometry.class.isAssignableFrom(param.type)) {
+                // wkt geometries parameters
+                GeometryWidget geometryView = new GeometryWidget(map);
+                geometryView.create(container, SWT.NONE, inputParams, param);
+            } else {
+                Map<String, Object> metadata = param.metadata;
+                if (metadata == null || metadata.size() == 0) {
+                    // other literal parameters
+                    LiteralDataWidget literalView = new LiteralDataWidget(map);
+                    literalView.create(container, SWT.NONE, inputParams, param);
+                } else {
+                    if (metadata.containsKey(Params.FIELD)) {
+                        LiteralDataFieldWidget fieldView = new LiteralDataFieldWidget(map);
+                        fieldView.create(container, SWT.NONE, inputParams, param, uiParams);
+                    } else if (metadata.containsKey(Params.FIELDS)) {
+                        LiteralDataFieldsWidget fieldView = new LiteralDataFieldsWidget(map);
+                        fieldView.create(container, SWT.NONE, inputParams, param, uiParams);
+                    } else {
+                        // other literal parameters
+                        LiteralDataWidget literalView = new LiteralDataWidget(map);
+                        literalView.create(container, SWT.NONE, inputParams, param);
+                    }
+                }
+            }
+            return;
+        }
+
+        if (SimpleFeatureCollection.class.isAssignableFrom(param.type)
+                || FeatureCollection.class.isAssignableFrom(param.type)) {
             // vector layer parameters
             FeatureCollectionDataWidget featuresView = new FeatureCollectionDataWidget(map);
             featuresView.create(container, SWT.NONE, inputParams, param, uiParams);

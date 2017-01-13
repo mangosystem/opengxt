@@ -63,10 +63,12 @@ public class Messages extends NLS {
     public static String Feature_Name;
     public static String Feature_Type;
     public static String Feature_CRS;
+    public static String Feature_Vector;
     public static String Feature_Point;
     public static String Feature_LineString;
     public static String Feature_Polygon;
     public static String Feature_FeatureType;
+    public static String Raster;
     
     public static String BoundingBoxViewer_CurrentMapExtent;
     public static String BoundingBoxViewer_CurrentMapFullExtent;
@@ -106,6 +108,8 @@ public class Messages extends NLS {
     public static String ExtentSelection_layerextent;
     public static String ExtentSelection_message;
     public static String ExtentSelection_title;
+    
+    public static String FeatureCollectionsDataWidget_Selected;
     
     public static String FieldCalculatorDialog_title;
     public static String FieldCalculatorDialog_description;
@@ -159,6 +163,8 @@ public class Messages extends NLS {
     public static String GeometryViewer_MapBoundary;
     public static String GeometryViewer_GeometryFromFeatures;
     
+    public static String GridCoveragesDataWidget_Selected;
+    
     public static String HistogramDialog_title;
     public static String HistogramDialog_description;
     public static String HistogramDialog_InputLayer;
@@ -199,6 +205,8 @@ public class Messages extends NLS {
     public static String MultipleFieldsSelectionDialog_SelectAll;
     public static String MultipleFieldsSelectionDialog_SwitchSelect;
     public static String MultipleFieldsSelectionDialog_Clear;
+    
+    public static String MultipleLayersSelectionDialog_title;
     
     public static String NumberDataViewer_GetArea;
 

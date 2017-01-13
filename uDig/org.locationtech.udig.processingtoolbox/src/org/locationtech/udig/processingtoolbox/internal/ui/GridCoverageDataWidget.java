@@ -9,12 +9,9 @@
  */
 package org.locationtech.udig.processingtoolbox.internal.ui;
 
-import java.io.IOException;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -25,6 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.Parameter;
 import org.geotools.util.logging.Logging;
+import org.locationtech.udig.processingtoolbox.styler.MapUtils;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
 import org.opengis.coverage.grid.GridCoverageReader;
@@ -32,7 +30,7 @@ import org.opengis.coverage.grid.GridCoverageReader;
 /**
  * GridCoverage Layer Data control
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -69,7 +67,7 @@ public class GridCoverageDataWidget extends AbstractToolboxWidget {
         cboGcLayer.addModifyListener(new ModifyListener() {
             @Override
             public void modifyText(ModifyEvent e) {
-                GridCoverage2D sfc = getGridCoverage(map, cboGcLayer.getText());
+                GridCoverage2D sfc = MapUtils.getGridCoverage(map, cboGcLayer.getText());
                 processParams.put(param.key, sfc);
             }
         });
@@ -86,24 +84,5 @@ public class GridCoverageDataWidget extends AbstractToolboxWidget {
                 combo.add(layer.getName());
             }
         }
-    }
-
-    private GridCoverage2D getGridCoverage(IMap map, String layerName) {
-        for (ILayer layer : map.getMapLayers()) {
-            if (layer.getName().equals(layerName)) {
-                try {
-                    if (layer.hasResource(GridCoverage2D.class)) {
-                        return layer.getResource(GridCoverage2D.class, new NullProgressMonitor());
-                    } else if (layer.getGeoResource().canResolve(GridCoverageReader.class)) {
-                        GridCoverageReader reader = layer.getResource(GridCoverageReader.class,
-                                null);
-                        return (GridCoverage2D) reader.read(null);
-                    }
-                } catch (IOException e) {
-                    LOGGER.log(Level.FINER, e.getMessage(), e);
-                }
-            }
-        }
-        return null;
     }
 }

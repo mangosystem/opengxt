@@ -144,7 +144,7 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
     private void fillLayers(IMap map, Combo combo, VectorLayerType layerType) {
         combo.removeAll();
         for (ILayer layer : map.getMapLayers()) {
-            if (layer.hasResource(FeatureSource.class)) {
+            if (layer.getName() != null && layer.hasResource(FeatureSource.class)) {
                 GeometryDescriptor descriptor = layer.getSchema().getGeometryDescriptor();
                 Class<?> geometryBinding = descriptor.getType().getBinding();
                 switch (layerType) {
@@ -204,7 +204,7 @@ public class FeatureCollectionDataWidget extends AbstractToolboxWidget {
             fillFields(combo, schema, FieldType.Double);
         }
     }
-    
+
     private void fillFields(Combo combo, SimpleFeatureType schema, FieldType fieldType) {
         String selectedValue = combo.getText() == null ? null : combo.getText();
 

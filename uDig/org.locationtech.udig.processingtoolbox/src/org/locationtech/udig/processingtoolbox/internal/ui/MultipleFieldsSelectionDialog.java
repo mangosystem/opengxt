@@ -112,7 +112,7 @@ public class MultipleFieldsSelectionDialog extends Dialog {
         widget.createLabel(grpMap, Messages.MultipleFieldsSelectionDialog_Layer, null, 1);
         cboLayer = widget.createCombo(grpMap, 1, true);
         for (ILayer layer : map.getMapLayers()) {
-            if (layer.hasResource(FeatureSource.class)) {
+            if (layer.getName() != null && layer.hasResource(FeatureSource.class)) {
                 cboLayer.add(layer.getName());
             }
         }

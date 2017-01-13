@@ -536,9 +536,10 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(utilTool, "org.geotools.process.spatialstatistics.MultipartToSinglepartProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SinglepartToMultipartProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToPointProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToLineProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToPolygonProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.VerticesToPointsProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.PointsAlongLinesProcessFactory");
-        buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToLineProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.PointsToLineProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SplitLineByDistanceProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.SplitLineAtVerticesProcessFactory");

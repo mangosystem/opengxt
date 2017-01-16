@@ -550,6 +550,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToMinimumRectangleProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.FeatureToOctagonalEnvelopeProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.FlowMapProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.MergeFeaturesProcessFactory");
     }
 
     @SuppressWarnings("nls")

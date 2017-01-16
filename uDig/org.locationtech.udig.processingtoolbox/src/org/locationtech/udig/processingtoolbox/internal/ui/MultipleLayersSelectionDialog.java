@@ -10,7 +10,7 @@
 package org.locationtech.udig.processingtoolbox.internal.ui;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -71,6 +71,10 @@ public class MultipleLayersSelectionDialog extends Dialog {
 
     private Button btnVector, btnPoint, btnLine, btnPolygon, btnRaster;
 
+    private List<SimpleFeatureCollection> vectors = new ArrayList<SimpleFeatureCollection>();
+
+    private List<GridCoverage2D> rasters = new ArrayList<GridCoverage2D>();
+
     public MultipleLayersSelectionDialog(Shell parentShell, IMap map, boolean isFeatures) {
         super(parentShell);
 
@@ -87,26 +91,12 @@ public class MultipleLayersSelectionDialog extends Dialog {
         newShell.setText(Messages.MultipleLayersSelectionDialog_title);
     }
 
-    public Collection<SimpleFeatureCollection> getSelectedFeatures() {
-        Collection<SimpleFeatureCollection> list = new ArrayList<SimpleFeatureCollection>();
-        for (TableItem item : schemaTable.getItems()) {
-            if (item.getChecked()) {
-                SimpleFeatureCollection data = MapUtils.getFeatures((ILayer) item.getData());
-                list.add(data);
-            }
-        }
-        return list;
+    public List<SimpleFeatureCollection> getSelectedFeatures() {
+        return vectors.size() == 0 ? null : vectors;
     }
 
-    public Collection<GridCoverage2D> getSelectedRasters() {
-        Collection<GridCoverage2D> list = new ArrayList<GridCoverage2D>();
-        for (TableItem item : schemaTable.getItems()) {
-            if (item.getChecked()) {
-                GridCoverage2D data = MapUtils.getGridCoverage((ILayer) item.getData());
-                list.add(data);
-            }
-        }
-        return list;
+    public List<GridCoverage2D> getSelectedRasters() {
+        return rasters.size() == 0 ? null : rasters;
     }
 
     @Override
@@ -154,6 +144,26 @@ public class MultipleLayersSelectionDialog extends Dialog {
         btnRaster.setEnabled(!isFeatures);
 
         schemaTable = widget.createTable(grpLayer, columns, 5);
+        schemaTable.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent event) {
+                if (isFeatures) {
+                    vectors.clear();
+                    for (TableItem item : schemaTable.getItems()) {
+                        if (item.getChecked()) {
+                            vectors.add(MapUtils.getFeatures((ILayer) item.getData()));
+                        }
+                    }
+                } else {
+                    rasters.clear();
+                    for (TableItem item : schemaTable.getItems()) {
+                        if (item.getChecked()) {
+                            rasters.add(MapUtils.getGridCoverage((ILayer) item.getData()));
+                        }
+                    }
+                }
+            }
+        });
 
         GridData btnLayout = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
         btnAll = widget.createButton(grpLayer, Messages.MultipleFieldsSelectionDialog_SelectAll,

@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics.core;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,30 +78,27 @@ public class Params {
         }
 
         // check type
-        if (!parameter.type.isAssignableFrom(param.getClass())) {
-            String msg = parameter.key + " require " + parameter.type.getSimpleName()
-                    + " type!, not " + param.getClass().getSimpleName() + " type!!!";
-            throw new ClassCastException(msg);
+        if (parameter.maxOccurs > 1 && Collection.class.isAssignableFrom(param.getClass())) {
+            Collection<?> collection = (Collection<?>) param;
+            Object item = collection.iterator().next();
+            if (!parameter.type.isAssignableFrom(item.getClass())) {
+                String msg = parameter.key + " require " + parameter.type.getSimpleName()
+                        + " type!, not " + param.getClass().getSimpleName() + " type!!!";
+                throw new ClassCastException(msg);
+            }
+        } else {
+            if (!parameter.type.isAssignableFrom(param.getClass())) {
+                String msg = parameter.key + " require " + parameter.type.getSimpleName()
+                        + " type!, not " + param.getClass().getSimpleName() + " type!!!";
+                throw new ClassCastException(msg);
+            }
         }
 
         return param;
     }
 
     public static Object getValue(Map<String, Object> input, Parameter<?> parameter) {
-        Object param = input.get(parameter.key);
-
-        if (param == null) {
-            return parameter.sample;
-        }
-
-        // check type
-        if (!parameter.type.isAssignableFrom(param.getClass())) {
-            String msg = parameter.key + " require " + parameter.type.getSimpleName()
-                    + " type!, not " + param.getClass().getSimpleName() + " type!!!";
-            throw new ClassCastException(msg);
-        }
-
-        return param;
+        return getValue(input, parameter, null);
     }
 
     // create boundingbox from comma separated coordinates string and crs

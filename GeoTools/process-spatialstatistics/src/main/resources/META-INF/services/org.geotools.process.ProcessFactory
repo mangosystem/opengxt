@@ -77,6 +77,7 @@ org.geotools.process.spatialstatistics.UpdateProcessFactory
 org.geotools.process.spatialstatistics.IntersectProcessFactory
 org.geotools.process.spatialstatistics.UnionProcessFactory
 org.geotools.process.spatialstatistics.IdentityProcessFactory
+org.geotools.process.spatialstatistics.MergeFeaturesProcessFactory
 
 org.geotools.process.spatialstatistics.CalculateFieldProcessFactory
 org.geotools.process.spatialstatistics.CalculateAreaProcessFactory

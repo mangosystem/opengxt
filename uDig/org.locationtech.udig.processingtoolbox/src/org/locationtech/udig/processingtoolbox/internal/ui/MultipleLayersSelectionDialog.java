@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Widget;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -66,8 +65,6 @@ public class MultipleLayersSelectionDialog extends Dialog {
     private Table schemaTable;
 
     private boolean isFeatures = true;
-
-    private Button btnAll, btnSwitch, btnClear;
 
     private Button btnVector, btnPoint, btnLine, btnPolygon, btnRaster;
 
@@ -165,48 +162,17 @@ public class MultipleLayersSelectionDialog extends Dialog {
             }
         });
 
-        GridData btnLayout = new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1);
-        btnAll = widget.createButton(grpLayer, Messages.MultipleFieldsSelectionDialog_SelectAll,
-                null, btnLayout);
-        btnAll.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent event) {
-                for (TableItem item : schemaTable.getItems()) {
-                    item.setChecked(true);
-                }
-            }
-        });
-
-        btnSwitch = widget.createButton(grpLayer,
-                Messages.MultipleFieldsSelectionDialog_SwitchSelect, null, btnLayout);
-        btnSwitch.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent event) {
-                for (TableItem item : schemaTable.getItems()) {
-                    item.setChecked(!item.getChecked());
-                }
-            }
-        });
-
-        btnClear = widget.createButton(grpLayer, Messages.MultipleFieldsSelectionDialog_Clear,
-                null, btnLayout);
-        btnClear.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent event) {
-                for (TableItem item : schemaTable.getItems()) {
-                    item.setChecked(false);
-                }
-            }
-        });
+        TableSelectionWidget tblSelection = new TableSelectionWidget(schemaTable);
+        tblSelection.create(grpLayer, SWT.NONE, 5, 1);
 
         area.pack();
 
-        resizeTableColumn();
-
         if (isFeatures) {
-            btnAll.setSelection(true);
+            btnVector.setSelection(true);
+            loadVectorLayers(VectorLayerType.ALL);
         } else {
             btnRaster.setSelection(true);
+            loadRasterLayers();
         }
 
         return area;
@@ -243,8 +209,6 @@ public class MultipleLayersSelectionDialog extends Dialog {
                 item.setData(layer);
             }
         }
-
-        resizeTableColumn();
     }
 
     private void loadVectorLayers(VectorLayerType layerType) {
@@ -297,21 +261,11 @@ public class MultipleLayersSelectionDialog extends Dialog {
                 }
             }
         }
-
-        resizeTableColumn();
     }
 
     private void insertTableItem(ILayer layer, String layerType, String crs) {
         TableItem item = new TableItem(schemaTable, SWT.NONE);
         item.setText(new String[] { layer.getName(), layerType, crs });
         item.setData(layer);
-    }
-
-    private void resizeTableColumn() {
-        schemaTable.setRedraw(false);
-        for (TableColumn column : schemaTable.getColumns()) {
-            column.setWidth(schemaTable.getSize().x - (2 * schemaTable.getBorderWidth()));
-        }
-        schemaTable.setRedraw(true);
     }
 }

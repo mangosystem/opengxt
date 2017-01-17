@@ -79,8 +79,10 @@ public class GridCoveragesDataWidget extends AbstractToolboxWidget {
                 if (dialog.open() == Window.OK) {
                     Collection<GridCoverage2D> list = dialog.getSelectedRasters();
                     processParams.put(param.key, list);
+
+                    int cnt = list == null ? 0 : list.size();
                     txtData.setText(String.format(Messages.FeatureCollectionsDataWidget_Selected,
-                            list.size()));
+                            cnt));
                 }
             }
         });

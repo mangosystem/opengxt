@@ -79,8 +79,10 @@ public class FeatureCollectionsDataWidget extends AbstractToolboxWidget {
                 if (dialog.open() == Window.OK) {
                     Collection<SimpleFeatureCollection> list = dialog.getSelectedFeatures();
                     processParams.put(param.key, list);
+
+                    int cnt = list == null ? 0 : list.size();
                     txtData.setText(String.format(Messages.FeatureCollectionsDataWidget_Selected,
-                            list.size()));
+                            cnt));
                 }
             }
         });

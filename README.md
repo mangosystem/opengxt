@@ -24,7 +24,7 @@ any major spatial data source using open standards.
  * Copy these files to the WEB-INF/lib directory of the GeoServer installation.
  * Restart GeoServer
 
-### uDig Plugin Installation
+### uDig Processing Toolbox Plugin Installation
 * Download and install uDig 2.0-SNAPSHOT (GeoTools 14.1)
  * Windows [x86_64 Installer](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.exe)
  * Windows [x86_64 zip](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.zip)
@@ -41,6 +41,15 @@ any major spatial data source using open standards.
 * Press OK and Finish
 * Install and restart uDig application
 * Enjoy!
+
+### Manual & Documents
+* uDig Processing Toolbox Manual
+ * [Korean v2.0](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.0.pdf)
+ * [Korean v2.x-latest](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.latest.pdf)
+ 
+* GeoServer WPS Processes Manual 
+ *[Korean v1.0](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.0.pdf)
+ *[Korean v1.x-latest](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.latest.pdf)
 
 ### Localization
 * [Transifex - English(defalut), Korean ...](https://www.transifex.com/projects/p/ss-rd/)

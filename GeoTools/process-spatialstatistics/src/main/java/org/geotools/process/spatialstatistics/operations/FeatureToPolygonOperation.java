@@ -33,9 +33,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.operation.polygonize.Polygonizer;
@@ -64,6 +62,7 @@ public class FeatureToPolygonOperation extends GeneralOperation {
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, double tolerance,
             SimpleFeatureCollection labelFeatures) throws IOException {
         this.tolerance = tolerance;
+        this.labelFeatures = labelFeatures;
 
         boolean isPolygon = FeatureTypes.getSimpleShapeType(inputFeatures) == SimpleShapeType.POLYGON;
 
@@ -155,7 +154,6 @@ public class FeatureToPolygonOperation extends GeneralOperation {
                 Geometry multi = (Geometry) feature.getDefaultGeometry();
                 for (int index = 0; index < multi.getNumGeometries(); index++) {
                     LineString part = (LineString) multi.getGeometryN(index);
-                    // part = exendLine(part, tolerance, tolerance);
                     list.add(part);
                 }
             }
@@ -167,31 +165,5 @@ public class FeatureToPolygonOperation extends GeneralOperation {
         polygonizer.add(gf.buildGeometry(list).union());
 
         return (List<Polygon>) polygonizer.getPolygons();
-    }
-
-    @SuppressWarnings("unused")
-    private LineString exendLine(LineString segment, double fromOffset, double toOffset) {
-        Coordinate[] coordinates = ((LineString) segment.clone()).getCoordinates();
-
-        LineSegment line = new LineSegment();
-        if (fromOffset > 0) {
-            line.p0 = coordinates[0];
-            line.p1 = coordinates[1];
-            coordinates[0] = offset(line.p0, line.angle(), -fromOffset);
-        }
-
-        if (toOffset > 0) {
-            line.p0 = coordinates[coordinates.length - 2];
-            line.p1 = coordinates[coordinates.length - 1];
-            coordinates[coordinates.length - 1] = offset(line.p1, line.angle(), toOffset);
-        }
-
-        return segment.getFactory().createLineString(coordinates);
-    }
-
-    private Coordinate offset(Coordinate coordinate, double angle, double distance) {
-        double newX = coordinate.x + distance * Math.cos(angle);
-        double newY = coordinate.y + distance * Math.sin(angle);
-        return new Coordinate(newX, newY);
     }
 }

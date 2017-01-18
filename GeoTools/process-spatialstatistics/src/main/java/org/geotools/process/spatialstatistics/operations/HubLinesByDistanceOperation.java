@@ -46,19 +46,19 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
     protected static final Logger LOGGER = Logging.getLogger(HubLinesByDistanceOperation.class);
 
-    public SimpleFeatureCollection execute(SimpleFeatureCollection spokeFeatures,
-            SimpleFeatureCollection hubFeatures, String hubIdField, boolean useCentroid,
-            boolean preserveAttributes, double maximumDistance) throws IOException {
+    public SimpleFeatureCollection execute(SimpleFeatureCollection hubFeatures, String hubIdField,
+            SimpleFeatureCollection spokeFeatures, boolean useCentroid, boolean preserveAttributes,
+            double maximumDistance) throws IOException {
 
         this.setPreserveAttributes(preserveAttributes);
         this.setMaximumDistance(maximumDistance);
         this.setUseCentroid(useCentroid);
 
-        return execute(spokeFeatures, hubFeatures, hubIdField);
+        return execute(hubFeatures, hubIdField, spokeFeatures);
     }
 
-    public SimpleFeatureCollection execute(SimpleFeatureCollection spokeFeatures,
-            SimpleFeatureCollection hubFeatures, String hubIdField) throws IOException {
+    public SimpleFeatureCollection execute(SimpleFeatureCollection hubFeatures, String hubIdField,
+            SimpleFeatureCollection spokeFeatures) throws IOException {
         SimpleFeatureType spokeSchema = spokeFeatures.getSchema();
         CoordinateReferenceSystem crs = spokeSchema.getCoordinateReferenceSystem();
 

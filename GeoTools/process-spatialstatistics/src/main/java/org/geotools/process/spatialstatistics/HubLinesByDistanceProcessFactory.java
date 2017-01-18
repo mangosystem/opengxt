@@ -46,7 +46,7 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
     private static final String PROCESS_NAME = "HubLinesByDistance";
 
     /*
-     * HubLinesByDistance(SimpleFeatureCollection spokeFeatures, SimpleFeatureCollection hubFeatures, String hubIdField, boolean preserveAttributes,
+     * HubLinesByDistance(SimpleFeatureCollection hubFeatures, String hubIdField, SimpleFeatureCollection spokeFeatures, boolean preserveAttributes,
      * boolean useCentroid, double maximumDistance): SimpleFeatureCollection
      */
 
@@ -69,12 +69,6 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
         return getResource("HubLinesByDistance.description");
     }
 
-    /** spokeFeatures */
-    public static final Parameter<SimpleFeatureCollection> spokeFeatures = new Parameter<SimpleFeatureCollection>(
-            "spokeFeatures", SimpleFeatureCollection.class,
-            getResource("HubLinesByDistance.spokeFeatures.title"),
-            getResource("HubLinesByDistance.spokeFeatures.description"), true, 1, 1, null, null);
-
     /** hubFeatures */
     public static final Parameter<SimpleFeatureCollection> hubFeatures = new Parameter<SimpleFeatureCollection>(
             "hubFeatures", SimpleFeatureCollection.class,
@@ -86,6 +80,12 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
             String.class, getResource("HubLinesByDistance.hubIdField.title"),
             getResource("HubLinesByDistance.hubIdField.description"), false, 0, 1, null, new KVP(
                     Params.FIELD, "hubFeatures.All"));
+
+    /** spokeFeatures */
+    public static final Parameter<SimpleFeatureCollection> spokeFeatures = new Parameter<SimpleFeatureCollection>(
+            "spokeFeatures", SimpleFeatureCollection.class,
+            getResource("HubLinesByDistance.spokeFeatures.title"),
+            getResource("HubLinesByDistance.spokeFeatures.description"), true, 1, 1, null, null);
 
     /** preserveAttributes */
     public static final Parameter<Boolean> preserveAttributes = new Parameter<Boolean>(
@@ -110,9 +110,9 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
-        parameterInfo.put(spokeFeatures.key, spokeFeatures);
         parameterInfo.put(hubFeatures.key, hubFeatures);
         parameterInfo.put(hubIdField.key, hubIdField);
+        parameterInfo.put(spokeFeatures.key, spokeFeatures);
         parameterInfo.put(preserveAttributes.key, preserveAttributes);
         parameterInfo.put(useCentroid.key, useCentroid);
         parameterInfo.put(maximumDistance.key, maximumDistance);

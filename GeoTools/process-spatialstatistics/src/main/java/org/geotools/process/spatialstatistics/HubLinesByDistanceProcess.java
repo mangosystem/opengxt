@@ -50,13 +50,13 @@ public class HubLinesByDistanceProcess extends AbstractStatisticsProcess {
         return factory;
     }
 
-    public static SimpleFeatureCollection process(SimpleFeatureCollection spokeFeatures,
-            SimpleFeatureCollection hubFeatures, String hubIdField, boolean preserveAttributes,
+    public static SimpleFeatureCollection process(SimpleFeatureCollection hubFeatures,
+            String hubIdField, SimpleFeatureCollection spokeFeatures, boolean preserveAttributes,
             boolean useCentroid, double maximumDistance, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(HubLinesByDistanceProcessFactory.spokeFeatures.key, spokeFeatures);
         map.put(HubLinesByDistanceProcessFactory.hubFeatures.key, hubFeatures);
         map.put(HubLinesByDistanceProcessFactory.hubIdField.key, hubIdField);
+        map.put(HubLinesByDistanceProcessFactory.spokeFeatures.key, spokeFeatures);
         map.put(HubLinesByDistanceProcessFactory.preserveAttributes.key, preserveAttributes);
         map.put(HubLinesByDistanceProcessFactory.useCentroid.key, useCentroid);
         map.put(HubLinesByDistanceProcessFactory.maximumDistance.key, maximumDistance);
@@ -82,13 +82,12 @@ public class HubLinesByDistanceProcess extends AbstractStatisticsProcess {
         started = true;
 
         try {
-            SimpleFeatureCollection spokeFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, HubLinesByDistanceProcessFactory.spokeFeatures, null);
-
             SimpleFeatureCollection hubFeatures = (SimpleFeatureCollection) Params.getValue(input,
                     HubLinesByDistanceProcessFactory.hubFeatures, null);
             String hubIdField = (String) Params.getValue(input,
                     HubLinesByDistanceProcessFactory.hubIdField, null);
+            SimpleFeatureCollection spokeFeatures = (SimpleFeatureCollection) Params.getValue(
+                    input, HubLinesByDistanceProcessFactory.spokeFeatures, null);
             if (hubFeatures == null || spokeFeatures == null) {
                 throw new NullPointerException("hubFeatures, spokeFeatures parameters required");
             }
@@ -105,8 +104,8 @@ public class HubLinesByDistanceProcess extends AbstractStatisticsProcess {
 
             // start process
             HubLinesByDistanceOperation operation = new HubLinesByDistanceOperation();
-            SimpleFeatureCollection resultFc = operation.execute(spokeFeatures, hubFeatures,
-                    hubIdField, useCentroid, preserveAttributes, maximumDistance);
+            SimpleFeatureCollection resultFc = operation.execute(hubFeatures, hubIdField,
+                    spokeFeatures, useCentroid, preserveAttributes, maximumDistance);
             // end process
 
             Map<String, Object> resultMap = new HashMap<String, Object>();

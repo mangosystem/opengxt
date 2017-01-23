@@ -530,6 +530,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(editTool, "org.geotools.process.spatialstatistics.RemoveHolesProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.RemovePartsProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.EliminateProcessFactory");
+        buildTool(editTool, "org.geotools.process.spatialstatistics.DeleteDuplicatesProcessFactory");
 
         // Utilities
         TreeParent utilTool = new TreeParent(Messages.ToolboxView_Utilities, null, null);

@@ -68,6 +68,7 @@ org.geotools.process.spatialstatistics.RemovePartsProcessFactory
 org.geotools.process.spatialstatistics.FlipLineProcessFactory
 org.geotools.process.spatialstatistics.EliminateProcessFactory
 org.geotools.process.spatialstatistics.RepairGeometryProcessFactory
+org.geotools.process.spatialstatistics.DeleteDuplicatesProcessFactory
 
 org.geotools.process.spatialstatistics.ClipWithGeometryProcessFactory
 org.geotools.process.spatialstatistics.ClipWithFeaturesProcessFactory

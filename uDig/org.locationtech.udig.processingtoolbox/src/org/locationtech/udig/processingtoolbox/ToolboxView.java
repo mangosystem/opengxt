@@ -519,6 +519,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         // Editing
         TreeParent editTool = new TreeParent(Messages.ToolboxView_Editing, null, null);
         generalTool.addChild(editTool);
+        buildTool(editTool, "org.geotools.process.spatialstatistics.RepairGeometryProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.OffsetFeaturesProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.SnapPointsToLinesProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.SimplifyProcessFactory");

@@ -510,6 +510,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(overlayTool, "org.geotools.process.spatialstatistics.SymDifferenceProcessFactory");
         buildTool(overlayTool, "org.geotools.process.spatialstatistics.IdentityProcessFactory");
         buildTool(overlayTool, "org.geotools.process.spatialstatistics.UpdateProcessFactory");
+        buildTool(overlayTool, "org.geotools.process.spatialstatistics.IntersectionPointsProcessFactory");
 
         buildTool(overlayTool, "org.geotools.process.spatialstatistics.SpatialJoinProcessFactory");
         buildTool(overlayTool, "org.geotools.process.spatialstatistics.PointStatisticsProcessFactory");

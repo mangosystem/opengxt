@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class SDProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(SDProcess.class);
-
-    private boolean started = false;
 
     public SDProcess(ProcessFactory factory) {
         super(factory);
@@ -73,45 +72,38 @@ public class SDProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SDProcessFactory.inputFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameters required");
+        }
 
+        String weightField = (String) Params.getValue(input, SDProcessFactory.weightField, null);
+        String caseField = (String) Params.getValue(input, SDProcessFactory.caseField, null);
+        String circleSize = (String) Params.getValue(input, SDProcessFactory.circleSize,
+                SDProcessFactory.circleSize.sample);
+
+        // start process
+        // 1_STANDARD_DEVIATION
+        double stdDeviation = 1.0;
+        if (circleSize.contains("2")) {
+            stdDeviation = 2.0;
+        } else if (circleSize.contains("3")) {
+            stdDeviation = 3.0;
+        }
+
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, SDProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
-            }
-            String weightField = (String) Params
-                    .getValue(input, SDProcessFactory.weightField, null);
-            String caseField = (String) Params.getValue(input, SDProcessFactory.caseField, null);
-            String circleSize = (String) Params.getValue(input, SDProcessFactory.circleSize,
-                    SDProcessFactory.circleSize.sample);
-
-            // start process
-            SimpleFeatureCollection resultFc = null;
-
-            // 1_STANDARD_DEVIATION
-            double stdDeviation = 1.0;
-            if (circleSize.contains("2")) {
-                stdDeviation = 2.0;
-            } else if (circleSize.contains("3")) {
-                stdDeviation = 3.0;
-            }
-
             StandardDistanceOperation process = new StandardDistanceOperation();
             process.setStdDeviation(stdDeviation);
             resultFc = process.execute(inputFeatures, weightField, caseField);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(SDProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(SDProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

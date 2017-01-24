@@ -42,8 +42,6 @@ import org.opengis.util.ProgressListener;
 public class CalculateFieldProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(CalculateFieldProcess.class);
 
-    private boolean started = false;
-
     public CalculateFieldProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -74,35 +72,23 @@ public class CalculateFieldProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, CalculateFieldProcessFactory.inputFeatures, null);
-            Expression expression = (Expression) Params.getValue(input,
-                    CalculateFieldProcessFactory.expression, null);
-            String fieldName = (String) Params.getValue(input,
-                    CalculateFieldProcessFactory.fieldName,
-                    CalculateFieldProcessFactory.fieldName.sample);
-            if (inputFeatures == null || expression == null) {
-                throw new NullPointerException("All parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection resultFc = DataUtilities
-                    .simple(new FieldCalculationFeatureCollection(inputFeatures, expression,
-                            fieldName));
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(CalculateFieldProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                CalculateFieldProcessFactory.inputFeatures, null);
+        Expression expression = (Expression) Params.getValue(input,
+                CalculateFieldProcessFactory.expression, null);
+        String fieldName = (String) Params.getValue(input, CalculateFieldProcessFactory.fieldName,
+                CalculateFieldProcessFactory.fieldName.sample);
+        if (inputFeatures == null || expression == null) {
+            throw new NullPointerException("All parameters required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities
+                .simple(new FieldCalculationFeatureCollection(inputFeatures, expression, fieldName));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(CalculateFieldProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

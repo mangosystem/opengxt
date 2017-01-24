@@ -41,8 +41,6 @@ import org.opengis.util.ProgressListener;
 public class QuadratAnalysisProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(QuadratAnalysisProcess.class);
 
-    private boolean started = false;
-
     public QuadratAnalysisProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -72,33 +70,22 @@ public class QuadratAnalysisProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, QuadratAnalysisProcessFactory.inputFeatures, null);
-            Double cellSize = (Double) Params.getValue(input,
-                    QuadratAnalysisProcessFactory.cellSize,
-                    QuadratAnalysisProcessFactory.cellSize.sample);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
-            }
-
-            // start process
-            QuadratOperation operator = new QuadratOperation();
-            QuadratResult result = operator.execute(inputFeatures, cellSize);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(QuadratAnalysisProcessFactory.RESULT.key, result);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                QuadratAnalysisProcessFactory.inputFeatures, null);
+        Double cellSize = (Double) Params.getValue(input, QuadratAnalysisProcessFactory.cellSize,
+                QuadratAnalysisProcessFactory.cellSize.sample);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameters required");
         }
+
+        // start process
+        QuadratOperation operator = new QuadratOperation();
+        QuadratResult result = operator.execute(inputFeatures, cellSize);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(QuadratAnalysisProcessFactory.RESULT.key, result);
+        return resultMap;
     }
 
 }

@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class CalculateAreaProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(CalculateAreaProcess.class);
-
-    private boolean started = false;
 
     public CalculateAreaProcess(ProcessFactory factory) {
         super(factory);
@@ -73,39 +72,29 @@ public class CalculateAreaProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                CalculateAreaProcessFactory.inputFeatures, null);
 
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, CalculateAreaProcessFactory.inputFeatures, null);
+        String areaField = (String) Params.getValue(input, CalculateAreaProcessFactory.areaField,
+                CalculateAreaProcessFactory.areaField.sample);
 
-            String areaField = (String) Params.getValue(input,
-                    CalculateAreaProcessFactory.areaField,
-                    CalculateAreaProcessFactory.areaField.sample);
-
-            String perimeterField = (String) Params.getValue(input,
-                    CalculateAreaProcessFactory.perimeterField, null);
-            if (inputFeatures == null || areaField == null || areaField.trim().length() == 0) {
-                throw new NullPointerException("inputFeatures, areaField parameters required");
-            }
-
-            // start process
-            if (perimeterField != null && perimeterField.trim().length() == 0) {
-                perimeterField = null;
-            }
-            SimpleFeatureCollection resultFc = new AreaCalculationFeatureCollection(inputFeatures,
-                    areaField, perimeterField);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(CalculateAreaProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        String perimeterField = (String) Params.getValue(input,
+                CalculateAreaProcessFactory.perimeterField, null);
+        if (inputFeatures == null || areaField == null || areaField.trim().length() == 0) {
+            throw new NullPointerException("inputFeatures, areaField parameters required");
         }
+
+        // start process
+        if (perimeterField != null && perimeterField.trim().length() == 0) {
+            perimeterField = null;
+        }
+        SimpleFeatureCollection resultFc = DataUtilities
+                .simple(new AreaCalculationFeatureCollection(inputFeatures, areaField,
+                        perimeterField));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(CalculateAreaProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

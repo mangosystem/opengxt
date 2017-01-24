@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,8 +42,6 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public class DelaunayTriangulationProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(DelaunayTriangulationProcess.class);
-
-    private boolean started = false;
 
     public DelaunayTriangulationProcess(ProcessFactory factory) {
         super(factory);
@@ -74,36 +73,30 @@ public class DelaunayTriangulationProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                DelaunayTriangulationProcessFactory.inputFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameter required");
+        }
 
+        Geometry clipArea = (Geometry) Params.getValue(input,
+                DelaunayTriangulationProcessFactory.clipArea, null);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, DelaunayTriangulationProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameter required");
-            }
-
-            Geometry clipArea = (Geometry) Params.getValue(input,
-                    DelaunayTriangulationProcessFactory.clipArea, null);
-
-            // start process
             DelaunayTrangulationOperation operation = new DelaunayTrangulationOperation();
             if (clipArea != null) {
                 operation.setClipArea(clipArea);
             }
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(DelaunayTriangulationProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = operation.execute(inputFeatures);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
-    }
+        // end process
 
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(DelaunayTriangulationProcessFactory.RESULT.key, resultFc);
+        return resultMap;
+    }
 }

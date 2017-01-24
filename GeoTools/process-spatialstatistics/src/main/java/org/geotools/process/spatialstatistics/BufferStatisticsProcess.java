@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -42,8 +43,6 @@ import com.vividsolutions.jts.geom.Polygon;
  */
 public class BufferStatisticsProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(BufferStatisticsProcess.class);
-
-    private boolean started = false;
 
     public BufferStatisticsProcess(ProcessFactory factory) {
         super(factory);
@@ -78,53 +77,45 @@ public class BufferStatisticsProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                BufferStatisticsProcessFactory.inputFeatures, null);
+        SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                BufferStatisticsProcessFactory.pointFeatures, null);
+        Double distance = (Double) Params.getValue(input, BufferStatisticsProcessFactory.distance,
+                BufferStatisticsProcessFactory.distance.sample);
+        String countField = (String) Params.getValue(input,
+                BufferStatisticsProcessFactory.countField,
+                BufferStatisticsProcessFactory.countField.sample);
+        String statisticsFields = (String) Params.getValue(input,
+                BufferStatisticsProcessFactory.statisticsFields,
+                BufferStatisticsProcessFactory.statisticsFields.sample);
+        if (inputFeatures == null || pointFeatures == null) {
+            throw new NullPointerException("inputFeatures and pointFeatures parameters required");
+        }
 
+        if (distance == 0) {
+            Class<?> geomBinding = inputFeatures.getSchema().getGeometryDescriptor().getType()
+                    .getBinding();
+            if (!geomBinding.isAssignableFrom(Polygon.class)
+                    && !geomBinding.isAssignableFrom(MultiPolygon.class)) {
+                throw new NullPointerException("distance parameter required");
+            }
+        }
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, BufferStatisticsProcessFactory.inputFeatures, null);
-            SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, BufferStatisticsProcessFactory.pointFeatures, null);
-            Double distance = (Double) Params.getValue(input,
-                    BufferStatisticsProcessFactory.distance,
-                    BufferStatisticsProcessFactory.distance.sample);
-            String countField = (String) Params.getValue(input,
-                    BufferStatisticsProcessFactory.countField,
-                    BufferStatisticsProcessFactory.countField.sample);
-            String statisticsFields = (String) Params.getValue(input,
-                    BufferStatisticsProcessFactory.statisticsFields,
-                    BufferStatisticsProcessFactory.statisticsFields.sample);
-            if (inputFeatures == null || pointFeatures == null) {
-                throw new NullPointerException(
-                        "inputFeatures and pointFeatures parameters required");
-            }
-
-            if (distance == 0) {
-                Class<?> geomBinding = inputFeatures.getSchema().getGeometryDescriptor().getType()
-                        .getBinding();
-                if (!geomBinding.isAssignableFrom(Polygon.class)
-                        && !geomBinding.isAssignableFrom(MultiPolygon.class)) {
-                    throw new NullPointerException("distance parameter required");
-                }
-            }
-
-            // start process
             PointStatisticsOperation operation = new PointStatisticsOperation();
             operation.setBufferDistance(distance);
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, countField,
-                    statisticsFields, pointFeatures);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(BufferStatisticsProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = operation
+                    .execute(inputFeatures, countField, statisticsFields, pointFeatures);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
-    }
+        // end process
 
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(BufferStatisticsProcessFactory.RESULT.key, resultFc);
+        return resultMap;
+    }
 }

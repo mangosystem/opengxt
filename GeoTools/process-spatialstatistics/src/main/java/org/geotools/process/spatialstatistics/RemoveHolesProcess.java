@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -40,8 +41,6 @@ import org.opengis.util.ProgressListener;
  */
 public class RemoveHolesProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RemoveHolesProcess.class);
-
-    private boolean started = false;
 
     public RemoveHolesProcess(ProcessFactory factory) {
         super(factory);
@@ -73,32 +72,22 @@ public class RemoveHolesProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, RemoveHolesProcessFactory.inputFeatures, null);
-            Expression minimumArea = (Expression) Params.getValue(input,
-                    RemoveHolesProcessFactory.minimumArea,
-                    RemoveHolesProcessFactory.minimumArea.sample);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures, minimumArea parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection resultFc = new RemoveHolesFeatureCollection(inputFeatures,
-                    minimumArea);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(RemoveHolesProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                RemoveHolesProcessFactory.inputFeatures, null);
+        Expression minimumArea = (Expression) Params
+                .getValue(input, RemoveHolesProcessFactory.minimumArea,
+                        RemoveHolesProcessFactory.minimumArea.sample);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures, minimumArea parameters required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new RemoveHolesFeatureCollection(
+                inputFeatures, minimumArea));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(RemoveHolesProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

@@ -45,8 +45,6 @@ import org.opengis.util.ProgressListener;
 public class UpdateProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(UpdateProcess.class);
 
-    private boolean started = false;
-
     public UpdateProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -76,42 +74,33 @@ public class UpdateProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, UpdateProcessFactory.inputFeatures, null);
-            SimpleFeatureCollection updateFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, UpdateProcessFactory.updateFeatures, null);
-            if (inputFeatures == null || updateFeatures == null) {
-                throw new NullPointerException("inputFeatures, updateFeatures parameters required");
-            }
-
-            // check polygon type
-            if (FeatureTypes.getSimpleShapeType(inputFeatures) != SimpleShapeType.POLYGON) {
-                throw new ProcessException("inputFeatures must be a polygon features!");
-            }
-
-            if (FeatureTypes.getSimpleShapeType(updateFeatures) != SimpleShapeType.POLYGON) {
-                throw new ProcessException("updateFeatures must be a polygon features!");
-            }
-
-            // start process
-            SimpleFeatureCollection diff1 = new DifferenceFeatureCollection(inputFeatures,
-                    updateFeatures);
-            SimpleFeatureCollection resultFc = DataUtilities.simple(new MergeFeatureCollection(
-                    diff1, updateFeatures));
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(UpdateProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                UpdateProcessFactory.inputFeatures, null);
+        SimpleFeatureCollection updateFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                UpdateProcessFactory.updateFeatures, null);
+        if (inputFeatures == null || updateFeatures == null) {
+            throw new NullPointerException("inputFeatures, updateFeatures parameters required");
         }
+
+        // check polygon type
+        if (FeatureTypes.getSimpleShapeType(inputFeatures) != SimpleShapeType.POLYGON) {
+            throw new ProcessException("inputFeatures must be a polygon features!");
+        }
+
+        if (FeatureTypes.getSimpleShapeType(updateFeatures) != SimpleShapeType.POLYGON) {
+            throw new ProcessException("updateFeatures must be a polygon features!");
+        }
+
+        // start process
+        SimpleFeatureCollection diff1 = DataUtilities.simple(new DifferenceFeatureCollection(
+                inputFeatures, updateFeatures));
+
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new MergeFeatureCollection(diff1,
+                updateFeatures));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(UpdateProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

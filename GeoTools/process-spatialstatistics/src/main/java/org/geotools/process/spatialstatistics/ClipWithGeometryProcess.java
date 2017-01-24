@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -41,8 +42,6 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public class ClipWithGeometryProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(ClipWithGeometryProcess.class);
-
-    private boolean started = false;
 
     public ClipWithGeometryProcess(ProcessFactory factory) {
         super(factory);
@@ -75,31 +74,21 @@ public class ClipWithGeometryProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, ClipWithGeometryProcessFactory.inputFeatures, null);
-            Geometry clipGeometry = (Geometry) Params.getValue(input,
-                    ClipWithGeometryProcessFactory.clipGeometry, null);
-            if (inputFeatures == null || clipGeometry == null) {
-                throw new NullPointerException("All parameter required");
-            }
-
-            // start process
-            SimpleFeatureCollection resultFc = new ClipWithGeometryFeatureCollection(inputFeatures,
-                    clipGeometry);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(ClipWithGeometryProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                ClipWithGeometryProcessFactory.inputFeatures, null);
+        Geometry clipGeometry = (Geometry) Params.getValue(input,
+                ClipWithGeometryProcessFactory.clipGeometry, null);
+        if (inputFeatures == null || clipGeometry == null) {
+            throw new NullPointerException("All parameter required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities
+                .simple(new ClipWithGeometryFeatureCollection(inputFeatures, clipGeometry));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(ClipWithGeometryProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

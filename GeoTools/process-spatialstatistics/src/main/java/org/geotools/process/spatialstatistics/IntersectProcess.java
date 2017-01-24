@@ -41,8 +41,6 @@ import org.opengis.util.ProgressListener;
 public class IntersectProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(IntersectProcess.class);
 
-    private boolean started = false;
-
     public IntersectProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -72,33 +70,22 @@ public class IntersectProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                IntersectProcessFactory.inputFeatures, null);
 
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, IntersectProcessFactory.inputFeatures, null);
-
-            SimpleFeatureCollection overlayFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, IntersectProcessFactory.overlayFeatures, null);
-            if (inputFeatures == null || overlayFeatures == null) {
-                throw new NullPointerException("inputFeatures, overlayFeatures parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection resultFc = DataUtilities.simple(new IntersectFeatureCollection(
-                    inputFeatures, overlayFeatures));
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(IntersectProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection overlayFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                IntersectProcessFactory.overlayFeatures, null);
+        if (inputFeatures == null || overlayFeatures == null) {
+            throw new NullPointerException("inputFeatures, overlayFeatures parameters required");
         }
-    }
 
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new IntersectFeatureCollection(
+                inputFeatures, overlayFeatures));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(IntersectProcessFactory.RESULT.key, resultFc);
+        return resultMap;
+    }
 }

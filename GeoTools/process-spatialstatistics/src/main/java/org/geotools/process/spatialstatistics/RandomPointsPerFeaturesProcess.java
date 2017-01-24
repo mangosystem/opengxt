@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,8 +41,6 @@ import org.opengis.util.ProgressListener;
  */
 public class RandomPointsPerFeaturesProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RandomPointsPerFeaturesProcess.class);
-
-    private boolean started = false;
 
     public RandomPointsPerFeaturesProcess(ProcessFactory factory) {
         super(factory);
@@ -73,33 +72,27 @@ public class RandomPointsPerFeaturesProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection polygonFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, RandomPointsPerFeaturesProcessFactory.polygonFeatures, null);
-            Expression expression = (Expression) Params.getValue(input,
-                    RandomPointsPerFeaturesProcessFactory.expression,
-                    RandomPointsPerFeaturesProcessFactory.expression.sample);
-            if (polygonFeatures == null || expression == null) {
-                throw new NullPointerException("polygonFeatures, expression parameters required");
-            }
-
-            // start process
-            RandomPointsOperation operator = new RandomPointsOperation();
-            SimpleFeatureCollection randomPoints = null;
-            randomPoints = operator.executeperFeatures(polygonFeatures, expression);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(AreaProcessFactory.RESULT.key, randomPoints);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection polygonFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                RandomPointsPerFeaturesProcessFactory.polygonFeatures, null);
+        Expression expression = (Expression) Params.getValue(input,
+                RandomPointsPerFeaturesProcessFactory.expression,
+                RandomPointsPerFeaturesProcessFactory.expression.sample);
+        if (polygonFeatures == null || expression == null) {
+            throw new NullPointerException("polygonFeatures, expression parameters required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            RandomPointsOperation operator = new RandomPointsOperation();
+            resultFc = operator.executeperFeatures(polygonFeatures, expression);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(AreaProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

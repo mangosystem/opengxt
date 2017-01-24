@@ -42,8 +42,6 @@ import org.opengis.util.ProgressListener;
 public class ExtractValuesToPointsProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(ExtractValuesToPointsProcess.class);
 
-    private boolean started = false;
-
     public ExtractValuesToPointsProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -78,45 +76,34 @@ public class ExtractValuesToPointsProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                ExtractValuesToPointsProcessFactory.pointFeatures, null);
+        String valueField = (String) Params.getValue(input,
+                ExtractValuesToPointsProcessFactory.valueField,
+                ExtractValuesToPointsProcessFactory.valueField.sample);
+        GridCoverage2D valueCoverage = (GridCoverage2D) Params.getValue(input,
+                ExtractValuesToPointsProcessFactory.valueCoverage, null);
+        ExtractionType valueType = (ExtractionType) Params.getValue(input,
+                ExtractValuesToPointsProcessFactory.valueType,
+                ExtractValuesToPointsProcessFactory.valueType.sample);
 
-        try {
-            SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, ExtractValuesToPointsProcessFactory.pointFeatures, null);
-            String valueField = (String) Params.getValue(input,
-                    ExtractValuesToPointsProcessFactory.valueField,
-                    ExtractValuesToPointsProcessFactory.valueField.sample);
-            GridCoverage2D valueCoverage = (GridCoverage2D) Params.getValue(input,
-                    ExtractValuesToPointsProcessFactory.valueCoverage, null);
-            ExtractionType valueType = (ExtractionType) Params.getValue(input,
-                    ExtractValuesToPointsProcessFactory.valueType,
-                    ExtractValuesToPointsProcessFactory.valueType.sample);
-
-            if (pointFeatures == null || valueField == null || valueCoverage == null) {
-                throw new NullPointerException(
-                        "pointFeatures, pointFeatures, valueCoverage parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection resultSfc = null;
-            try {
-                RasterExtractValuesToPointsOperation process = new RasterExtractValuesToPointsOperation();
-                resultSfc = process.execute(pointFeatures, valueField, valueCoverage, valueType);
-            } catch (Exception ee) {
-                monitor.exceptionOccurred(ee);
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(ExtractValuesToPointsProcessFactory.RESULT.key, resultSfc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        if (pointFeatures == null || valueField == null || valueCoverage == null) {
+            throw new NullPointerException(
+                    "pointFeatures, pointFeatures, valueCoverage parameters required");
         }
-    }
 
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            RasterExtractValuesToPointsOperation process = new RasterExtractValuesToPointsOperation();
+            resultFc = process.execute(pointFeatures, valueField, valueCoverage, valueType);
+        } catch (Exception e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(ExtractValuesToPointsProcessFactory.RESULT.key, resultFc);
+        return resultMap;
+    }
 }

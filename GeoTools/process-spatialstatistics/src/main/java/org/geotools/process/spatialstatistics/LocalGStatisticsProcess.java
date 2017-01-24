@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -43,8 +44,6 @@ import org.opengis.util.ProgressListener;
  */
 public class LocalGStatisticsProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(LocalGStatisticsProcess.class);
-
-    private boolean started = false;
 
     public LocalGStatisticsProcess(ProcessFactory factory) {
         super(factory);
@@ -83,72 +82,63 @@ public class LocalGStatisticsProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                LocalGStatisticsProcessFactory.inputFeatures, null);
+        String inputField = (String) Params.getValue(input,
+                LocalGStatisticsProcessFactory.inputField, null);
+        if (inputFeatures == null || inputField == null) {
+            throw new NullPointerException("inputFeatures and inputField parameters required");
+        }
+
+        inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
+        if (inputFeatures.getSchema().indexOf(inputField) == -1) {
+            throw new NullPointerException(inputField + " field does not exist!");
+        }
+
+        SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
+                LocalGStatisticsProcessFactory.spatialConcept,
+                LocalGStatisticsProcessFactory.spatialConcept.sample);
+
+        DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
+                LocalGStatisticsProcessFactory.distanceMethod,
+                LocalGStatisticsProcessFactory.distanceMethod.sample);
+
+        StandardizationMethod standardization = (StandardizationMethod) Params.getValue(input,
+                LocalGStatisticsProcessFactory.standardization,
+                LocalGStatisticsProcessFactory.standardization.sample);
+
+        Double searchDistance = (Double) Params.getValue(input,
+                LocalGStatisticsProcessFactory.searchDistance,
+                LocalGStatisticsProcessFactory.searchDistance.sample);
+
+        Boolean selfNeighbors = (Boolean) Params.getValue(input,
+                LocalGStatisticsProcessFactory.selfNeighbors,
+                LocalGStatisticsProcessFactory.selfNeighbors.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+
+        LocalGStatisticOperation process = new LocalGStatisticOperation();
+        process.setSpatialConceptType(spatialConcept);
+        process.setDistanceType(distanceMethod);
+        process.setStandardizationType(standardization);
+        process.setSelfNeighbors(selfNeighbors);
+
+        // searchDistance
+        if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
+            process.setDistanceBand(searchDistance);
+        }
 
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, LocalGStatisticsProcessFactory.inputFeatures, null);
-            String inputField = (String) Params.getValue(input,
-                    LocalGStatisticsProcessFactory.inputField, null);
-            if (inputFeatures == null || inputField == null) {
-                throw new NullPointerException("inputFeatures and inputField parameters required");
-            }
-
-            inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
-            if (inputFeatures.getSchema().indexOf(inputField) == -1) {
-                throw new NullPointerException(inputField + " field does not exist!");
-            }
-
-            SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
-                    LocalGStatisticsProcessFactory.spatialConcept,
-                    LocalGStatisticsProcessFactory.spatialConcept.sample);
-
-            DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
-                    LocalGStatisticsProcessFactory.distanceMethod,
-                    LocalGStatisticsProcessFactory.distanceMethod.sample);
-
-            StandardizationMethod standardization = (StandardizationMethod) Params.getValue(input,
-                    LocalGStatisticsProcessFactory.standardization,
-                    LocalGStatisticsProcessFactory.standardization.sample);
-
-            Double searchDistance = (Double) Params.getValue(input,
-                    LocalGStatisticsProcessFactory.searchDistance,
-                    LocalGStatisticsProcessFactory.searchDistance.sample);
-
-            Boolean selfNeighbors = (Boolean) Params.getValue(input,
-                    LocalGStatisticsProcessFactory.selfNeighbors,
-                    LocalGStatisticsProcessFactory.selfNeighbors.sample);
-
-            // start process
-            SimpleFeatureCollection resultFc = null;
-            try {
-                LocalGStatisticOperation process = new LocalGStatisticOperation();
-                process.setSpatialConceptType(spatialConcept);
-                process.setDistanceType(distanceMethod);
-                process.setStandardizationType(standardization);
-                process.setSelfNeighbors(selfNeighbors);
-
-                // searchDistance
-                if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
-                    process.setDistanceBand(searchDistance);
-                }
-
-                resultFc = process.execute(inputFeatures, inputField);
-            } catch (Exception ee) {
-                monitor.exceptionOccurred(ee);
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(LocalGStatisticsProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = process.execute(inputFeatures, inputField);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(LocalGStatisticsProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
 }

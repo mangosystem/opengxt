@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class ExtendLineProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(ExtendLineProcess.class);
-
-    private boolean started = false;
 
     public ExtendLineProcess(ProcessFactory factory) {
         super(factory);
@@ -73,38 +72,33 @@ public class ExtendLineProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, ExtendLineProcessFactory.lineFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameter required");
-            }
-
-            Double length = (Double) Params.getValue(input, ExtendLineProcessFactory.length,
-                    ExtendLineProcessFactory.length.sample);
-            if (length == null || length <= 0) {
-                throw new NullPointerException("length parameter must be greater than 0");
-            }
-
-            Boolean extendTo = (Boolean) Params.getValue(input, ExtendLineProcessFactory.extendTo,
-                    ExtendLineProcessFactory.extendTo.sample);
-
-            // start process
-            ExtendLineOperation operation = new ExtendLineOperation();
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, length, extendTo);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(ExtendLineProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                ExtendLineProcessFactory.lineFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameter required");
         }
+
+        Double length = (Double) Params.getValue(input, ExtendLineProcessFactory.length,
+                ExtendLineProcessFactory.length.sample);
+        if (length == null || length <= 0) {
+            throw new NullPointerException("length parameter must be greater than 0");
+        }
+
+        Boolean extendTo = (Boolean) Params.getValue(input, ExtendLineProcessFactory.extendTo,
+                ExtendLineProcessFactory.extendTo.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            ExtendLineOperation operation = new ExtendLineOperation();
+            resultFc = operation.execute(inputFeatures, length, extendTo);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(ExtendLineProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

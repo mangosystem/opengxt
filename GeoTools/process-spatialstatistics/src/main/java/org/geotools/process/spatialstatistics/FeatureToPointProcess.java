@@ -42,8 +42,6 @@ import org.opengis.util.ProgressListener;
 public class FeatureToPointProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(FeatureToPointProcess.class);
 
-    private boolean started = false;
-
     public FeatureToPointProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -75,40 +73,30 @@ public class FeatureToPointProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, FeatureToPointProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameter required");
-            }
-
-            Boolean inside = (Boolean) Params.getValue(input, FeatureToPointProcessFactory.inside,
-                    FeatureToPointProcessFactory.inside.sample);
-            Boolean singlePart = (Boolean) Params.getValue(input,
-                    FeatureToPointProcessFactory.singlePart,
-                    FeatureToPointProcessFactory.singlePart.sample);
-
-            // start process
-            SimpleFeatureCollection resultFc = null;
-            if (singlePart) {
-                resultFc = new ToPointFeatureCollection(
-                        new ExplodeFeatureCollection(inputFeatures), inside);
-            } else {
-                resultFc = new ToPointFeatureCollection(inputFeatures, inside);
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(FeatureToPointProcessFactory.RESULT.key, DataUtilities.simple(resultFc));
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                FeatureToPointProcessFactory.inputFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameter required");
         }
+
+        Boolean inside = (Boolean) Params.getValue(input, FeatureToPointProcessFactory.inside,
+                FeatureToPointProcessFactory.inside.sample);
+        Boolean singlePart = (Boolean) Params.getValue(input,
+                FeatureToPointProcessFactory.singlePart,
+                FeatureToPointProcessFactory.singlePart.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        if (singlePart) {
+            resultFc = DataUtilities.simple(new ToPointFeatureCollection(
+                    new ExplodeFeatureCollection(inputFeatures), inside));
+        } else {
+            resultFc = DataUtilities.simple(new ToPointFeatureCollection(inputFeatures, inside));
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(FeatureToPointProcessFactory.RESULT.key, DataUtilities.simple(resultFc));
+        return resultMap;
     }
 }

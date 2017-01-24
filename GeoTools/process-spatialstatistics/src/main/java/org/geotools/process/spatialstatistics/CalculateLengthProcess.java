@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class CalculateLengthProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(CalculateLengthProcess.class);
-
-    private boolean started = false;
 
     public CalculateLengthProcess(ProcessFactory factory) {
         super(factory);
@@ -73,32 +72,22 @@ public class CalculateLengthProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, CalculateLengthProcessFactory.inputFeatures, null);
-            String lengthField = (String) Params.getValue(input,
-                    CalculateLengthProcessFactory.lengthField,
-                    CalculateLengthProcessFactory.lengthField.sample);
-            if (inputFeatures == null || lengthField == null || lengthField.trim().length() == 0) {
-                throw new NullPointerException("inputFeatures, lengthField parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection resultFc = new LengthCalculationFeatureCollection(
-                    inputFeatures, lengthField);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(CalculateLengthProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                CalculateLengthProcessFactory.inputFeatures, null);
+        String lengthField = (String) Params.getValue(input,
+                CalculateLengthProcessFactory.lengthField,
+                CalculateLengthProcessFactory.lengthField.sample);
+        if (inputFeatures == null || lengthField == null || lengthField.trim().length() == 0) {
+            throw new NullPointerException("inputFeatures, lengthField parameters required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities
+                .simple(new LengthCalculationFeatureCollection(inputFeatures, lengthField));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(CalculateLengthProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

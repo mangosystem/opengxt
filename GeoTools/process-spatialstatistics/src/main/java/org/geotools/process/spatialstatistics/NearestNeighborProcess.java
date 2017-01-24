@@ -42,8 +42,6 @@ import org.opengis.util.ProgressListener;
 public class NearestNeighborProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(NearestNeighborProcess.class);
 
-    private boolean started = false;
-
     public NearestNeighborProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -74,39 +72,29 @@ public class NearestNeighborProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, NearestNeighborProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
-            }
-            DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
-                    NearestNeighborProcessFactory.distanceMethod,
-                    NearestNeighborProcessFactory.distanceMethod.sample);
-            Double area = (Double) Params.getValue(input, NearestNeighborProcessFactory.area,
-                    Double.valueOf(0.0));
-
-            // start process
-            NNIOperation operation = new NNIOperation();
-            operation.setDistanceType(distanceMethod);
-            if (area == null) {
-                area = Double.valueOf(0.0d);
-            }
-            NearestNeighborResult nni = operation.execute(inputFeatures, area);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(NearestNeighborProcessFactory.RESULT.key, nni);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                NearestNeighborProcessFactory.inputFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameters required");
         }
+        DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
+                NearestNeighborProcessFactory.distanceMethod,
+                NearestNeighborProcessFactory.distanceMethod.sample);
+        Double area = (Double) Params.getValue(input, NearestNeighborProcessFactory.area,
+                Double.valueOf(0.0));
+
+        // start process
+        NNIOperation operation = new NNIOperation();
+        operation.setDistanceType(distanceMethod);
+        if (area == null) {
+            area = Double.valueOf(0.0d);
+        }
+        NearestNeighborResult nni = operation.execute(inputFeatures, area);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(NearestNeighborProcessFactory.RESULT.key, nni);
+        return resultMap;
     }
 
 }

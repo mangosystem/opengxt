@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,8 +41,6 @@ import org.opengis.util.ProgressListener;
  */
 public class FeatureToLineProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(FeatureToLineProcess.class);
-
-    private boolean started = false;
 
     public FeatureToLineProcess(ProcessFactory factory) {
         super(factory);
@@ -73,33 +72,28 @@ public class FeatureToLineProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, FeatureToLineProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameter required");
-            }
-
-            Boolean preserveAttributes = (Boolean) Params.getValue(input,
-                    FeatureToLineProcessFactory.preserveAttributes,
-                    FeatureToLineProcessFactory.preserveAttributes.sample);
-
-            // start process
-            FeatureToLineOperation operation = new FeatureToLineOperation();
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, preserveAttributes);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(FeatureToLineProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                FeatureToLineProcessFactory.inputFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameter required");
         }
+
+        Boolean preserveAttributes = (Boolean) Params.getValue(input,
+                FeatureToLineProcessFactory.preserveAttributes,
+                FeatureToLineProcessFactory.preserveAttributes.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            FeatureToLineOperation operation = new FeatureToLineOperation();
+            resultFc = operation.execute(inputFeatures, preserveAttributes);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(FeatureToLineProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

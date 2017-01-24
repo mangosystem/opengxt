@@ -82,7 +82,7 @@ public class DeleteDuplicatesProcess extends AbstractStatisticsProcess {
             DeleteDuplicateFeaturesOperation operation = new DeleteDuplicateFeaturesOperation();
             resultFc = operation.execute(inputFeatures);
         } catch (IOException e) {
-            throw new ProcessException(e.getMessage());
+            throw new ProcessException(e);
         }
         // end process
 

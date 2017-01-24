@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,8 +41,6 @@ import org.opengis.util.ProgressListener;
  */
 public class CentralFeatureProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(CentralFeatureProcess.class);
-
-    private boolean started = false;
 
     public CentralFeatureProcess(ProcessFactory factory) {
         super(factory);
@@ -76,44 +75,36 @@ public class CentralFeatureProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                CentralFeatureProcessFactory.inputFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameter required");
+        }
 
+        DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
+                CentralFeatureProcessFactory.distanceMethod,
+                CentralFeatureProcessFactory.distanceMethod.sample);
+        String weightField = (String) Params.getValue(input,
+                CentralFeatureProcessFactory.weightField, null);
+        String selfPotentialWeightField = (String) Params.getValue(input,
+                CentralFeatureProcessFactory.selfPotentialWeightField, null);
+        String caseField = (String) Params.getValue(input, CentralFeatureProcessFactory.caseField,
+                null);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, CentralFeatureProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameter required");
-            }
-
-            DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
-                    CentralFeatureProcessFactory.distanceMethod,
-                    CentralFeatureProcessFactory.distanceMethod.sample);
-            String weightField = (String) Params.getValue(input, CentralFeatureProcessFactory.weightField,
-                    null);
-            String selfPotentialWeightField = (String) Params.getValue(input,
-                    CentralFeatureProcessFactory.selfPotentialWeightField, null);
-            String caseField = (String) Params.getValue(input, CentralFeatureProcessFactory.caseField,
-                    null);
-
-            // start process
-            SimpleFeatureCollection resultFc = inputFeatures;
-
             CentralFeatureOperation process = new CentralFeatureOperation();
             process.setDistanceMethod(distanceMethod);
-
             resultFc = process.execute(inputFeatures, weightField, selfPotentialWeightField,
                     caseField);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(CentralFeatureProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(CentralFeatureProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

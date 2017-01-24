@@ -45,8 +45,6 @@ import org.opengis.util.ProgressListener;
 public class IDWProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(IDWProcess.class);
 
-    private boolean started = false;
-
     public IDWProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -85,89 +83,78 @@ public class IDWProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, IDWProcessFactory.inputFeatures, null);
-            String inputField = (String) Params.getValue(input, IDWProcessFactory.inputField, null);
-            if (inputFeatures == null || inputField == null || inputField.trim().length() == 0) {
-                throw new NullPointerException("inputFeatures, inputField parameters required");
-            }
-
-            inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
-            if (inputFeatures.getSchema().indexOf(inputField) == -1) {
-                throw new NullPointerException(inputField + " does not exist!");
-            }
-
-            Double power = (Double) Params.getValue(input, IDWProcessFactory.power,
-                    IDWProcessFactory.power.sample);
-            RadiusType radiusType = (RadiusType) Params.getValue(input,
-                    IDWProcessFactory.radiusType, IDWProcessFactory.radiusType.sample);
-            Integer numberOfPoints = (Integer) Params.getValue(input,
-                    IDWProcessFactory.numberOfPoints, IDWProcessFactory.numberOfPoints.sample);
-            Double distance = (Double) Params.getValue(input, IDWProcessFactory.distance,
-                    IDWProcessFactory.distance.sample);
-
-            Double cellSize = (Double) Params.getValue(input, IDWProcessFactory.cellSize,
-                    IDWProcessFactory.cellSize.sample);
-            ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
-                    IDWProcessFactory.extent, null);
-
-            // start process
-            ReferencedEnvelope boundingBox = inputFeatures.getBounds();
-            if (extent != null) {
-                boundingBox = extent;
-            }
-
-            // get default cell size from extent
-            if (cellSize == 0.0) {
-                cellSize = Math.min(boundingBox.getWidth(), boundingBox.getHeight()) / 250.0;
-                LOGGER.warning("default cell size = " + cellSize);
-            }
-
-            power = power == 0 ? 2.0 : power;
-
-            RasterRadius rasterRadius = new RasterRadius();
-            if (radiusType == RadiusType.Variable) {
-                numberOfPoints = numberOfPoints == 0 ? 12 : numberOfPoints;
-                if (distance > 0)
-                    rasterRadius.setVariable(numberOfPoints, distance);
-                else
-                    rasterRadius.setVariable(numberOfPoints);
-            } else {
-                // The default radius is five times the cell size of the output raster.
-                distance = distance == 0 ? cellSize * 5 : distance;
-                if (numberOfPoints > 0)
-                    rasterRadius.setFixed(distance, numberOfPoints);
-                else
-                    rasterRadius.setFixed(distance);
-            }
-
-            GridCoverage2D resultGc = null;
-            RasterInterpolationIDWOperation process = new RasterInterpolationIDWOperation();
-            process.getRasterEnvironment().setExtent(boundingBox);
-
-            if (cellSize > 0) {
-                double origCellSize = process.getRasterEnvironment().getCellSize();
-                process.getRasterEnvironment().setCellSize(cellSize);
-                resultGc = process.execute(inputFeatures, inputField, power, rasterRadius);
-                process.getRasterEnvironment().setCellSize(origCellSize);
-            } else {
-                resultGc = process.execute(inputFeatures, inputField, power, rasterRadius);
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(IDWProcessFactory.RESULT.key, resultGc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                IDWProcessFactory.inputFeatures, null);
+        String inputField = (String) Params.getValue(input, IDWProcessFactory.inputField, null);
+        if (inputFeatures == null || inputField == null || inputField.trim().length() == 0) {
+            throw new NullPointerException("inputFeatures, inputField parameters required");
         }
-    }
 
+        inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
+        if (inputFeatures.getSchema().indexOf(inputField) == -1) {
+            throw new NullPointerException(inputField + " does not exist!");
+        }
+
+        Double power = (Double) Params.getValue(input, IDWProcessFactory.power,
+                IDWProcessFactory.power.sample);
+        RadiusType radiusType = (RadiusType) Params.getValue(input, IDWProcessFactory.radiusType,
+                IDWProcessFactory.radiusType.sample);
+        Integer numberOfPoints = (Integer) Params.getValue(input, IDWProcessFactory.numberOfPoints,
+                IDWProcessFactory.numberOfPoints.sample);
+        Double distance = (Double) Params.getValue(input, IDWProcessFactory.distance,
+                IDWProcessFactory.distance.sample);
+
+        Double cellSize = (Double) Params.getValue(input, IDWProcessFactory.cellSize,
+                IDWProcessFactory.cellSize.sample);
+        ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
+                IDWProcessFactory.extent, null);
+
+        // start process
+        ReferencedEnvelope boundingBox = inputFeatures.getBounds();
+        if (extent != null) {
+            boundingBox = extent;
+        }
+
+        // get default cell size from extent
+        if (cellSize == 0.0) {
+            cellSize = Math.min(boundingBox.getWidth(), boundingBox.getHeight()) / 250.0;
+            LOGGER.warning("default cell size = " + cellSize);
+        }
+
+        power = power == 0 ? 2.0 : power;
+
+        RasterRadius rasterRadius = new RasterRadius();
+        if (radiusType == RadiusType.Variable) {
+            numberOfPoints = numberOfPoints == 0 ? 12 : numberOfPoints;
+            if (distance > 0)
+                rasterRadius.setVariable(numberOfPoints, distance);
+            else
+                rasterRadius.setVariable(numberOfPoints);
+        } else {
+            // The default radius is five times the cell size of the output raster.
+            distance = distance == 0 ? cellSize * 5 : distance;
+            if (numberOfPoints > 0)
+                rasterRadius.setFixed(distance, numberOfPoints);
+            else
+                rasterRadius.setFixed(distance);
+        }
+
+        GridCoverage2D resultGc = null;
+        RasterInterpolationIDWOperation process = new RasterInterpolationIDWOperation();
+        process.getRasterEnvironment().setExtent(boundingBox);
+
+        if (cellSize > 0) {
+            double origCellSize = process.getRasterEnvironment().getCellSize();
+            process.getRasterEnvironment().setCellSize(cellSize);
+            resultGc = process.execute(inputFeatures, inputField, power, rasterRadius);
+            process.getRasterEnvironment().setCellSize(origCellSize);
+        } else {
+            resultGc = process.execute(inputFeatures, inputField, power, rasterRadius);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(IDWProcessFactory.RESULT.key, resultGc);
+        return resultMap;
+    }
 }

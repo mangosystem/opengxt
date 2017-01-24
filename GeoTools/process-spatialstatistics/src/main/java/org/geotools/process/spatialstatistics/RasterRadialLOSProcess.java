@@ -56,8 +56,6 @@ import com.vividsolutions.jts.operation.linemerge.LineMerger;
 public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RasterRadialLOSProcess.class);
 
-    private boolean started = false;
-
     static final String ANGLE_FIELD = "Angle";
 
     static final String VALUE_FIELD = "Visible";
@@ -101,106 +99,81 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
+                RasterRadialLOSProcessFactory.inputCoverage, null);
+        Geometry observerPoint = (Geometry) Params.getValue(input,
+                RasterRadialLOSProcessFactory.observerPoint, null);
+        Double observerOffset = (Double) Params.getValue(input,
+                RasterRadialLOSProcessFactory.observerOffset,
+                RasterRadialLOSProcessFactory.observerOffset.sample);
+        Double radius = (Double) Params.getValue(input, RasterRadialLOSProcessFactory.radius,
+                RasterRadialLOSProcessFactory.radius.sample);
+        Integer sides = (Integer) Params.getValue(input, RasterRadialLOSProcessFactory.sides,
+                RasterRadialLOSProcessFactory.sides.sample);
+        Boolean useCurvature = (Boolean) Params.getValue(input,
+                RasterRadialLOSProcessFactory.useCurvature,
+                RasterRadialLOSProcessFactory.useCurvature.sample);
+        Boolean useRefraction = (Boolean) Params.getValue(input,
+                RasterRadialLOSProcessFactory.useRefraction,
+                RasterRadialLOSProcessFactory.useRefraction.sample);
+        Double refractionFactor = (Double) Params.getValue(input,
+                RasterRadialLOSProcessFactory.refractionFactor,
+                RasterRadialLOSProcessFactory.refractionFactor.sample);
 
-        try {
-            GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
-                    RasterRadialLOSProcessFactory.inputCoverage, null);
-            Geometry observerPoint = (Geometry) Params.getValue(input,
-                    RasterRadialLOSProcessFactory.observerPoint, null);
-            Double observerOffset = (Double) Params.getValue(input,
-                    RasterRadialLOSProcessFactory.observerOffset,
-                    RasterRadialLOSProcessFactory.observerOffset.sample);
-            Double radius = (Double) Params.getValue(input, RasterRadialLOSProcessFactory.radius,
-                    RasterRadialLOSProcessFactory.radius.sample);
-            Integer sides = (Integer) Params.getValue(input, RasterRadialLOSProcessFactory.sides,
-                    RasterRadialLOSProcessFactory.sides.sample);
-            Boolean useCurvature = (Boolean) Params.getValue(input,
-                    RasterRadialLOSProcessFactory.useCurvature,
-                    RasterRadialLOSProcessFactory.useCurvature.sample);
-            Boolean useRefraction = (Boolean) Params.getValue(input,
-                    RasterRadialLOSProcessFactory.useRefraction,
-                    RasterRadialLOSProcessFactory.useRefraction.sample);
-            Double refractionFactor = (Double) Params.getValue(input,
-                    RasterRadialLOSProcessFactory.refractionFactor,
-                    RasterRadialLOSProcessFactory.refractionFactor.sample);
+        if (inputCoverage == null || observerPoint == null || radius == null) {
+            throw new NullPointerException(
+                    "inputCoverage, observerPoint, radius parameters required");
+        }
 
-            if (inputCoverage == null || observerPoint == null || radius == null) {
-                throw new NullPointerException(
-                        "inputCoverage, observerPoint, radius parameters required");
+        if (radius <= 0 || observerOffset < 0 || sides <= 0) {
+            throw new NullPointerException(
+                    "radius, observerOffset, sides parameters must be a positive value");
+        }
+
+        // start process
+        CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType("RadialLineOfSight",
+                LineString.class, crs);
+        featureType = FeatureTypes.add(featureType, ANGLE_FIELD, Double.class, 38);
+        featureType = FeatureTypes.add(featureType, VALUE_FIELD, Integer.class, 5);
+
+        // prepare transactional feature store
+        ListFeatureCollection resultSfc = new ListFeatureCollection(featureType);
+        SimpleFeatureBuilder builder = new SimpleFeatureBuilder(featureType);
+
+        RasterFunctionalSurface process = new RasterFunctionalSurface(inputCoverage);
+        Coordinate center = observerPoint.getCoordinate();
+        int serialID = 0;
+        for (int index = 0; index < sides; index++) {
+            double angle = ((double) index / (double) sides) * Math.PI * 2.0;
+            double dx = Math.cos(angle) * radius;
+            double dy = Math.sin(angle) * radius;
+
+            Coordinate to = new Coordinate(center.x + dx, center.y + dy);
+            Geometry los = process.getLineOfSight(center, to, observerOffset, useCurvature,
+                    useRefraction, refractionFactor);
+            if (los == null) {
+                continue;
             }
 
-            if (radius <= 0 || observerOffset < 0 || sides <= 0) {
-                throw new NullPointerException(
-                        "radius, observerOffset, sides parameters must be a positive value");
-            }
-
-            // start process
-            CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
-            SimpleFeatureType featureType = FeatureTypes.getDefaultType("RadialLineOfSight",
-                    LineString.class, crs);
-            featureType = FeatureTypes.add(featureType, ANGLE_FIELD, Double.class, 38);
-            featureType = FeatureTypes.add(featureType, VALUE_FIELD, Integer.class, 5);
-
-            // prepare transactional feature store
-            ListFeatureCollection resultSfc = new ListFeatureCollection(featureType);
-            SimpleFeatureBuilder builder = new SimpleFeatureBuilder(featureType);
-
-            RasterFunctionalSurface process = new RasterFunctionalSurface(inputCoverage);
-            Coordinate center = observerPoint.getCoordinate();
-            int serialID = 0;
-            for (int index = 0; index < sides; index++) {
-                double angle = ((double) index / (double) sides) * Math.PI * 2.0;
-                double dx = Math.cos(angle) * radius;
-                double dy = Math.sin(angle) * radius;
-
-                Coordinate to = new Coordinate(center.x + dx, center.y + dy);
-                Geometry los = process.getLineOfSight(center, to, observerOffset, useCurvature,
-                        useRefraction, refractionFactor);
-                if (los == null) {
-                    continue;
-                }
-
-                int previsible = -1;
-                List<Geometry> segments = new ArrayList<Geometry>();
-                GeometryFactory gf = los.getFactory();
-                for (int idx = 0; idx < los.getNumGeometries(); idx++) {
-                    Coordinate[] coordinates = los.getCoordinates();
-                    for (int i = 0; i < coordinates.length - 1; i++) {
-                        int visible = (int) coordinates[i + 1].z;
-                        if (i == 0) {
-                            previsible = visible;
-                            segments.clear();
-                        }
-
-                        LineSegment seg = new LineSegment(coordinates[i], coordinates[i + 1]);
-                        Geometry lineseg = seg.toGeometry(los.getFactory());
-
-                        if (visible == previsible) {
-                            segments.add(lineseg);
-                        } else {
-                            LineMerger lineMerger = new LineMerger();
-                            lineMerger.add(segments);
-                            Geometry mergeMls = gf.createMultiLineString(GeometryFactory
-                                    .toLineStringArray(lineMerger.getMergedLineStrings()));
-
-                            String fid = featureType.getTypeName() + "." + (++serialID);
-                            SimpleFeature newFeature = builder.buildFeature(fid);
-                            newFeature.setDefaultGeometry(mergeMls);
-                            newFeature.setAttribute(ANGLE_FIELD,
-                                    Math.round(angle * (180.0 / Math.PI)));
-                            newFeature.setAttribute(VALUE_FIELD, visible);
-                            resultSfc.add(newFeature);
-
-                            segments.clear();
-                            previsible = visible;
-                            segments.add(lineseg);
-                        }
+            int previsible = -1;
+            List<Geometry> segments = new ArrayList<Geometry>();
+            GeometryFactory gf = los.getFactory();
+            for (int idx = 0; idx < los.getNumGeometries(); idx++) {
+                Coordinate[] coordinates = los.getCoordinates();
+                for (int i = 0; i < coordinates.length - 1; i++) {
+                    int visible = (int) coordinates[i + 1].z;
+                    if (i == 0) {
+                        previsible = visible;
+                        segments.clear();
                     }
 
-                    if (segments.size() > 0) {
+                    LineSegment seg = new LineSegment(coordinates[i], coordinates[i + 1]);
+                    Geometry lineseg = seg.toGeometry(los.getFactory());
+
+                    if (visible == previsible) {
+                        segments.add(lineseg);
+                    } else {
                         LineMerger lineMerger = new LineMerger();
                         lineMerger.add(segments);
                         Geometry mergeMls = gf.createMultiLineString(GeometryFactory
@@ -210,21 +183,35 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
                         SimpleFeature newFeature = builder.buildFeature(fid);
                         newFeature.setDefaultGeometry(mergeMls);
                         newFeature.setAttribute(ANGLE_FIELD, Math.round(angle * (180.0 / Math.PI)));
-                        newFeature.setAttribute(VALUE_FIELD, previsible);
+                        newFeature.setAttribute(VALUE_FIELD, visible);
                         resultSfc.add(newFeature);
+
+                        segments.clear();
+                        previsible = visible;
+                        segments.add(lineseg);
                     }
                 }
-            }
-            // end process
 
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(RasterRadialLOSProcessFactory.RESULT.key, resultSfc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+                if (segments.size() > 0) {
+                    LineMerger lineMerger = new LineMerger();
+                    lineMerger.add(segments);
+                    Geometry mergeMls = gf.createMultiLineString(GeometryFactory
+                            .toLineStringArray(lineMerger.getMergedLineStrings()));
+
+                    String fid = featureType.getTypeName() + "." + (++serialID);
+                    SimpleFeature newFeature = builder.buildFeature(fid);
+                    newFeature.setDefaultGeometry(mergeMls);
+                    newFeature.setAttribute(ANGLE_FIELD, Math.round(angle * (180.0 / Math.PI)));
+                    newFeature.setAttribute(VALUE_FIELD, previsible);
+                    resultSfc.add(newFeature);
+                }
+            }
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(RasterRadialLOSProcessFactory.RESULT.key, resultSfc);
+        return resultMap;
     }
 
 }

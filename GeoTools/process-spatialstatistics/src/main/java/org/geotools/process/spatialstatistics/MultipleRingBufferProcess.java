@@ -62,8 +62,6 @@ public class MultipleRingBufferProcess extends AbstractStatisticsProcess impleme
         RenderingProcess {
     protected static final Logger LOGGER = Logging.getLogger(MultipleRingBufferProcess.class);
 
-    private boolean started = false;
-
     static final String bufferField = "distance";
 
     public MultipleRingBufferProcess(ProcessFactory factory) {
@@ -99,93 +97,83 @@ public class MultipleRingBufferProcess extends AbstractStatisticsProcess impleme
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, MultipleRingBufferProcessFactory.inputFeatures, null);
-            String distances = (String) Params.getValue(input,
-                    MultipleRingBufferProcessFactory.distances, null);
-            if (inputFeatures == null || distances == null || distances.trim().length() == 0) {
-                throw new NullPointerException("inputFeatures, distances parameters required");
-            }
-
-            Boolean outsideOnly = (Boolean) Params.getValue(input,
-                    MultipleRingBufferProcessFactory.outsideOnly,
-                    MultipleRingBufferProcessFactory.outsideOnly.sample);
-            Boolean dissolve = (Boolean) Params.getValue(input,
-                    MultipleRingBufferProcessFactory.dissolve,
-                    MultipleRingBufferProcessFactory.dissolve.sample);
-
-            // start process
-            String[] arrDistance = distances.split(",");
-            double[] bufferDistance = new double[arrDistance.length];
-            for (int k = 0; k < arrDistance.length; k++) {
-                try {
-                    bufferDistance[k] = Double.parseDouble(arrDistance[k].trim());
-                } catch (NumberFormatException nfe) {
-                    throw new NumberFormatException(nfe.getMessage());
-                }
-            }
-
-            SimpleFeatureCollection resultFc = new MultipleBufferFeatureCollection(inputFeatures,
-                    bufferDistance, outsideOnly);
-
-            if (dissolve) {
-                Map<Double, List<Geometry>> map = new TreeMap<Double, List<Geometry>>();
-                SimpleFeatureIterator featureIter = resultFc.features();
-                try {
-                    FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
-                    Expression expression = ff.property(bufferField);
-                    while (featureIter.hasNext()) {
-                        SimpleFeature feature = featureIter.next();
-                        Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                        Double distance = expression.evaluate(feature, Double.class);
-                        if (!map.containsKey(distance)) {
-                            map.put(distance, new ArrayList<Geometry>());
-                        }
-                        map.get(distance).add(geometry);
-                    }
-                } finally {
-                    featureIter.close();
-                }
-
-                // inert features
-                SimpleFeatureType sfType = inputFeatures.getSchema();
-                String typeName = sfType.getTypeName();
-                CoordinateReferenceSystem crs = sfType.getCoordinateReferenceSystem();
-                String geomField = sfType.getGeometryDescriptor().getLocalName();
-                SimpleFeatureType schema = FeatureTypes.getDefaultType(typeName, geomField,
-                        Polygon.class, crs);
-                schema = FeatureTypes.add(schema, bufferField, Double.class, 19);
-
-                ListFeatureCollection unionFc = new ListFeatureCollection(schema);
-                SimpleFeatureBuilder fb = new SimpleFeatureBuilder(schema);
-
-                int featureID = 0;
-                for (Map.Entry<Double, List<Geometry>> entrySet : map.entrySet()) {
-                    Geometry unionGeometry = CascadedPolygonUnion.union(entrySet.getValue());
-
-                    SimpleFeature unionFeautre = fb.buildFeature(Integer.toString(++featureID));
-                    unionFeautre.setDefaultGeometry(unionGeometry);
-                    unionFeautre.setAttribute(bufferField, entrySet.getKey());
-                    unionFc.add(unionFeautre);
-                }
-
-                resultFc = unionFc;
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(MultipleRingBufferProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                MultipleRingBufferProcessFactory.inputFeatures, null);
+        String distances = (String) Params.getValue(input,
+                MultipleRingBufferProcessFactory.distances, null);
+        if (inputFeatures == null || distances == null || distances.trim().length() == 0) {
+            throw new NullPointerException("inputFeatures, distances parameters required");
         }
+
+        Boolean outsideOnly = (Boolean) Params.getValue(input,
+                MultipleRingBufferProcessFactory.outsideOnly,
+                MultipleRingBufferProcessFactory.outsideOnly.sample);
+        Boolean dissolve = (Boolean) Params.getValue(input,
+                MultipleRingBufferProcessFactory.dissolve,
+                MultipleRingBufferProcessFactory.dissolve.sample);
+
+        // start process
+        String[] arrDistance = distances.split(",");
+        double[] bufferDistance = new double[arrDistance.length];
+        for (int k = 0; k < arrDistance.length; k++) {
+            try {
+                bufferDistance[k] = Double.parseDouble(arrDistance[k].trim());
+            } catch (NumberFormatException nfe) {
+                throw new NumberFormatException(nfe.getMessage());
+            }
+        }
+
+        SimpleFeatureCollection resultFc = new MultipleBufferFeatureCollection(inputFeatures,
+                bufferDistance, outsideOnly);
+
+        if (dissolve) {
+            Map<Double, List<Geometry>> map = new TreeMap<Double, List<Geometry>>();
+            SimpleFeatureIterator featureIter = resultFc.features();
+            try {
+                FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+                Expression expression = ff.property(bufferField);
+                while (featureIter.hasNext()) {
+                    SimpleFeature feature = featureIter.next();
+                    Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                    Double distance = expression.evaluate(feature, Double.class);
+                    if (!map.containsKey(distance)) {
+                        map.put(distance, new ArrayList<Geometry>());
+                    }
+                    map.get(distance).add(geometry);
+                }
+            } finally {
+                featureIter.close();
+            }
+
+            // inert features
+            SimpleFeatureType sfType = inputFeatures.getSchema();
+            String typeName = sfType.getTypeName();
+            CoordinateReferenceSystem crs = sfType.getCoordinateReferenceSystem();
+            String geomField = sfType.getGeometryDescriptor().getLocalName();
+            SimpleFeatureType schema = FeatureTypes.getDefaultType(typeName, geomField,
+                    Polygon.class, crs);
+            schema = FeatureTypes.add(schema, bufferField, Double.class, 19);
+
+            ListFeatureCollection unionFc = new ListFeatureCollection(schema);
+            SimpleFeatureBuilder fb = new SimpleFeatureBuilder(schema);
+
+            int featureID = 0;
+            for (Map.Entry<Double, List<Geometry>> entrySet : map.entrySet()) {
+                Geometry unionGeometry = CascadedPolygonUnion.union(entrySet.getValue());
+
+                SimpleFeature unionFeautre = fb.buildFeature(Integer.toString(++featureID));
+                unionFeautre.setDefaultGeometry(unionGeometry);
+                unionFeautre.setAttribute(bufferField, entrySet.getKey());
+                unionFc.add(unionFeautre);
+            }
+
+            resultFc = unionFc;
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(MultipleRingBufferProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
     /**

@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,8 +42,6 @@ import org.opengis.util.ProgressListener;
  */
 public class CircularGridProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(CircularGridProcess.class);
-
-    private boolean started = false;
 
     public CircularGridProcess(ProcessFactory factory) {
         super(factory);
@@ -76,42 +75,36 @@ public class CircularGridProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        ReferencedEnvelope gridBounds = (ReferencedEnvelope) Params.getValue(input,
+                CircularGridProcessFactory.extent, null);
+        SimpleFeatureCollection boundsSource = (SimpleFeatureCollection) Params.getValue(input,
+                CircularGridProcessFactory.boundsSource, null);
+        if (gridBounds == null) {
+            throw new NullPointerException("extent parameters required");
+        }
 
+        Double radius = (Double) Params.getValue(input, CircularGridProcessFactory.radius, null);
+        CircularType circularType = (CircularType) Params.getValue(input,
+                CircularGridProcessFactory.circularType,
+                CircularGridProcessFactory.circularType.sample);
+        if (radius == null || radius == 0) {
+            throw new NullPointerException("sideLen parameter should be grater than 0");
+        }
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
         try {
-            ReferencedEnvelope gridBounds = (ReferencedEnvelope) Params.getValue(input,
-                    CircularGridProcessFactory.extent, null);
-            SimpleFeatureCollection boundsSource = (SimpleFeatureCollection) Params.getValue(input,
-                    CircularGridProcessFactory.boundsSource, null);
-            if (gridBounds == null) {
-                throw new NullPointerException("extent parameters required");
-            }
-
-            Double radius = (Double) Params
-                    .getValue(input, CircularGridProcessFactory.radius, null);
-            CircularType circularType = (CircularType) Params.getValue(input,
-                    CircularGridProcessFactory.circularType,
-                    CircularGridProcessFactory.circularType.sample);
-            if (radius == null || radius == 0) {
-                throw new NullPointerException("sideLen parameter should be grater than 0");
-            }
-
-            // start process
             CircularGridOperation operation = new CircularGridOperation();
             operation.setBoundsSource(boundsSource);
             operation.setCircularType(circularType);
-            SimpleFeatureCollection resultFc = operation.execute(gridBounds, radius);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(CircularGridProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = operation.execute(gridBounds, radius);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(CircularGridProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

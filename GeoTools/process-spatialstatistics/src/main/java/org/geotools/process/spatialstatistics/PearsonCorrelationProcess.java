@@ -44,8 +44,6 @@ import org.opengis.util.ProgressListener;
 public class PearsonCorrelationProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(PearsonCorrelationProcess.class);
 
-    private boolean started = false;
-
     public PearsonCorrelationProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -75,31 +73,21 @@ public class PearsonCorrelationProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, PearsonCorrelationProcessFactory.inputFeatures, null);
-            String inputFields = (String) Params.getValue(input,
-                    PearsonCorrelationProcessFactory.inputFields, null);
-            if (inputFeatures == null || inputFields == null) {
-                throw new NullPointerException("All parameters required");
-            }
-
-            // start process
-            PearsonOperation operation = new PearsonOperation();
-            PearsonResult ret = operation.execute(inputFeatures, inputFields);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(PearsonCorrelationProcessFactory.RESULT.key, ret);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                PearsonCorrelationProcessFactory.inputFeatures, null);
+        String inputFields = (String) Params.getValue(input,
+                PearsonCorrelationProcessFactory.inputFields, null);
+        if (inputFeatures == null || inputFields == null) {
+            throw new NullPointerException("All parameters required");
         }
+
+        // start process
+        PearsonOperation operation = new PearsonOperation();
+        PearsonResult ret = operation.execute(inputFeatures, inputFields);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(PearsonCorrelationProcessFactory.RESULT.key, ret);
+        return resultMap;
     }
 }

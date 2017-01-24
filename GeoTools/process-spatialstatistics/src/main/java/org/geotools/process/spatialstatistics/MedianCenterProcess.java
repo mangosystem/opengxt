@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class MedianCenterProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(MedianCenterProcess.class);
-
-    private boolean started = false;
 
     public MedianCenterProcess(ProcessFactory factory) {
         super(factory);
@@ -73,44 +72,39 @@ public class MedianCenterProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, MedianCenterProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
-            }
-            String weightField = (String) Params.getValue(input,
-                    MedianCenterProcessFactory.weightField, null);
-            String caseField = (String) Params.getValue(input,
-                    MedianCenterProcessFactory.caseField, null);
-            String attributeFields = (String) Params.getValue(input,
-                    MedianCenterProcessFactory.attributeFields, null);
-
-            // start process
-            String[] attFields = null;
-            if (attributeFields != null && attributeFields.length() > 0) {
-                attFields = attributeFields.split(",");
-                for (int k = 0; k < attFields.length; k++) {
-                    attFields[k] = attFields[k].trim();
-                }
-            }
-
-            MedianCenterOperation operation = new MedianCenterOperation();
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, weightField,
-                    caseField, attFields);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(MedianCenterProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                MedianCenterProcessFactory.inputFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameters required");
         }
+
+        String weightField = (String) Params.getValue(input,
+                MedianCenterProcessFactory.weightField, null);
+        String caseField = (String) Params.getValue(input, MedianCenterProcessFactory.caseField,
+                null);
+        String attributeFields = (String) Params.getValue(input,
+                MedianCenterProcessFactory.attributeFields, null);
+
+        // start process
+        String[] attFields = null;
+        if (attributeFields != null && attributeFields.length() > 0) {
+            attFields = attributeFields.split(",");
+            for (int k = 0; k < attFields.length; k++) {
+                attFields[k] = attFields[k].trim();
+            }
+        }
+
+        SimpleFeatureCollection resultFc = null;
+        try {
+            MedianCenterOperation operation = new MedianCenterOperation();
+            resultFc = operation.execute(inputFeatures, weightField, caseField, attFields);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(MedianCenterProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

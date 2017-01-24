@@ -45,8 +45,6 @@ import com.vividsolutions.jts.geom.Point;
 public class WindRoseMapProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(WindRoseMapProcess.class);
 
-    private boolean started = false;
-
     public WindRoseMapProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -77,45 +75,34 @@ public class WindRoseMapProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, WindRoseMapProcessFactory.inputFeatures, null);
-            String weightField = (String) Params.getValue(input,
-                    WindRoseMapProcessFactory.weightField, null);
-            Geometry center = (Geometry) Params.getValue(input, WindRoseMapProcessFactory.center,
-                    null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
-            }
-
-            // start process
-            Point centeroid = null;
-            if (center == null) {
-                centeroid = new GeometryFactory().createPoint(inputFeatures.getBounds().centre());
-            } else {
-                centeroid = center.getCentroid();
-            }
-
-            SimpleFeatureCollection windRoseFc = new WindroseFeatureCollection(inputFeatures,
-                    weightField, centeroid);
-
-            SimpleFeatureCollection anchorFc = new WindroseAnchorFeatureCollection(inputFeatures,
-                    centeroid);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(WindRoseMapProcessFactory.windRose.key, windRoseFc);
-            resultMap.put(WindRoseMapProcessFactory.anchor.key, anchorFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                WindRoseMapProcessFactory.inputFeatures, null);
+        String weightField = (String) Params.getValue(input, WindRoseMapProcessFactory.weightField,
+                null);
+        Geometry center = (Geometry) Params.getValue(input, WindRoseMapProcessFactory.center, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameters required");
         }
+
+        // start process
+        Point centeroid = null;
+        if (center == null) {
+            centeroid = new GeometryFactory().createPoint(inputFeatures.getBounds().centre());
+        } else {
+            centeroid = center.getCentroid();
+        }
+
+        SimpleFeatureCollection windRoseFc = new WindroseFeatureCollection(inputFeatures,
+                weightField, centeroid);
+
+        SimpleFeatureCollection anchorFc = new WindroseAnchorFeatureCollection(inputFeatures,
+                centeroid);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(WindRoseMapProcessFactory.windRose.key, windRoseFc);
+        resultMap.put(WindRoseMapProcessFactory.anchor.key, anchorFc);
+        return resultMap;
     }
 
 }

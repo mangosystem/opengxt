@@ -42,8 +42,6 @@ import org.opengis.util.ProgressListener;
 public class SymDifferenceProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(SymDifferenceProcess.class);
 
-    private boolean started = false;
-
     public SymDifferenceProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -73,38 +71,28 @@ public class SymDifferenceProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SymDifferenceProcessFactory.inputFeatures, null);
 
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, SymDifferenceProcessFactory.inputFeatures, null);
-
-            SimpleFeatureCollection differenceFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, SymDifferenceProcessFactory.differenceFeatures, null);
-            if (inputFeatures == null || differenceFeatures == null) {
-                throw new NullPointerException(
-                        "inputFeatures, differenceFeatures parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection diff1 = new DifferenceFeatureCollection(inputFeatures,
-                    differenceFeatures);
-            SimpleFeatureCollection diff2 = new DifferenceFeatureCollection(differenceFeatures,
-                    inputFeatures);
-            SimpleFeatureCollection resultFc = DataUtilities.simple(new MergeFeatureCollection(
-                    diff1, diff2));
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(SymDifferenceProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection differenceFeatures = (SimpleFeatureCollection) Params.getValue(
+                input, SymDifferenceProcessFactory.differenceFeatures, null);
+        if (inputFeatures == null || differenceFeatures == null) {
+            throw new NullPointerException("inputFeatures, differenceFeatures parameters required");
         }
+
+        // start process
+        SimpleFeatureCollection diff1 = DataUtilities.simple(new DifferenceFeatureCollection(
+                inputFeatures, differenceFeatures));
+        SimpleFeatureCollection diff2 = DataUtilities.simple(new DifferenceFeatureCollection(
+                differenceFeatures, inputFeatures));
+
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new MergeFeatureCollection(diff1,
+                diff2));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(SymDifferenceProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
 }

@@ -83,12 +83,12 @@ public class FeatureToConvexHullProcess extends AbstractStatisticsProcess {
                 FeatureToConvexHullProcessFactory.singlePart.sample);
 
         // start process
-        SimpleFeatureCollection resultFc = new ConvexHullFeatureCollection(inputFeatures,
-                singlePart);
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new ConvexHullFeatureCollection(
+                inputFeatures, singlePart));
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        resultMap.put(FeatureToConvexHullProcessFactory.RESULT.key, DataUtilities.simple(resultFc));
+        resultMap.put(FeatureToConvexHullProcessFactory.RESULT.key, resultFc);
         return resultMap;
     }
 }

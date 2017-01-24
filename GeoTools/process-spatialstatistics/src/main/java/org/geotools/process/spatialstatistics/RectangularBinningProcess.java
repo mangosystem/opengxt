@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,8 +42,6 @@ import org.opengis.util.ProgressListener;
  */
 public class RectangularBinningProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RectangularBinningProcess.class);
-
-    private boolean started = false;
 
     public RectangularBinningProcess(ProcessFactory factory) {
         super(factory);
@@ -80,53 +79,47 @@ public class RectangularBinningProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection features = (SimpleFeatureCollection) Params.getValue(input,
+                RectangularBinningProcessFactory.features, null);
+        if (features == null) {
+            throw new NullPointerException("features parameter required");
+        }
 
+        Expression weight = (Expression) Params.getValue(input,
+                RectangularBinningProcessFactory.weight, null);
+        ReferencedEnvelope bbox = (ReferencedEnvelope) Params.getValue(input,
+                RectangularBinningProcessFactory.bbox, null);
+        Double width = (Double) Params
+                .getValue(input, RectangularBinningProcessFactory.width, null);
+        Double height = (Double) Params.getValue(input, RectangularBinningProcessFactory.height,
+                null);
+        Boolean validGrid = (Boolean) Params.getValue(input,
+                RectangularBinningProcessFactory.validGrid,
+                RectangularBinningProcessFactory.validGrid.sample);
+
+        // start process
+        if (bbox == null || bbox.isEmpty()) {
+            bbox = features.getBounds();
+        }
+
+        if (width == null || width <= 0 || height == null || height <= 0) {
+            width = Math.min(bbox.getWidth(), bbox.getHeight()) / 250.0d;
+            height = width;
+            LOGGER.log(Level.WARNING, "The default width / height is " + width);
+        }
+
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection features = (SimpleFeatureCollection) Params.getValue(input,
-                    RectangularBinningProcessFactory.features, null);
-            if (features == null) {
-                throw new NullPointerException("features parameter required");
-            }
-
-            Expression weight = (Expression) Params.getValue(input,
-                    RectangularBinningProcessFactory.weight, null);
-            ReferencedEnvelope bbox = (ReferencedEnvelope) Params.getValue(input,
-                    RectangularBinningProcessFactory.bbox, null);
-            Double width = (Double) Params.getValue(input, RectangularBinningProcessFactory.width,
-                    null);
-            Double height = (Double) Params.getValue(input,
-                    RectangularBinningProcessFactory.height, null);
-            Boolean validGrid = (Boolean) Params.getValue(input,
-                    RectangularBinningProcessFactory.validGrid,
-                    RectangularBinningProcessFactory.validGrid.sample);
-
-            // start process
-            if (bbox == null || bbox.isEmpty()) {
-                bbox = features.getBounds();
-            }
-
-            if (width == null || width <= 0 || height == null || height <= 0) {
-                width = Math.min(bbox.getWidth(), bbox.getHeight()) / 250.0d;
-                height = width;
-                LOGGER.log(Level.WARNING, "The default width / height is " + width);
-            }
-
             RectangularBinningOperation process = new RectangularBinningOperation();
             process.setOnlyValidGrid(validGrid);
-            SimpleFeatureCollection resultFc = process.execute(features, weight, bbox, width,
-                    height);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(RectangularBinningProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = process.execute(features, weight, bbox, width, height);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(RectangularBinningProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

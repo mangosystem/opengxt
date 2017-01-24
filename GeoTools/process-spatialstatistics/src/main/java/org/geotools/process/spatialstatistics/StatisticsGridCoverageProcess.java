@@ -43,8 +43,6 @@ import com.vividsolutions.jts.geom.Geometry;
 public class StatisticsGridCoverageProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(StatisticsGridCoverageProcess.class);
 
-    private boolean started = false;
-
     public StatisticsGridCoverageProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -76,35 +74,25 @@ public class StatisticsGridCoverageProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
-                    StatisticsGridCoverageProcessFactory.inputCoverage, null);
-            if (inputCoverage == null) {
-                throw new NullPointerException("inputCoverage parameter required");
-            }
-
-            Geometry cropShape = (Geometry) Params.getValue(input,
-                    StatisticsGridCoverageProcessFactory.cropShape, null);
-            Integer bandIndex = (Integer) Params.getValue(input,
-                    StatisticsGridCoverageProcessFactory.bandIndex,
-                    StatisticsGridCoverageProcessFactory.bandIndex.sample);
-
-            // start process
-            DataStatisticsOperation operator = new DataStatisticsOperation();
-            DataStatisticsResult result = operator.execute(inputCoverage, cropShape, bandIndex);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(StatisticsGridCoverageProcessFactory.RESULT.key, result);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
+                StatisticsGridCoverageProcessFactory.inputCoverage, null);
+        if (inputCoverage == null) {
+            throw new NullPointerException("inputCoverage parameter required");
         }
+
+        Geometry cropShape = (Geometry) Params.getValue(input,
+                StatisticsGridCoverageProcessFactory.cropShape, null);
+        Integer bandIndex = (Integer) Params.getValue(input,
+                StatisticsGridCoverageProcessFactory.bandIndex,
+                StatisticsGridCoverageProcessFactory.bandIndex.sample);
+
+        // start process
+        DataStatisticsOperation operator = new DataStatisticsOperation();
+        DataStatisticsResult result = operator.execute(inputCoverage, cropShape, bandIndex);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(StatisticsGridCoverageProcessFactory.RESULT.key, result);
+        return resultMap;
     }
 }

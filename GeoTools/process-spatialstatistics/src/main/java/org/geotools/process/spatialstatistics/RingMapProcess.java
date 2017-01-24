@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class RingMapProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RingMapProcess.class);
-
-    private boolean started = false;
 
     public RingMapProcess(ProcessFactory factory) {
         super(factory);
@@ -73,41 +72,36 @@ public class RingMapProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                RingMapProcessFactory.inputFeatures, null);
+        String fields = (String) Params.getValue(input, RingMapProcessFactory.fields, null);
+        if (inputFeatures == null || fields == null || fields.isEmpty()) {
+            throw new NullPointerException("inputFeatures, fields parameters required");
+        }
 
+        String targetField = (String) Params.getValue(input, RingMapProcessFactory.targetField,
+                RingMapProcessFactory.targetField.sample);
+        Integer ringGap = (Integer) Params.getValue(input, RingMapProcessFactory.ringGap,
+                RingMapProcessFactory.ringGap.sample);
+
+        // start process
+        SimpleFeatureCollection ringFc = null;
+        SimpleFeatureCollection anchorFc = null;
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, RingMapProcessFactory.inputFeatures, null);
-            String fields = (String) Params.getValue(input, RingMapProcessFactory.fields, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures, fields parameters required");
-            }
-            String targetField = (String) Params.getValue(input, RingMapProcessFactory.targetField,
-                    RingMapProcessFactory.targetField.sample);
-            Integer ringGap = (Integer) Params.getValue(input, RingMapProcessFactory.ringGap,
-                    RingMapProcessFactory.ringGap.sample);
-
-            // start process
-            SimpleFeatureCollection ringFc = null;
-            SimpleFeatureCollection anchorFc = null;
             RingMapsOperation operation = new RingMapsOperation();
             if (operation.execute(inputFeatures, fields, targetField, ringGap)) {
                 ringFc = operation.getRingFc();
                 anchorFc = operation.getAnchorFc();
             }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(RingMapProcessFactory.ringmap.key, ringFc);
-            resultMap.put(RingMapProcessFactory.anchor.key, anchorFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(RingMapProcessFactory.ringmap.key, ringFc);
+        resultMap.put(RingMapProcessFactory.anchor.key, anchorFc);
+        return resultMap;
     }
 
 }

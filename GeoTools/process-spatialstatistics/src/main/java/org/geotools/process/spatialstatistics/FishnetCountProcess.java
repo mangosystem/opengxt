@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,8 +42,6 @@ import org.opengis.util.ProgressListener;
  */
 public class FishnetCountProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(FishnetCountProcess.class);
-
-    private boolean started = false;
 
     public FishnetCountProcess(ProcessFactory factory) {
         super(factory);
@@ -77,42 +76,37 @@ public class FishnetCountProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
+                FishnetCountProcessFactory.extent, null);
+        Integer columns = (Integer) Params.getValue(input, FishnetCountProcessFactory.columns,
+                FishnetCountProcessFactory.columns.sample);
+        Integer rows = (Integer) Params.getValue(input, FishnetCountProcessFactory.rows,
+                FishnetCountProcessFactory.rows.sample);
+        if (extent == null || columns == null || columns == 0 || rows == null || rows == 0) {
+            throw new NullPointerException("extent, columns, rows parameter required");
+        }
 
+        SimpleFeatureCollection boundsSource = (SimpleFeatureCollection) Params.getValue(input,
+                FishnetCountProcessFactory.boundsSource, null);
+        Boolean boundaryInside = (Boolean) Params.getValue(input,
+                FishnetCountProcessFactory.boundaryInside,
+                FishnetCountProcessFactory.boundaryInside.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
         try {
-            ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
-                    FishnetCountProcessFactory.extent, null);
-            Integer columns = (Integer) Params.getValue(input, FishnetCountProcessFactory.columns,
-                    FishnetCountProcessFactory.columns.sample);
-            Integer rows = (Integer) Params.getValue(input, FishnetCountProcessFactory.rows,
-                    FishnetCountProcessFactory.rows.sample);
-            if (extent == null || columns == null || columns == 0 || rows == null || rows == 0) {
-                throw new NullPointerException("extent, columns, rows parameter required");
-            }
-
-            SimpleFeatureCollection boundsSource = (SimpleFeatureCollection) Params.getValue(input,
-                    FishnetCountProcessFactory.boundsSource, null);
-            Boolean boundaryInside = (Boolean) Params.getValue(input,
-                    FishnetCountProcessFactory.boundaryInside,
-                    FishnetCountProcessFactory.boundaryInside.sample);
-
-            // start process
             FishnetOperation operation = new FishnetOperation();
             operation.setBoundaryInside(boundaryInside);
             operation.setFishnetType(FishnetType.Rectangle);
             operation.setBoundsSource(boundsSource);
-            SimpleFeatureCollection resultFc = operation.execute(extent, columns, rows);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(FishnetCountProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = operation.execute(extent, columns, rows);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(FishnetCountProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

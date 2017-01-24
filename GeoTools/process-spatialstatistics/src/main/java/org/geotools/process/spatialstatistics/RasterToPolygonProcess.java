@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,8 +41,6 @@ import org.opengis.util.ProgressListener;
  */
 public class RasterToPolygonProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RasterToPolygonProcess.class);
-
-    private boolean started = false;
 
     public RasterToPolygonProcess(ProcessFactory factory) {
         super(factory);
@@ -76,39 +75,32 @@ public class RasterToPolygonProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
-                    RasterToPolygonProcessFactory.inputCoverage, null);
-            Integer bandIndex = (Integer) Params.getValue(input,
-                    RasterToPolygonProcessFactory.bandIndex,
-                    RasterToPolygonProcessFactory.bandIndex.sample);
-            Boolean weeding = (Boolean) Params.getValue(input,
-                    RasterToPolygonProcessFactory.weeding,
-                    RasterToPolygonProcessFactory.weeding.sample);
-            String valueField = (String) Params.getValue(input,
-                    RasterToPolygonProcessFactory.valueField,
-                    RasterToPolygonProcessFactory.valueField.sample);
-            if (inputCoverage == null) {
-                throw new NullPointerException("inputCoverage parameter required");
-            }
-
-            // start process
-            RasterToPolygonOperation process = new RasterToPolygonOperation();
-            SimpleFeatureCollection resultFc = process.execute(inputCoverage, bandIndex, weeding,
-                    valueField);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(RasterToPolygonProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
+                RasterToPolygonProcessFactory.inputCoverage, null);
+        Integer bandIndex = (Integer) Params.getValue(input,
+                RasterToPolygonProcessFactory.bandIndex,
+                RasterToPolygonProcessFactory.bandIndex.sample);
+        Boolean weeding = (Boolean) Params.getValue(input, RasterToPolygonProcessFactory.weeding,
+                RasterToPolygonProcessFactory.weeding.sample);
+        String valueField = (String) Params.getValue(input,
+                RasterToPolygonProcessFactory.valueField,
+                RasterToPolygonProcessFactory.valueField.sample);
+        if (inputCoverage == null) {
+            throw new NullPointerException("inputCoverage parameter required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc;
+        try {
+            RasterToPolygonOperation process = new RasterToPolygonOperation();
+            resultFc = process.execute(inputCoverage, bandIndex, weeding, valueField);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(RasterToPolygonProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

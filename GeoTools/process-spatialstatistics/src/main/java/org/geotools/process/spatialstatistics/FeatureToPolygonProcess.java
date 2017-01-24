@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class FeatureToPolygonProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(FeatureToPolygonProcess.class);
-
-    private boolean started = false;
 
     public FeatureToPolygonProcess(ProcessFactory factory) {
         super(factory);
@@ -73,38 +72,31 @@ public class FeatureToPolygonProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                FeatureToPolygonProcessFactory.inputFeatures, null);
 
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, FeatureToPolygonProcessFactory.inputFeatures, null);
+        Double tolerance = (Double) Params.getValue(input,
+                FeatureToPolygonProcessFactory.tolerance,
+                FeatureToPolygonProcessFactory.tolerance.sample);
 
-            Double tolerance = (Double) Params.getValue(input,
-                    FeatureToPolygonProcessFactory.tolerance,
-                    FeatureToPolygonProcessFactory.tolerance.sample);
-
-            SimpleFeatureCollection labelFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, FeatureToPolygonProcessFactory.labelFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameter required");
-            }
-
-            // start process
-            FeatureToPolygonOperation operation = new FeatureToPolygonOperation();
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, tolerance,
-                    labelFeatures);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(FeatureToPolygonProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection labelFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                FeatureToPolygonProcessFactory.labelFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameter required");
         }
-    }
 
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            FeatureToPolygonOperation operation = new FeatureToPolygonOperation();
+            resultFc = operation.execute(inputFeatures, tolerance, labelFeatures);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(FeatureToPolygonProcessFactory.RESULT.key, resultFc);
+        return resultMap;
+    }
 }

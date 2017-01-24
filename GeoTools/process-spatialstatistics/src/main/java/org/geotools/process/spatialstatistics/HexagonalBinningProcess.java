@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,8 +42,6 @@ import org.opengis.util.ProgressListener;
  */
 public class HexagonalBinningProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(HexagonalBinningProcess.class);
-
-    private boolean started = false;
 
     public HexagonalBinningProcess(ProcessFactory factory) {
         super(factory);
@@ -79,49 +78,43 @@ public class HexagonalBinningProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection features = (SimpleFeatureCollection) Params.getValue(input,
+                HexagonalBinningProcessFactory.features, null);
+        if (features == null) {
+            throw new NullPointerException("features parameter required");
+        }
 
+        Expression weight = (Expression) Params.getValue(input,
+                HexagonalBinningProcessFactory.weight, null);
+        ReferencedEnvelope bbox = (ReferencedEnvelope) Params.getValue(input,
+                HexagonalBinningProcessFactory.bbox, null);
+        Double size = (Double) Params.getValue(input, HexagonalBinningProcessFactory.size, null);
+        Boolean validGrid = (Boolean) Params.getValue(input,
+                HexagonalBinningProcessFactory.validGrid,
+                HexagonalBinningProcessFactory.validGrid.sample);
+
+        // start process
+        if (bbox == null || bbox.isEmpty()) {
+            bbox = features.getBounds();
+        }
+
+        if (size == null || size <= 0) {
+            size = (Math.min(bbox.getWidth(), bbox.getHeight()) / 250.0d) / 2.0d;
+            LOGGER.log(Level.WARNING, "The default width / height is " + size);
+        }
+
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection features = (SimpleFeatureCollection) Params.getValue(input,
-                    HexagonalBinningProcessFactory.features, null);
-            if (features == null) {
-                throw new NullPointerException("features parameter required");
-            }
-
-            Expression weight = (Expression) Params.getValue(input,
-                    HexagonalBinningProcessFactory.weight, null);
-            ReferencedEnvelope bbox = (ReferencedEnvelope) Params.getValue(input,
-                    HexagonalBinningProcessFactory.bbox, null);
-            Double size = (Double) Params
-                    .getValue(input, HexagonalBinningProcessFactory.size, null);
-            Boolean validGrid = (Boolean) Params.getValue(input,
-                    HexagonalBinningProcessFactory.validGrid,
-                    HexagonalBinningProcessFactory.validGrid.sample);
-
-            // start process
-            if (bbox == null || bbox.isEmpty()) {
-                bbox = features.getBounds();
-            }
-
-            if (size == null || size <= 0) {
-                size = (Math.min(bbox.getWidth(), bbox.getHeight()) / 250.0d) / 2.0d;
-                LOGGER.log(Level.WARNING, "The default width / height is " + size);
-            }
-
             HexagonalBinningOperation process = new HexagonalBinningOperation();
             process.setOnlyValidGrid(validGrid);
-            SimpleFeatureCollection resultFc = process.execute(features, weight, bbox, size);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(HexagonalBinningProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = process.execute(features, weight, bbox, size);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(HexagonalBinningProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

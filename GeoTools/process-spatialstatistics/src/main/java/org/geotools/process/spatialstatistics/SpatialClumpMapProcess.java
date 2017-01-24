@@ -47,8 +47,6 @@ import org.opengis.util.ProgressListener;
 public class SpatialClumpMapProcess extends AbstractStatisticsProcess implements RenderingProcess {
     protected static final Logger LOGGER = Logging.getLogger(SpatialClumpMapProcess.class);
 
-    private boolean started = false;
-
     public SpatialClumpMapProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -80,36 +78,25 @@ public class SpatialClumpMapProcess extends AbstractStatisticsProcess implements
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, SpatialClumpMapProcessFactory.inputFeatures, null);
-            Expression radius = (Expression) Params.getValue(input,
-                    SpatialClumpMapProcessFactory.radius, null);
-            Integer quadrantSegments = (Integer) Params.getValue(input,
-                    SpatialClumpMapProcessFactory.quadrantSegments,
-                    SpatialClumpMapProcessFactory.quadrantSegments.sample);
-            if (inputFeatures == null || radius == null) {
-                throw new NullPointerException("All parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection resultFc = DataUtilities
-                    .simple(new SpatialClumpFeatureCollection(inputFeatures, radius,
-                            quadrantSegments));
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(SpatialClumpMapProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SpatialClumpMapProcessFactory.inputFeatures, null);
+        Expression radius = (Expression) Params.getValue(input,
+                SpatialClumpMapProcessFactory.radius, null);
+        Integer quadrantSegments = (Integer) Params.getValue(input,
+                SpatialClumpMapProcessFactory.quadrantSegments,
+                SpatialClumpMapProcessFactory.quadrantSegments.sample);
+        if (inputFeatures == null || radius == null) {
+            throw new NullPointerException("All parameters required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new SpatialClumpFeatureCollection(
+                inputFeatures, radius, quadrantSegments));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(SpatialClumpMapProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
     /**

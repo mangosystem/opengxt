@@ -44,8 +44,6 @@ import org.opengis.util.ProgressListener;
 public class SelectFeaturesProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(SelectFeaturesProcess.class);
 
-    private boolean started = false;
-
     public SelectFeaturesProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -77,49 +75,38 @@ public class SelectFeaturesProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, SelectFeaturesProcessFactory.inputFeatures, null);
-            Filter filter = (Filter) Params.getValue(input, SelectFeaturesProcessFactory.filter,
-                    null);
-            String attributes = (String) Params.getValue(input,
-                    SelectFeaturesProcessFactory.attributes, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameter required");
-            }
-
-            // start process
-            // apply filtering if necessary
-            SimpleFeatureCollection resultFc = inputFeatures;
-            if (filter != null && !filter.equals(Filter.INCLUDE)) {
-                resultFc = new FilteringSimpleFeatureCollection(inputFeatures, filter);
-            }
-
-            // apply retyping if necessary
-            if (attributes != null && attributes.length() > 0) {
-                String[] names = attributes.split(",");
-                for (int idx = 0; idx < names.length; idx++) {
-                    names[idx] = names[idx].trim();
-                }
-
-                SimpleFeatureType ft = SimpleFeatureTypeBuilder.retype(resultFc.getSchema(), names);
-                if (!(ft.equals(resultFc.getSchema()))) {
-                    resultFc = new ReTypingFeatureCollection(resultFc, ft);
-                }
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(SelectFeaturesProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SelectFeaturesProcessFactory.inputFeatures, null);
+        Filter filter = (Filter) Params.getValue(input, SelectFeaturesProcessFactory.filter, null);
+        String attributes = (String) Params.getValue(input,
+                SelectFeaturesProcessFactory.attributes, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameter required");
         }
+
+        // start process
+        // apply filtering if necessary
+        SimpleFeatureCollection resultFc = inputFeatures;
+        if (filter != null && !filter.equals(Filter.INCLUDE)) {
+            resultFc = new FilteringSimpleFeatureCollection(inputFeatures, filter);
+        }
+
+        // apply retyping if necessary
+        if (attributes != null && attributes.length() > 0) {
+            String[] names = attributes.split(",");
+            for (int idx = 0; idx < names.length; idx++) {
+                names[idx] = names[idx].trim();
+            }
+
+            SimpleFeatureType ft = SimpleFeatureTypeBuilder.retype(resultFc.getSchema(), names);
+            if (!(ft.equals(resultFc.getSchema()))) {
+                resultFc = new ReTypingFeatureCollection(resultFc, ft);
+            }
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(SelectFeaturesProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

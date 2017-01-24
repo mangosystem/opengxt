@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class CollectEventsProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(CollectEventsProcess.class);
-
-    private boolean started = false;
 
     public CollectEventsProcess(ProcessFactory factory) {
         super(factory);
@@ -73,40 +72,33 @@ public class CollectEventsProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                CollectEventsProcessFactory.inputFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameter required");
+        }
 
+        String countField = (String) Params.getValue(input, CollectEventsProcessFactory.countField,
+                CollectEventsProcessFactory.countField.sample);
+
+        Double tolerance = (Double) Params.getValue(input, CollectEventsProcessFactory.tolerance,
+                CollectEventsProcessFactory.tolerance.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, CollectEventsProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameter required");
-            }
-
-            String countField = (String) Params.getValue(input,
-                    CollectEventsProcessFactory.countField,
-                    CollectEventsProcessFactory.countField.sample);
-
-            Double tolerance = (Double) Params.getValue(input,
-                    CollectEventsProcessFactory.tolerance,
-                    CollectEventsProcessFactory.tolerance.sample);
-
-            // start process
             CollectEventsOperation operation = new CollectEventsOperation();
             if (tolerance != null && tolerance > 0) {
                 operation.setTolerance(tolerance);
             }
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, countField);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(CollectEventsProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = operation.execute(inputFeatures, countField);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(CollectEventsProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

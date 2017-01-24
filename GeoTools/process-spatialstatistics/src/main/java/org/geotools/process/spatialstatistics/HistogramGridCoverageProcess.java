@@ -47,8 +47,6 @@ import com.vividsolutions.jts.geom.Geometry;
 public class HistogramGridCoverageProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(HistogramGridCoverageProcess.class);
 
-    private boolean started = false;
-
     public HistogramGridCoverageProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -81,57 +79,47 @@ public class HistogramGridCoverageProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
-                    HistogramGridCoverageProcessFactory.inputCoverage, null);
-            if (inputCoverage == null) {
-                throw new NullPointerException("inputCoverage parameters required");
-            }
-
-            Geometry cropShape = (Geometry) Params.getValue(input,
-                    HistogramGridCoverageProcessFactory.cropShape, null);
-            Integer bandIndex = (Integer) Params.getValue(input,
-                    HistogramGridCoverageProcessFactory.bandIndex,
-                    HistogramGridCoverageProcessFactory.bandIndex.sample);
-
-            // start process
-            // 1. crop raster
-            GridCoverage2D cropedCoverage = inputCoverage;
-            if (cropShape != null) {
-                RasterCropOperation cropOperation = new RasterCropOperation();
-                cropedCoverage = cropOperation.execute(inputCoverage, cropShape);
-            }
-
-            // 2. histogram
-            String typeName = inputCoverage.getName().toString();
-            HistogramProcessResult result = new HistogramProcessResult(typeName, "Value");
-            if (cropedCoverage != null) {
-                double noData = RasterHelper.getNoDataValue(cropedCoverage);
-
-                if (cropShape != null) {
-                    result.setArea(FormatUtils.format(cropShape.getArea())); // 6 digit
-                }
-
-                double cellSize = RasterHelper.getCellSize(cropedCoverage);
-                result.setCellSize(FormatUtils.format(cellSize)); // 6 digit
-
-                DataHistogram process = new HistogramGridCoverage();
-                process.calculateHistogram(cropedCoverage, bandIndex, noData);
-                result.putValues(process.getArrayValues(), process.getArrayFrequencies());
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(HistogramGridCoverageProcessFactory.RESULT.key, result);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
+                HistogramGridCoverageProcessFactory.inputCoverage, null);
+        if (inputCoverage == null) {
+            throw new NullPointerException("inputCoverage parameters required");
         }
+
+        Geometry cropShape = (Geometry) Params.getValue(input,
+                HistogramGridCoverageProcessFactory.cropShape, null);
+        Integer bandIndex = (Integer) Params.getValue(input,
+                HistogramGridCoverageProcessFactory.bandIndex,
+                HistogramGridCoverageProcessFactory.bandIndex.sample);
+
+        // start process
+        // 1. crop raster
+        GridCoverage2D cropedCoverage = inputCoverage;
+        if (cropShape != null) {
+            RasterCropOperation cropOperation = new RasterCropOperation();
+            cropedCoverage = cropOperation.execute(inputCoverage, cropShape);
+        }
+
+        // 2. histogram
+        String typeName = inputCoverage.getName().toString();
+        HistogramProcessResult result = new HistogramProcessResult(typeName, "Value");
+        if (cropedCoverage != null) {
+            double noData = RasterHelper.getNoDataValue(cropedCoverage);
+
+            if (cropShape != null) {
+                result.setArea(FormatUtils.format(cropShape.getArea())); // 6 digit
+            }
+
+            double cellSize = RasterHelper.getCellSize(cropedCoverage);
+            result.setCellSize(FormatUtils.format(cellSize)); // 6 digit
+
+            DataHistogram process = new HistogramGridCoverage();
+            process.calculateHistogram(cropedCoverage, bandIndex, noData);
+            result.putValues(process.getArrayValues(), process.getArrayFrequencies());
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(HistogramGridCoverageProcessFactory.RESULT.key, result);
+        return resultMap;
     }
 }

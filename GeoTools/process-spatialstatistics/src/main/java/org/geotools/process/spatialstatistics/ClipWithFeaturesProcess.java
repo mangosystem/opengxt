@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class ClipWithFeaturesProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(ClipWithFeaturesProcess.class);
-
-    private boolean started = false;
 
     public ClipWithFeaturesProcess(ProcessFactory factory) {
         super(factory);
@@ -73,31 +72,26 @@ public class ClipWithFeaturesProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, ClipWithFeaturesProcessFactory.inputFeatures, null);
-            SimpleFeatureCollection clipFeatures = (SimpleFeatureCollection) Params.getValue(input,
-                    ClipWithFeaturesProcessFactory.clipFeatures, null);
-            if (inputFeatures == null || clipFeatures == null) {
-                throw new NullPointerException("All parameter required");
-            }
-
-            // start process
-            ClipWithFeaturesOperation operation = new ClipWithFeaturesOperation();
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, clipFeatures);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(ClipWithFeaturesProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                ClipWithFeaturesProcessFactory.inputFeatures, null);
+        SimpleFeatureCollection clipFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                ClipWithFeaturesProcessFactory.clipFeatures, null);
+        if (inputFeatures == null || clipFeatures == null) {
+            throw new NullPointerException("All parameter required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            ClipWithFeaturesOperation operation = new ClipWithFeaturesOperation();
+            resultFc = operation.execute(inputFeatures, clipFeatures);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(ClipWithFeaturesProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

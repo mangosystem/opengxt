@@ -47,8 +47,7 @@ public class MergeFeatureCollection extends GXTSimpleFeatureCollection {
 
     private SimpleFeatureType schema;
 
-    public MergeFeatureCollection(SimpleFeatureCollection delegate, SimpleFeatureCollection features)
-            throws ClassNotFoundException {
+    public MergeFeatureCollection(SimpleFeatureCollection delegate, SimpleFeatureCollection features) {
         super(delegate);
 
         this.features = features;

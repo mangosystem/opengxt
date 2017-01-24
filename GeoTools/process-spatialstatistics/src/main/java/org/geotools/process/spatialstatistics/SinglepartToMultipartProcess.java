@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class SinglepartToMultipartProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(SinglepartToMultipartProcess.class);
-
-    private boolean started = false;
 
     public SinglepartToMultipartProcess(ProcessFactory factory) {
         super(factory);
@@ -74,37 +73,27 @@ public class SinglepartToMultipartProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SinglepartToMultipartProcessFactory.inputFeatures, null);
 
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, SinglepartToMultipartProcessFactory.inputFeatures, null);
-
-            String caseField = (String) Params.getValue(input,
-                    SinglepartToMultipartProcessFactory.caseField,
-                    SinglepartToMultipartProcessFactory.caseField.sample);
-            if (inputFeatures == null || caseField == null || caseField.trim().length() == 0) {
-                throw new NullPointerException("inputFeatures, caseField, parameters required");
-            }
-
-            Boolean dissolve = (Boolean) Params.getValue(input,
-                    SinglepartToMultipartProcessFactory.dissolve,
-                    SinglepartToMultipartProcessFactory.dissolve.sample);
-
-            // start process
-            SimpleFeatureCollection resultFc = new MultipartFeatureCollection(inputFeatures,
-                    caseField, dissolve);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(SinglepartToMultipartProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        String caseField = (String) Params.getValue(input,
+                SinglepartToMultipartProcessFactory.caseField,
+                SinglepartToMultipartProcessFactory.caseField.sample);
+        if (inputFeatures == null || caseField == null || caseField.trim().length() == 0) {
+            throw new NullPointerException("inputFeatures, caseField, parameters required");
         }
+
+        Boolean dissolve = (Boolean) Params.getValue(input,
+                SinglepartToMultipartProcessFactory.dissolve,
+                SinglepartToMultipartProcessFactory.dissolve.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new MultipartFeatureCollection(
+                inputFeatures, caseField, dissolve));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(SinglepartToMultipartProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

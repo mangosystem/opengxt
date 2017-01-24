@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,8 +41,6 @@ import org.opengis.util.ProgressListener;
  */
 public class SpatialJoinProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(SpatialJoinProcess.class);
-
-    private boolean started = false;
 
     public SpatialJoinProcess(ProcessFactory factory) {
         super(factory);
@@ -75,39 +74,33 @@ public class SpatialJoinProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SpatialJoinProcessFactory.inputFeatures, null);
+        SimpleFeatureCollection joinFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SpatialJoinProcessFactory.joinFeatures, null);
+        if (inputFeatures == null || joinFeatures == null) {
+            throw new NullPointerException("inputFeatures and joinFeatures parameters required");
+        }
+        SpatialJoinType joinType = (SpatialJoinType) Params.getValue(input,
+                SpatialJoinProcessFactory.joinType, SpatialJoinProcessFactory.joinType.sample);
+        Double searchRadius = (Double) Params.getValue(input,
+                SpatialJoinProcessFactory.searchRadius,
+                SpatialJoinProcessFactory.searchRadius.sample);
 
+        // start process
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, SpatialJoinProcessFactory.inputFeatures, null);
-            SimpleFeatureCollection joinFeatures = (SimpleFeatureCollection) Params.getValue(input,
-                    SpatialJoinProcessFactory.joinFeatures, null);
-            if (inputFeatures == null || joinFeatures == null) {
-                throw new NullPointerException("inputFeatures and joinFeatures parameters required");
-            }
-            SpatialJoinType joinType = (SpatialJoinType) Params.getValue(input,
-                    SpatialJoinProcessFactory.joinType, SpatialJoinProcessFactory.joinType.sample);
-            Double searchRadius = (Double) Params.getValue(input,
-                    SpatialJoinProcessFactory.searchRadius,
-                    SpatialJoinProcessFactory.searchRadius.sample);
-
-            // start process
             SpatialJoinOperation operation = new SpatialJoinOperation();
             operation.setSearchRadius(searchRadius);
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, joinFeatures,
-                    joinType);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(SpatialJoinProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = operation.execute(inputFeatures, joinFeatures, joinType);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(SpatialJoinProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
 }

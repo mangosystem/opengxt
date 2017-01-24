@@ -84,13 +84,12 @@ public class FeatureToOctagonalEnvelopeProcess extends AbstractStatisticsProcess
                 FeatureToOctagonalEnvelopeProcessFactory.singlePart.sample);
 
         // start process
-        SimpleFeatureCollection resultFc = new OctagonalEnvelopeFeatureCollection(inputFeatures,
-                singlePart);
+        SimpleFeatureCollection resultFc = DataUtilities
+                .simple(new OctagonalEnvelopeFeatureCollection(inputFeatures, singlePart));
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        resultMap.put(FeatureToOctagonalEnvelopeProcessFactory.RESULT.key,
-                DataUtilities.simple(resultFc));
+        resultMap.put(FeatureToOctagonalEnvelopeProcessFactory.RESULT.key, resultFc);
         return resultMap;
     }
 }

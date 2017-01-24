@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,8 +41,6 @@ import org.opengis.util.ProgressListener;
  */
 public class KMeansClusteringProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(KMeansClusteringProcess.class);
-
-    private boolean started = false;
 
     public KMeansClusteringProcess(ProcessFactory factory) {
         super(factory);
@@ -75,52 +74,46 @@ public class KMeansClusteringProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                KMeansClusteringProcessFactory.inputFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameters required");
+        }
 
+        String targetField = (String) Params.getValue(input,
+                KMeansClusteringProcessFactory.targetField,
+                KMeansClusteringProcessFactory.targetField.sample);
+        if (targetField == null) {
+            throw new NullPointerException("targetField parameters required");
+        }
+
+        int numberOfClusters = (Integer) Params.getValue(input,
+                KMeansClusteringProcessFactory.numberOfClusters,
+                KMeansClusteringProcessFactory.numberOfClusters.sample);
+        if (numberOfClusters < 1) {
+            throw new NullPointerException("Number of clusters must be greater than 1");
+        }
+
+        Boolean asCircle = (Boolean) Params.getValue(input,
+                KMeansClusteringProcessFactory.asCircle,
+                KMeansClusteringProcessFactory.asCircle.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, KMeansClusteringProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
-            }
-
-            String targetField = (String) Params.getValue(input,
-                    KMeansClusteringProcessFactory.targetField,
-                    KMeansClusteringProcessFactory.targetField.sample);
-            if (targetField == null) {
-                throw new NullPointerException("targetField parameters required");
-            }
-
-            int numberOfClusters = (Integer) Params.getValue(input,
-                    KMeansClusteringProcessFactory.numberOfClusters,
-                    KMeansClusteringProcessFactory.numberOfClusters.sample);
-            if (numberOfClusters < 1) {
-                throw new NullPointerException("Number of clusters must be greater than 1");
-            }
-
-            Boolean asCircle = (Boolean) Params.getValue(input,
-                    KMeansClusteringProcessFactory.asCircle,
-                    KMeansClusteringProcessFactory.asCircle.sample);
-
-            // start process
             KMeansClusterOperation operator = new KMeansClusterOperation();
-            SimpleFeatureCollection resultFc = null;
             if (asCircle) {
                 resultFc = operator.executeAsCircle(inputFeatures, targetField, numberOfClusters);
             } else {
                 resultFc = operator.execute(inputFeatures, targetField, numberOfClusters);
             }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(AreaProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(AreaProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

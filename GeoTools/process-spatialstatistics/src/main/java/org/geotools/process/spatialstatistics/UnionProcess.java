@@ -43,8 +43,6 @@ import org.opengis.util.ProgressListener;
 public class UnionProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(UnionProcess.class);
 
-    private boolean started = false;
-
     public UnionProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -74,40 +72,35 @@ public class UnionProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                UnionProcessFactory.inputFeatures, null);
 
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, UnionProcessFactory.inputFeatures, null);
-
-            SimpleFeatureCollection overlayFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, UnionProcessFactory.overlayFeatures, null);
-            if (inputFeatures == null || overlayFeatures == null) {
-                throw new NullPointerException("inputFeatures, overlayFeatures parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection intersect = new IntersectFeatureCollection(inputFeatures,
-                    overlayFeatures);
-            SimpleFeatureCollection difference1 = new DifferenceFeatureCollection(inputFeatures,
-                    overlayFeatures);
-            SimpleFeatureCollection difference2 = new DifferenceFeatureCollection(overlayFeatures,
-                    inputFeatures);
-            SimpleFeatureCollection merge1 = new MergeFeatureCollection(intersect, difference1);
-            SimpleFeatureCollection resultFc = DataUtilities.simple(new MergeFeatureCollection(
-                    merge1, difference2));
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(UnionProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection overlayFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                UnionProcessFactory.overlayFeatures, null);
+        if (inputFeatures == null || overlayFeatures == null) {
+            throw new NullPointerException("inputFeatures, overlayFeatures parameters required");
         }
+
+        // start process
+        SimpleFeatureCollection intersect = DataUtilities.simple(new IntersectFeatureCollection(
+                inputFeatures, overlayFeatures));
+
+        SimpleFeatureCollection difference1 = DataUtilities.simple(new DifferenceFeatureCollection(
+                inputFeatures, overlayFeatures));
+
+        SimpleFeatureCollection difference2 = DataUtilities.simple(new DifferenceFeatureCollection(
+                overlayFeatures, inputFeatures));
+
+        SimpleFeatureCollection merge1 = DataUtilities.simple(new MergeFeatureCollection(intersect,
+                difference1));
+
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new MergeFeatureCollection(merge1,
+                difference2));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(UnionProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
 }

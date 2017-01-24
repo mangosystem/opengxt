@@ -84,13 +84,12 @@ public class FeatureToMinimumRectangleProcess extends AbstractStatisticsProcess 
                 FeatureToMinimumRectangleProcessFactory.singlePart.sample);
 
         // start process
-        SimpleFeatureCollection resultFc = new MinimumRectangleFeatureCollection(inputFeatures,
-                singlePart);
+        SimpleFeatureCollection resultFc = DataUtilities
+                .simple(new MinimumRectangleFeatureCollection(inputFeatures, singlePart));
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        resultMap.put(FeatureToMinimumRectangleProcessFactory.RESULT.key,
-                DataUtilities.simple(resultFc));
+        resultMap.put(FeatureToMinimumRectangleProcessFactory.RESULT.key, resultFc);
         return resultMap;
     }
 }

@@ -40,8 +40,6 @@ import org.opengis.util.ProgressListener;
 public class RasterReclassProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RasterReclassProcess.class);
 
-    private boolean started = false;
-
     public RasterReclassProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -73,34 +71,22 @@ public class RasterReclassProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
-                    RasterReclassProcessFactory.inputCoverage, null);
-            Integer bandIndex = (Integer) Params.getValue(input,
-                    RasterReclassProcessFactory.bandIndex,
-                    RasterReclassProcessFactory.bandIndex.sample);
-            String ranges = (String) Params.getValue(input, RasterReclassProcessFactory.ranges,
-                    null);
-            if (inputCoverage == null || ranges == null || ranges.isEmpty()) {
-                throw new NullPointerException("inputCoverage, ranges parameters required");
-            }
-
-            // start process
-            RasterReclassOperation process = new RasterReclassOperation();
-            GridCoverage2D cropedCoverage = process.execute(inputCoverage, bandIndex, ranges);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(RasterReclassProcessFactory.RESULT.key, cropedCoverage);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
+                RasterReclassProcessFactory.inputCoverage, null);
+        Integer bandIndex = (Integer) Params.getValue(input, RasterReclassProcessFactory.bandIndex,
+                RasterReclassProcessFactory.bandIndex.sample);
+        String ranges = (String) Params.getValue(input, RasterReclassProcessFactory.ranges, null);
+        if (inputCoverage == null || ranges == null || ranges.isEmpty()) {
+            throw new NullPointerException("inputCoverage, ranges parameters required");
         }
+
+        // start process
+        RasterReclassOperation process = new RasterReclassOperation();
+        GridCoverage2D cropedCoverage = process.execute(inputCoverage, bandIndex, ranges);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(RasterReclassProcessFactory.RESULT.key, cropedCoverage);
+        return resultMap;
     }
 }

@@ -41,8 +41,6 @@ import org.opengis.util.ProgressListener;
 public class DifferenceProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(DifferenceProcess.class);
 
-    private boolean started = false;
-
     public DifferenceProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -72,34 +70,22 @@ public class DifferenceProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                DifferenceProcessFactory.inputFeatures, null);
 
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, DifferenceProcessFactory.inputFeatures, null);
-
-            SimpleFeatureCollection differenceFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, DifferenceProcessFactory.differenceFeatures, null);
-            if (inputFeatures == null || differenceFeatures == null) {
-                throw new NullPointerException(
-                        "inputFeatures, differenceFeatures parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection resultFc = DataUtilities
-                    .simple(new DifferenceFeatureCollection(inputFeatures, differenceFeatures));
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(DifferenceProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection differenceFeatures = (SimpleFeatureCollection) Params.getValue(
+                input, DifferenceProcessFactory.differenceFeatures, null);
+        if (inputFeatures == null || differenceFeatures == null) {
+            throw new NullPointerException("inputFeatures, differenceFeatures parameters required");
         }
-    }
 
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new DifferenceFeatureCollection(
+                inputFeatures, differenceFeatures));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(DifferenceProcessFactory.RESULT.key, resultFc);
+        return resultMap;
+    }
 }

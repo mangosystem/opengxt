@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,8 +42,6 @@ import org.opengis.util.ProgressListener;
  */
 public class FishnetSizeProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(FishnetSizeProcess.class);
-
-    private boolean started = false;
 
     public FishnetSizeProcess(ProcessFactory factory) {
         super(factory);
@@ -77,42 +76,37 @@ public class FishnetSizeProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
+                FishnetSizeProcessFactory.extent, null);
+        Double width = (Double) Params.getValue(input, FishnetSizeProcessFactory.width,
+                FishnetSizeProcessFactory.width.sample);
+        Double height = (Double) Params.getValue(input, FishnetSizeProcessFactory.height,
+                FishnetSizeProcessFactory.height.sample);
+        if (extent == null || width == null || height == null || width == 0 || height == 0) {
+            throw new NullPointerException("extent, width, height parameters required");
+        }
 
+        SimpleFeatureCollection boundsSource = (SimpleFeatureCollection) Params.getValue(input,
+                FishnetSizeProcessFactory.boundsSource, null);
+        Boolean boundaryInside = (Boolean) Params.getValue(input,
+                FishnetSizeProcessFactory.boundaryInside,
+                FishnetSizeProcessFactory.boundaryInside.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
         try {
-            ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
-                    FishnetSizeProcessFactory.extent, null);
-            Double width = (Double) Params.getValue(input, FishnetSizeProcessFactory.width,
-                    FishnetSizeProcessFactory.width.sample);
-            Double height = (Double) Params.getValue(input, FishnetSizeProcessFactory.height,
-                    FishnetSizeProcessFactory.height.sample);
-            if (extent == null || width == null || height == null || width == 0 || height == 0) {
-                throw new NullPointerException("extent, width, height parameters required");
-            }
-
-            SimpleFeatureCollection boundsSource = (SimpleFeatureCollection) Params.getValue(input,
-                    FishnetSizeProcessFactory.boundsSource, null);
-            Boolean boundaryInside = (Boolean) Params.getValue(input,
-                    FishnetSizeProcessFactory.boundaryInside,
-                    FishnetSizeProcessFactory.boundaryInside.sample);
-
-            // start process
             FishnetOperation operation = new FishnetOperation();
             operation.setBoundaryInside(boundaryInside);
             operation.setFishnetType(FishnetType.Rectangle);
             operation.setBoundsSource(boundsSource);
-            SimpleFeatureCollection resultFc = operation.execute(extent, width, height);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(FishnetSizeProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = operation.execute(extent, width, height);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(FishnetSizeProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

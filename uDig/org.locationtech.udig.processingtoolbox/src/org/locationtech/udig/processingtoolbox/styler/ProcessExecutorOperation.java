@@ -191,7 +191,11 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
             }
             monitor.worked(increment);
         } catch (ProcessException e) {
+            // always show log
+            boolean showLog = ToolboxView.getShowLog();
+            ToolboxView.setShowLog(true);
             ToolboxPlugin.log(e.getMessage());
+            ToolboxView.setShowLog(showLog);
         } finally {
             ToolboxPlugin.log(String.format(Messages.Task_Completed, windowTitle));
             monitor.done();

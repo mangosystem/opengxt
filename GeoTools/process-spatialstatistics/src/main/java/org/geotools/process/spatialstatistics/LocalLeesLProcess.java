@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -51,8 +52,6 @@ import org.opengis.util.ProgressListener;
  */
 public class LocalLeesLProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(LocalLeesLProcess.class);
-
-    private boolean started = false;
 
     public LocalLeesLProcess(ProcessFactory factory) {
         super(factory);
@@ -91,77 +90,68 @@ public class LocalLeesLProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                LocalLeesLProcessFactory.inputFeatures, null);
+        String xField = (String) Params.getValue(input, LocalLeesLProcessFactory.xField, null);
+        String yField = (String) Params.getValue(input, LocalLeesLProcessFactory.yField, null);
+        if (inputFeatures == null || xField == null || yField == null) {
+            throw new NullPointerException("inputFeatures, xField, yField parameters required");
+        }
+
+        xField = FeatureTypes.validateProperty(inputFeatures.getSchema(), xField);
+        if (inputFeatures.getSchema().indexOf(xField) == -1) {
+            throw new NullPointerException(xField + " field does not exist!");
+        }
+
+        yField = FeatureTypes.validateProperty(inputFeatures.getSchema(), yField);
+        if (inputFeatures.getSchema().indexOf(yField) == -1) {
+            throw new NullPointerException(yField + " field does not exist!");
+        }
+
+        SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
+                LocalLeesLProcessFactory.spatialConcept,
+                LocalLeesLProcessFactory.spatialConcept.sample);
+
+        DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
+                LocalLeesLProcessFactory.distanceMethod,
+                LocalLeesLProcessFactory.distanceMethod.sample);
+
+        StandardizationMethod standardization = (StandardizationMethod) Params.getValue(input,
+                LocalLeesLProcessFactory.standardization,
+                LocalLeesLProcessFactory.standardization.sample);
+
+        Double searchDistance = (Double) Params.getValue(input,
+                LocalLeesLProcessFactory.searchDistance,
+                LocalLeesLProcessFactory.searchDistance.sample);
+
+        Boolean selfNeighbors = (Boolean) Params.getValue(input,
+                LocalLeesLProcessFactory.selfNeighbors,
+                LocalLeesLProcessFactory.selfNeighbors.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+
+        LocalLeesLOperation process = new LocalLeesLOperation();
+        process.setSpatialConceptType(spatialConcept);
+        process.setDistanceType(distanceMethod);
+        process.setStandardizationType(standardization);
+        process.setSelfNeighbors(selfNeighbors);
+
+        // searchDistance
+        if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
+            process.setDistanceBand(searchDistance);
+        }
 
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, LocalLeesLProcessFactory.inputFeatures, null);
-            String xField = (String) Params.getValue(input, LocalLeesLProcessFactory.xField, null);
-            String yField = (String) Params.getValue(input, LocalLeesLProcessFactory.yField, null);
-            if (inputFeatures == null || xField == null || yField == null) {
-                throw new NullPointerException("inputFeatures, xField, yField parameters required");
-            }
-
-            xField = FeatureTypes.validateProperty(inputFeatures.getSchema(), xField);
-            if (inputFeatures.getSchema().indexOf(xField) == -1) {
-                throw new NullPointerException(xField + " field does not exist!");
-            }
-
-            yField = FeatureTypes.validateProperty(inputFeatures.getSchema(), yField);
-            if (inputFeatures.getSchema().indexOf(yField) == -1) {
-                throw new NullPointerException(yField + " field does not exist!");
-            }
-
-            SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
-                    LocalLeesLProcessFactory.spatialConcept,
-                    LocalLeesLProcessFactory.spatialConcept.sample);
-
-            DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
-                    LocalLeesLProcessFactory.distanceMethod,
-                    LocalLeesLProcessFactory.distanceMethod.sample);
-
-            StandardizationMethod standardization = (StandardizationMethod) Params.getValue(input,
-                    LocalLeesLProcessFactory.standardization,
-                    LocalLeesLProcessFactory.standardization.sample);
-
-            Double searchDistance = (Double) Params.getValue(input,
-                    LocalLeesLProcessFactory.searchDistance,
-                    LocalLeesLProcessFactory.searchDistance.sample);
-
-            Boolean selfNeighbors = (Boolean) Params.getValue(input,
-                    LocalLeesLProcessFactory.selfNeighbors,
-                    LocalLeesLProcessFactory.selfNeighbors.sample);
-
-            // start process
-            SimpleFeatureCollection resultFc = null;
-            try {
-                LocalLeesLOperation process = new LocalLeesLOperation();
-                process.setSpatialConceptType(spatialConcept);
-                process.setDistanceType(distanceMethod);
-                process.setStandardizationType(standardization);
-                process.setSelfNeighbors(selfNeighbors);
-
-                // searchDistance
-                if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
-                    process.setDistanceBand(searchDistance);
-                }
-
-                resultFc = process.execute(inputFeatures, xField, yField);
-            } catch (Exception ee) {
-                monitor.exceptionOccurred(ee);
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(LocalLeesLProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = process.execute(inputFeatures, xField, yField);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(LocalLeesLProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
 }

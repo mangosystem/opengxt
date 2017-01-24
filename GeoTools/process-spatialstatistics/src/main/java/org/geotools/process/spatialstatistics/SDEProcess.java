@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,8 +41,6 @@ import org.opengis.util.ProgressListener;
  */
 public class SDEProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(SDEProcess.class);
-
-    private boolean started = false;
 
     public SDEProcess(ProcessFactory factory) {
         super(factory);
@@ -74,45 +73,38 @@ public class SDEProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SDEProcessFactory.inputFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameters required");
+        }
+        
+        String weightField = (String) Params.getValue(input, SDEProcessFactory.weightField, null);
+        String caseField = (String) Params.getValue(input, SDEProcessFactory.caseField, null);
+        String ellipseSize = (String) Params.getValue(input, SDEProcessFactory.ellipseSize,
+                SDEProcessFactory.ellipseSize.sample);
 
+        // start process
+        // 1_STANDARD_DEVIATION
+        double stdDeviation = 1.0;
+        if (ellipseSize.contains("2")) {
+            stdDeviation = 2.0;
+        } else if (ellipseSize.contains("3")) {
+            stdDeviation = 3.0;
+        }
+
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, SDEProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
-            }
-            String weightField = (String) Params.getValue(input, SDEProcessFactory.weightField,
-                    null);
-            String caseField = (String) Params.getValue(input, SDEProcessFactory.caseField, null);
-            String ellipseSize = (String) Params.getValue(input, SDEProcessFactory.ellipseSize,
-                    SDEProcessFactory.ellipseSize.sample);
-
-            // start process
-            SimpleFeatureCollection resultFc = null;
-
-            // 1_STANDARD_DEVIATION
-            double stdDeviation = 1.0;
-            if (ellipseSize.contains("2")) {
-                stdDeviation = 2.0;
-            } else if (ellipseSize.contains("3")) {
-                stdDeviation = 3.0;
-            }
-
             StandardDeviationalEllipseOperation process = new StandardDeviationalEllipseOperation();
             process.setStdDeviation(stdDeviation);
             resultFc = process.execute(inputFeatures, weightField, caseField);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(SDEProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(SDEProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

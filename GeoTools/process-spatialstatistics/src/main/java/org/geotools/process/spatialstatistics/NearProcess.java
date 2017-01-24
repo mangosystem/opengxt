@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class NearProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(NearProcess.class);
-
-    private boolean started = false;
 
     public NearProcess(ProcessFactory factory) {
         super(factory);
@@ -74,39 +73,32 @@ public class NearProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                NearProcessFactory.inputFeatures, null);
 
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, NearProcessFactory.inputFeatures, null);
-
-            SimpleFeatureCollection nearFeatures = (SimpleFeatureCollection) Params.getValue(input,
-                    NearProcessFactory.nearFeatures, null);
-            String nearIdField = (String) Params.getValue(input, NearProcessFactory.nearIdField,
-                    null);
-            if (nearFeatures == null || inputFeatures == null) {
-                throw new NullPointerException("nearFeatures, inputFeatures parameters required");
-            }
-
-            Double maximumDistance = (Double) Params.getValue(input,
-                    NearProcessFactory.maximumDistance, NearProcessFactory.maximumDistance.sample);
-
-            // start process
-            NearOperation operation = new NearOperation();
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, nearFeatures,
-                    nearIdField, maximumDistance);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(NearProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection nearFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                NearProcessFactory.nearFeatures, null);
+        String nearIdField = (String) Params.getValue(input, NearProcessFactory.nearIdField, null);
+        if (nearFeatures == null || inputFeatures == null) {
+            throw new NullPointerException("nearFeatures, inputFeatures parameters required");
         }
+
+        Double maximumDistance = (Double) Params.getValue(input,
+                NearProcessFactory.maximumDistance, NearProcessFactory.maximumDistance.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            NearOperation operation = new NearOperation();
+            resultFc = operation.execute(inputFeatures, nearFeatures, nearIdField, maximumDistance);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(NearProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
 }

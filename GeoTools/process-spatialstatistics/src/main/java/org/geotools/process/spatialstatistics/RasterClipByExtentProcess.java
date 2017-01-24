@@ -31,9 +31,11 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterClipOperation;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
+import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.ProgressListener;
 
 /**
@@ -45,8 +47,6 @@ import org.opengis.util.ProgressListener;
  */
 public class RasterClipByExtentProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RasterClipByExtentProcess.class);
-
-    private boolean started = false;
 
     public RasterClipByExtentProcess(ProcessFactory factory) {
         super(factory);
@@ -78,44 +78,38 @@ public class RasterClipByExtentProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
-                    RasterClipByExtentProcessFactory.inputCoverage, null);
-            ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
-                    RasterClipByExtentProcessFactory.extent, null);
-            if (inputCoverage == null || extent == null) {
-                throw new NullPointerException("inputCoverage, extent parameters required");
-            }
-
-            // start process
-            CoordinateReferenceSystem tCrs = inputCoverage.getCoordinateReferenceSystem();
-            CoordinateReferenceSystem sCrs = extent.getCoordinateReferenceSystem();
-            if (sCrs == null) {
-                extent = new ReferencedEnvelope(extent, tCrs);
-            } else if (!CRS.equalsIgnoreMetadata(sCrs, tCrs)) {
-                try {
-                    MathTransform transform = CRS.findMathTransform(sCrs, tCrs, true);
-                    extent = new ReferencedEnvelope(JTS.transform(extent, transform), tCrs);
-                } catch (FactoryException e) {
-                    throw new IllegalArgumentException("Could not create math transform");
-                }
-            }
-
-            RasterClipOperation cropOperation = new RasterClipOperation();
-            GridCoverage2D cropedCoverage = cropOperation.execute(inputCoverage, extent);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(RasterClipByExtentProcessFactory.RESULT.key, cropedCoverage);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
+                RasterClipByExtentProcessFactory.inputCoverage, null);
+        ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
+                RasterClipByExtentProcessFactory.extent, null);
+        if (inputCoverage == null || extent == null) {
+            throw new NullPointerException("inputCoverage, extent parameters required");
         }
+
+        // start process
+        CoordinateReferenceSystem tCrs = inputCoverage.getCoordinateReferenceSystem();
+        CoordinateReferenceSystem sCrs = extent.getCoordinateReferenceSystem();
+        if (sCrs == null) {
+            extent = new ReferencedEnvelope(extent, tCrs);
+        } else if (!CRS.equalsIgnoreMetadata(sCrs, tCrs)) {
+            try {
+                MathTransform transform = CRS.findMathTransform(sCrs, tCrs, true);
+                extent = new ReferencedEnvelope(JTS.transform(extent, transform), tCrs);
+            } catch (FactoryException e) {
+                throw new ProcessException(e);
+            } catch (MismatchedDimensionException e) {
+                throw new ProcessException(e);
+            } catch (TransformException e) {
+                throw new ProcessException(e);
+            }
+        }
+
+        RasterClipOperation cropOperation = new RasterClipOperation();
+        GridCoverage2D cropedCoverage = cropOperation.execute(inputCoverage, extent);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(RasterClipByExtentProcessFactory.RESULT.key, cropedCoverage);
+        return resultMap;
     }
 }

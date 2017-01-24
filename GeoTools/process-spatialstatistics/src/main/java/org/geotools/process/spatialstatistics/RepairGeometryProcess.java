@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -75,7 +76,8 @@ public class RepairGeometryProcess extends AbstractStatisticsProcess {
         }
 
         // start process
-        SimpleFeatureCollection resultFc = new RepairGeometryFeatureCollection(inputFeatures);
+        SimpleFeatureCollection resultFc = DataUtilities
+                .simple(new RepairGeometryFeatureCollection(inputFeatures));
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

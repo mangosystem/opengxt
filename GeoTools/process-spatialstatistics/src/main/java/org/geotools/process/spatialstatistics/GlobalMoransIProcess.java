@@ -46,8 +46,6 @@ import org.opengis.util.ProgressListener;
 public class GlobalMoransIProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(GlobalMoransIProcess.class);
 
-    private boolean started = false;
-
     public GlobalMoransIProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -58,7 +56,8 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
 
     public static MoransIProcessResult process(SimpleFeatureCollection inputFeatures,
             String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-            StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors, ProgressListener monitor) {
+            StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(GlobalMoransIProcessFactory.inputFeatures.key, inputFeatures);
         map.put(GlobalMoransIProcessFactory.inputField.key, inputField);
@@ -84,74 +83,60 @@ public class GlobalMoransIProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, GlobalMoransIProcessFactory.inputFeatures, null);
-            String inputField = (String) Params.getValue(input,
-                    GlobalMoransIProcessFactory.inputField, null);
-            if (inputFeatures == null || inputField == null) {
-                throw new NullPointerException("inputFeatures and inputField parameters required");
-            }
-
-            inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
-            if (inputFeatures.getSchema().indexOf(inputField) == -1) {
-                throw new NullPointerException(inputField + " field does not exist!");
-            }
-
-            SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
-                    GlobalMoransIProcessFactory.spatialConcept,
-                    GlobalMoransIProcessFactory.spatialConcept.sample);
-
-            DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
-                    GlobalMoransIProcessFactory.distanceMethod,
-                    GlobalMoransIProcessFactory.distanceMethod.sample);
-
-            StandardizationMethod standardization = (StandardizationMethod) Params.getValue(input,
-                    GlobalMoransIProcessFactory.standardization,
-                    GlobalMoransIProcessFactory.standardization.sample);
-
-            Double searchDistance = (Double) Params.getValue(input,
-                    GlobalMoransIProcessFactory.searchDistance,
-                    GlobalMoransIProcessFactory.searchDistance.sample);
-
-            Boolean selfNeighbors = (Boolean) Params.getValue(input,
-                    GlobalMoransIProcessFactory.selfNeighbors,
-                    GlobalMoransIProcessFactory.selfNeighbors.sample);
-
-            // start process
-            String typeName = inputFeatures.getSchema().getTypeName();
-            MoransIProcessResult processResult = null;
-            try {
-                GlobalMoranIStatisticOperation process = new GlobalMoranIStatisticOperation();
-                process.setSpatialConceptType(spatialConcept);
-                process.setDistanceType(distanceMethod);
-                process.setStandardizationType(standardization);
-                process.setSelfNeighbors(selfNeighbors);
-
-                // searchDistance
-                if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
-                    process.setDistanceBand(searchDistance);
-                }
-
-                MoransI ret = process.execute(inputFeatures, inputField);
-                processResult = new MoransIProcessResult(typeName, inputField, ret);
-            } catch (Exception e) {
-                processResult = new MoransIProcessResult(typeName, inputField, new MoransI());
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(GlobalMoransIProcessFactory.RESULT.key, processResult);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                GlobalMoransIProcessFactory.inputFeatures, null);
+        String inputField = (String) Params.getValue(input, GlobalMoransIProcessFactory.inputField,
+                null);
+        if (inputFeatures == null || inputField == null) {
+            throw new NullPointerException("inputFeatures and inputField parameters required");
         }
+
+        inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
+        if (inputFeatures.getSchema().indexOf(inputField) == -1) {
+            throw new NullPointerException(inputField + " field does not exist!");
+        }
+
+        SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
+                GlobalMoransIProcessFactory.spatialConcept,
+                GlobalMoransIProcessFactory.spatialConcept.sample);
+
+        DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
+                GlobalMoransIProcessFactory.distanceMethod,
+                GlobalMoransIProcessFactory.distanceMethod.sample);
+
+        StandardizationMethod standardization = (StandardizationMethod) Params.getValue(input,
+                GlobalMoransIProcessFactory.standardization,
+                GlobalMoransIProcessFactory.standardization.sample);
+
+        Double searchDistance = (Double) Params.getValue(input,
+                GlobalMoransIProcessFactory.searchDistance,
+                GlobalMoransIProcessFactory.searchDistance.sample);
+
+        Boolean selfNeighbors = (Boolean) Params.getValue(input,
+                GlobalMoransIProcessFactory.selfNeighbors,
+                GlobalMoransIProcessFactory.selfNeighbors.sample);
+
+        // start process
+        String typeName = inputFeatures.getSchema().getTypeName();
+
+        GlobalMoranIStatisticOperation process = new GlobalMoranIStatisticOperation();
+        process.setSpatialConceptType(spatialConcept);
+        process.setDistanceType(distanceMethod);
+        process.setStandardizationType(standardization);
+        process.setSelfNeighbors(selfNeighbors);
+
+        // searchDistance
+        if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
+            process.setDistanceBand(searchDistance);
+        }
+
+        MoransI ret = process.execute(inputFeatures, inputField);
+        MoransIProcessResult processResult = new MoransIProcessResult(typeName, inputField, ret);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(GlobalMoransIProcessFactory.RESULT.key, processResult);
+        return resultMap;
     }
 
     public static class MoransIProcessResult {

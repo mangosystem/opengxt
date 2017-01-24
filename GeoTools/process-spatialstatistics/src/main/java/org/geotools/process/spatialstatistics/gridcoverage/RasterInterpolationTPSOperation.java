@@ -46,9 +46,9 @@ public class RasterInterpolationTPSOperation extends RasterInterpolationOperator
 
     public GridCoverage2D execute(SimpleFeatureCollection pointFeatures, String valueField) {
         valueField = FeatureTypes.validateProperty(pointFeatures.getSchema(), valueField);
-        if (pointFeatures.getSchema().indexOf(valueField) == -1) {
+        if (valueField == null || pointFeatures.getSchema().indexOf(valueField) == -1) {
             LOGGER.log(Level.FINER, valueField + " does not exist!");
-            return null;
+            throw new NullPointerException(valueField + " is null!");
         }
 
         // calculate extent & cellsize

@@ -38,10 +38,7 @@ import org.opengis.util.ProgressListener;
  * @source $URL$
  */
 public class CountFeaturesProcess extends AbstractStatisticsProcess {
-
     protected static final Logger LOGGER = Logging.getLogger(CountFeaturesProcess.class);
-
-    private boolean started = false;
 
     public CountFeaturesProcess(ProcessFactory factory) {
         super(factory);
@@ -72,37 +69,25 @@ public class CountFeaturesProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, CountFeaturesProcessFactory.inputFeatures, null);
-            Filter filter = (Filter) Params.getValue(input, CountFeaturesProcessFactory.filter,
-                    null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
-            }
-
-            // start process
-            int count = 0;
-            if (filter == null) {
-                count = inputFeatures.size();
-            } else {
-                count = inputFeatures.subCollection(filter).size();
-            }
-
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(CountFeaturesProcessFactory.RESULT.key, new Integer(count));
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                CountFeaturesProcessFactory.inputFeatures, null);
+        Filter filter = (Filter) Params.getValue(input, CountFeaturesProcessFactory.filter, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameters required");
         }
-    }
 
+        // start process
+        int count = 0;
+        if (filter == null) {
+            count = inputFeatures.size();
+        } else {
+            count = inputFeatures.subCollection(filter).size();
+        }
+
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(CountFeaturesProcessFactory.RESULT.key, new Integer(count));
+        return resultMap;
+    }
 }

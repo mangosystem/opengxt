@@ -44,8 +44,6 @@ import com.vividsolutions.jts.geom.Geometry;
 public class AreaProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(AreaProcess.class);
 
-    private boolean started = false;
-
     public AreaProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -75,44 +73,33 @@ public class AreaProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, AreaProcessFactory.inputFeatures, null);
-            Filter filter = (Filter) Params.getValue(input, AreaProcessFactory.filter, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
-            }
-
-            // start process
-            double area = 0.0;
-            filter = filter == null ? Filter.INCLUDE : filter;
-            SimpleFeatureIterator featureIter = inputFeatures.subCollection(filter).features();
-            try {
-                while (featureIter.hasNext()) {
-                    SimpleFeature feature = featureIter.next();
-                    Geometry geometry = (Geometry) feature.getDefaultGeometry();
-                    if (geometry == null || geometry.isEmpty()) {
-                        continue;
-                    }
-                    area += geometry.getArea();
-                }
-            } finally {
-                featureIter.close();
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(AreaProcessFactory.RESULT.key, new Double(area));
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                AreaProcessFactory.inputFeatures, null);
+        Filter filter = (Filter) Params.getValue(input, AreaProcessFactory.filter, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameters required");
         }
-    }
 
+        // start process
+        double area = 0.0;
+        filter = filter == null ? Filter.INCLUDE : filter;
+        SimpleFeatureIterator featureIter = inputFeatures.subCollection(filter).features();
+        try {
+            while (featureIter.hasNext()) {
+                SimpleFeature feature = featureIter.next();
+                Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                if (geometry == null || geometry.isEmpty()) {
+                    continue;
+                }
+                area += geometry.getArea();
+            }
+        } finally {
+            featureIter.close();
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(AreaProcessFactory.RESULT.key, new Double(area));
+        return resultMap;
+    }
 }

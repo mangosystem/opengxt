@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class HubLinesByIDProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(HubLinesByIDProcess.class);
-
-    private boolean started = false;
 
     public HubLinesByIDProcess(ProcessFactory factory) {
         super(factory);
@@ -78,50 +77,44 @@ public class HubLinesByIDProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection hubFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                HubLinesByIDProcessFactory.hubFeatures, null);
+        String hubIdField = (String) Params.getValue(input, HubLinesByIDProcessFactory.hubIdField,
+                null);
 
-        try {
-            SimpleFeatureCollection hubFeatures = (SimpleFeatureCollection) Params.getValue(input,
-                    HubLinesByIDProcessFactory.hubFeatures, null);
-            String hubIdField = (String) Params.getValue(input,
-                    HubLinesByIDProcessFactory.hubIdField, null);
-
-            SimpleFeatureCollection spokeFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, HubLinesByIDProcessFactory.spokeFeatures, null);
-            String spokeIdField = (String) Params.getValue(input,
-                    HubLinesByIDProcessFactory.spokeIdField, null);
-            if (hubFeatures == null || hubIdField == null || spokeFeatures == null
-                    || spokeIdField == null) {
-                throw new NullPointerException(
-                        "hubFeatures, hubIdField, spokeFeatures, spokeIdField parameters required");
-            }
-
-            Boolean preserveAttributes = (Boolean) Params.getValue(input,
-                    HubLinesByIDProcessFactory.preserveAttributes,
-                    HubLinesByIDProcessFactory.preserveAttributes.sample);
-            Boolean useCentroid = (Boolean) Params.getValue(input,
-                    HubLinesByIDProcessFactory.useCentroid,
-                    HubLinesByIDProcessFactory.useCentroid.sample);
-            Double maximumDistance = (Double) Params.getValue(input,
-                    HubLinesByIDProcessFactory.maximumDistance,
-                    HubLinesByIDProcessFactory.maximumDistance.sample);
-
-            // start process
-            HubLinesByIDOperation operation = new HubLinesByIDOperation();
-            SimpleFeatureCollection resultFc = operation.execute(hubFeatures, hubIdField,
-                    spokeFeatures, spokeIdField, useCentroid, preserveAttributes, maximumDistance);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(HubLinesByIDProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection spokeFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                HubLinesByIDProcessFactory.spokeFeatures, null);
+        String spokeIdField = (String) Params.getValue(input,
+                HubLinesByIDProcessFactory.spokeIdField, null);
+        if (hubFeatures == null || hubIdField == null || spokeFeatures == null
+                || spokeIdField == null) {
+            throw new NullPointerException(
+                    "hubFeatures, hubIdField, spokeFeatures, spokeIdField parameters required");
         }
-    }
 
+        Boolean preserveAttributes = (Boolean) Params.getValue(input,
+                HubLinesByIDProcessFactory.preserveAttributes,
+                HubLinesByIDProcessFactory.preserveAttributes.sample);
+        Boolean useCentroid = (Boolean) Params.getValue(input,
+                HubLinesByIDProcessFactory.useCentroid,
+                HubLinesByIDProcessFactory.useCentroid.sample);
+        Double maximumDistance = (Double) Params.getValue(input,
+                HubLinesByIDProcessFactory.maximumDistance,
+                HubLinesByIDProcessFactory.maximumDistance.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            HubLinesByIDOperation operation = new HubLinesByIDOperation();
+            resultFc = operation.execute(hubFeatures, hubIdField, spokeFeatures, spokeIdField,
+                    useCentroid, preserveAttributes, maximumDistance);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(HubLinesByIDProcessFactory.RESULT.key, resultFc);
+        return resultMap;
+    }
 }

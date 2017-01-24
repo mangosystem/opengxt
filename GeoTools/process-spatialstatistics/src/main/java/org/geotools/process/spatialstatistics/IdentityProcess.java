@@ -43,8 +43,6 @@ import org.opengis.util.ProgressListener;
 public class IdentityProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(IdentityProcess.class);
 
-    private boolean started = false;
-
     public IdentityProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -74,38 +72,28 @@ public class IdentityProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                IdentityProcessFactory.inputFeatures, null);
 
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, IdentityProcessFactory.inputFeatures, null);
-
-            SimpleFeatureCollection identityFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, IdentityProcessFactory.identityFeatures, null);
-            if (inputFeatures == null || identityFeatures == null) {
-                throw new NullPointerException(
-                        "inputFeatures, identityFeatures parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection difference = new DifferenceFeatureCollection(inputFeatures,
-                    identityFeatures);
-            SimpleFeatureCollection intersect = new IntersectFeatureCollection(inputFeatures,
-                    identityFeatures);
-            SimpleFeatureCollection resultFc = DataUtilities.simple(new MergeFeatureCollection(
-                    intersect, difference));
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(IdentityProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection identityFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                IdentityProcessFactory.identityFeatures, null);
+        if (inputFeatures == null || identityFeatures == null) {
+            throw new NullPointerException("inputFeatures, identityFeatures parameters required");
         }
-    }
 
+        // start process
+        SimpleFeatureCollection difference = DataUtilities.simple(new DifferenceFeatureCollection(
+                inputFeatures, identityFeatures));
+
+        SimpleFeatureCollection intersect = DataUtilities.simple(new IntersectFeatureCollection(
+                inputFeatures, identityFeatures));
+
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new MergeFeatureCollection(
+                intersect, difference));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(IdentityProcessFactory.RESULT.key, resultFc);
+        return resultMap;
+    }
 }

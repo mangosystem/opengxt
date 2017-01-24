@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,8 +42,6 @@ import org.opengis.util.ProgressListener;
  */
 public class FocalLQProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(FocalLQProcess.class);
-
-    private boolean started = false;
 
     public FocalLQProcess(ProcessFactory factory) {
         super(factory);
@@ -78,47 +77,39 @@ public class FocalLQProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                FocalLQProcessFactory.inputFeatures, null);
+        String xField = (String) Params.getValue(input, FocalLQProcessFactory.xField, null);
+        String yField = (String) Params.getValue(input, FocalLQProcessFactory.yField, null);
+        if (inputFeatures == null || xField == null || xField.isEmpty() || yField == null
+                || yField.isEmpty()) {
+            throw new NullPointerException("inputFeatures, xField, yField parameters required");
+        }
 
+        SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
+                FocalLQProcessFactory.spatialConcept, FocalLQProcessFactory.spatialConcept.sample);
+
+        DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
+                FocalLQProcessFactory.distanceMethod, FocalLQProcessFactory.distanceMethod.sample);
+
+        Double searchDistance = (Double) Params.getValue(input,
+                FocalLQProcessFactory.searchDistance, FocalLQProcessFactory.searchDistance.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, FocalLQProcessFactory.inputFeatures, null);
-            String xField = (String) Params.getValue(input, FocalLQProcessFactory.xField, null);
-            String yField = (String) Params.getValue(input, FocalLQProcessFactory.yField, null);
-            if (inputFeatures == null || xField == null || yField == null) {
-                throw new NullPointerException("inputFeatures, xField, yField parameters required");
-            }
-
-            SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
-                    FocalLQProcessFactory.spatialConcept,
-                    FocalLQProcessFactory.spatialConcept.sample);
-
-            DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
-                    FocalLQProcessFactory.distanceMethod,
-                    FocalLQProcessFactory.distanceMethod.sample);
-
-            Double searchDistance = (Double) Params.getValue(input,
-                    FocalLQProcessFactory.searchDistance,
-                    FocalLQProcessFactory.searchDistance.sample);
-
-            // start process
             FocalLQOperation process = new FocalLQOperation();
             process.setSpatialConceptType(spatialConcept);
             process.setDistanceType(distanceMethod);
             process.setDistanceBand(searchDistance);
-            SimpleFeatureCollection resultFc = process.execute(inputFeatures, xField, yField);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(FocalLQProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = process.execute(inputFeatures, xField, yField);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
-    }
+        // end process
 
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(FocalLQProcessFactory.RESULT.key, resultFc);
+        return resultMap;
+    }
 }

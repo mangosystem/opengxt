@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class SplitLineAtPointProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(SplitLineAtPointProcess.class);
-
-    private boolean started = false;
 
     public SplitLineAtPointProcess(ProcessFactory factory) {
         super(factory);
@@ -73,39 +72,32 @@ public class SplitLineAtPointProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection lineFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SplitLineAtPointProcessFactory.lineFeatures, null);
 
-        try {
-
-            SimpleFeatureCollection lineFeatures = (SimpleFeatureCollection) Params.getValue(input,
-                    SplitLineAtPointProcessFactory.lineFeatures, null);
-
-            SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, SplitLineAtPointProcessFactory.pointFeatures, null);
-            if (lineFeatures == null || pointFeatures == null) {
-                throw new NullPointerException("pointFeatures, lineFeatures parameters required");
-            }
-
-            Double tolerance = (Double) Params.getValue(input,
-                    SplitLineAtPointProcessFactory.tolerance,
-                    SplitLineAtPointProcessFactory.tolerance.sample);
-
-            // start process
-            SplitLineAtPointOperation operation = new SplitLineAtPointOperation();
-            SimpleFeatureCollection resultFc = operation.execute(lineFeatures, pointFeatures,
-                    tolerance);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(SplitLineAtPointProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SplitLineAtPointProcessFactory.pointFeatures, null);
+        if (lineFeatures == null || pointFeatures == null) {
+            throw new NullPointerException("pointFeatures, lineFeatures parameters required");
         }
+
+        Double tolerance = (Double) Params.getValue(input,
+                SplitLineAtPointProcessFactory.tolerance,
+                SplitLineAtPointProcessFactory.tolerance.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            SplitLineAtPointOperation operation = new SplitLineAtPointOperation();
+            resultFc = operation.execute(lineFeatures, pointFeatures, tolerance);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(SplitLineAtPointProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
 }

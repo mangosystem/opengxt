@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,8 +42,6 @@ import org.opengis.util.ProgressListener;
  */
 public class CircularBinningProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(CircularBinningProcess.class);
-
-    private boolean started = false;
 
     public CircularBinningProcess(ProcessFactory factory) {
         super(factory);
@@ -79,49 +78,43 @@ public class CircularBinningProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection features = (SimpleFeatureCollection) Params.getValue(input,
+                CircularBinningProcessFactory.features, null);
+        if (features == null) {
+            throw new NullPointerException("features parameter required");
+        }
 
+        Expression weight = (Expression) Params.getValue(input,
+                CircularBinningProcessFactory.weight, null);
+        ReferencedEnvelope bbox = (ReferencedEnvelope) Params.getValue(input,
+                CircularBinningProcessFactory.bbox, null);
+        Double radius = (Double) Params.getValue(input, CircularBinningProcessFactory.radius, null);
+        Boolean validGrid = (Boolean) Params.getValue(input,
+                CircularBinningProcessFactory.validGrid,
+                CircularBinningProcessFactory.validGrid.sample);
+
+        // start process
+        if (bbox == null || bbox.isEmpty()) {
+            bbox = features.getBounds();
+        }
+
+        if (radius == null || radius <= 0) {
+            radius = (Math.min(bbox.getWidth(), bbox.getHeight()) / 250.0d) / 2.0d;
+            LOGGER.log(Level.WARNING, "The default width / height is " + radius);
+        }
+
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection features = (SimpleFeatureCollection) Params.getValue(input,
-                    CircularBinningProcessFactory.features, null);
-            if (features == null) {
-                throw new NullPointerException("features parameter required");
-            }
-
-            Expression weight = (Expression) Params.getValue(input,
-                    CircularBinningProcessFactory.weight, null);
-            ReferencedEnvelope bbox = (ReferencedEnvelope) Params.getValue(input,
-                    CircularBinningProcessFactory.bbox, null);
-            Double radius = (Double) Params.getValue(input, CircularBinningProcessFactory.radius,
-                    null);
-            Boolean validGrid = (Boolean) Params.getValue(input,
-                    CircularBinningProcessFactory.validGrid,
-                    CircularBinningProcessFactory.validGrid.sample);
-
-            // start process
-            if (bbox == null || bbox.isEmpty()) {
-                bbox = features.getBounds();
-            }
-
-            if (radius == null || radius <= 0) {
-                radius = (Math.min(bbox.getWidth(), bbox.getHeight()) / 250.0d) / 2.0d;
-                LOGGER.log(Level.WARNING, "The default width / height is " + radius);
-            }
-
             CircularBinningOperation process = new CircularBinningOperation();
             process.setOnlyValidGrid(validGrid);
-            SimpleFeatureCollection resultFc = process.execute(features, weight, bbox, radius);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(CircularBinningProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = process.execute(features, weight, bbox, radius);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(CircularBinningProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

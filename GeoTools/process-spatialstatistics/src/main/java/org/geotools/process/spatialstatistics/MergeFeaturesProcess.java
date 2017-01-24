@@ -79,12 +79,12 @@ public class MergeFeaturesProcess extends AbstractStatisticsProcess {
         }
 
         // start process
-        MergeFeaturesOperation operation = new MergeFeaturesOperation();
         SimpleFeatureCollection resultFc = null;
         try {
+            MergeFeaturesOperation operation = new MergeFeaturesOperation();
             resultFc = operation.execute(features, null);
         } catch (IOException e) {
-            LOGGER.log(Level.FINER, e.getMessage(), e);
+            throw new ProcessException(e);
         }
         // end process
 

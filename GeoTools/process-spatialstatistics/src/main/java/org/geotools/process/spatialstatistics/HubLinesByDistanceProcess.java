@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class HubLinesByDistanceProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(HubLinesByDistanceProcess.class);
-
-    private boolean started = false;
 
     public HubLinesByDistanceProcess(ProcessFactory factory) {
         super(factory);
@@ -77,45 +76,39 @@ public class HubLinesByDistanceProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection hubFeatures = (SimpleFeatureCollection) Params.getValue(input,
-                    HubLinesByDistanceProcessFactory.hubFeatures, null);
-            String hubIdField = (String) Params.getValue(input,
-                    HubLinesByDistanceProcessFactory.hubIdField, null);
-            SimpleFeatureCollection spokeFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, HubLinesByDistanceProcessFactory.spokeFeatures, null);
-            if (hubFeatures == null || spokeFeatures == null) {
-                throw new NullPointerException("hubFeatures, spokeFeatures parameters required");
-            }
-
-            Boolean preserveAttributes = (Boolean) Params.getValue(input,
-                    HubLinesByDistanceProcessFactory.preserveAttributes,
-                    HubLinesByDistanceProcessFactory.preserveAttributes.sample);
-            Boolean useCentroid = (Boolean) Params.getValue(input,
-                    HubLinesByDistanceProcessFactory.useCentroid,
-                    HubLinesByDistanceProcessFactory.useCentroid.sample);
-            Double maximumDistance = (Double) Params.getValue(input,
-                    HubLinesByDistanceProcessFactory.maximumDistance,
-                    HubLinesByDistanceProcessFactory.maximumDistance.sample);
-
-            // start process
-            HubLinesByDistanceOperation operation = new HubLinesByDistanceOperation();
-            SimpleFeatureCollection resultFc = operation.execute(hubFeatures, hubIdField,
-                    spokeFeatures, useCentroid, preserveAttributes, maximumDistance);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(HubLinesByDistanceProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection hubFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                HubLinesByDistanceProcessFactory.hubFeatures, null);
+        String hubIdField = (String) Params.getValue(input,
+                HubLinesByDistanceProcessFactory.hubIdField, null);
+        SimpleFeatureCollection spokeFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                HubLinesByDistanceProcessFactory.spokeFeatures, null);
+        if (hubFeatures == null || spokeFeatures == null) {
+            throw new NullPointerException("hubFeatures, spokeFeatures parameters required");
         }
-    }
 
+        Boolean preserveAttributes = (Boolean) Params.getValue(input,
+                HubLinesByDistanceProcessFactory.preserveAttributes,
+                HubLinesByDistanceProcessFactory.preserveAttributes.sample);
+        Boolean useCentroid = (Boolean) Params.getValue(input,
+                HubLinesByDistanceProcessFactory.useCentroid,
+                HubLinesByDistanceProcessFactory.useCentroid.sample);
+        Double maximumDistance = (Double) Params.getValue(input,
+                HubLinesByDistanceProcessFactory.maximumDistance,
+                HubLinesByDistanceProcessFactory.maximumDistance.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            HubLinesByDistanceOperation operation = new HubLinesByDistanceOperation();
+            resultFc = operation.execute(hubFeatures, hubIdField, spokeFeatures, useCentroid,
+                    preserveAttributes, maximumDistance);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(HubLinesByDistanceProcessFactory.RESULT.key, resultFc);
+        return resultMap;
+    }
 }

@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -40,8 +41,6 @@ import org.opengis.util.ProgressListener;
  */
 public class CalculateXYCoordinateProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(CalculateXYCoordinateProcess.class);
-
-    private boolean started = false;
 
     public CalculateXYCoordinateProcess(ProcessFactory factory) {
         super(factory);
@@ -78,46 +77,33 @@ public class CalculateXYCoordinateProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                CalculateXYCoordinateProcessFactory.inputFeatures, null);
 
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, CalculateXYCoordinateProcessFactory.inputFeatures, null);
+        String xField = (String) Params.getValue(input, CalculateXYCoordinateProcessFactory.xField,
+                CalculateXYCoordinateProcessFactory.xField.sample);
 
-            String xField = (String) Params.getValue(input,
-                    CalculateXYCoordinateProcessFactory.xField,
-                    CalculateXYCoordinateProcessFactory.xField.sample);
-
-            String yField = (String) Params.getValue(input,
-                    CalculateXYCoordinateProcessFactory.yField,
-                    CalculateXYCoordinateProcessFactory.yField.sample);
-            if (inputFeatures == null || xField == null || xField.trim().length() == 0
-                    || yField == null || yField.trim().length() == 0) {
-                throw new NullPointerException("inputFeatures, xField, yField parameters required");
-            }
-
-            Boolean inside = (Boolean) Params.getValue(input,
-                    CalculateXYCoordinateProcessFactory.inside,
-                    CalculateXYCoordinateProcessFactory.inside.sample);
-
-            CoordinateReferenceSystem targetCRS = (CoordinateReferenceSystem) Params.getValue(
-                    input, CalculateXYCoordinateProcessFactory.targetCRS, null);
-
-            // start process
-            SimpleFeatureCollection resultFc = null;
-            resultFc = new XYCalculationFeatureCollection(inputFeatures, xField, yField, inside,
-                    targetCRS);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(CalculateXYCoordinateProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        String yField = (String) Params.getValue(input, CalculateXYCoordinateProcessFactory.yField,
+                CalculateXYCoordinateProcessFactory.yField.sample);
+        if (inputFeatures == null || xField == null || xField.trim().length() == 0
+                || yField == null || yField.trim().length() == 0) {
+            throw new NullPointerException("inputFeatures, xField, yField parameters required");
         }
+
+        Boolean inside = (Boolean) Params.getValue(input,
+                CalculateXYCoordinateProcessFactory.inside,
+                CalculateXYCoordinateProcessFactory.inside.sample);
+
+        CoordinateReferenceSystem targetCRS = (CoordinateReferenceSystem) Params.getValue(input,
+                CalculateXYCoordinateProcessFactory.targetCRS, null);
+
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new XYCalculationFeatureCollection(
+                inputFeatures, xField, yField, inside, targetCRS));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(CalculateXYCoordinateProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

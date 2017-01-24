@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -43,8 +44,6 @@ import org.opengis.util.ProgressListener;
  */
 public class LocalGearysCProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(LocalGearysCProcess.class);
-
-    private boolean started = false;
 
     public LocalGearysCProcess(ProcessFactory factory) {
         super(factory);
@@ -82,72 +81,63 @@ public class LocalGearysCProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                LocalGearysCProcessFactory.inputFeatures, null);
+        String inputField = (String) Params.getValue(input, LocalGearysCProcessFactory.inputField,
+                null);
+        if (inputFeatures == null || inputField == null) {
+            throw new NullPointerException("inputFeatures and inputField parameters required");
+        }
+
+        inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
+        if (inputFeatures.getSchema().indexOf(inputField) == -1) {
+            throw new NullPointerException(inputField + " field does not exist!");
+        }
+
+        SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
+                LocalGearysCProcessFactory.spatialConcept,
+                LocalGearysCProcessFactory.spatialConcept.sample);
+
+        DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
+                LocalGearysCProcessFactory.distanceMethod,
+                LocalGearysCProcessFactory.distanceMethod.sample);
+
+        StandardizationMethod standardization = (StandardizationMethod) Params.getValue(input,
+                LocalGearysCProcessFactory.standardization,
+                LocalGearysCProcessFactory.standardization.sample);
+
+        Double searchDistance = (Double) Params.getValue(input,
+                LocalGearysCProcessFactory.searchDistance,
+                LocalGearysCProcessFactory.searchDistance.sample);
+
+        Boolean selfNeighbors = (Boolean) Params.getValue(input,
+                LocalGearysCProcessFactory.selfNeighbors,
+                LocalGearysCProcessFactory.selfNeighbors.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+
+        LocalGearysCOperation process = new LocalGearysCOperation();
+        process.setSpatialConceptType(spatialConcept);
+        process.setDistanceType(distanceMethod);
+        process.setStandardizationType(standardization);
+        process.setSelfNeighbors(selfNeighbors);
+
+        // searchDistance
+        if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
+            process.setDistanceBand(searchDistance);
+        }
 
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, LocalGearysCProcessFactory.inputFeatures, null);
-            String inputField = (String) Params.getValue(input,
-                    LocalGearysCProcessFactory.inputField, null);
-            if (inputFeatures == null || inputField == null) {
-                throw new NullPointerException("inputFeatures and inputField parameters required");
-            }
-
-            inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
-            if (inputFeatures.getSchema().indexOf(inputField) == -1) {
-                throw new NullPointerException(inputField + " field does not exist!");
-            }
-
-            SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
-                    LocalGearysCProcessFactory.spatialConcept,
-                    LocalGearysCProcessFactory.spatialConcept.sample);
-
-            DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
-                    LocalGearysCProcessFactory.distanceMethod,
-                    LocalGearysCProcessFactory.distanceMethod.sample);
-
-            StandardizationMethod standardization = (StandardizationMethod) Params.getValue(input,
-                    LocalGearysCProcessFactory.standardization,
-                    LocalGearysCProcessFactory.standardization.sample);
-
-            Double searchDistance = (Double) Params.getValue(input,
-                    LocalGearysCProcessFactory.searchDistance,
-                    LocalGearysCProcessFactory.searchDistance.sample);
-
-            Boolean selfNeighbors = (Boolean) Params.getValue(input,
-                    LocalGearysCProcessFactory.selfNeighbors,
-                    LocalGearysCProcessFactory.selfNeighbors.sample);
-
-            // start process
-            SimpleFeatureCollection resultFc = null;
-            try {
-                LocalGearysCOperation process = new LocalGearysCOperation();
-                process.setSpatialConceptType(spatialConcept);
-                process.setDistanceType(distanceMethod);
-                process.setStandardizationType(standardization);
-                process.setSelfNeighbors(selfNeighbors);
-
-                // searchDistance
-                if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
-                    process.setDistanceBand(searchDistance);
-                }
-
-                resultFc = process.execute(inputFeatures, inputField);
-            } catch (Exception ee) {
-                monitor.exceptionOccurred(ee);
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(LocalGearysCProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = process.execute(inputFeatures, inputField);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(LocalGearysCProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
 }

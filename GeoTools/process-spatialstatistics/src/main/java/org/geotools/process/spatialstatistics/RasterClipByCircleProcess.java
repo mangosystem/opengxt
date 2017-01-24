@@ -31,9 +31,11 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterClipOperation;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
+import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.ProgressListener;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -47,8 +49,6 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public class RasterClipByCircleProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RasterClipByCircleProcess.class);
-
-    private boolean started = false;
 
     public RasterClipByCircleProcess(ProcessFactory factory) {
         super(factory);
@@ -82,60 +82,53 @@ public class RasterClipByCircleProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
+                RasterClipByCircleProcessFactory.inputCoverage, null);
+        Geometry center = (Geometry) Params.getValue(input,
+                RasterClipByCircleProcessFactory.center, null);
+        Double radius = (Double) Params.getValue(input, RasterClipByCircleProcessFactory.radius,
+                null);
+        Boolean inside = (Boolean) Params.getValue(input, RasterClipByCircleProcessFactory.inside,
+                RasterClipByCircleProcessFactory.inside.sample);
+        if (inputCoverage == null || center == null || radius == null || radius <= 0d) {
+            throw new NullPointerException("inputCoverage, center parameters required");
+        }
 
-        try {
-            GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
-                    RasterClipByCircleProcessFactory.inputCoverage, null);
-            Geometry center = (Geometry) Params.getValue(input,
-                    RasterClipByCircleProcessFactory.center, null);
-            Double radius = (Double) Params.getValue(input,
-                    RasterClipByCircleProcessFactory.radius, null);
-            Boolean inside = (Boolean) Params.getValue(input,
-                    RasterClipByCircleProcessFactory.inside,
-                    RasterClipByCircleProcessFactory.inside.sample);
-            if (inputCoverage == null || center == null || radius == null || radius <= 0d) {
-                throw new NullPointerException("inputCoverage, center parameters required");
-            }
-
-            // start process
-            Object userData = center.getUserData();
-            CoordinateReferenceSystem tCrs = inputCoverage.getCoordinateReferenceSystem();
-            if (userData == null) {
-                center.setUserData(tCrs);
-            } else if (userData instanceof CoordinateReferenceSystem) {
-                CoordinateReferenceSystem sCrs = (CoordinateReferenceSystem) userData;
-                if (!CRS.equalsIgnoreMetadata(sCrs, tCrs)) {
-                    try {
-                        MathTransform transform = CRS.findMathTransform(sCrs, tCrs, true);
-                        center = JTS.transform(center, transform);
-                        center.setUserData(tCrs);
-                    } catch (FactoryException e) {
-                        throw new IllegalArgumentException("Could not create math transform");
-                    }
+        // start process
+        Object userData = center.getUserData();
+        CoordinateReferenceSystem tCrs = inputCoverage.getCoordinateReferenceSystem();
+        if (userData == null) {
+            center.setUserData(tCrs);
+        } else if (userData instanceof CoordinateReferenceSystem) {
+            CoordinateReferenceSystem sCrs = (CoordinateReferenceSystem) userData;
+            if (!CRS.equalsIgnoreMetadata(sCrs, tCrs)) {
+                try {
+                    MathTransform transform = CRS.findMathTransform(sCrs, tCrs, true);
+                    center = JTS.transform(center, transform);
+                    center.setUserData(tCrs);
+                } catch (FactoryException e) {
+                    throw new ProcessException(e);
+                } catch (MismatchedDimensionException e) {
+                    throw new ProcessException(e);
+                } catch (TransformException e) {
+                    throw new ProcessException(e);
                 }
             }
-
-            Geometry cropShape = center.buffer(radius, 24);
-            if (inside == Boolean.FALSE) {
-                ReferencedEnvelope extent = new ReferencedEnvelope(inputCoverage.getEnvelope());
-                cropShape = cropShape.getFactory().toGeometry(extent).difference(cropShape);
-                cropShape.setUserData(tCrs);
-            }
-
-            RasterClipOperation cropOperation = new RasterClipOperation();
-            GridCoverage2D cropedCoverage = cropOperation.execute(inputCoverage, cropShape);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(RasterClipByCircleProcessFactory.RESULT.key, cropedCoverage);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
         }
+
+        Geometry cropShape = center.buffer(radius, 24);
+        if (inside == Boolean.FALSE) {
+            ReferencedEnvelope extent = new ReferencedEnvelope(inputCoverage.getEnvelope());
+            cropShape = cropShape.getFactory().toGeometry(extent).difference(cropShape);
+            cropShape.setUserData(tCrs);
+        }
+
+        RasterClipOperation cropOperation = new RasterClipOperation();
+        GridCoverage2D cropedCoverage = cropOperation.execute(inputCoverage, cropShape);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(RasterClipByCircleProcessFactory.RESULT.key, cropedCoverage);
+        return resultMap;
     }
 }

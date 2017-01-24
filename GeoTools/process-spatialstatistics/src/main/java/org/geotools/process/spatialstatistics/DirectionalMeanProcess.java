@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class DirectionalMeanProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(DirectionalMeanProcess.class);
-
-    private boolean started = false;
 
     public DirectionalMeanProcess(ProcessFactory factory) {
         super(factory);
@@ -73,36 +72,29 @@ public class DirectionalMeanProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                DirectionalMeanProcessFactory.inputFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameters required");
+        }
+        Boolean orientationOnly = (Boolean) Params.getValue(input,
+                DirectionalMeanProcessFactory.orientationOnly,
+                DirectionalMeanProcessFactory.orientationOnly.sample);
+        String caseField = (String) Params.getValue(input, DirectionalMeanProcessFactory.caseField,
+                null);
 
+        // start process
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, DirectionalMeanProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
-            }
-            Boolean orientationOnly = (Boolean) Params.getValue(input,
-                    DirectionalMeanProcessFactory.orientationOnly,
-                    DirectionalMeanProcessFactory.orientationOnly.sample);
-            String caseField = (String) Params.getValue(input,
-                    DirectionalMeanProcessFactory.caseField, null);
-
-            // start process
-            SimpleFeatureCollection resultFc = null;
-
             LinearDirectionalMeanOperation process = new LinearDirectionalMeanOperation();
             resultFc = process.execute(inputFeatures, orientationOnly, caseField);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(DirectionalMeanProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(DirectionalMeanProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

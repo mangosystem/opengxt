@@ -43,8 +43,6 @@ import org.opengis.util.ProgressListener;
 public class TPSProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(TPSProcess.class);
 
-    private boolean started = false;
-
     public TPSProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -78,62 +76,52 @@ public class TPSProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, TPSProcessFactory.inputFeatures, null);
-            String inputField = (String) Params.getValue(input, TPSProcessFactory.inputField, null);
-            if (inputFeatures == null || inputField == null || inputField.trim().length() == 0) {
-                throw new NullPointerException("inputFeatures, inputField parameters required");
-            }
-
-            inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
-            if (inputFeatures.getSchema().indexOf(inputField) == -1) {
-                throw new NullPointerException(inputField + " does not exist!");
-            }
-
-            Double cellSize = (Double) Params.getValue(input, TPSProcessFactory.cellSize,
-                    TPSProcessFactory.cellSize.sample);
-            ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
-                    TPSProcessFactory.extent, null);
-
-            // start process
-            ReferencedEnvelope boundingBox = inputFeatures.getBounds();
-            if (extent != null) {
-                boundingBox = extent;
-            }
-
-            // get default cell size from extent
-            if (cellSize == 0.0) {
-                cellSize = Math.min(boundingBox.getWidth(), boundingBox.getHeight()) / 250.0;
-                LOGGER.warning("default cell size = " + cellSize);
-            }
-
-            GridCoverage2D resultGc = null;
-            RasterInterpolationTPSOperation process = new RasterInterpolationTPSOperation();
-            process.getRasterEnvironment().setExtent(boundingBox);
-
-            if (cellSize > 0) {
-                double origCellSize = process.getRasterEnvironment().getCellSize();
-                process.getRasterEnvironment().setCellSize(cellSize);
-                resultGc = process.execute(inputFeatures, inputField);
-                process.getRasterEnvironment().setCellSize(origCellSize);
-            } else {
-                resultGc = process.execute(inputFeatures, inputField);
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(TPSProcessFactory.RESULT.key, resultGc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                TPSProcessFactory.inputFeatures, null);
+        String inputField = (String) Params.getValue(input, TPSProcessFactory.inputField, null);
+        if (inputFeatures == null || inputField == null || inputField.trim().length() == 0) {
+            throw new NullPointerException("inputFeatures, inputField parameters required");
         }
+
+        inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
+        if (inputFeatures.getSchema().indexOf(inputField) == -1) {
+            throw new NullPointerException(inputField + " does not exist!");
+        }
+
+        Double cellSize = (Double) Params.getValue(input, TPSProcessFactory.cellSize,
+                TPSProcessFactory.cellSize.sample);
+        ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
+                TPSProcessFactory.extent, null);
+
+        // start process
+        ReferencedEnvelope boundingBox = inputFeatures.getBounds();
+        if (extent != null) {
+            boundingBox = extent;
+        }
+
+        // get default cell size from extent
+        if (cellSize == 0.0) {
+            cellSize = Math.min(boundingBox.getWidth(), boundingBox.getHeight()) / 250.0;
+            LOGGER.warning("default cell size = " + cellSize);
+        }
+
+        GridCoverage2D resultGc = null;
+        RasterInterpolationTPSOperation process = new RasterInterpolationTPSOperation();
+        process.getRasterEnvironment().setExtent(boundingBox);
+
+        if (cellSize > 0) {
+            double origCellSize = process.getRasterEnvironment().getCellSize();
+            process.getRasterEnvironment().setCellSize(cellSize);
+            resultGc = process.execute(inputFeatures, inputField);
+            process.getRasterEnvironment().setCellSize(origCellSize);
+        } else {
+            resultGc = process.execute(inputFeatures, inputField);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(TPSProcessFactory.RESULT.key, resultGc);
+        return resultMap;
     }
 
 }

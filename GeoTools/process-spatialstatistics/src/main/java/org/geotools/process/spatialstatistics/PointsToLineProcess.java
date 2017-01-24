@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class PointsToLineProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(PointsToLineProcess.class);
-
-    private boolean started = false;
 
     public PointsToLineProcess(ProcessFactory factory) {
         super(factory);
@@ -73,38 +72,31 @@ public class PointsToLineProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, PointsToLineProcessFactory.inputFeatures, null);
-            String lineField = (String) Params.getValue(input,
-                    PointsToLineProcessFactory.lineField, null);
-            String sortField = (String) Params.getValue(input,
-                    PointsToLineProcessFactory.sortField, null);
-            Boolean closeLine = (Boolean) Params.getValue(input,
-                    PointsToLineProcessFactory.closeLine,
-                    PointsToLineProcessFactory.closeLine.sample);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameter required");
-            }
-
-            // start process
-            PointsToLineOperation operation = new PointsToLineOperation();
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, lineField,
-                    sortField, closeLine);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(PointsToLineProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                PointsToLineProcessFactory.inputFeatures, null);
+        String lineField = (String) Params.getValue(input, PointsToLineProcessFactory.lineField,
+                null);
+        String sortField = (String) Params.getValue(input, PointsToLineProcessFactory.sortField,
+                null);
+        Boolean closeLine = (Boolean) Params.getValue(input, PointsToLineProcessFactory.closeLine,
+                PointsToLineProcessFactory.closeLine.sample);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameter required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            PointsToLineOperation operation = new PointsToLineOperation();
+            resultFc = operation.execute(inputFeatures, lineField, sortField, closeLine);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(PointsToLineProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
 }

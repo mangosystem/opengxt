@@ -41,8 +41,6 @@ import org.opengis.util.ProgressListener;
 public class StatisticsFeaturesProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(StatisticsFeaturesProcess.class);
 
-    private boolean started = false;
-
     public StatisticsFeaturesProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -79,34 +77,24 @@ public class StatisticsFeaturesProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, StatisticsFeaturesProcessFactory.inputFeatures, null);
-            String inputFields = (String) Params.getValue(input,
-                    StatisticsFeaturesProcessFactory.inputFields, null);
-            if (inputFeatures == null || inputFields == null) {
-                throw new NullPointerException("inputFeatures, inputFields parameters required");
-            }
-
-            String caseField = (String) Params.getValue(input,
-                    StatisticsFeaturesProcessFactory.caseField, null);
-
-            // start process
-            DataStatisticsOperation operator = new DataStatisticsOperation();
-            DataStatisticsResult result = operator.execute(inputFeatures, inputFields, caseField);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(StatisticsFeaturesProcessFactory.RESULT.key, result);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                StatisticsFeaturesProcessFactory.inputFeatures, null);
+        String inputFields = (String) Params.getValue(input,
+                StatisticsFeaturesProcessFactory.inputFields, null);
+        if (inputFeatures == null || inputFields == null) {
+            throw new NullPointerException("inputFeatures, inputFields parameters required");
         }
+
+        String caseField = (String) Params.getValue(input,
+                StatisticsFeaturesProcessFactory.caseField, null);
+
+        // start process
+        DataStatisticsOperation operator = new DataStatisticsOperation();
+        DataStatisticsResult result = operator.execute(inputFeatures, inputFields, caseField);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(StatisticsFeaturesProcessFactory.RESULT.key, result);
+        return resultMap;
     }
 }

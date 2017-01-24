@@ -61,8 +61,6 @@ import org.opengis.util.ProgressListener;
 public class RasterToImageProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RasterToImageProcess.class);
 
-    private boolean started = false;
-
     private StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
 
     private FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
@@ -105,79 +103,67 @@ public class RasterToImageProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        GridCoverage2D coverage = (GridCoverage2D) Params.getValue(input,
+                RasterToImageProcessFactory.coverage, null);
+        String bbox = (String) Params.getValue(input, RasterToImageProcessFactory.bbox, null);
+        CoordinateReferenceSystem crs = (CoordinateReferenceSystem) Params.getValue(input,
+                RasterToImageProcessFactory.crs, null);
+        Style style = (Style) Params.getValue(input, RasterToImageProcessFactory.style, null);
+        Integer width = (Integer) Params.getValue(input, RasterToImageProcessFactory.width, null);
+        Integer height = (Integer) Params.getValue(input, RasterToImageProcessFactory.height, null);
+        String format = (String) Params.getValue(input, RasterToImageProcessFactory.format,
+                RasterToImageProcessFactory.format.sample);
+        Boolean transparent = (Boolean) Params.getValue(input,
+                RasterToImageProcessFactory.transparent,
+                RasterToImageProcessFactory.transparent.sample);
+        String bgColor = (String) Params.getValue(input, RasterToImageProcessFactory.bgColor,
+                RasterToImageProcessFactory.bgColor.sample);
 
-        try {
-            GridCoverage2D coverage = (GridCoverage2D) Params.getValue(input,
-                    RasterToImageProcessFactory.coverage, null);
-            String bbox = (String) Params.getValue(input, RasterToImageProcessFactory.bbox, null);
-            CoordinateReferenceSystem crs = (CoordinateReferenceSystem) Params.getValue(input,
-                    RasterToImageProcessFactory.crs, null);
-            Style style = (Style) Params.getValue(input, RasterToImageProcessFactory.style, null);
-            Integer width = (Integer) Params.getValue(input, RasterToImageProcessFactory.width,
-                    null);
-            Integer height = (Integer) Params.getValue(input, RasterToImageProcessFactory.height,
-                    null);
-            String format = (String) Params.getValue(input, RasterToImageProcessFactory.format,
-                    RasterToImageProcessFactory.format.sample);
-            Boolean transparent = (Boolean) Params.getValue(input,
-                    RasterToImageProcessFactory.transparent,
-                    RasterToImageProcessFactory.transparent.sample);
-            String bgColor = (String) Params.getValue(input, RasterToImageProcessFactory.bgColor,
-                    RasterToImageProcessFactory.bgColor.sample);
-
-            if (coverage == null || width == null || height == null) {
-                throw new NullPointerException("coverage, width, height parameters required");
-            }
-
-            if (width <= 0 || height <= 0) {
-                throw new ProcessException("width, height parameters mustbe grater than 0!");
-            }
-
-            // start process
-            if (crs == null) {
-                crs = coverage.getCoordinateReferenceSystem();
-            }
-
-            if (style == null) {
-                style = getDefaultStyle(coverage);
-            }
-
-            ReferencedEnvelope mapExtent = this.getBoundingBox(bbox, crs);
-            if (mapExtent == null || mapExtent.isEmpty()) {
-                mapExtent = new ReferencedEnvelope(coverage.getEnvelope());
-            }
-
-            Color backgroundColor = Color.WHITE;
-            try {
-                backgroundColor = Color.decode(bgColor);
-            } catch (NumberFormatException ne) {
-                LOGGER.warning("Color Decode Error: " + ne.getMessage());
-            }
-
-            // start process
-            MapToImageParam mapImage = new MapToImageParam();
-            mapImage.setInputCoverage(coverage);
-            mapImage.setStyle(style);
-            mapImage.setBackgroundColor(backgroundColor);
-            mapImage.setWidth(width);
-            mapImage.setHeight(height);
-            mapImage.setMapExtent(mapExtent);
-            mapImage.setSrs(crs);
-            mapImage.setFormat(format);
-            mapImage.setTransparent(transparent);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(RasterToImageProcessFactory.RESULT.key, mapImage);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        if (coverage == null || width == null || height == null) {
+            throw new NullPointerException("coverage, width, height parameters required");
         }
+
+        if (width <= 0 || height <= 0) {
+            throw new ProcessException("width, height parameters mustbe grater than 0!");
+        }
+
+        // start process
+        if (crs == null) {
+            crs = coverage.getCoordinateReferenceSystem();
+        }
+
+        if (style == null) {
+            style = getDefaultStyle(coverage);
+        }
+
+        ReferencedEnvelope mapExtent = this.getBoundingBox(bbox, crs);
+        if (mapExtent == null || mapExtent.isEmpty()) {
+            mapExtent = new ReferencedEnvelope(coverage.getEnvelope());
+        }
+
+        Color backgroundColor = Color.WHITE;
+        try {
+            backgroundColor = Color.decode(bgColor);
+        } catch (NumberFormatException ne) {
+            LOGGER.warning("Color Decode Error: " + ne.getMessage());
+        }
+
+        // start process
+        MapToImageParam mapImage = new MapToImageParam();
+        mapImage.setInputCoverage(coverage);
+        mapImage.setStyle(style);
+        mapImage.setBackgroundColor(backgroundColor);
+        mapImage.setWidth(width);
+        mapImage.setHeight(height);
+        mapImage.setMapExtent(mapExtent);
+        mapImage.setSrs(crs);
+        mapImage.setFormat(format);
+        mapImage.setTransparent(transparent);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(RasterToImageProcessFactory.RESULT.key, mapImage);
+        return resultMap;
     }
 
     private ReferencedEnvelope getBoundingBox(String bBox, CoordinateReferenceSystem crs) {

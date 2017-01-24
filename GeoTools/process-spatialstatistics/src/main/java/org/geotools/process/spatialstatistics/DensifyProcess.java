@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -40,8 +41,6 @@ import org.opengis.util.ProgressListener;
  */
 public class DensifyProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(DensifyProcess.class);
-
-    private boolean started = false;
 
     public DensifyProcess(ProcessFactory factory) {
         super(factory);
@@ -73,31 +72,21 @@ public class DensifyProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, DensifyProcessFactory.inputFeatures, null);
-            Expression tolerance = (Expression) Params.getValue(input,
-                    DensifyProcessFactory.tolerance, null);
-            if (inputFeatures == null || tolerance == null) {
-                throw new NullPointerException("inputFeatures, tolerance parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection resultFc = new DensifyFeatureCollection(inputFeatures,
-                    tolerance);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(DensifyProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                DensifyProcessFactory.inputFeatures, null);
+        Expression tolerance = (Expression) Params.getValue(input, DensifyProcessFactory.tolerance,
+                null);
+        if (inputFeatures == null || tolerance == null) {
+            throw new NullPointerException("inputFeatures, tolerance parameters required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new DensifyFeatureCollection(
+                inputFeatures, tolerance));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(DensifyProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

@@ -42,8 +42,6 @@ import org.opengis.util.ProgressListener;
 public class SplitLineByDistanceProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(SplitLineByDistanceProcess.class);
 
-    private boolean started = false;
-
     public SplitLineByDistanceProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -74,32 +72,21 @@ public class SplitLineByDistanceProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection lineFeatures = (SimpleFeatureCollection) Params.getValue(input,
-                    SplitLineByDistanceProcessFactory.lineFeatures, null);
-            Expression distance = (Expression) Params.getValue(input,
-                    SplitLineByDistanceProcessFactory.distance);
-            if (lineFeatures == null || distance == null) {
-                throw new NullPointerException(
-                        "lineFeatures, distance expression parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection resultFc = DataUtilities
-                    .simple(new SplitByDistanceFeatureCollection(lineFeatures, distance));
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(AreaProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection lineFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SplitLineByDistanceProcessFactory.lineFeatures, null);
+        Expression distance = (Expression) Params.getValue(input,
+                SplitLineByDistanceProcessFactory.distance);
+        if (lineFeatures == null || distance == null) {
+            throw new NullPointerException("lineFeatures, distance expression parameters required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities
+                .simple(new SplitByDistanceFeatureCollection(lineFeatures, distance));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(AreaProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

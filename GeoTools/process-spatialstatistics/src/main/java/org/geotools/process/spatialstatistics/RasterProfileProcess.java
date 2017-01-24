@@ -51,8 +51,6 @@ import com.vividsolutions.jts.geom.Point;
 public class RasterProfileProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RasterProfileProcess.class);
 
-    private boolean started = false;
-
     public RasterProfileProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -84,67 +82,54 @@ public class RasterProfileProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
+                RasterProfileProcessFactory.inputCoverage, null);
+        Geometry userLine = (Geometry) Params.getValue(input, RasterProfileProcessFactory.userLine,
+                RasterProfileProcessFactory.userLine.sample);
+        Double interval = (Double) Params.getValue(input, RasterProfileProcessFactory.interval,
+                null);
 
-        try {
-            GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
-                    RasterProfileProcessFactory.inputCoverage, null);
-            Geometry userLine = (Geometry) Params.getValue(input,
-                    RasterProfileProcessFactory.userLine,
-                    RasterProfileProcessFactory.userLine.sample);
-            Double interval = (Double) Params.getValue(input, RasterProfileProcessFactory.interval,
-                    null);
-
-            if (inputCoverage == null || userLine == null) {
-                throw new NullPointerException("inputCoverage, userLine parameters required");
-            }
-
-            // start process
-            if (interval == null || interval <= 0) {
-                interval = userLine.getLength() / 20; // default interval
-            }
-
-            RasterFunctionalSurface process = new RasterFunctionalSurface(inputCoverage);
-            Geometry profileLine = process.getProfile(userLine, interval);
-
-            // prepare feature type
-            CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
-            SimpleFeatureType featureType = FeatureTypes
-                    .getDefaultType("profile", Point.class, crs);
-            featureType = FeatureTypes.add(featureType, "distance", Double.class, 38);
-            featureType = FeatureTypes.add(featureType, "value", Double.class, 38);
-
-            // create feature collection
-            ListFeatureCollection resultSfc = new ListFeatureCollection(featureType);
-            SimpleFeatureBuilder builder = new SimpleFeatureBuilder(featureType);
-
-            Coordinate[] coords = profileLine.getCoordinates();
-            int id = 0;
-            double distance = 0;
-            for (Coordinate coord : coords) {
-                Point curPoint = userLine.getFactory().createPoint(coord);
-
-                // create feature and set geometry
-                String fid = featureType.getTypeName() + "." + (++id);
-                SimpleFeature newFeature = builder.buildFeature(fid);
-                newFeature.setDefaultGeometry(curPoint);
-                newFeature.setAttribute("distance", distance);
-                newFeature.setAttribute("value", coord.z);
-                resultSfc.add(newFeature);
-                distance += interval;
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(RasterProfileProcessFactory.RESULT.key, resultSfc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        if (inputCoverage == null || userLine == null) {
+            throw new NullPointerException("inputCoverage, userLine parameters required");
         }
-    }
 
+        // start process
+        if (interval == null || interval <= 0) {
+            interval = userLine.getLength() / 20; // default interval
+        }
+
+        RasterFunctionalSurface process = new RasterFunctionalSurface(inputCoverage);
+        Geometry profileLine = process.getProfile(userLine, interval);
+
+        // prepare feature type
+        CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType("profile", Point.class, crs);
+        featureType = FeatureTypes.add(featureType, "distance", Double.class, 38);
+        featureType = FeatureTypes.add(featureType, "value", Double.class, 38);
+
+        // create feature collection
+        ListFeatureCollection resultSfc = new ListFeatureCollection(featureType);
+        SimpleFeatureBuilder builder = new SimpleFeatureBuilder(featureType);
+
+        Coordinate[] coords = profileLine.getCoordinates();
+        int id = 0;
+        double distance = 0;
+        for (Coordinate coord : coords) {
+            Point curPoint = userLine.getFactory().createPoint(coord);
+
+            // create feature and set geometry
+            String fid = featureType.getTypeName() + "." + (++id);
+            SimpleFeature newFeature = builder.buildFeature(fid);
+            newFeature.setDefaultGeometry(curPoint);
+            newFeature.setAttribute("distance", distance);
+            newFeature.setAttribute("value", coord.z);
+            resultSfc.add(newFeature);
+            distance += interval;
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(RasterProfileProcessFactory.RESULT.key, resultSfc);
+        return resultMap;
+    }
 }

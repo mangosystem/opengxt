@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,8 +41,6 @@ import org.opengis.util.ProgressListener;
  */
 public class SnapPointsToLinesProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(SnapPointsToLinesProcess.class);
-
-    private boolean started = false;
 
     public SnapPointsToLinesProcess(ProcessFactory factory) {
         super(factory);
@@ -74,38 +73,32 @@ public class SnapPointsToLinesProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SnapPointsToLinesProcessFactory.pointFeatures, null);
 
-        try {
-            SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, SnapPointsToLinesProcessFactory.pointFeatures, null);
-
-            SimpleFeatureCollection lineFeatures = (SimpleFeatureCollection) Params.getValue(input,
-                    SnapPointsToLinesProcessFactory.lineFeatures, null);
-            if (lineFeatures == null || pointFeatures == null) {
-                throw new NullPointerException("pointFeatures, lineFeatures parameters required");
-            }
-
-            Double tolerance = (Double) Params.getValue(input,
-                    SnapPointsToLinesProcessFactory.tolerance,
-                    SnapPointsToLinesProcessFactory.tolerance.sample);
-
-            // start process
-            SnapPointsToLinesOperation operation = new SnapPointsToLinesOperation();
-            SimpleFeatureCollection resultFc = operation.execute(pointFeatures, lineFeatures,
-                    tolerance);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(SnapPointsToLinesProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection lineFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SnapPointsToLinesProcessFactory.lineFeatures, null);
+        if (lineFeatures == null || pointFeatures == null) {
+            throw new NullPointerException("pointFeatures, lineFeatures parameters required");
         }
+
+        Double tolerance = (Double) Params.getValue(input,
+                SnapPointsToLinesProcessFactory.tolerance,
+                SnapPointsToLinesProcessFactory.tolerance.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            SnapPointsToLinesOperation operation = new SnapPointsToLinesOperation();
+            resultFc = operation.execute(pointFeatures, lineFeatures, tolerance);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(SnapPointsToLinesProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
 }

@@ -89,7 +89,8 @@ public class OffsetFeaturesProcess extends AbstractStatisticsProcess {
         if (offsetX == 0 && offsetY == 0) {
             resultFc = inputFeatures;
         } else {
-            resultFc = new OffsetFeatureCollection(inputFeatures, offsetX, offsetY);
+            resultFc = DataUtilities.simple(new OffsetFeatureCollection(inputFeatures, offsetX,
+                    offsetY));
         }
         // end process
 

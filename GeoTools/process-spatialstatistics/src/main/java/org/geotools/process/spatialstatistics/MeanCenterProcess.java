@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class MeanCenterProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(MeanCenterProcess.class);
-
-    private boolean started = false;
 
     public MeanCenterProcess(ProcessFactory factory) {
         super(factory);
@@ -73,36 +72,31 @@ public class MeanCenterProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, MeanCenterProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
-            }
-            String weightField = (String) Params.getValue(input,
-                    MeanCenterProcessFactory.weightField, null);
-            String caseField = (String) Params.getValue(input, MeanCenterProcessFactory.caseField,
-                    null);
-            String dimensionField = (String) Params.getValue(input,
-                    MeanCenterProcessFactory.dimensionField, null);
-
-            // start process
-            MeanCenterOperation operation = new MeanCenterOperation();
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, weightField,
-                    caseField, dimensionField);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(MeanCenterProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                MeanCenterProcessFactory.inputFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameters required");
         }
+
+        String weightField = (String) Params.getValue(input, MeanCenterProcessFactory.weightField,
+                null);
+        String caseField = (String) Params
+                .getValue(input, MeanCenterProcessFactory.caseField, null);
+        String dimensionField = (String) Params.getValue(input,
+                MeanCenterProcessFactory.dimensionField, null);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            MeanCenterOperation operation = new MeanCenterOperation();
+            resultFc = operation.execute(inputFeatures, weightField, caseField, dimensionField);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(MeanCenterProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

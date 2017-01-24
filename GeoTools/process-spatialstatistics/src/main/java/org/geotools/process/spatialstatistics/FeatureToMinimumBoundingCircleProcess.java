@@ -84,13 +84,12 @@ public class FeatureToMinimumBoundingCircleProcess extends AbstractStatisticsPro
                 FeatureToMinimumBoundingCircleProcessFactory.singlePart.sample);
 
         // start process
-        SimpleFeatureCollection resultFc = new MinimumBoundingCircleFeatureCollection(
-                inputFeatures, singlePart);
+        SimpleFeatureCollection resultFc = DataUtilities
+                .simple(new MinimumBoundingCircleFeatureCollection(inputFeatures, singlePart));
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        resultMap.put(FeatureToMinimumBoundingCircleProcessFactory.RESULT.key,
-                DataUtilities.simple(resultFc));
+        resultMap.put(FeatureToMinimumBoundingCircleProcessFactory.RESULT.key, resultFc);
         return resultMap;
     }
 }

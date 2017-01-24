@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class SumLineLengthProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(SumLineLengthProcess.class);
-
-    private boolean started = false;
 
     public SumLineLengthProcess(ProcessFactory factory) {
         super(factory);
@@ -74,39 +73,32 @@ public class SumLineLengthProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection polygons = (SimpleFeatureCollection) Params.getValue(input,
-                    SumLineLengthProcessFactory.polygons, null);
-            String lengthField = (String) Params.getValue(input,
-                    SumLineLengthProcessFactory.lengthField,
-                    SumLineLengthProcessFactory.lengthField.sample);
-            String countField = (String) Params.getValue(input,
-                    SumLineLengthProcessFactory.countField,
-                    SumLineLengthProcessFactory.countField.sample);
-            SimpleFeatureCollection lines = (SimpleFeatureCollection) Params.getValue(input,
-                    SumLineLengthProcessFactory.lines, null);
-            if (polygons == null || lengthField == null || lines == null) {
-                throw new NullPointerException("All parameters required");
-            }
-
-            // start process
-            CalculateSumLineLengthOperation process = new CalculateSumLineLengthOperation();
-            SimpleFeatureCollection resultFc = process.execute(polygons, lengthField, countField,
-                    lines);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(SumLineLengthProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection polygons = (SimpleFeatureCollection) Params.getValue(input,
+                SumLineLengthProcessFactory.polygons, null);
+        String lengthField = (String) Params.getValue(input,
+                SumLineLengthProcessFactory.lengthField,
+                SumLineLengthProcessFactory.lengthField.sample);
+        String countField = (String) Params.getValue(input, SumLineLengthProcessFactory.countField,
+                SumLineLengthProcessFactory.countField.sample);
+        SimpleFeatureCollection lines = (SimpleFeatureCollection) Params.getValue(input,
+                SumLineLengthProcessFactory.lines, null);
+        if (polygons == null || lengthField == null || lines == null) {
+            throw new NullPointerException("All parameters required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            CalculateSumLineLengthOperation process = new CalculateSumLineLengthOperation();
+            resultFc = process.execute(polygons, lengthField, countField, lines);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(SumLineLengthProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
 }

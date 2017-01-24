@@ -43,8 +43,6 @@ import org.opengis.util.ProgressListener;
 public class KernelDensityProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(KernelDensityProcess.class);
 
-    private boolean started = false;
-
     public KernelDensityProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -80,61 +78,50 @@ public class KernelDensityProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, KernelDensityProcessFactory.inputFeatures, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
-            }
-
-            KernelType kernelType = (KernelType) Params.getValue(input,
-                    KernelDensityProcessFactory.kernelType, KernelType.Quadratic);
-            String populationField = (String) Params.getValue(input,
-                    KernelDensityProcessFactory.populationField, null);
-            Double searchRadius = (Double) Params.getValue(input,
-                    KernelDensityProcessFactory.searchRadius, 0.0);
-            Double cellSize = (Double) Params.getValue(input, KernelDensityProcessFactory.cellSize,
-                    0.0);
-            ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
-                    KernelDensityProcessFactory.extent, null);
-
-            // start process
-            ReferencedEnvelope boundingBox = inputFeatures.getBounds();
-            if (extent != null) {
-                boundingBox = extent;
-            }
-
-            // get default cell size from extent
-            if (cellSize == null || Double.isNaN(cellSize) || cellSize == 0.0) {
-                cellSize = Math.min(boundingBox.getWidth(), boundingBox.getHeight()) / 250.0;
-                LOGGER.warning("default cell size = " + cellSize);
-            }
-
-            if (searchRadius == null || Double.isNaN(searchRadius) || searchRadius == 0) {
-                searchRadius = Math.min(boundingBox.getWidth(), boundingBox.getHeight()) / 30.0;
-                LOGGER.warning("default neighborhood = Circle + Radius(" + searchRadius + ")");
-            }
-
-            GridCoverage2D resultGc = null;
-            RasterKernelDensityOperation process = new RasterKernelDensityOperation();
-            process.getRasterEnvironment().setExtent(boundingBox);
-            process.getRasterEnvironment().setCellSize(cellSize);
-            process.setKernelType(kernelType);
-            resultGc = process.execute(inputFeatures, populationField, searchRadius);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(KernelDensityProcessFactory.RESULT.key, resultGc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                KernelDensityProcessFactory.inputFeatures, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameters required");
         }
-    }
 
+        KernelType kernelType = (KernelType) Params.getValue(input,
+                KernelDensityProcessFactory.kernelType, KernelType.Quadratic);
+        String populationField = (String) Params.getValue(input,
+                KernelDensityProcessFactory.populationField, null);
+        Double searchRadius = (Double) Params.getValue(input,
+                KernelDensityProcessFactory.searchRadius, 0.0);
+        Double cellSize = (Double) Params
+                .getValue(input, KernelDensityProcessFactory.cellSize, 0.0);
+        ReferencedEnvelope extent = (ReferencedEnvelope) Params.getValue(input,
+                KernelDensityProcessFactory.extent, null);
+
+        // start process
+        ReferencedEnvelope boundingBox = inputFeatures.getBounds();
+        if (extent != null) {
+            boundingBox = extent;
+        }
+
+        // get default cell size from extent
+        if (cellSize == null || Double.isNaN(cellSize) || cellSize == 0.0) {
+            cellSize = Math.min(boundingBox.getWidth(), boundingBox.getHeight()) / 250.0;
+            LOGGER.warning("default cell size = " + cellSize);
+        }
+
+        if (searchRadius == null || Double.isNaN(searchRadius) || searchRadius == 0) {
+            searchRadius = Math.min(boundingBox.getWidth(), boundingBox.getHeight()) / 30.0;
+            LOGGER.warning("default neighborhood = Circle + Radius(" + searchRadius + ")");
+        }
+
+        GridCoverage2D resultGc = null;
+        RasterKernelDensityOperation process = new RasterKernelDensityOperation();
+        process.getRasterEnvironment().setExtent(boundingBox);
+        process.getRasterEnvironment().setCellSize(cellSize);
+        process.setKernelType(kernelType);
+        resultGc = process.execute(inputFeatures, populationField, searchRadius);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(KernelDensityProcessFactory.RESULT.key, resultGc);
+        return resultMap;
+    }
 }

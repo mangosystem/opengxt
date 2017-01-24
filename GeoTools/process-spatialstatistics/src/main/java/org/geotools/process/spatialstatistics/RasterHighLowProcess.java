@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -43,8 +44,6 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public class RasterHighLowProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RasterHighLowProcess.class);
-
-    private boolean started = false;
 
     public RasterHighLowProcess(ProcessFactory factory) {
         super(factory);
@@ -78,42 +77,35 @@ public class RasterHighLowProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
-                    RasterHighLowProcessFactory.inputCoverage, null);
-            Integer bandIndex = (Integer) Params.getValue(input,
-                    RasterHighLowProcessFactory.bandIndex,
-                    RasterHighLowProcessFactory.bandIndex.sample);
-            Geometry cropShape = (Geometry) Params.getValue(input,
-                    RasterHighLowProcessFactory.cropShape, null);
-            HighLowType valueType = (HighLowType) Params.getValue(input,
-                    RasterHighLowProcessFactory.valueType,
-                    RasterHighLowProcessFactory.valueType.sample);
-            if (inputCoverage == null) {
-                throw new NullPointerException("inputCoverage parameter required");
-            }
-
-            if (valueType == null) {
-                valueType = HighLowType.Both;
-            }
-
-            // start process
-            RasterHighLowPointsOperation process = new RasterHighLowPointsOperation();
-            SimpleFeatureCollection resultFc = process.execute(inputCoverage, bandIndex, cropShape,
-                    valueType);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(RasterHighLowProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
+                RasterHighLowProcessFactory.inputCoverage, null);
+        Integer bandIndex = (Integer) Params.getValue(input, RasterHighLowProcessFactory.bandIndex,
+                RasterHighLowProcessFactory.bandIndex.sample);
+        Geometry cropShape = (Geometry) Params.getValue(input,
+                RasterHighLowProcessFactory.cropShape, null);
+        HighLowType valueType = (HighLowType) Params
+                .getValue(input, RasterHighLowProcessFactory.valueType,
+                        RasterHighLowProcessFactory.valueType.sample);
+        if (inputCoverage == null) {
+            throw new NullPointerException("inputCoverage parameter required");
         }
+
+        if (valueType == null) {
+            valueType = HighLowType.Both;
+        }
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            RasterHighLowPointsOperation process = new RasterHighLowPointsOperation();
+            resultFc = process.execute(inputCoverage, bandIndex, cropShape, valueType);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(RasterHighLowProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

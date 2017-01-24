@@ -41,8 +41,6 @@ import org.opengis.util.ProgressListener;
 public class RasterConProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RasterConProcess.class);
 
-    private boolean started = false;
-
     public RasterConProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -76,37 +74,27 @@ public class RasterConProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
-                    RasterConProcessFactory.inputCoverage, null);
-            Integer bandIndex = (Integer) Params.getValue(input, RasterConProcessFactory.bandIndex,
-                    RasterConProcessFactory.bandIndex.sample);
-            Filter filter = (Filter) Params.getValue(input, RasterConProcessFactory.filter, null);
-            Integer trueValue = (Integer) Params.getValue(input, RasterConProcessFactory.trueValue,
-                    RasterConProcessFactory.trueValue.sample);
-            Integer falseValue = (Integer) Params.getValue(input,
-                    RasterConProcessFactory.falseValue, RasterConProcessFactory.falseValue.sample);
-            if (inputCoverage == null || filter == null) {
-                throw new NullPointerException("inputCoverage, filter parameters required");
-            }
-
-            // start process
-            RasterConditionalOperation process = new RasterConditionalOperation();
-            GridCoverage2D cropedCoverage = process.execute(inputCoverage, bandIndex, filter,
-                    trueValue, falseValue);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(RasterConProcessFactory.RESULT.key, cropedCoverage);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
+                RasterConProcessFactory.inputCoverage, null);
+        Integer bandIndex = (Integer) Params.getValue(input, RasterConProcessFactory.bandIndex,
+                RasterConProcessFactory.bandIndex.sample);
+        Filter filter = (Filter) Params.getValue(input, RasterConProcessFactory.filter, null);
+        Integer trueValue = (Integer) Params.getValue(input, RasterConProcessFactory.trueValue,
+                RasterConProcessFactory.trueValue.sample);
+        Integer falseValue = (Integer) Params.getValue(input, RasterConProcessFactory.falseValue,
+                RasterConProcessFactory.falseValue.sample);
+        if (inputCoverage == null || filter == null) {
+            throw new NullPointerException("inputCoverage, filter parameters required");
         }
+
+        // start process
+        RasterConditionalOperation process = new RasterConditionalOperation();
+        GridCoverage2D cropedCoverage = process.execute(inputCoverage, bandIndex, filter,
+                trueValue, falseValue);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(RasterConProcessFactory.RESULT.key, cropedCoverage);
+        return resultMap;
     }
 }

@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,8 +42,6 @@ import org.opengis.util.ProgressListener;
  */
 public class EliminateProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(EliminateProcess.class);
-
-    private boolean started = false;
 
     public EliminateProcess(ProcessFactory factory) {
         super(factory);
@@ -74,34 +73,28 @@ public class EliminateProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, EliminateProcessFactory.inputFeatures, null);
-            EliminateOption option = (EliminateOption) Params.getValue(input,
-                    EliminateProcessFactory.option, EliminateProcessFactory.option.sample);
-            Filter exception = (Filter) Params.getValue(input, EliminateProcessFactory.exception,
-                    EliminateProcessFactory.exception.sample);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameters required");
-            }
-
-            // start process
-            EliminateOperation operation = new EliminateOperation();
-            SimpleFeatureCollection resultFc = operation.execute(inputFeatures, option, exception);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(EliminateProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                EliminateProcessFactory.inputFeatures, null);
+        EliminateOption option = (EliminateOption) Params.getValue(input,
+                EliminateProcessFactory.option, EliminateProcessFactory.option.sample);
+        Filter exception = (Filter) Params.getValue(input, EliminateProcessFactory.exception,
+                EliminateProcessFactory.exception.sample);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameters required");
         }
-    }
 
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            EliminateOperation operation = new EliminateOperation();
+            resultFc = operation.execute(inputFeatures, option, exception);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(EliminateProcessFactory.RESULT.key, resultFc);
+        return resultMap;
+    }
 }

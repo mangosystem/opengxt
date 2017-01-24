@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,8 +41,6 @@ import org.opengis.util.ProgressListener;
  */
 public class StandardizedScoresProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(StandardizedScoresProcess.class);
-
-    private boolean started = false;
 
     public StandardizedScoresProcess(ProcessFactory factory) {
         super(factory);
@@ -75,38 +74,32 @@ public class StandardizedScoresProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                StandardizedScoresProcessFactory.inputFeatures, null);
+        Expression xField = (Expression) Params.getValue(input,
+                StandardizedScoresProcessFactory.xField, null);
+        Expression yField = (Expression) Params.getValue(input,
+                StandardizedScoresProcessFactory.yField, null);
+        String targetField = (String) Params.getValue(input,
+                StandardizedScoresProcessFactory.targetField,
+                StandardizedScoresProcessFactory.targetField.sample);
+        if (inputFeatures == null || xField == null || yField == null) {
+            throw new NullPointerException("All parameters required");
+        }
 
+        // start process
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, StandardizedScoresProcessFactory.inputFeatures, null);
-            Expression xField = (Expression) Params.getValue(input,
-                    StandardizedScoresProcessFactory.xField, null);
-            Expression yField = (Expression) Params.getValue(input,
-                    StandardizedScoresProcessFactory.yField, null);
-            String targetField = (String) Params.getValue(input,
-                    StandardizedScoresProcessFactory.targetField,
-                    StandardizedScoresProcessFactory.targetField.sample);
-            if (inputFeatures == null || xField == null || yField == null) {
-                throw new NullPointerException("All parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection resultFc = null;
             StandardizedScoresOperation process = new StandardizedScoresOperation();
             resultFc = process.execute(inputFeatures, xField, yField, targetField);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(StandardizedScoresProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(StandardizedScoresProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
 }

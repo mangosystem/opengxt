@@ -42,8 +42,6 @@ import org.opengis.util.ProgressListener;
 public class PointsAlongLinesProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(PointsAlongLinesProcess.class);
 
-    private boolean started = false;
-
     public PointsAlongLinesProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -74,32 +72,21 @@ public class PointsAlongLinesProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection lineFeatures = (SimpleFeatureCollection) Params.getValue(input,
-                    PointsAlongLinesProcessFactory.lineFeatures, null);
-            Expression distance = (Expression) Params.getValue(input,
-                    PointsAlongLinesProcessFactory.distance);
-            if (lineFeatures == null || distance == null) {
-                throw new NullPointerException(
-                        "lineFeatures, distance expression parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection resultFc = DataUtilities
-                    .simple(new PointsAlongLinesFeatureCollection(lineFeatures, distance));
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(AreaProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection lineFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                PointsAlongLinesProcessFactory.lineFeatures, null);
+        Expression distance = (Expression) Params.getValue(input,
+                PointsAlongLinesProcessFactory.distance);
+        if (lineFeatures == null || distance == null) {
+            throw new NullPointerException("lineFeatures, distance expression parameters required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities
+                .simple(new PointsAlongLinesFeatureCollection(lineFeatures, distance));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(AreaProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

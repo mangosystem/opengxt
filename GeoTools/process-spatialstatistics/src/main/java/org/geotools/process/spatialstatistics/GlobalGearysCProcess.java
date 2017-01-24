@@ -46,8 +46,6 @@ import org.opengis.util.ProgressListener;
 public class GlobalGearysCProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(GlobalGearysCProcess.class);
 
-    private boolean started = false;
-
     public GlobalGearysCProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -85,74 +83,60 @@ public class GlobalGearysCProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, GlobalGearysCProcessFactory.inputFeatures, null);
-            String inputField = (String) Params.getValue(input,
-                    GlobalGearysCProcessFactory.inputField, null);
-            if (inputFeatures == null || inputField == null) {
-                throw new NullPointerException("inputFeatures and inputField parameters required");
-            }
-
-            inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
-            if (inputFeatures.getSchema().indexOf(inputField) == -1) {
-                throw new NullPointerException(inputField + " field does not exist!");
-            }
-
-            SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
-                    GlobalGearysCProcessFactory.spatialConcept,
-                    GlobalGearysCProcessFactory.spatialConcept.sample);
-
-            DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
-                    GlobalGearysCProcessFactory.distanceMethod,
-                    GlobalGearysCProcessFactory.distanceMethod.sample);
-
-            StandardizationMethod standardization = (StandardizationMethod) Params.getValue(input,
-                    GlobalGearysCProcessFactory.standardization,
-                    GlobalGearysCProcessFactory.standardization.sample);
-
-            Double searchDistance = (Double) Params.getValue(input,
-                    GlobalGearysCProcessFactory.searchDistance,
-                    GlobalGearysCProcessFactory.searchDistance.sample);
-
-            Boolean selfNeighbors = (Boolean) Params.getValue(input,
-                    GlobalGearysCProcessFactory.selfNeighbors,
-                    GlobalGearysCProcessFactory.selfNeighbors.sample);
-
-            // start process
-            String typeName = inputFeatures.getSchema().getTypeName();
-            GearysCProcessResult processResult = null;
-            try {
-                GlobalGearysCOperation process = new GlobalGearysCOperation();
-                process.setSpatialConceptType(spatialConcept);
-                process.setDistanceType(distanceMethod);
-                process.setStandardizationType(standardization);
-                process.setSelfNeighbors(selfNeighbors);
-
-                // searchDistance
-                if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
-                    process.setDistanceBand(searchDistance);
-                }
-
-                GearysC ret = process.execute(inputFeatures, inputField);
-                processResult = new GearysCProcessResult(typeName, inputField, ret);
-            } catch (Exception e) {
-                processResult = new GearysCProcessResult(typeName, inputField, new GearysC());
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(GlobalGearysCProcessFactory.RESULT.key, processResult);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                GlobalGearysCProcessFactory.inputFeatures, null);
+        String inputField = (String) Params.getValue(input, GlobalGearysCProcessFactory.inputField,
+                null);
+        if (inputFeatures == null || inputField == null) {
+            throw new NullPointerException("inputFeatures and inputField parameters required");
         }
+
+        inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
+        if (inputFeatures.getSchema().indexOf(inputField) == -1) {
+            throw new NullPointerException(inputField + " field does not exist!");
+        }
+
+        SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
+                GlobalGearysCProcessFactory.spatialConcept,
+                GlobalGearysCProcessFactory.spatialConcept.sample);
+
+        DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
+                GlobalGearysCProcessFactory.distanceMethod,
+                GlobalGearysCProcessFactory.distanceMethod.sample);
+
+        StandardizationMethod standardization = (StandardizationMethod) Params.getValue(input,
+                GlobalGearysCProcessFactory.standardization,
+                GlobalGearysCProcessFactory.standardization.sample);
+
+        Double searchDistance = (Double) Params.getValue(input,
+                GlobalGearysCProcessFactory.searchDistance,
+                GlobalGearysCProcessFactory.searchDistance.sample);
+
+        Boolean selfNeighbors = (Boolean) Params.getValue(input,
+                GlobalGearysCProcessFactory.selfNeighbors,
+                GlobalGearysCProcessFactory.selfNeighbors.sample);
+
+        // start process
+        String typeName = inputFeatures.getSchema().getTypeName();
+
+        GlobalGearysCOperation process = new GlobalGearysCOperation();
+        process.setSpatialConceptType(spatialConcept);
+        process.setDistanceType(distanceMethod);
+        process.setStandardizationType(standardization);
+        process.setSelfNeighbors(selfNeighbors);
+
+        // searchDistance
+        if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
+            process.setDistanceBand(searchDistance);
+        }
+
+        GearysC ret = process.execute(inputFeatures, inputField);
+        GearysCProcessResult processResult = new GearysCProcessResult(typeName, inputField, ret);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(GlobalGearysCProcessFactory.RESULT.key, processResult);
+        return resultMap;
     }
 
     public static class GearysCProcessResult {

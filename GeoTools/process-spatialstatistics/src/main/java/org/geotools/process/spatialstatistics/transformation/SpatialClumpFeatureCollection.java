@@ -61,6 +61,10 @@ public class SpatialClumpFeatureCollection extends GXTSimpleFeatureCollection {
         this.schema = FeatureTypes.getDefaultType(typeName, Polygon.class, crs);
         this.schema = FeatureTypes.add(schema, "uid", Integer.class, 19);
 
+        if (quadrantSegments <= 0) {
+            quadrantSegments = 8; // default
+        }
+
         this.buildGeometries(delegate, radius, quadrantSegments);
     }
 

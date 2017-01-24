@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -40,8 +41,6 @@ import org.opengis.util.ProgressListener;
  */
 public class SimplifyProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(SimplifyProcess.class);
-
-    private boolean started = false;
 
     public SimplifyProcess(ProcessFactory factory) {
         super(factory);
@@ -74,35 +73,25 @@ public class SimplifyProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, SimplifyProcessFactory.inputFeatures, null);
-            Expression tolerance = (Expression) Params.getValue(input,
-                    SimplifyProcessFactory.tolerance, null);
-            if (inputFeatures == null) {
-                throw new NullPointerException("inputFeatures parameter required");
-            }
-
-            Boolean preserveTopology = (Boolean) Params.getValue(input,
-                    SimplifyProcessFactory.preserveTopology,
-                    SimplifyProcessFactory.preserveTopology.sample);
-
-            // start process
-            SimpleFeatureCollection resultFc = new SimplifyFeatureCollection(inputFeatures,
-                    tolerance, preserveTopology);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(SimplifyProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                SimplifyProcessFactory.inputFeatures, null);
+        Expression tolerance = (Expression) Params.getValue(input,
+                SimplifyProcessFactory.tolerance, null);
+        if (inputFeatures == null) {
+            throw new NullPointerException("inputFeatures parameter required");
         }
+
+        Boolean preserveTopology = (Boolean) Params.getValue(input,
+                SimplifyProcessFactory.preserveTopology,
+                SimplifyProcessFactory.preserveTopology.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new SimplifyFeatureCollection(
+                inputFeatures, tolerance, preserveTopology));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(SimplifyProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

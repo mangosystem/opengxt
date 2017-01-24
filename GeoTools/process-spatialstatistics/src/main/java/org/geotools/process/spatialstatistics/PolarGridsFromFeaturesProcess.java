@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -45,8 +46,6 @@ import org.opengis.util.ProgressListener;
 public class PolarGridsFromFeaturesProcess extends AbstractStatisticsProcess implements
         RenderingProcess {
     protected static final Logger LOGGER = Logging.getLogger(PolarGridsFromFeaturesProcess.class);
-
-    private boolean started = false;
 
     public PolarGridsFromFeaturesProcess(ProcessFactory factory) {
         super(factory);
@@ -80,49 +79,43 @@ public class PolarGridsFromFeaturesProcess extends AbstractStatisticsProcess imp
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection origin = (SimpleFeatureCollection) Params.getValue(input,
-                    PolarGridsFromFeaturesProcessFactory.origin, null);
-            String radius = (String) Params.getValue(input,
-                    PolarGridsFromFeaturesProcessFactory.radius, null);
-            if (origin == null || radius == null || radius.length() == 0) {
-                throw new NullPointerException("origin, radius parameters required");
-            }
-            RadialType radialType = (RadialType) Params.getValue(input,
-                    PolarGridsFromFeaturesProcessFactory.radialType,
-                    PolarGridsFromFeaturesProcessFactory.radialType.sample);
-            Integer sides = (Integer) Params.getValue(input,
-                    PolarGridsFromFeaturesProcessFactory.sides,
-                    PolarGridsFromFeaturesProcessFactory.sides.sample);
-
-            // start process
-            String[] arrDistance = radius.split(",");
-            double[] bufferRadius = new double[arrDistance.length];
-            for (int k = 0; k < arrDistance.length; k++) {
-                try {
-                    bufferRadius[k] = Double.parseDouble(arrDistance[k].trim());
-                } catch (NumberFormatException nfe) {
-                    throw new NumberFormatException(nfe.getMessage());
-                }
-            }
-
-            PolarGridsOperation operation = new PolarGridsOperation();
-            SimpleFeatureCollection resultFc = operation.execute(origin, bufferRadius, sides,
-                    radialType);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(PolarGridsFromFeaturesProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection origin = (SimpleFeatureCollection) Params.getValue(input,
+                PolarGridsFromFeaturesProcessFactory.origin, null);
+        String radius = (String) Params.getValue(input,
+                PolarGridsFromFeaturesProcessFactory.radius, null);
+        if (origin == null || radius == null || radius.length() == 0) {
+            throw new NullPointerException("origin, radius parameters required");
         }
+        RadialType radialType = (RadialType) Params.getValue(input,
+                PolarGridsFromFeaturesProcessFactory.radialType,
+                PolarGridsFromFeaturesProcessFactory.radialType.sample);
+        Integer sides = (Integer) Params.getValue(input,
+                PolarGridsFromFeaturesProcessFactory.sides,
+                PolarGridsFromFeaturesProcessFactory.sides.sample);
+
+        // start process
+        String[] arrDistance = radius.split(",");
+        double[] bufferRadius = new double[arrDistance.length];
+        for (int k = 0; k < arrDistance.length; k++) {
+            try {
+                bufferRadius[k] = Double.parseDouble(arrDistance[k].trim());
+            } catch (NumberFormatException nfe) {
+                throw new ProcessException(nfe);
+            }
+        }
+
+        SimpleFeatureCollection resultFc = null;
+        try {
+            PolarGridsOperation operation = new PolarGridsOperation();
+            resultFc = operation.execute(origin, bufferRadius, sides, radialType);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(PolarGridsFromFeaturesProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
     /**

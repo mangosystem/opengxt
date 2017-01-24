@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class KNearestNeighborMapProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(KNearestNeighborMapProcess.class);
-
-    private boolean started = false;
 
     public KNearestNeighborMapProcess(ProcessFactory factory) {
         super(factory);
@@ -74,37 +73,32 @@ public class KNearestNeighborMapProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                KNearestNeighborMapProcessFactory.inputFeatures, null);
 
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, KNearestNeighborMapProcessFactory.inputFeatures, null);
-
-            Integer neighbor = (Integer) Params.getValue(input,
-                    KNearestNeighborMapProcessFactory.neighbor,
-                    KNearestNeighborMapProcessFactory.neighbor.sample);
-            if (inputFeatures == null || neighbor == null || neighbor == 0) {
-                throw new NullPointerException("inputFeatures, neighbor parameters required");
-            }
-
-            Boolean convexHull = (Boolean) Params.getValue(input,
-                    KNearestNeighborMapProcessFactory.convexHull,
-                    KNearestNeighborMapProcessFactory.convexHull.sample);
-
-            // start process
-            KNearestNeighborMapOperation process = new KNearestNeighborMapOperation();
-            SimpleFeatureCollection resultFc = process.execute(inputFeatures, neighbor, convexHull);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(KNearestNeighborMapProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        Integer neighbor = (Integer) Params.getValue(input,
+                KNearestNeighborMapProcessFactory.neighbor,
+                KNearestNeighborMapProcessFactory.neighbor.sample);
+        if (inputFeatures == null || neighbor == null || neighbor == 0) {
+            throw new NullPointerException("inputFeatures, neighbor parameters required");
         }
+
+        Boolean convexHull = (Boolean) Params.getValue(input,
+                KNearestNeighborMapProcessFactory.convexHull,
+                KNearestNeighborMapProcessFactory.convexHull.sample);
+
+        // start process
+        SimpleFeatureCollection resultFc = null;
+        try {
+            KNearestNeighborMapOperation process = new KNearestNeighborMapOperation();
+            resultFc = process.execute(inputFeatures, neighbor, convexHull);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(KNearestNeighborMapProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

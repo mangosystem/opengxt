@@ -46,8 +46,6 @@ import org.opengis.util.ProgressListener;
 public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(GlobalGStatisticsProcess.class);
 
-    private boolean started = false;
-
     public GlobalGStatisticsProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -58,7 +56,8 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
 
     public static GStatisticsProcessResult process(SimpleFeatureCollection inputFeatures,
             String inputField, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-            StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors, ProgressListener monitor) {
+            StandardizationMethod standardization, Double searchDistance, Boolean selfNeighbors,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(GlobalGStatisticsProcessFactory.inputFeatures.key, inputFeatures);
         map.put(GlobalGStatisticsProcessFactory.inputField.key, inputField);
@@ -85,74 +84,61 @@ public class GlobalGStatisticsProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, GlobalGStatisticsProcessFactory.inputFeatures, null);
-            String inputField = (String) Params.getValue(input,
-                    GlobalGStatisticsProcessFactory.inputField, null);
-            if (inputFeatures == null || inputField == null) {
-                throw new NullPointerException("inputFeatures and inputField parameters required");
-            }
-
-            inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
-            if (inputFeatures.getSchema().indexOf(inputField) == -1) {
-                throw new NullPointerException(inputField + " field does not exist!");
-            }
-
-            SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
-                    GlobalGStatisticsProcessFactory.spatialConcept,
-                    GlobalGStatisticsProcessFactory.spatialConcept.sample);
-
-            DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
-                    GlobalGStatisticsProcessFactory.distanceMethod,
-                    GlobalGStatisticsProcessFactory.distanceMethod.sample);
-
-            StandardizationMethod standardization = (StandardizationMethod) Params.getValue(input,
-                    GlobalGStatisticsProcessFactory.standardization,
-                    GlobalGStatisticsProcessFactory.standardization.sample);
-
-            Double searchDistance = (Double) Params.getValue(input,
-                    GlobalGStatisticsProcessFactory.searchDistance,
-                    GlobalGStatisticsProcessFactory.searchDistance.sample);
-
-            Boolean selfNeighbors = (Boolean) Params.getValue(input,
-                    GlobalGStatisticsProcessFactory.selfNeighbors,
-                    GlobalGStatisticsProcessFactory.selfNeighbors.sample);
-
-            // start process
-            String typeName = inputFeatures.getSchema().getTypeName();
-            GStatisticsProcessResult processResult = null;
-            try {
-                GlobalGStatisticOperation process = new GlobalGStatisticOperation();
-                process.setSpatialConceptType(spatialConcept);
-                process.setDistanceType(distanceMethod);
-                process.setStandardizationType(standardization);
-                process.setSelfNeighbors(selfNeighbors);
-
-                // searchDistance
-                if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
-                    process.setDistanceBand(searchDistance);
-                }
-
-                GeneralG ret = process.execute(inputFeatures, inputField);
-                processResult = new GStatisticsProcessResult(typeName, inputField, ret);
-            } catch (Exception e) {
-                processResult = new GStatisticsProcessResult(typeName, inputField, new GeneralG());
-            }
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(GlobalGStatisticsProcessFactory.RESULT.key, processResult);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                GlobalGStatisticsProcessFactory.inputFeatures, null);
+        String inputField = (String) Params.getValue(input,
+                GlobalGStatisticsProcessFactory.inputField, null);
+        if (inputFeatures == null || inputField == null) {
+            throw new NullPointerException("inputFeatures and inputField parameters required");
         }
+
+        inputField = FeatureTypes.validateProperty(inputFeatures.getSchema(), inputField);
+        if (inputFeatures.getSchema().indexOf(inputField) == -1) {
+            throw new NullPointerException(inputField + " field does not exist!");
+        }
+
+        SpatialConcept spatialConcept = (SpatialConcept) Params.getValue(input,
+                GlobalGStatisticsProcessFactory.spatialConcept,
+                GlobalGStatisticsProcessFactory.spatialConcept.sample);
+
+        DistanceMethod distanceMethod = (DistanceMethod) Params.getValue(input,
+                GlobalGStatisticsProcessFactory.distanceMethod,
+                GlobalGStatisticsProcessFactory.distanceMethod.sample);
+
+        StandardizationMethod standardization = (StandardizationMethod) Params.getValue(input,
+                GlobalGStatisticsProcessFactory.standardization,
+                GlobalGStatisticsProcessFactory.standardization.sample);
+
+        Double searchDistance = (Double) Params.getValue(input,
+                GlobalGStatisticsProcessFactory.searchDistance,
+                GlobalGStatisticsProcessFactory.searchDistance.sample);
+
+        Boolean selfNeighbors = (Boolean) Params.getValue(input,
+                GlobalGStatisticsProcessFactory.selfNeighbors,
+                GlobalGStatisticsProcessFactory.selfNeighbors.sample);
+
+        // start process
+        String typeName = inputFeatures.getSchema().getTypeName();
+
+        GlobalGStatisticOperation process = new GlobalGStatisticOperation();
+        process.setSpatialConceptType(spatialConcept);
+        process.setDistanceType(distanceMethod);
+        process.setStandardizationType(standardization);
+        process.setSelfNeighbors(selfNeighbors);
+
+        // searchDistance
+        if (searchDistance > 0 && !Double.isNaN(searchDistance)) {
+            process.setDistanceBand(searchDistance);
+        }
+
+        GeneralG ret = process.execute(inputFeatures, inputField);
+        GStatisticsProcessResult processResult = new GStatisticsProcessResult(typeName, inputField,
+                ret);
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(GlobalGStatisticsProcessFactory.RESULT.key, processResult);
+        return resultMap;
     }
 
     public static class GStatisticsProcessResult {

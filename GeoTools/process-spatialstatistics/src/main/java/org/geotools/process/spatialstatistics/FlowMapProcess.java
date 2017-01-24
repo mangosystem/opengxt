@@ -42,8 +42,6 @@ import org.opengis.util.ProgressListener;
 public class FlowMapProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(FlowMapProcess.class);
 
-    private boolean started = false;
-
     public FlowMapProcess(ProcessFactory factory) {
         super(factory);
     }
@@ -75,35 +73,25 @@ public class FlowMapProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
-
-        try {
-            SimpleFeatureCollection lineFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, FlowMapProcessFactory.lineFeatures, null);
-            Expression odValue = (Expression) Params.getValue(input, FlowMapProcessFactory.odValue,
-                    null);
-            Expression doValue = (Expression) Params.getValue(input, FlowMapProcessFactory.doValue,
-                    null);
-            Double maxSize = (Double) Params.getValue(input, FlowMapProcessFactory.maxSize, null);
-            if (lineFeatures == null || odValue == null) {
-                throw new NullPointerException(
-                        "inputFeatures, odValue, inputFeatures parameters required");
-            }
-
-            // start process
-            SimpleFeatureCollection resultFc = DataUtilities.simple(new FlowMapFeatureCollection(
-                    lineFeatures, odValue, doValue, maxSize));
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(FlowMapProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        SimpleFeatureCollection lineFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                FlowMapProcessFactory.lineFeatures, null);
+        Expression odValue = (Expression) Params.getValue(input, FlowMapProcessFactory.odValue,
+                null);
+        Expression doValue = (Expression) Params.getValue(input, FlowMapProcessFactory.doValue,
+                null);
+        Double maxSize = (Double) Params.getValue(input, FlowMapProcessFactory.maxSize, null);
+        if (lineFeatures == null || odValue == null) {
+            throw new NullPointerException(
+                    "inputFeatures, odValue, inputFeatures parameters required");
         }
+
+        // start process
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new FlowMapFeatureCollection(
+                lineFeatures, odValue, doValue, maxSize));
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(FlowMapProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 }

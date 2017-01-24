@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -42,8 +43,6 @@ import org.opengis.util.ProgressListener;
  */
 public class JoinCountStatisticsProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(JoinCountStatisticsProcess.class);
-
-    private boolean started = false;
 
     public JoinCountStatisticsProcess(ProcessFactory factory) {
         super(factory);
@@ -77,38 +76,34 @@ public class JoinCountStatisticsProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                JoinCountStatisticsProcessFactory.inputFeatures, null);
 
-        try {
-            SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, JoinCountStatisticsProcessFactory.inputFeatures, null);
-
-            Filter blackExpression = (Filter) Params.getValue(input,
-                    JoinCountStatisticsProcessFactory.blackExpression, null);
-            if (inputFeatures == null || blackExpression == null) {
-                throw new NullPointerException("inputFeatures, blackExpression parameters required");
-            }
-
-            ContiguityType contiguityType = (ContiguityType) Params.getValue(input,
-                    JoinCountStatisticsProcessFactory.contiguityType,
-                    JoinCountStatisticsProcessFactory.contiguityType.sample);
-
-            // start process
-            JoinCountStatisticsOperation operation = new JoinCountStatisticsOperation();
-            JoinCount joinCount = operation.execute(inputFeatures, blackExpression, contiguityType);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(JoinCountStatisticsProcessFactory.RESULT.key, new JoinCountProcessResult(
-                    joinCount));
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+        Filter blackExpression = (Filter) Params.getValue(input,
+                JoinCountStatisticsProcessFactory.blackExpression, null);
+        if (inputFeatures == null || blackExpression == null) {
+            throw new NullPointerException("inputFeatures, blackExpression parameters required");
         }
+
+        ContiguityType contiguityType = (ContiguityType) Params.getValue(input,
+                JoinCountStatisticsProcessFactory.contiguityType,
+                JoinCountStatisticsProcessFactory.contiguityType.sample);
+
+        // start process
+        String typeName = inputFeatures.getSchema().getTypeName();
+        JoinCount joinCount = new JoinCount(typeName, contiguityType);
+        try {
+            JoinCountStatisticsOperation operation = new JoinCountStatisticsOperation();
+            joinCount = operation.execute(inputFeatures, blackExpression, contiguityType);
+        } catch (IOException e) {
+            throw new ProcessException(e);
+        }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(JoinCountStatisticsProcessFactory.RESULT.key, new JoinCountProcessResult(
+                joinCount));
+        return resultMap;
     }
 
     public static class JoinCountProcessResult {

@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,8 +40,6 @@ import org.opengis.util.ProgressListener;
  */
 public class PointStatisticsProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(PointStatisticsProcess.class);
-
-    private boolean started = false;
 
     public PointStatisticsProcess(ProcessFactory factory) {
         super(factory);
@@ -75,41 +74,35 @@ public class PointStatisticsProcess extends AbstractStatisticsProcess {
     @Override
     public Map<String, Object> execute(Map<String, Object> input, ProgressListener monitor)
             throws ProcessException {
-        if (started)
-            throw new IllegalStateException("Process can only be run once");
-        started = true;
+        SimpleFeatureCollection polygonFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                PointStatisticsProcessFactory.polygonFeatures, null);
+        SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(input,
+                PointStatisticsProcessFactory.pointFeatures, null);
+        String countField = (String) Params.getValue(input,
+                PointStatisticsProcessFactory.countField,
+                PointStatisticsProcessFactory.countField.sample);
+        String statisticsFields = (String) Params.getValue(input,
+                PointStatisticsProcessFactory.statisticsFields,
+                PointStatisticsProcessFactory.statisticsFields.sample);
+        if (polygonFeatures == null || pointFeatures == null) {
+            throw new NullPointerException("polygonFeatures and pointFeatures parameters required");
+        }
 
+        // start process
+        SimpleFeatureCollection resultFc = null;
         try {
-            SimpleFeatureCollection polygonFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, PointStatisticsProcessFactory.polygonFeatures, null);
-            SimpleFeatureCollection pointFeatures = (SimpleFeatureCollection) Params.getValue(
-                    input, PointStatisticsProcessFactory.pointFeatures, null);
-            String countField = (String) Params.getValue(input,
-                    PointStatisticsProcessFactory.countField,
-                    PointStatisticsProcessFactory.countField.sample);
-            String statisticsFields = (String) Params.getValue(input,
-                    PointStatisticsProcessFactory.statisticsFields,
-                    PointStatisticsProcessFactory.statisticsFields.sample);
-            if (polygonFeatures == null || pointFeatures == null) {
-                throw new NullPointerException(
-                        "polygonFeatures and pointFeatures parameters required");
-            }
-
-            // start process
             PointStatisticsOperation operation = new PointStatisticsOperation();
             operation.setBufferDistance(0.0);
-            SimpleFeatureCollection resultFc = operation.execute(polygonFeatures, countField,
-                    statisticsFields, pointFeatures);
-            // end process
-
-            Map<String, Object> resultMap = new HashMap<String, Object>();
-            resultMap.put(PointStatisticsProcessFactory.RESULT.key, resultFc);
-            return resultMap;
-        } catch (Exception eek) {
-            throw new ProcessException(eek);
-        } finally {
-            started = false;
+            resultFc = operation.execute(polygonFeatures, countField, statisticsFields,
+                    pointFeatures);
+        } catch (IOException e) {
+            throw new ProcessException(e);
         }
+        // end process
+
+        Map<String, Object> resultMap = new HashMap<String, Object>();
+        resultMap.put(PointStatisticsProcessFactory.RESULT.key, resultFc);
+        return resultMap;
     }
 
 }

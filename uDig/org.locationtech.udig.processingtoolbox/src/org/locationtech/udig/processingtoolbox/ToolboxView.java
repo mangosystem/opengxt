@@ -479,11 +479,13 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(proxTool, "org.geotools.process.spatialstatistics.HubLinesByIDProcessFactory");
         buildTool(proxTool, "org.geotools.process.spatialstatistics.HubLinesByDistanceProcessFactory");
         buildTool(proxTool, "org.geotools.process.spatialstatistics.NearProcessFactory");
+        buildTool(proxTool, "org.geotools.process.spatialstatistics.NearestNeighborCountProcessFactory");
 
         // Aggregation
         TreeParent aggreTool = new TreeParent(Messages.ToolboxView_Aggregation, null, null);
         generalTool.addChild(aggreTool);
         buildTool(aggreTool, "org.geotools.process.spatialstatistics.CollectEventsProcessFactory");
+        buildTool(aggreTool, "org.geotools.process.spatialstatistics.BufferStatisticsProcessFactory");
         buildTool(aggreTool, "org.geotools.process.spatialstatistics.DissolveProcessFactory");
         buildTool(aggreTool, "org.geotools.process.spatialstatistics.UnionPolygonProcessFactory");
         buildTool(aggreTool, "org.geotools.process.spatialstatistics.AttributeJoinProcessFactory");
@@ -514,7 +516,6 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
 
         buildTool(overlayTool, "org.geotools.process.spatialstatistics.SpatialJoinProcessFactory");
         buildTool(overlayTool, "org.geotools.process.spatialstatistics.PointStatisticsProcessFactory");
-        buildTool(overlayTool, "org.geotools.process.spatialstatistics.BufferStatisticsProcessFactory");
         buildTool(overlayTool, "org.geotools.process.spatialstatistics.SumLineLengthProcessFactory");
 
         // Editing

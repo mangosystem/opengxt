@@ -18,9 +18,9 @@ any major spatial data source using open standards.
 ### Download GeoTools & GeoServer WPS libraries
 * Visit [SourceForge](https://sourceforge.net/projects/mango-spatialstatistics/)
 * Geotools 14.x
- * Download gt-process-spatialstatistics-14.1.jar file
+ * Download gt-process-spatialstatistics-14.5.jar file
 * GeoServer 2.8.x
- * Download gs-wps-spatialstatistics-2.8.1.jar, gt-process-spatialstatistics-14.1.jar files
+ * Download gs-wps-spatialstatistics-2.8.5.jar, gt-process-spatialstatistics-14.5.jar files
  * Copy these files to the WEB-INF/lib directory of the GeoServer installation.
  * Restart GeoServer
 

@@ -90,8 +90,6 @@ public class DelaunayTrangulationOperation extends GeneralOperation {
             double deltaY = clipEnvelope.getHeight() * 0.1;
             clipEnvelope.expandBy(deltaX, deltaY);
             clipPolygon = gf.toGeometry(clipEnvelope);
-        } else {
-            clipEnvelope = new ReferencedEnvelope(clipArea.getEnvelopeInternal(), crs);
         }
 
         // fast test

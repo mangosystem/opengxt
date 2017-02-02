@@ -109,6 +109,7 @@ org.geotools.process.spatialstatistics.HubLinesByDistanceProcessFactory
 org.geotools.process.spatialstatistics.HubLinesByIDProcessFactory
 org.geotools.process.spatialstatistics.NearProcessFactory
 org.geotools.process.spatialstatistics.SpatialClumpMapProcessFactory
+org.geotools.process.spatialstatistics.NearestNeighborCountProcessFactory
 
 org.geotools.process.spatialstatistics.RasterToPolygonProcessFactory
 org.geotools.process.spatialstatistics.RasterConProcessFactory

@@ -29,11 +29,18 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.strtree.ItemBoundable;
 import com.vividsolutions.jts.index.strtree.ItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
+import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
 /**
  * Creates a line features representing the shortest distance between hub and spoke features by nearest distance.
@@ -88,7 +95,7 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
                 Object id = hasHubID ? feature.getAttribute(hubIdField) : feature.getID();
                 if (useCentroid) {
-                    geometry = geometry.getCentroid();
+                    geometry = getCentroid(geometry);
                 }
 
                 // find nearest hub
@@ -141,7 +148,7 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
                 if (useCentroid) {
-                    geometry = geometry.getCentroid();
+                    geometry = getCentroid(geometry);
                 }
 
                 Object id = hasID ? feature.getAttribute(idField) : feature.getID();
@@ -152,6 +159,92 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
             featureIter.close();
         }
         return spatialIndex;
+    }
+
+    private Geometry getCentroid(Geometry input) {
+        Class<?> geomBinding = input.getClass();
+
+        if (MultiPolygon.class.equals(geomBinding)) {
+            if (input.getNumGeometries() == 1) {
+                return getCentroid(input.getGeometryN(0));
+            }
+
+            // largest area
+            return getCentroid(getLargestGeometry(input, false));
+        } else if (Polygon.class.equals(geomBinding)) {
+            // point in polygon
+            Point center = input.getCentroid();
+            if (!input.contains(center)) {
+                center = input.getInteriorPoint();
+            }
+            return center;
+        } else if (MultiLineString.class.equals(geomBinding)) {
+            if (input.getNumGeometries() == 1) {
+                return getCentroid(input.getGeometryN(0));
+            }
+
+            // largest length
+            return getCentroid(getLargestGeometry(input, true));
+        } else if (LineString.class.equals(geomBinding)) {
+            // point on linestring
+            LengthIndexedLine lil = new LengthIndexedLine(input);
+            double index = input.getLength() * 0.5;
+            Coordinate midpoint = lil.extractPoint(index);
+            return input.getFactory().createPoint(midpoint);
+        } else if (MultiPoint.class.equals(geomBinding)) {
+            // central point
+            return getCentralPoint((MultiPoint) input);
+        } else if (Point.class.equals(geomBinding)) {
+            return input;
+        }
+
+        return input.getCentroid();
+    }
+
+    private Geometry getLargestGeometry(Geometry multi, boolean useLength) {
+        Geometry largest = null;
+
+        double max = Double.MIN_VALUE;
+        for (int i = 0; i < multi.getNumGeometries(); i++) {
+            Geometry part = multi.getGeometryN(i);
+            double cur = useLength ? part.getLength() : part.getArea();
+
+            if (max < cur) {
+                max = cur;
+                largest = part;
+            }
+        }
+
+        return largest;
+    }
+
+    private Point getCentralPoint(MultiPoint multiPoint) {
+        int numPoints = multiPoint.getNumPoints();
+        if (numPoints == 1) {
+            return (Point) multiPoint.getGeometryN(0);
+        }
+
+        double minDistance = Double.MAX_VALUE;
+        Point centralPoint = null;
+
+        for (int i = 0; i < numPoints; i++) {
+            Point ce = (Point) multiPoint.getGeometryN(i);
+            double curDistance = 0d;
+
+            for (int j = 0; j < numPoints; j++) {
+                Point de = (Point) multiPoint.getGeometryN(j);
+                if (i != j) {
+                    curDistance += ce.distance(de);
+                }
+            }
+
+            if (minDistance > curDistance) {
+                minDistance = curDistance;
+                centralPoint = ce;
+            }
+        }
+
+        return centralPoint;
     }
 
     static final class Hub {

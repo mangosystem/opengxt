@@ -36,14 +36,12 @@ import org.opengis.filter.expression.Function;
  * 
  * @source $URL$
  */
-@SuppressWarnings("nls")
 public abstract class AbstractFeatureStyleBuilder {
     protected static final Logger LOGGER = Logging.getLogger(AbstractFeatureStyleBuilder.class);
 
     protected final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
 
     protected final StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
-
 
     protected float lineWidth = 1.0f;
 

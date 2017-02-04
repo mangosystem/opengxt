@@ -56,7 +56,6 @@ import com.vividsolutions.jts.geom.Polygon;
  * 
  * @source $URL$
  */
-@SuppressWarnings("nls")
 public class SSStyleBuilder {
     protected static final Logger LOGGER = Logging.getLogger(SSStyleBuilder.class);
 
@@ -153,7 +152,9 @@ public class SSStyleBuilder {
             }
 
             Rule rule = sf.createRule();
-            rule.setName(classDescs[k]);
+            if (classDescs != null && classDescs.length > k) {
+                rule.setName(classDescs[k]);
+            }
             rule.setFilter(filter);
             rule.symbolizers().add(symbolizer);
             

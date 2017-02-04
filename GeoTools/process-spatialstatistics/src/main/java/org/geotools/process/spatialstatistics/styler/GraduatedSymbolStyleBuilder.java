@@ -17,8 +17,12 @@
 package org.geotools.process.spatialstatistics.styler;
 
 import java.awt.Color;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.logging.Logger;
 
+import org.geotools.brewer.color.BrewerPalette;
+import org.geotools.brewer.color.ColorBrewer;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.filter.function.RangedClassifier;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
@@ -31,6 +35,7 @@ import org.geotools.styling.Mark;
 import org.geotools.styling.PointSymbolizer;
 import org.geotools.styling.PolygonSymbolizer;
 import org.geotools.styling.Rule;
+import org.geotools.styling.SLD;
 import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
 import org.geotools.styling.Symbolizer;
@@ -38,6 +43,7 @@ import org.geotools.styling.visitor.DuplicatingStyleVisitor;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.Filter;
+import org.opengis.filter.expression.Expression;
 import org.opengis.filter.expression.PropertyName;
 
 /**
@@ -47,7 +53,6 @@ import org.opengis.filter.expression.PropertyName;
  * 
  * @source $URL$
  */
-@SuppressWarnings("nls")
 public class GraduatedSymbolStyleBuilder extends AbstractFeatureStyleBuilder {
     protected static final Logger LOGGER = Logging.getLogger(GraduatedSymbolStyleBuilder.class);
 
@@ -166,6 +171,17 @@ public class GraduatedSymbolStyleBuilder extends AbstractFeatureStyleBuilder {
     }
 
     public Style createStyle(SimpleFeatureCollection inputFeatures, String propertyName) {
+        return createStyle(inputFeatures, propertyName, "OrRd", false);
+    }
+
+    public Style createStyle(SimpleFeatureCollection inputFeatures, String propertyName,
+            String brewerPaletteName, boolean reverse) {
+        return createStyle(inputFeatures, propertyName, methodName, numClasses, brewerPaletteName,
+                reverse);
+    }
+
+    public Style createStyle(SimpleFeatureCollection inputFeatures, String propertyName,
+            String methodName, int numClasses, String brewerPaletteName, boolean reverse) {
         GeometryDescriptor geomDesc = inputFeatures.getSchema().getGeometryDescriptor();
         String geometryPropertyName = geomDesc.getLocalName();
         SimpleShapeType shapeType = FeatureTypes.getSimpleShapeType(inputFeatures);
@@ -186,7 +202,16 @@ public class GraduatedSymbolStyleBuilder extends AbstractFeatureStyleBuilder {
         }
 
         double[] classBreaks = getClassBreaks(classifier);
-        int step = (int) ((maxSize + minSize) / classBreaks.length) + 1;
+
+        ColorBrewer brewer = ColorBrewer.instance();
+        BrewerPalette brewerPalette = brewer.getPalette(brewerPaletteName);
+
+        Color[] colors = brewerPalette.getColors(classBreaks.length - 1);
+        if (reverse) {
+            Collections.reverse(Arrays.asList(colors));
+        }
+
+        int step = (int) (maxSize + minSize) / colors.length;
 
         FeatureTypeStyle featureTypeStyle = sf.createFeatureTypeStyle();
 
@@ -195,7 +220,7 @@ public class GraduatedSymbolStyleBuilder extends AbstractFeatureStyleBuilder {
             if (backgroundSymbol == null) {
                 Stroke stroke = sf.createStroke(ff.literal(outlineColor),
                         ff.literal(outlineOpacity));
-                Fill fill = sf.createFill(ff.literal(new Color(190, 255, 232)),
+                Fill fill = sf.createFill(ff.literal(new Color(234, 234, 234)),
                         ff.literal(fillOpacity));
                 backgroundSymbol = sf.createPolygonSymbolizer(stroke, fill, geometryPropertyName);
             }
@@ -209,7 +234,10 @@ public class GraduatedSymbolStyleBuilder extends AbstractFeatureStyleBuilder {
         DuplicatingStyleVisitor styleVisitor = new DuplicatingStyleVisitor();
         PropertyName property = ff.property(propertyName);
         for (int k = 0, length = classBreaks.length - 2; k <= length; k++) {
-            float size = minSize + (step * k);
+            Expression color = ff.literal(colors[k]);
+            Expression size = ff.literal(minSize + (step * k));
+            Expression lowerClass = ff.literal(classBreaks[k]);
+            Expression upperClass = ff.literal(classBreaks[k + 1]);
 
             Symbolizer symbolizer = null;
             if (templateSymbol instanceof PointSymbolizer) {
@@ -219,9 +247,10 @@ public class GraduatedSymbolStyleBuilder extends AbstractFeatureStyleBuilder {
                 graphic.accept(styleVisitor);
 
                 Graphic copy = (Graphic) styleVisitor.getCopy();
-                copy.setSize(ff.literal(size));
+                copy.setSize(size);
 
                 symbolizer = sf.createPointSymbolizer(copy, geometryPropertyName);
+                SLD.setPointColour((PointSymbolizer) symbolizer, colors[k]);
             } else {
                 LineSymbolizer lineSymbolizer = (LineSymbolizer) templateSymbol;
 
@@ -229,15 +258,16 @@ public class GraduatedSymbolStyleBuilder extends AbstractFeatureStyleBuilder {
                 stroke.accept(styleVisitor);
 
                 Stroke copy = (Stroke) styleVisitor.getCopy();
-                stroke.setWidth(ff.literal(size));
+                copy.setWidth(size);
+                copy.setColor(color);
 
                 symbolizer = sf.createLineSymbolizer(copy, geometryPropertyName);
             }
-            
-            Filter lower = ff.greaterOrEqual(property, ff.literal(classBreaks[k]));
-            Filter upper = k == length ? ff.lessOrEqual(property, ff.literal(classBreaks[k + 1]))
-                    : ff.less(property, ff.literal(classBreaks[k + 1]));
-            
+
+            Filter lower = ff.greaterOrEqual(property, lowerClass);
+            Filter upper = k == length ? ff.lessOrEqual(property, upperClass) : ff.less(property,
+                    upperClass);
+
             Rule rule = sf.createRule();
             rule.setName(classBreaks[k] + " - " + classBreaks[k + 1]);
             rule.setFilter(ff.and(lower, upper));
@@ -251,5 +281,4 @@ public class GraduatedSymbolStyleBuilder extends AbstractFeatureStyleBuilder {
 
         return style;
     }
-
 }

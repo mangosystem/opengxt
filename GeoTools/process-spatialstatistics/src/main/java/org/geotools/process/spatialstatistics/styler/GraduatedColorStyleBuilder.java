@@ -40,6 +40,7 @@ import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.Filter;
+import org.opengis.filter.expression.Expression;
 import org.opengis.filter.expression.PropertyName;
 
 /**
@@ -49,7 +50,6 @@ import org.opengis.filter.expression.PropertyName;
  * 
  * @source $URL$
  */
-@SuppressWarnings("nls")
 public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
     protected static final Logger LOGGER = Logging.getLogger(GraduatedColorStyleBuilder.class);
 
@@ -91,7 +91,6 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
         }
 
         ColorBrewer brewer = ColorBrewer.instance();
-        // brewer.loadPalettes();
         BrewerPalette brewerPalette = brewer.getPalette(brewerPaletteName);
 
         Color[] colors = brewerPalette.getColors(classBreaks.length - 1);
@@ -123,7 +122,9 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
         FeatureTypeStyle fts = sf.createFeatureTypeStyle();
         PropertyName property = ff.property(propertyName);
         for (int k = 0, length = classBreaks.length - 2; k <= length; k++) {
-            final Color uvColor = colors[k];
+            Expression color = ff.literal(colors[k]);
+            Expression lowerClass = ff.literal(classBreaks[k]);
+            Expression upperClass = ff.literal(classBreaks[k + 1]);
 
             Symbolizer symbolizer = null;
             switch (shapeType) {
@@ -132,7 +133,7 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
                 Stroke markStroke = sf.createStroke(ff.literal(Color.WHITE),
                         ff.literal(outlineWidth), ff.literal(outlineOpacity));
                 mark.setStroke(markStroke);
-                mark.setFill(sf.createFill(ff.literal(uvColor), ff.literal(fillOpacity)));
+                mark.setFill(sf.createFill(color, ff.literal(fillOpacity)));
 
                 Graphic graphic = sf.createDefaultGraphic();
                 graphic.graphicalSymbols().clear();
@@ -142,7 +143,7 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
                 symbolizer = sf.createPointSymbolizer(graphic, geometryPropertyName);
                 break;
             case LINESTRING:
-                Stroke lineStroke = sf.createStroke(ff.literal(uvColor), ff.literal(lineWidth),
+                Stroke lineStroke = sf.createStroke(color, ff.literal(lineWidth),
                         ff.literal(lineOpacity));
 
                 symbolizer = sf.createLineSymbolizer(lineStroke, geometryPropertyName);
@@ -151,15 +152,15 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
                 Stroke outlineStroke = sf.createStroke(ff.literal(outlineColor),
                         ff.literal(outlineWidth), ff.literal(outlineOpacity));
 
-                Fill fill = sf.createFill(ff.literal(uvColor), ff.literal(fillOpacity));
+                Fill fill = sf.createFill(color, ff.literal(fillOpacity));
                 symbolizer = sf.createPolygonSymbolizer(outlineStroke, fill, geometryPropertyName);
                 break;
             }
-            
-            Filter lower = ff.greaterOrEqual(property, ff.literal(classBreaks[k]));
-            Filter upper = k == length ? ff.lessOrEqual(property, ff.literal(classBreaks[k + 1]))
-                    : ff.less(property, ff.literal(classBreaks[k + 1]));
-            
+
+            Filter lower = ff.greaterOrEqual(property, lowerClass);
+            Filter upper = k == length ? ff.lessOrEqual(property, upperClass) : ff.less(property,
+                    upperClass);
+
             Rule rule = sf.createRule();
             rule.setName(classBreaks[k] + " - " + classBreaks[k + 1]);
             rule.setFilter(ff.and(lower, upper));

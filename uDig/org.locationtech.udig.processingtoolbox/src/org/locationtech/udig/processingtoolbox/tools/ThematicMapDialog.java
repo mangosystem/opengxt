@@ -9,6 +9,7 @@
  */
 package org.locationtech.udig.processingtoolbox.tools;
 
+import java.awt.Color;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -36,12 +37,17 @@ import org.eclipse.swt.widgets.Spinner;
 import org.geotools.brewer.color.BrewerPalette;
 import org.geotools.brewer.color.ColorBrewer;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.styler.GraduatedColorStyleBuilder;
 import org.geotools.process.spatialstatistics.styler.GraduatedSymbolStyleBuilder;
 import org.geotools.process.spatialstatistics.styler.SSStyleBuilder;
+import org.geotools.styling.Fill;
+import org.geotools.styling.PolygonSymbolizer;
+import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
+import org.geotools.styling.StyleFactory;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
@@ -52,6 +58,8 @@ import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.locationtech.udig.style.sld.editor.BorderColorComboListener.Outline;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.FilterFactory2;
 
 /**
  * Histogram Dialog
@@ -72,15 +80,19 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
 
     private ColorBrewer brewer;
 
+    private StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
+
+    private FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+
     private ILayer activeLayer;
 
-    private Button chkReverse;
+    private Button chkReverse, chkSymbol;
 
     private Combo cboLayer, cboField, cboMethod, cboNormal, cboOutline;
 
     private Combo cboColorRamp;
 
-    private Spinner spnClass, spnTransparency, spnLineWidth;
+    private Spinner spnClass, spnTransparency, spnLineWidth, spnMin, spnMax;
 
     private Slider sldTransparency;
 
@@ -91,7 +103,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
 
         this.windowTitle = Messages.ThematicMapDialog_title;
         this.windowDesc = Messages.ThematicMapDialog_description;
-        this.windowSize = new Point(600, 370);
+        this.windowSize = new Point(600, 450);
         this.brewer = ColorBrewer.instance();
     }
 
@@ -132,6 +144,15 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
         uiBuilder.createLabel(container, EMPTY, EMPTY, null, 1);
         chkReverse = uiBuilder.createCheckbox(container, Messages.ThematicMapDialog_Reverse, EMPTY,
                 5);
+
+        // Graduated Symbol
+        uiBuilder.createLabel(container, EMPTY, EMPTY, null, 1);
+        chkSymbol = uiBuilder
+                .createCheckbox(container, Messages.ThematicMapDialog_Symbol, EMPTY, 1);
+        uiBuilder.createLabel(container, Messages.ThematicMapDialog_Minimum, EMPTY, null, 1);
+        spnMin = uiBuilder.createSpinner(container, 1, 0, 5, 0, 1, 1, 1);
+        uiBuilder.createLabel(container, Messages.ThematicMapDialog_Maximum, EMPTY, null, 1);
+        spnMax = uiBuilder.createSpinner(container, 0, 5, 200, 0, 1, 1, 1);
 
         // transparency
         uiBuilder.createLabel(container, Messages.ThematicMapDialog_Transparency, EMPTY, image, 1);
@@ -194,6 +215,12 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
                     cboNormal.add(EMPTY);
                     cboNormal.select(cboNormal.getItemCount() - 1);
                     cboMethod.removeAll();
+
+                    if (FeatureTypes.getSimpleShapeType(activeLayer.getSchema()) == SimpleShapeType.LINESTRING) {
+                        spnMax.setSelection(5);
+                    } else {
+                        spnMax.setSelection(50);
+                    }
                 }
             }
         });
@@ -291,17 +318,21 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
                 String functionName = getFunctionName();
 
                 SimpleFeatureCollection features = MapUtils.getFeatures(activeLayer);
+                SimpleFeatureType schema = activeLayer.getSchema();
 
                 // create default style
-                SSStyleBuilder ssBuilder = new SSStyleBuilder(activeLayer.getSchema());
+                SSStyleBuilder ssBuilder = new SSStyleBuilder(schema);
                 ssBuilder.setOpacity(opacity);
                 Style style = ssBuilder.getDefaultFeatureStyle();
 
                 // crate thematic style
-                SimpleShapeType shapeType = FeatureTypes
-                        .getSimpleShapeType(activeLayer.getSchema());
-                if (shapeType == SimpleShapeType.POINT) {
+                if (chkSymbol.getSelection()) {
+                    double minSize = uiBuilder.fromSpinnerValue(spnMin, spnMin.getSelection());
+                    double maxSize = uiBuilder.fromSpinnerValue(spnMax, spnMax.getSelection());
+
                     GraduatedSymbolStyleBuilder builder = new GraduatedSymbolStyleBuilder();
+                    builder.setMinSize((float) minSize);
+                    builder.setMaxSize((float) maxSize);
                     builder.setFillOpacity(opacity);
                     builder.setOutlineColor(outlineColor);
                     builder.setOutlineWidth(outlineWidth);
@@ -309,8 +340,21 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
                         builder.setLineOpacity(0.0f);
                     }
                     builder.setNormalProperty(normalProperty);
-                    builder.setMethodName(functionName);
-                    style = builder.createStyle(features, fieldName);
+
+                    // background symbol
+                    if (FeatureTypes.getSimpleShapeType(schema) == SimpleShapeType.POLYGON) {
+                        String geom = schema.getGeometryDescriptor().getLocalName();
+                        Stroke stroke = sf.createStroke(ff.literal(outlineColor),
+                                ff.literal(opacity));
+                        Fill fill = sf.createFill(ff.literal(new Color(234, 234, 234)),
+                                ff.literal(0.5f));
+                        PolygonSymbolizer backgroundSymbol = sf.createPolygonSymbolizer(stroke,
+                                fill, geom);
+                        builder.setBackgroundSymbol(backgroundSymbol);
+                    }
+
+                    style = builder.createStyle(features, fieldName, functionName, numClasses,
+                            paletteName, reverse);
                 } else {
                     GraduatedColorStyleBuilder builder = new GraduatedColorStyleBuilder();
                     builder.setFillOpacity(opacity);

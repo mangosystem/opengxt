@@ -79,7 +79,7 @@ public class GeometryToFeaturesDialog extends AbstractGeoProcessingDialog {
 
         this.windowTitle = Messages.GeometryToFeaturesDialog_title;
         this.windowDesc = Messages.GeometryToFeaturesDialog_description;
-        this.windowSize = new Point(650, 400);
+        this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 650, 400);
     }
 
     @Override

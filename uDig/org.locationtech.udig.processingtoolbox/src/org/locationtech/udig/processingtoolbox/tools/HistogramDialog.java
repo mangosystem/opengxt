@@ -35,7 +35,6 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -130,7 +129,7 @@ public class HistogramDialog extends AbstractGeoProcessingDialog implements IRun
 
         this.windowTitle = Messages.HistogramDialog_title;
         this.windowDesc = Messages.HistogramDialog_description;
-        this.windowSize = new Point(650, 450);
+        this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 650, 450);
     }
 
     @Override

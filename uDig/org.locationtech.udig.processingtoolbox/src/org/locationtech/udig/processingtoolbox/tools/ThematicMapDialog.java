@@ -19,7 +19,6 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -103,7 +102,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
 
         this.windowTitle = Messages.ThematicMapDialog_title;
         this.windowDesc = Messages.ThematicMapDialog_description;
-        this.windowSize = new Point(600, 450);
+        this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 550, 350);
         this.brewer = ColorBrewer.instance();
     }
 

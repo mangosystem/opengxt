@@ -83,7 +83,7 @@ public class ExpressionBuilderDialog extends Dialog {
     private String initSQL = null;
 
     private SimpleFeatureCollection source = null;
-    
+
     private String geom_field = null;
 
     private Table fieldTable, valueTable;
@@ -171,7 +171,7 @@ public class ExpressionBuilderDialog extends Dialog {
      */
     @Override
     protected Point getInitialSize() {
-        return new Point(650, 500);
+        return ToolboxPlugin.rescaleSize(getShell(), 650, 500);
     }
 
     /**

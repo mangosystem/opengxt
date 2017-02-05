@@ -32,7 +32,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -120,7 +119,7 @@ public class BubbleChartDialog extends AbstractGeoProcessingDialog implements IR
 
         this.windowTitle = Messages.BubbleChartDialog_title;
         this.windowDesc = Messages.BubbleChartDialog_description;
-        this.windowSize = new Point(650, 450);
+        this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 650, 450);
     }
 
     @Override

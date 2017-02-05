@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
+import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
@@ -82,7 +83,7 @@ public class ExtentSelectionDialog extends TitleAreaDialog {
 
     @Override
     protected Point getInitialSize() {
-        return new Point(400, height);
+        return ToolboxPlugin.rescaleSize(getShell(), 400, height / 2);
     }
 
     @Override

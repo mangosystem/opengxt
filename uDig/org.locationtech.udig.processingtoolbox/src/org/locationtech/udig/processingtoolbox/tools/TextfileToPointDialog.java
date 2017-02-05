@@ -29,7 +29,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -94,7 +93,7 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
 
         this.windowTitle = Messages.TextfileToPointDialog_title;
         this.windowDesc = Messages.TextfileToPointDialog_description;
-        this.windowSize = new Point(700, 500);
+        this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 650, 500);
     }
 
     @Override
@@ -204,7 +203,6 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
 
         group.pack(true);
         area.pack(true);
-        this.windowSize = new Point(650, area.getSize().y + 50);
         return area;
     }
 

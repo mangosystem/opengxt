@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -75,7 +74,7 @@ public class ExportStyleDialog extends AbstractGeoProcessingDialog implements IR
 
         this.windowTitle = Messages.ExportStyleDialog_title;
         this.windowDesc = Messages.ExportStyleDialog_description;
-        this.windowSize = new Point(650, 500);
+        this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 650, 500);
     }
 
     @Override

@@ -107,7 +107,7 @@ public class GeometryPickerDialog extends Dialog {
 
     @Override
     protected Point getInitialSize() {
-        return new Point(650, 450);
+        return ToolboxPlugin.rescaleSize(getShell(), 650, 450);
     }
 
     /**

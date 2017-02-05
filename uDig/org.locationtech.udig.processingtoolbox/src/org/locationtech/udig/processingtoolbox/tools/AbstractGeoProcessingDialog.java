@@ -87,7 +87,8 @@ public abstract class AbstractGeoProcessingDialog extends TitleAreaDialog {
 
     protected String windowDesc = EMPTY;
 
-    protected org.eclipse.swt.graphics.Point windowSize = new org.eclipse.swt.graphics.Point(650, 400);
+    protected org.eclipse.swt.graphics.Point windowSize = new org.eclipse.swt.graphics.Point(650,
+            400);
 
     protected OutputDataWidget locationView;
 

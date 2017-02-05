@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -158,4 +159,9 @@ public class ToolboxPlugin extends AbstractUIPlugin {
         }
     }
 
+    public static org.eclipse.swt.graphics.Point rescaleSize(Shell parentShell, int width,
+            int height) {
+        int scale = (int) parentShell.getDisplay().getDPI().x / 96;
+        return new org.eclipse.swt.graphics.Point(width * scale, height * scale);
+    }
 }

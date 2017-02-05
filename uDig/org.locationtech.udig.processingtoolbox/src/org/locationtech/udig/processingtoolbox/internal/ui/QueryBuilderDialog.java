@@ -192,7 +192,7 @@ public class QueryBuilderDialog extends Dialog {
      */
     @Override
     protected Point getInitialSize() {
-        return new Point(650, 500);
+        return ToolboxPlugin.rescaleSize(getShell(), 650, 500);
     }
 
     /**

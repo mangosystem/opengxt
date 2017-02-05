@@ -23,7 +23,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -85,7 +84,7 @@ public class FormatConversionDialog extends AbstractGeoProcessingDialog implemen
 
         this.windowTitle = Messages.FormatConversionDialog_title;
         this.windowDesc = Messages.FormatConversionDialog_description;
-        this.windowSize = new Point(650, 500);
+        this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 650, 500);
     }
 
     @SuppressWarnings("nls")

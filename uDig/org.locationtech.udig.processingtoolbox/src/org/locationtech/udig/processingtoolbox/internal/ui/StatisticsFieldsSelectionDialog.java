@@ -36,6 +36,7 @@ import org.geotools.data.FeatureSource;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.util.logging.Logging;
+import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils;
 import org.locationtech.udig.project.ILayer;
@@ -91,7 +92,7 @@ public class StatisticsFieldsSelectionDialog extends Dialog {
 
     @Override
     protected Point getInitialSize() {
-        return new Point(650, 450);
+        return ToolboxPlugin.rescaleSize(getShell(), 650, 450);
     }
     
     /**

@@ -90,6 +90,8 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
 
     private int height = 100;
 
+    private int scale = 1;
+
     private Browser browser;
 
     private CTabItem inputTab, outputTab;
@@ -104,6 +106,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
         this.factory = factory;
         this.processName = processName;
         this.windowTitle = factory.getTitle(processName).toString();
+        this.scale = (int) parentShell.getDisplay().getDPI().x / 96;
     }
 
     @Override
@@ -116,7 +119,7 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
 
     @Override
     protected Point getInitialSize() {
-        return new Point(650, height);
+        return new org.eclipse.swt.graphics.Point(650 * scale, height);
     }
 
     @Override
@@ -153,8 +156,9 @@ public class ProcessExecutionDialog extends TitleAreaDialog {
         area.pack();
         parentTabFolder.pack();
 
-        height = parentTabFolder.computeSize(SWT.DEFAULT, SWT.DEFAULT).y + 165;
-        height = height > 650 ? 650 : height;
+        int maxHeight = 500 * scale;
+        height = parent.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).y + (150 * scale);
+        height = height > maxHeight ? maxHeight : height;
 
         return area;
     }

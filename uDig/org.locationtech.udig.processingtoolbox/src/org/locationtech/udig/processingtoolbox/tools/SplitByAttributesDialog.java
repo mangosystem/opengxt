@@ -25,7 +25,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -87,7 +86,7 @@ public class SplitByAttributesDialog extends AbstractGeoProcessingDialog impleme
 
         this.windowTitle = Messages.SplitByAttributesDialog_title;
         this.windowDesc = Messages.SplitByAttributesDialog_description;
-        this.windowSize = new Point(650, 550);
+        this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 650, 550);
     }
 
     @Override

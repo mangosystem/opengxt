@@ -30,7 +30,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -137,7 +136,7 @@ public class MoranScatterPlotDialog extends AbstractGeoProcessingDialog implemen
 
         this.windowTitle = Messages.MoranScatterPlotDialog_title;
         this.windowDesc = Messages.MoranScatterPlotDialog_description;
-        this.windowSize = new Point(650, 520);
+        this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 650, 520);
     }
 
     @Override

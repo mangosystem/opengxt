@@ -144,7 +144,7 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
 
         this.windowTitle = Messages.FieldCalculatorDialog_title;
         this.windowDesc = Messages.FieldCalculatorDialog_description;
-        this.windowSize = new Point(650, 600);
+        this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 650, 600);
     }
 
     /**

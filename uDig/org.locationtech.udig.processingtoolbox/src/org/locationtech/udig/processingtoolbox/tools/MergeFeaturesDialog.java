@@ -95,7 +95,7 @@ public class MergeFeaturesDialog extends AbstractGeoProcessingDialog implements
 
         this.windowTitle = Messages.MergeFeaturesDialog_title;
         this.windowDesc = Messages.MergeFeaturesDialog_description;
-        this.windowSize = new Point(650, 400);
+        this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 650, 500);
     }
 
     @Override
@@ -132,7 +132,6 @@ public class MergeFeaturesDialog extends AbstractGeoProcessingDialog implements
         locationView.setFile(new File(ToolboxView.getWorkspace(), "merge.shp")); //$NON-NLS-1$
 
         area.pack(true);
-        this.windowSize = new Point(650, area.getSize().y + 160);
         return area;
     }
 

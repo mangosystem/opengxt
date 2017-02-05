@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.geotools.util.logging.Logging;
+import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.ToolboxView;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 
@@ -62,7 +63,7 @@ public class SettingsDialog extends Dialog {
 
     @Override
     protected Point getInitialSize() {
-        return new Point(550, 300);
+        return ToolboxPlugin.rescaleSize(getShell(), 550, 300);
     }
 
     @Override

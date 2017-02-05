@@ -33,6 +33,7 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.util.logging.Logging;
+import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils.VectorLayerType;
@@ -98,7 +99,7 @@ public class MultipleLayersSelectionDialog extends Dialog {
 
     @Override
     protected Point getInitialSize() {
-        return new Point(500, 450);
+        return ToolboxPlugin.rescaleSize(getShell(), 500, 450);
     }
 
     /**

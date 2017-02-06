@@ -471,6 +471,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(proxTool);
         buildTool(proxTool, "org.geotools.process.spatialstatistics.BufferExpressionProcessFactory");
         buildTool(proxTool, "org.geotools.process.spatialstatistics.SingleSidedBufferProcessFactory");
+        buildTool(proxTool, "org.geotools.process.spatialstatistics.WedgeBufferProcessFactory");
         buildTool(proxTool, "org.geotools.process.spatialstatistics.MultipleRingBufferProcessFactory");
         buildTool(proxTool, "org.geotools.process.spatialstatistics.PolarGridsFromFeaturesProcessFactory");
         buildTool(proxTool, "org.geotools.process.spatialstatistics.PolarGridsFromGeometryProcessFactory");

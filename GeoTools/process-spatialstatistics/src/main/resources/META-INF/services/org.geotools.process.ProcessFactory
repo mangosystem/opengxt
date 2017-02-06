@@ -104,6 +104,7 @@ org.geotools.process.spatialstatistics.PolarGridsFromGeometryProcessFactory
 org.geotools.process.spatialstatistics.MultipleRingBufferProcessFactory
 org.geotools.process.spatialstatistics.BufferExpressionProcessFactory
 org.geotools.process.spatialstatistics.SingleSidedBufferProcessFactory
+org.geotools.process.spatialstatistics.WedgeBufferProcessFactory
 org.geotools.process.spatialstatistics.RingMapProcessFactory
 org.geotools.process.spatialstatistics.HubLinesByDistanceProcessFactory
 org.geotools.process.spatialstatistics.HubLinesByIDProcessFactory

@@ -143,7 +143,7 @@ public class SplitLineAtPointOperation extends GeneralOperation {
         for (Entry<Integer, Coordinate> entrySet : sortedMap.entrySet()) {
             LinearLocation endIndex = liLine.indexOf(entrySet.getValue());
             Geometry left = liLine.extractLine(startIndex, endIndex);
-            if (left != null && !left.isEmpty()) {
+            if (left != null && !left.isEmpty() && left.getLength() > 0) {
                 splits.add(left);
             }
             startIndex = endIndex;
@@ -151,7 +151,7 @@ public class SplitLineAtPointOperation extends GeneralOperation {
 
         // add last segment
         Geometry left = liLine.extractLine(startIndex, liLine.getEndIndex());
-        if (left != null && !left.isEmpty()) {
+        if (left != null && !left.isEmpty() && left.getLength() > 0) {
             splits.add(left);
         }
 

@@ -79,9 +79,13 @@ public class IntersectionPointsOperation extends GeneralOperation {
         SimpleFeatureIterator featureIter = inputFeatures.features();
         try {
             final List<Point> points = new ArrayList<Point>();
+            boolean isPolygon = FeatureTypes.getSimpleShapeType(inputFeatures) == SimpleShapeType.POLYGON;
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
+                if (isPolygon) {
+                    geometry = geometry.getBoundary();
+                }
                 PreparedGeometry prepared = PreparedGeometryFactory.prepare(geometry);
 
                 // find coincident events

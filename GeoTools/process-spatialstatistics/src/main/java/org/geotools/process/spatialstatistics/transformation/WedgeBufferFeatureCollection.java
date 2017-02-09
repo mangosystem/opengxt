@@ -37,6 +37,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateList;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
@@ -53,20 +54,20 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
 
     private Expression wedgeAngle;
 
-    private Expression outerRadius;
-
     private Expression innerRadius;
+
+    private Expression outerRadius;
 
     private SimpleFeatureType schema;
 
     public WedgeBufferFeatureCollection(SimpleFeatureCollection delegate, Expression azimuth,
-            Expression wedgeAngle, Expression outerRadius, Expression innerRadius) {
+            Expression wedgeAngle, Expression innerRadius, Expression outerRadius) {
         super(delegate);
 
         this.azimuth = azimuth;
         this.wedgeAngle = wedgeAngle;
-        this.outerRadius = outerRadius;
         this.innerRadius = innerRadius;
+        this.outerRadius = outerRadius;
 
         String typeName = delegate.getSchema().getTypeName();
         this.schema = FeatureTypes.build(delegate.getSchema(), typeName, Polygon.class);
@@ -75,7 +76,7 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
     @Override
     public SimpleFeatureIterator features() {
         return new WedgeBufferFeatureIterator(delegate.features(), getSchema(), azimuth,
-                wedgeAngle, outerRadius, innerRadius);
+                wedgeAngle, innerRadius, outerRadius);
     }
 
     @Override
@@ -118,14 +119,14 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
         private String typeName;
 
         public WedgeBufferFeatureIterator(SimpleFeatureIterator delegate, SimpleFeatureType schema,
-                Expression azimuth, Expression wedgeAngle, Expression outerRadius,
-                Expression innerRadius) {
+                Expression azimuth, Expression wedgeAngle, Expression innerRadius,
+                Expression outerRadius) {
             this.delegate = delegate;
 
             this.azimuthExp = azimuth;
             this.wedgeAngleExp = wedgeAngle;
-            this.outerRadiusExp = outerRadius;
             this.innerRadiusExp = innerRadius;
+            this.outerRadiusExp = outerRadius;
             this.builder = new SimpleFeatureBuilder(schema);
             this.typeName = schema.getTypeName();
         }
@@ -143,14 +144,6 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
                     continue;
                 }
 
-                Double outerRadius = Double.valueOf(0d);
-                if (outerRadiusExp != null) {
-                    outerRadius = outerRadiusExp.evaluate(source, Double.class);
-                    if (outerRadius == null || outerRadius < 0) {
-                        outerRadius = Double.valueOf(0d);
-                    }
-                }
-
                 Double innerRadius = Double.valueOf(0d);
                 if (innerRadiusExp != null) {
                     innerRadius = innerRadiusExp.evaluate(source, Double.class);
@@ -159,17 +152,25 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
                     }
                 }
 
-                if (outerRadius == 0 && innerRadius == 0) {
+                Double outerRadius = Double.valueOf(0d);
+                if (outerRadiusExp != null) {
+                    outerRadius = outerRadiusExp.evaluate(source, Double.class);
+                    if (outerRadius == null || outerRadius < 0) {
+                        outerRadius = Double.valueOf(0d);
+                    }
+                }
+
+                if (innerRadius == 0 && outerRadius == 0) {
                     continue;
                 }
 
                 Geometry geometry = (Geometry) source.getDefaultGeometry();
-                Coordinate centroid = geometry.getCentroid().getCoordinate();
+                Point centroid = geometry.getCentroid();
                 Geometry buffered = null;
 
                 try {
-                    buffered = this.bufferWedge(centroid, azimuth, wedgeAngle, outerRadius,
-                            innerRadius);
+                    buffered = this.bufferWedge(centroid, azimuth, wedgeAngle, innerRadius,
+                            outerRadius);
                 } catch (IllegalArgumentException e) {
                     LOGGER.log(Level.INFO, e.getMessage());
                 }
@@ -200,28 +201,36 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
             return result;
         }
 
-        private Geometry bufferWedge(Coordinate centroid, double azimuth, double wedgeAngle,
-                double outerRadius, double innerRadius) throws IllegalArgumentException {
+        private Geometry bufferWedge(Point centroid, double azimuth, double wedgeAngle,
+                double innerRadius, double outerRadius) {
+            double minRadius = Math.min(outerRadius, innerRadius);
+            double maxRadius = Math.max(outerRadius, innerRadius);
+
+            if (wedgeAngle >= 360) {
+                Geometry buffered = centroid.buffer(maxRadius, SEG);
+                if (minRadius > 0) {
+                    buffered = buffered.difference(centroid.buffer(minRadius, SEG));
+                }
+                return buffered;
+            }
+
             // make azimuth 0 north and positive clockwise (compass direction)
             azimuth = -1.0 * azimuth + 90;
             double fromAzimuth = azimuth - wedgeAngle * 0.5;
             double toAzimuth = azimuth + wedgeAngle * 0.5;
-            return createWedgeBuffer(centroid, fromAzimuth, toAzimuth, outerRadius, innerRadius);
+            return createWedgeBuffer(centroid.getCoordinate(), fromAzimuth, toAzimuth, minRadius,
+                    maxRadius);
         }
 
         private Geometry createWedgeBuffer(Coordinate centroid, double fromAzimuth,
-                double toAzimuth, double outerRadius, double innerRadius)
-                throws IllegalArgumentException {
-            double min = Math.min(outerRadius, innerRadius);
-            double max = Math.max(outerRadius, innerRadius);
-
+                double toAzimuth, double minRadius, double maxRadius) {
             CoordinateList coords = new CoordinateList();
             double increment = Math.abs(toAzimuth - fromAzimuth) / SEG;
 
-            if (min > 0) {
+            if (minRadius > 0) {
                 for (int i = SEG; i >= 0; i--) {
                     double radian = Math.toRadians(fromAzimuth + (i * increment));
-                    coords.add(createPoint(centroid, radian, min), false);
+                    coords.add(createPoint(centroid, radian, minRadius), false);
                 }
             } else {
                 coords.add(centroid, false);
@@ -230,7 +239,7 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
             // outer
             for (int i = 0; i <= SEG; i++) {
                 double radian = Math.toRadians(fromAzimuth + (i * increment));
-                coords.add(createPoint(centroid, radian, max), false);
+                coords.add(createPoint(centroid, radian, maxRadius), false);
             }
 
             // close ring

@@ -51,14 +51,14 @@ public class WedgeBufferProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection pointFeatures,
-            Expression azimuth, Expression wedgeAngle, Expression outerRadius,
-            Expression innerRadius, ProgressListener monitor) {
+            Expression azimuth, Expression wedgeAngle, Expression innerRadius,
+            Expression outerRadius, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(WedgeBufferProcessFactory.pointFeatures.key, pointFeatures);
         map.put(WedgeBufferProcessFactory.azimuth.key, azimuth);
         map.put(WedgeBufferProcessFactory.wedgeAngle.key, wedgeAngle);
-        map.put(WedgeBufferProcessFactory.outerRadius.key, outerRadius);
         map.put(WedgeBufferProcessFactory.innerRadius.key, innerRadius);
+        map.put(WedgeBufferProcessFactory.outerRadius.key, outerRadius);
 
         Process process = new WedgeBufferProcess(null);
         Map<String, Object> resultMap;
@@ -81,10 +81,10 @@ public class WedgeBufferProcess extends AbstractStatisticsProcess {
                 null);
         Expression wedgeAngle = (Expression) Params.getValue(input,
                 WedgeBufferProcessFactory.wedgeAngle, null);
-        Expression outerRadius = (Expression) Params.getValue(input,
-                WedgeBufferProcessFactory.outerRadius, null);
         Expression innerRadius = (Expression) Params.getValue(input,
                 WedgeBufferProcessFactory.innerRadius, null);
+        Expression outerRadius = (Expression) Params.getValue(input,
+                WedgeBufferProcessFactory.outerRadius, null);
 
         if (pointFeatures == null || azimuth == null || wedgeAngle == null || outerRadius == null) {
             throw new NullPointerException(
@@ -93,7 +93,7 @@ public class WedgeBufferProcess extends AbstractStatisticsProcess {
 
         // start process
         SimpleFeatureCollection resultFc = DataUtilities.simple(new WedgeBufferFeatureCollection(
-                pointFeatures, azimuth, wedgeAngle, outerRadius, innerRadius));
+                pointFeatures, azimuth, wedgeAngle, innerRadius, outerRadius));
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

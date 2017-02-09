@@ -46,7 +46,7 @@ public class WedgeBufferProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "WedgeBuffer";
 
     /*
-     * WedgeBuffer(SimpleFeatureCollection pointFeatures, Expression azimuth, Expression wedgeAngle, Expression outerRadius, Expression innerRadius):
+     * WedgeBuffer(SimpleFeatureCollection pointFeatures, Expression azimuth, Expression wedgeAngle, Expression innerRadius, Expression outerRadius):
      * SimpleFeatureCollection
      */
 
@@ -87,16 +87,16 @@ public class WedgeBufferProcessFactory extends SpatialStatisticsProcessFactory {
             getResource("WedgeBuffer.wedgeAngle.description"), true, 1, 1, null, new KVP(
                     Params.FIELD, "pointFeatures.Number"));
 
-    /** outerRadius */
-    public static final Parameter<Expression> outerRadius = new Parameter<Expression>(
-            "outerRadius", Expression.class, getResource("WedgeBuffer.outerRadius.title"),
-            getResource("WedgeBuffer.outerRadius.description"), true, 1, 1, null, new KVP(
-                    Params.FIELD, "pointFeatures.Number"));
-
     /** innerRadius */
     public static final Parameter<Expression> innerRadius = new Parameter<Expression>(
             "innerRadius", Expression.class, getResource("WedgeBuffer.innerRadius.title"),
             getResource("WedgeBuffer.innerRadius.description"), false, 0, 1, null, new KVP(
+                    Params.FIELD, "pointFeatures.Number"));
+
+    /** outerRadius */
+    public static final Parameter<Expression> outerRadius = new Parameter<Expression>(
+            "outerRadius", Expression.class, getResource("WedgeBuffer.outerRadius.title"),
+            getResource("WedgeBuffer.outerRadius.description"), true, 1, 1, null, new KVP(
                     Params.FIELD, "pointFeatures.Number"));
 
     @Override
@@ -105,8 +105,8 @@ public class WedgeBufferProcessFactory extends SpatialStatisticsProcessFactory {
         parameterInfo.put(pointFeatures.key, pointFeatures);
         parameterInfo.put(azimuth.key, azimuth);
         parameterInfo.put(wedgeAngle.key, wedgeAngle);
-        parameterInfo.put(outerRadius.key, outerRadius);
         parameterInfo.put(innerRadius.key, innerRadius);
+        parameterInfo.put(outerRadius.key, outerRadius);
         return parameterInfo;
     }
 

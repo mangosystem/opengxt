@@ -141,13 +141,30 @@ public class WeightMatrixBuilder {
         return buildWeightMatrix(inputFeatures, xField, null);
     }
 
+    public WeightMatrix buildWeightMatrix(SimpleFeatureCollection inputFeatures, Expression xField) {
+        return buildWeightMatrix(inputFeatures, xField, null);
+    }
+
     public WeightMatrix buildWeightMatrix(SimpleFeatureCollection inputFeatures, String xField,
             String yField) {
-        if (yField == null) {
-            this.events = loadEvents(inputFeatures, xField);
-        } else {
-            this.events = loadEvents(inputFeatures, xField, yField);
+        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
+
+        Expression xExpression = null;
+        if (xField != null && !xField.isEmpty()) {
+            xExpression = ff.property(xField);
         }
+
+        Expression yExpression = null;
+        if (yField != null && !yField.isEmpty()) {
+            yExpression = ff.property(yField);
+        }
+
+        return buildWeightMatrix(inputFeatures, xExpression, yExpression);
+    }
+
+    public WeightMatrix buildWeightMatrix(SimpleFeatureCollection inputFeatures, Expression xField,
+            Expression yField) {
+        this.events = loadEvents(inputFeatures, xField, yField);
 
         if (isContiguity) {
             WeightMatrixContiguity contiguity = new WeightMatrixContiguity();
@@ -244,27 +261,12 @@ public class WeightMatrixBuilder {
         return value;
     }
 
-    private List<SpatialEvent> loadEvents(SimpleFeatureCollection features, String xField) {
-        return loadEvents(features, xField, null);
-    }
-
-    private List<SpatialEvent> loadEvents(SimpleFeatureCollection features, String xField,
-            String yField) {
+    private List<SpatialEvent> loadEvents(SimpleFeatureCollection features, Expression xField,
+            Expression yField) {
         List<SpatialEvent> eventList = new ArrayList<SpatialEvent>();
 
         this.sumX = this.sumX2 = this.sumX3 = this.sumX4 = 0.0;
         this.sumY = this.sumY2 = this.sumY3 = this.sumY4 = 0.0;
-
-        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
-
-        xField = FeatureTypes.validateProperty(features.getSchema(), xField);
-        Expression xExpression = ff.property(xField);
-
-        yField = FeatureTypes.validateProperty(features.getSchema(), yField);
-        Expression yExpression = null;
-        if (yField != null && !yField.isEmpty()) {
-            yExpression = ff.property(yField);
-        }
 
         SimpleFeatureIterator featureIter = features.features();
         try {
@@ -274,15 +276,15 @@ public class WeightMatrixBuilder {
                 Coordinate coordinate = geometry.getCentroid().getCoordinate();
 
                 SpatialEvent event = new SpatialEvent(feature.getID(), coordinate);
-                event.xVal = getValue(feature, xExpression);
+                event.xVal = getValue(feature, xField);
 
                 sumX += event.xVal;
                 sumX2 += Math.pow(event.xVal, 2.0);
                 sumX3 += Math.pow(event.xVal, 3.0);
                 sumX4 += Math.pow(event.xVal, 4.0);
 
-                if (yExpression != null) {
-                    event.yVal = getValue(feature, yExpression);
+                if (yField != null) {
+                    event.yVal = getValue(feature, yField);
 
                     sumY += event.yVal;
                     sumY2 += Math.pow(event.yVal, 2.0);

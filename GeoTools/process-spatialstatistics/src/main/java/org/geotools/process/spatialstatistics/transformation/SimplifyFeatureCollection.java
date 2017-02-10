@@ -47,6 +47,11 @@ public class SimplifyFeatureCollection extends GXTSimpleFeatureCollection {
 
     private boolean preserveTopology;
 
+    public SimplifyFeatureCollection(SimpleFeatureCollection delegate, double tolerance,
+            boolean preserveTopology) {
+        this(delegate, ff.literal(tolerance), preserveTopology);
+    }
+
     public SimplifyFeatureCollection(SimpleFeatureCollection delegate, Expression tolerance,
             boolean preserveTopology) {
         super(delegate);

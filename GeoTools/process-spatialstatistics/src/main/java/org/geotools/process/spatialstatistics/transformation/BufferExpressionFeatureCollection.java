@@ -54,6 +54,11 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
 
     private SimpleFeatureType schema;
 
+    public BufferExpressionFeatureCollection(SimpleFeatureCollection delegate, double distance,
+            int quadrantSegments) {
+        this(delegate, ff.literal(distance), quadrantSegments);
+    }
+
     public BufferExpressionFeatureCollection(SimpleFeatureCollection delegate, Expression distance,
             int quadrantSegments) {
         super(delegate);
@@ -106,7 +111,7 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
         private SimpleFeatureBuilder builder;
 
         private SimpleFeature next;
-        
+
         private String typeName;
 
         public BufferExpressionFeatureIterator(SimpleFeatureIterator delegate,

@@ -25,8 +25,6 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.geotools.filter.text.cql2.CQLException;
-import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.Converters;
@@ -113,13 +111,7 @@ public class RandomPointsOperation extends GeneralOperation {
 
     public SimpleFeatureCollection executeperFeatures(SimpleFeatureCollection polygonFeatures,
             int pointCount) throws IOException {
-        try {
-            Expression expression = ECQL.toExpression(String.valueOf(pointCount));
-            return executeperFeatures(polygonFeatures, expression);
-        } catch (CQLException e1) {
-            LOGGER.log(Level.FINER, e1.getMessage(), e1);
-        }
-        return null;
+        return executeperFeatures(polygonFeatures, ff.literal(pointCount));
     }
 
     public SimpleFeatureCollection executeperFeatures(SimpleFeatureCollection polygonFeatures,

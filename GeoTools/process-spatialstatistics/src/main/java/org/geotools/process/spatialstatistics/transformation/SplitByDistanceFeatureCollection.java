@@ -54,6 +54,10 @@ public class SplitByDistanceFeatureCollection extends GXTSimpleFeatureCollection
 
     private Expression distance;
 
+    public SplitByDistanceFeatureCollection(SimpleFeatureCollection delegate, double tolerance) {
+        this(delegate, ff.literal(tolerance));
+    }
+
     public SplitByDistanceFeatureCollection(SimpleFeatureCollection delegate, Expression distance) {
         super(delegate);
 

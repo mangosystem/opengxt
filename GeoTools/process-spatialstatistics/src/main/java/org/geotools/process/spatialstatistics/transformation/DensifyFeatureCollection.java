@@ -44,6 +44,10 @@ public class DensifyFeatureCollection extends GXTSimpleFeatureCollection {
 
     private Expression tolerance;
 
+    public DensifyFeatureCollection(SimpleFeatureCollection delegate, double tolerance) {
+        this(delegate, ff.literal(tolerance));
+    }
+
     public DensifyFeatureCollection(SimpleFeatureCollection delegate, Expression tolerance) {
         super(delegate);
 

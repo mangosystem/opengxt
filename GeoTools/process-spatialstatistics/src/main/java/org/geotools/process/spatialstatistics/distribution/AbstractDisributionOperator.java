@@ -16,7 +16,10 @@
  */
 package org.geotools.process.spatialstatistics.distribution;
 
+import java.util.logging.Logger;
+
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
+import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.expression.Expression;
 
@@ -38,15 +41,33 @@ import com.vividsolutions.jts.geom.Polygon;
  * @source $URL$
  */
 public abstract class AbstractDisributionOperator extends GeneralOperation {
+    protected static final Logger LOGGER = Logging.getLogger(AbstractDisributionOperator.class);
 
     protected final String ALL = "ALL";
 
     protected double getValue(SimpleFeature feature, Expression expression, double defaultValue) {
+        if (expression == null) {
+            return defaultValue;
+        }
+
         Double dblVal = expression.evaluate(feature, Double.class);
         if (dblVal == null || dblVal.isNaN() || dblVal.isInfinite()) {
             return defaultValue;
         } else {
             return dblVal.doubleValue();
+        }
+    }
+
+    protected String getCaseValue(SimpleFeature feature, Expression expression) {
+        if (expression == null) {
+            return ALL;
+        }
+
+        String caseValue = expression.evaluate(feature, String.class);
+        if (caseValue == null || caseValue.isEmpty()) {
+            return ALL;
+        } else {
+            return caseValue;
         }
     }
 

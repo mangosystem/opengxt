@@ -65,7 +65,7 @@ public class XYCalculationFeatureCollection extends GXTSimpleFeatureCollection {
 
     public XYCalculationFeatureCollection(SimpleFeatureCollection delegate, String xField,
             String yField, boolean useInside) {
-        this(delegate, "xcoord", "ycoord", useInside, null);
+        this(delegate, xField, yField, useInside, null);
     }
 
     public XYCalculationFeatureCollection(SimpleFeatureCollection delegate, String xField,

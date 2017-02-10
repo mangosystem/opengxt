@@ -32,6 +32,7 @@ import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.expression.Expression;
 
 /**
  * Calculates a Focal Location Quotients (Focal LQ).
@@ -65,6 +66,21 @@ public class FocalLQOperation extends AbstractStatisticsOperation {
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, String xField,
             String yField) throws IOException {
+        Expression xExpression = null;
+        if (xField != null && !xField.isEmpty()) {
+            xExpression = ff.property(xField);
+        }
+
+        Expression yExpression = null;
+        if (yField != null && !yField.isEmpty()) {
+            yExpression = ff.property(yField);
+        }
+
+        return execute(inputFeatures, xExpression, yExpression);
+    }
+
+    public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
+            Expression xField, Expression yField) throws IOException {
         swMatrix = new WeightMatrixBuilder(getSpatialConceptType(), getStandardizationType());
         swMatrix.setDistanceMethod(getDistanceType());
         swMatrix.setDistanceBandWidth(getDistanceBand());

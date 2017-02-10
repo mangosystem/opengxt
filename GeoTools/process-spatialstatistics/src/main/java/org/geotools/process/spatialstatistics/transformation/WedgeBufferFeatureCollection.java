@@ -60,6 +60,12 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
 
     private SimpleFeatureType schema;
 
+    public WedgeBufferFeatureCollection(SimpleFeatureCollection delegate, String azimuthField,
+            String wedgeAngleField, String innerRadiusField, String outerRadiusField) {
+        this(delegate, ff.literal(azimuthField), ff.literal(wedgeAngleField), ff
+                .literal(innerRadiusField), ff.literal(outerRadiusField));
+    }
+
     public WedgeBufferFeatureCollection(SimpleFeatureCollection delegate, Expression azimuth,
             Expression wedgeAngle, Expression innerRadius, Expression outerRadius) {
         super(delegate);

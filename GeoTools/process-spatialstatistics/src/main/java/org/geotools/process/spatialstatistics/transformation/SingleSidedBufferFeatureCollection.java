@@ -56,6 +56,11 @@ public class SingleSidedBufferFeatureCollection extends GXTSimpleFeatureCollecti
 
     private SimpleFeatureType schema;
 
+    public SingleSidedBufferFeatureCollection(SimpleFeatureCollection delegate, double distance,
+            int quadrantSegments) {
+        this(delegate, ff.literal(distance), quadrantSegments);
+    }
+
     public SingleSidedBufferFeatureCollection(SimpleFeatureCollection delegate,
             Expression distance, int quadrantSegments) {
         super(delegate);

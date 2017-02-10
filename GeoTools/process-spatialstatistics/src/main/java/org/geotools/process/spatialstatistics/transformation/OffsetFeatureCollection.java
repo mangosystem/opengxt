@@ -19,6 +19,7 @@ package org.geotools.process.spatialstatistics.transformation;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.collection.SubFeatureCollection;
@@ -28,6 +29,7 @@ import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
+import org.opengis.filter.expression.Expression;
 
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
@@ -43,11 +45,21 @@ import com.vividsolutions.jts.geom.Geometry;
 public class OffsetFeatureCollection extends GXTSimpleFeatureCollection {
     protected static final Logger LOGGER = Logging.getLogger(OffsetFeatureCollection.class);
 
-    private double offsetX = 0d;
+    private Expression offsetX = ff.literal(0d);
 
-    private double offsetY = 0d;
+    private Expression offsetY = ff.literal(0d);
+
+    private ReferencedEnvelope offsetBounds = null;
 
     public OffsetFeatureCollection(SimpleFeatureCollection delegate, double offsetX, double offsetY) {
+        this(delegate, ff.literal(offsetX), ff.literal(offsetY));
+
+        offsetBounds = delegate.getBounds();
+        offsetBounds.translate(offsetY, offsetY);
+    }
+
+    public OffsetFeatureCollection(SimpleFeatureCollection delegate, Expression offsetX,
+            Expression offsetY) {
         super(delegate);
 
         this.offsetX = offsetX;
@@ -61,9 +73,10 @@ public class OffsetFeatureCollection extends GXTSimpleFeatureCollection {
 
     @Override
     public ReferencedEnvelope getBounds() {
-        ReferencedEnvelope bounds = delegate.getBounds();
-        bounds.translate(offsetY, offsetY);
-        return bounds;
+        if (offsetBounds == null) {
+            return DataUtilities.bounds(features());
+        }
+        return offsetBounds;
     }
 
     @Override
@@ -77,18 +90,18 @@ public class OffsetFeatureCollection extends GXTSimpleFeatureCollection {
     static class OffsetFeatureIterator implements SimpleFeatureIterator {
         private SimpleFeatureIterator delegate;
 
-        private double offsetX = 0d;
+        private Expression offsetX = ff.literal(0d);
 
-        private double offsetY = 0d;
+        private Expression offsetY = ff.literal(0d);
 
         private SimpleFeatureBuilder builder;
 
         public OffsetFeatureIterator(SimpleFeatureIterator delegate, SimpleFeatureType schema,
-                double offsetX, double offsetY) {
+                Expression offsetX, Expression offsetY) {
             this.delegate = delegate;
             this.offsetX = offsetX;
             this.offsetY = offsetY;
-            builder = new SimpleFeatureBuilder(schema);
+            this.builder = new SimpleFeatureBuilder(schema);
         }
 
         public void close() {
@@ -101,13 +114,23 @@ public class OffsetFeatureCollection extends GXTSimpleFeatureCollection {
 
         public SimpleFeature next() throws NoSuchElementException {
             SimpleFeature feature = delegate.next();
+            Double dX = offsetX.evaluate(feature, Double.class);
+            Double dY = offsetY.evaluate(feature, Double.class);
+
+            if (dX == null) {
+                dX = Double.valueOf(0d);
+            }
+
+            if (dY == null) {
+                dY = Double.valueOf(0d);
+            }
 
             for (Object attribute : feature.getAttributes()) {
                 if (attribute instanceof Geometry) {
                     Geometry geometry = (Geometry) attribute;
-                    if (offsetX > 0 || offsetY > 0) {
+                    if (dX > 0 || dY > 0) {
                         Geometry offseted = (Geometry) geometry.clone();
-                        offseted.apply(new OffsetOrdinateFilter(offsetX, offsetY));
+                        offseted.apply(new OffsetOrdinateFilter(dX.doubleValue(), dY.doubleValue()));
                         attribute = offseted;
                     }
                 }

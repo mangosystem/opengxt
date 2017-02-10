@@ -52,6 +52,10 @@ public class RemovePartsFeatureCollection extends GXTSimpleFeatureCollection {
         this(delegate, ff.literal(0.0d));
     }
 
+    public RemovePartsFeatureCollection(SimpleFeatureCollection delegate, double minimumArea) {
+        this(delegate, ff.literal(minimumArea));
+    }
+
     public RemovePartsFeatureCollection(SimpleFeatureCollection delegate, Expression minimumArea) {
         super(delegate);
 
@@ -141,9 +145,9 @@ public class RemovePartsFeatureCollection extends GXTSimpleFeatureCollection {
 
             if (Polygon.class.equals(geomBinding)) {
                 return polygon;
-            } else if (MultiPolygon.class.equals(geomBinding)) {                
+            } else if (MultiPolygon.class.equals(geomBinding)) {
                 List<Polygon> remains = new ArrayList<Polygon>();
-                
+
                 Geometry largest = polygon.getGeometryN(0);
                 for (int index = 0; index < polygon.getNumGeometries(); index++) {
                     Geometry part = polygon.getGeometryN(index);

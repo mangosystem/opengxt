@@ -54,6 +54,10 @@ public class RemoveHolesFeatureCollection extends GXTSimpleFeatureCollection {
         this(delegate, ff.literal(0.0d));
     }
 
+    public RemoveHolesFeatureCollection(SimpleFeatureCollection delegate, double minimumArea) {
+        this(delegate, ff.literal(minimumArea));
+    }
+
     public RemoveHolesFeatureCollection(SimpleFeatureCollection delegate, Expression minimumArea) {
         super(delegate);
 

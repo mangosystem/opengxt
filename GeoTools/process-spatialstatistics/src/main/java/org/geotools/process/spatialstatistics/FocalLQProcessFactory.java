@@ -32,6 +32,7 @@ import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
+import org.opengis.filter.expression.Expression;
 import org.opengis.util.InternationalString;
 
 /**
@@ -47,8 +48,8 @@ public class FocalLQProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "FocalLQ";
 
     /*
-     * FocalLQ(SimpleFeatureCollection GML, fieldName1 String, fieldName2 String, SpatialConcept spatialConcept, DistanceMethod distanceMethod,
-     * searchDistance Double): SimpleFeatureCollection
+     * FocalLQ(SimpleFeatureCollection GML, Expression fieldName1, Expression fieldName2, SpatialConcept spatialConcept, DistanceMethod
+     * distanceMethod, searchDistance Double): SimpleFeatureCollection
      */
 
     public FocalLQProcessFactory() {
@@ -77,14 +78,16 @@ public class FocalLQProcessFactory extends SpatialStatisticsProcessFactory {
             getResource("FocalLQ.inputFeatures.description"), true, 1, 1, null, null);
 
     /** xField */
-    public static final Parameter<String> xField = new Parameter<String>("xField", String.class,
-            getResource("FocalLQ.xField.title"), getResource("FocalLQ.xField.description"), true,
-            1, 1, null, new KVP(Params.FIELD, "inputFeatures.Number"));
+    public static final Parameter<Expression> xField = new Parameter<Expression>("xField",
+            Expression.class, getResource("FocalLQ.xField.title"),
+            getResource("FocalLQ.xField.description"), true, 1, 1, null, new KVP(Params.FIELD,
+                    "inputFeatures.Number"));
 
     /** yField */
-    public static final Parameter<String> yField = new Parameter<String>("yField", String.class,
-            getResource("FocalLQ.yField.title"), getResource("FocalLQ.yField.description"), true,
-            1, 1, null, new KVP(Params.FIELD, "inputFeatures.Number"));
+    public static final Parameter<Expression> yField = new Parameter<Expression>("yField",
+            Expression.class, getResource("FocalLQ.yField.title"),
+            getResource("FocalLQ.yField.description"), true, 1, 1, null, new KVP(Params.FIELD,
+                    "inputFeatures.Number"));
 
     /** spatialConcept */
     public static final Parameter<SpatialConcept> spatialConcept = new Parameter<SpatialConcept>(

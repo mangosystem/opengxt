@@ -31,6 +31,7 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.enumeration.SpatialConcept;
 import org.geotools.util.logging.Logging;
+import org.opengis.filter.expression.Expression;
 import org.opengis.util.ProgressListener;
 
 /**
@@ -52,7 +53,7 @@ public class FocalLQProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            String xField, String yField, SpatialConcept spatialConcept,
+            Expression xField, Expression yField, SpatialConcept spatialConcept,
             DistanceMethod distanceMethod, Double searchDistance, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(FocalLQProcessFactory.inputFeatures.key, inputFeatures);
@@ -79,10 +80,9 @@ public class FocalLQProcess extends AbstractStatisticsProcess {
             throws ProcessException {
         SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
                 FocalLQProcessFactory.inputFeatures, null);
-        String xField = (String) Params.getValue(input, FocalLQProcessFactory.xField, null);
-        String yField = (String) Params.getValue(input, FocalLQProcessFactory.yField, null);
-        if (inputFeatures == null || xField == null || xField.isEmpty() || yField == null
-                || yField.isEmpty()) {
+        Expression xField = (Expression) Params.getValue(input, FocalLQProcessFactory.xField, null);
+        Expression yField = (Expression) Params.getValue(input, FocalLQProcessFactory.yField, null);
+        if (inputFeatures == null || xField == null || yField == null) {
             throw new NullPointerException("inputFeatures, xField, yField parameters required");
         }
 

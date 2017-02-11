@@ -25,14 +25,13 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.spatialstatistics.util.CoordinateTranslateFilter;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
 
-import com.vividsolutions.jts.geom.CoordinateSequence;
-import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
@@ -130,7 +129,8 @@ public class OffsetFeatureCollection extends GXTSimpleFeatureCollection {
                     Geometry geometry = (Geometry) attribute;
                     if (dX > 0 || dY > 0) {
                         Geometry offseted = (Geometry) geometry.clone();
-                        offseted.apply(new OffsetOrdinateFilter(dX.doubleValue(), dY.doubleValue()));
+                        offseted.apply(new CoordinateTranslateFilter(dX.doubleValue(), dY
+                                .doubleValue()));
                         attribute = offseted;
                     }
                 }
@@ -141,30 +141,6 @@ public class OffsetFeatureCollection extends GXTSimpleFeatureCollection {
             builder.reset();
 
             return nextFeature;
-        }
-    }
-
-    static final class OffsetOrdinateFilter implements CoordinateSequenceFilter {
-        private double offsetX;
-
-        private double offsetY;
-
-        public OffsetOrdinateFilter(double offsetX, double offsetY) {
-            this.offsetX = offsetX;
-            this.offsetY = offsetY;
-        }
-
-        public void filter(CoordinateSequence seq, int i) {
-            seq.setOrdinate(i, 0, seq.getOrdinate(i, 0) + offsetX);
-            seq.setOrdinate(i, 1, seq.getOrdinate(i, 1) + offsetY);
-        }
-
-        public boolean isDone() {
-            return false;
-        }
-
-        public boolean isGeometryChanged() {
-            return true;
         }
     }
 }

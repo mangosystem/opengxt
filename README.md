@@ -18,18 +18,18 @@ any major spatial data source using open standards.
 ### Download GeoTools & GeoServer WPS libraries
 * Visit [SourceForge](https://sourceforge.net/projects/mango-spatialstatistics/)
 * Geotools 14.x
- * Download gt-process-spatialstatistics-14.5.jar file
+  * Download gt-process-spatialstatistics-14.5.jar file
 * GeoServer 2.8.x
- * Download gs-wps-spatialstatistics-2.8.5.jar, gt-process-spatialstatistics-14.5.jar files
- * Copy these files to the WEB-INF/lib directory of the GeoServer installation.
- * Restart GeoServer
+  * Download gs-wps-spatialstatistics-2.8.5.jar, gt-process-spatialstatistics-14.5.jar files
+  * Copy these files to the WEB-INF/lib directory of the GeoServer installation.
+  * Restart GeoServer
 
 ### uDig Processing Toolbox Plugin Installation
 * Download and install uDig 2.0-SNAPSHOT (GeoTools 14.1)
- * Windows [x86_64 Installer](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.exe)
- * Windows [x86_64 zip](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.zip)
- * Linux [x86_64 zip](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.linux.gtk.x86_64.zip)
- * Mac OS/X [x86_64 zip](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.macosx.cocoa.x86_64.zip)
+  * Windows [x86_64 Installer](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.exe)
+  * Windows [x86_64 zip](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.zip)
+  * Linux [x86_64 zip](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.linux.gtk.x86_64.zip)
+  * Mac OS/X [x86_64 zip](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.macosx.cocoa.x86_64.zip)
 * Start uDig application
 * Choose Help -> Find and Install... from the menu bar to open up the Install/Update window
 * Select Search for new features to install option and press Next.
@@ -44,12 +44,12 @@ any major spatial data source using open standards.
 
 ### Manual & Documents
 * uDig Processing Toolbox Manual
- * [Korean v1.0](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.0.pdf)
- * [Korean v1.x-latest](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.latest.pdf)
+  * [Korean v1.0](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.0.pdf)
+  * [Korean v1.x-latest](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.latest.pdf)
 
 * GeoServer WPS Processes Manual
- * [Korean v2.0](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.0.pdf)
- * [Korean v2.x-latest](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.latest.pdf)
+  * [Korean v2.0](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.0.pdf)
+  * [Korean v2.x-latest](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.latest.pdf)
  
 ### Localization
 * [Transifex - English(defalut), Korean ...](https://www.transifex.com/projects/p/ss-rd/)

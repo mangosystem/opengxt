@@ -2,6 +2,8 @@
 
 ### Overview
 The goal of this project is to provide a spatial statistics tools for Geotools, Geoserver WPS, uDig Statistics Toolbox
+
+![screenshot](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/images/architecture.png?width=600)
  
 ### Related Projects
 * [GeoTools](http://geotools.org) is an open source Java library that provides tools for geospatial data. 
@@ -44,12 +46,12 @@ any major spatial data source using open standards.
 
 ### Manual & Documents
 * uDig Processing Toolbox Manual
-  * [Korean v1.0](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.0.pdf)
-  * [Korean v1.x-latest](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.latest.pdf)
+  * [Korean v1.0](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.0.pdf)
+  * [Korean v1.x-latest](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.latest.pdf)
 
 * GeoServer WPS Processes Manual
-  * [Korean v2.0](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.0.pdf)
-  * [Korean v2.x-latest](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.latest.pdf)
+  * [Korean v2.0](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.0.pdf)
+  * [Korean v2.x-latest](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.latest.pdf)
  
 ### Localization
 * [Transifex - English(defalut), Korean ...](https://www.transifex.com/projects/p/ss-rd/)
@@ -63,10 +65,10 @@ any major spatial data source using open standards.
 
 ### Gallery
 
-![screenshot](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/images/udig_processing_toolbox.png?width=800)
+![screenshot](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/images/udig_processing_toolbox.png?width=800)
 
 
-![screenshot](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/images/geoserver_wps_request.png?width=800)
+![screenshot](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/images/geoserver_wps_request.png?width=800)
 
 
-![screenshot](https://github.com/MapPlus/spatial_statistics_for_geotools_udig/blob/master/docs/images/geoserver_wps_client.png?width=800)
+![screenshot](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/images/geoserver_wps_client.png?width=800)

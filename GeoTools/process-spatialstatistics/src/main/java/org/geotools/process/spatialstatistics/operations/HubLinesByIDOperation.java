@@ -17,12 +17,15 @@
 package org.geotools.process.spatialstatistics.operations;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
+import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -76,6 +79,14 @@ public class HubLinesByIDOperation extends AbstractHubLinesOperation {
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
 
+        // check coordinate reference system
+        CoordinateReferenceSystem crsT = spokeFeatures.getSchema().getCoordinateReferenceSystem();
+        CoordinateReferenceSystem crsS = hubFeatures.getSchema().getCoordinateReferenceSystem();
+        if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
+            hubFeatures = new ReprojectFeatureCollection(hubFeatures, crsS, crsT, true);
+            LOGGER.log(Level.WARNING, "reprojecting features");
+        }
+
         SimpleFeatureIterator hubIter = hubFeatures.features();
         try {
             while (hubIter.hasNext()) {
@@ -94,8 +105,8 @@ public class HubLinesByIDOperation extends AbstractHubLinesOperation {
                         SimpleFeature spokeFeature = spokeIter.next();
                         Geometry spokeGeom = (Geometry) spokeFeature.getDefaultGeometry();
 
-                        // create line: direction = spoke --> hub
-                        Geometry hubLine = getShortestLine(spokeGeom, hubGeom, useCentroid);
+                        // create line: direction = hub --> spoke
+                        Geometry hubLine = getShortestLine(hubGeom, spokeGeom, useCentroid);
                         double distance = hubLine.getLength();
                         if (distance == 0 || this.maximumDistance < distance) {
                             continue;

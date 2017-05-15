@@ -23,10 +23,10 @@ import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.data.store.ReprojectingFeatureCollection;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.enumeration.SpatialJoinType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
@@ -81,11 +81,11 @@ public class SpatialJoinOperation extends GeneralOperation {
         }
 
         // check CRS
-        CoordinateReferenceSystem aCrs = inputFeatures.getSchema().getCoordinateReferenceSystem();
-        CoordinateReferenceSystem bCrs = joinFeatures.getSchema().getCoordinateReferenceSystem();
-        if (!CRS.equalsIgnoreMetadata(aCrs, bCrs) && bCrs != null) {
+        CoordinateReferenceSystem crsT = inputFeatures.getSchema().getCoordinateReferenceSystem();
+        CoordinateReferenceSystem crsS = joinFeatures.getSchema().getCoordinateReferenceSystem();
+        if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
             // reproject joinFeatures to inputFeatures CRS
-            joinFeatures = new ReprojectingFeatureCollection(joinFeatures, aCrs);
+            joinFeatures = new ReprojectFeatureCollection(joinFeatures, crsS, crsT, true);
         }
 
         STRtree spatialIndex = loadFeatures(joinFeatures);

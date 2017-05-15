@@ -21,6 +21,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.DataUtilities;
@@ -32,12 +33,14 @@ import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.Filter;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
@@ -70,6 +73,14 @@ public class IntersectFeatureCollection extends GXTSimpleFeatureCollection {
         super(delegate);
 
         this.fieldMap = new Hashtable<String, String>();
+
+        // check coordinate reference system
+        CoordinateReferenceSystem crsT = delegate.getSchema().getCoordinateReferenceSystem();
+        CoordinateReferenceSystem crsS = overlays.getSchema().getCoordinateReferenceSystem();
+        if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
+            overlays = new ReprojectFeatureCollection(overlays, crsS, crsT, true);
+            LOGGER.log(Level.WARNING, "reprojecting features");
+        }
 
         // use SpatialIndexFeatureCollection
         this.overlays = DataUtils.toSpatialIndexFeatureCollection(overlays);

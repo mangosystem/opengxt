@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics.operations;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -26,12 +27,15 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.transformation.ClipWithGeometryFeatureCollection;
+import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
+import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.Filter;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
@@ -61,6 +65,14 @@ public class ClipWithFeaturesOperation extends GeneralOperation {
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
+
+        // check coordinate reference system
+        CoordinateReferenceSystem crsT = inputFeatures.getSchema().getCoordinateReferenceSystem();
+        CoordinateReferenceSystem crsS = clipFeatures.getSchema().getCoordinateReferenceSystem();
+        if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
+            clipFeatures = new ReprojectFeatureCollection(clipFeatures, crsS, crsT, true);
+            LOGGER.log(Level.WARNING, "reprojecting features");
+        }
 
         SimpleFeatureIterator clipIter = clipFeatures.features();
         try {

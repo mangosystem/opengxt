@@ -19,6 +19,7 @@ package org.geotools.process.spatialstatistics.transformation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.DataUtilities;
@@ -29,12 +30,14 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.DataUtils;
+import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.Filter;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
@@ -64,6 +67,16 @@ public class DifferenceFeatureCollection extends GXTSimpleFeatureCollection {
     public DifferenceFeatureCollection(SimpleFeatureCollection delegate,
             SimpleFeatureCollection differenceFeatures) {
         super(delegate);
+
+        // check coordinate reference system
+        CoordinateReferenceSystem crsT = delegate.getSchema().getCoordinateReferenceSystem();
+        CoordinateReferenceSystem crsS = differenceFeatures.getSchema()
+                .getCoordinateReferenceSystem();
+        if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
+            differenceFeatures = new ReprojectFeatureCollection(differenceFeatures, crsS, crsT,
+                    true);
+            LOGGER.log(Level.WARNING, "reprojecting features");
+        }
 
         // use SpatialIndexFeatureCollection
         this.differenceFeatures = DataUtils.toSpatialIndexFeatureCollection(differenceFeatures);

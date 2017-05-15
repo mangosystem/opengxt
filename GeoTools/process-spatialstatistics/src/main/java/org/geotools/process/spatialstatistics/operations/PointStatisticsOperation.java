@@ -21,11 +21,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.data.store.ReprojectingFeatureCollection;
 import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.StatisticsField;
@@ -33,6 +33,7 @@ import org.geotools.process.spatialstatistics.core.StatisticsVisitor;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitorResult;
 import org.geotools.process.spatialstatistics.core.SummaryFieldBuilder;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
@@ -103,13 +104,12 @@ public class PointStatisticsOperation extends GeneralOperation {
                 uvFields.add(curField.getSrcField());
             }
         }
-
-        // check CRS
-        CoordinateReferenceSystem aCrs = polygons.getSchema().getCoordinateReferenceSystem();
-        CoordinateReferenceSystem bCrs = points.getSchema().getCoordinateReferenceSystem();
-        if (!CRS.equalsIgnoreMetadata(aCrs, bCrs) && bCrs != null) {
-            // reproject joinFeatures to inputFeatures CRS
-            points = new ReprojectingFeatureCollection(points, aCrs);
+        // check coordinate reference system
+        CoordinateReferenceSystem crsT = polygons.getSchema().getCoordinateReferenceSystem();
+        CoordinateReferenceSystem crsS = points.getSchema().getCoordinateReferenceSystem();
+        if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
+            points = new ReprojectFeatureCollection(points, crsS, crsT, true);
+            LOGGER.log(Level.WARNING, "reprojecting features");
         }
 
         // use SpatialIndexFeatureCollection

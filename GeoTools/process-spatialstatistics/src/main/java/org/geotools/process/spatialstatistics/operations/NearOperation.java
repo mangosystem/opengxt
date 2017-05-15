@@ -17,16 +17,20 @@
 package org.geotools.process.spatialstatistics.operations;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
+import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.index.strtree.ItemBoundable;
@@ -85,7 +89,16 @@ public class NearOperation extends GeneralOperation {
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
 
+        // check coordinate reference system
+        CoordinateReferenceSystem crsT = inputFeatures.getSchema().getCoordinateReferenceSystem();
+        CoordinateReferenceSystem crsS = nearFeatures.getSchema().getCoordinateReferenceSystem();
+        if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
+            nearFeatures = new ReprojectFeatureCollection(nearFeatures, crsS, crsT, true);
+            LOGGER.log(Level.WARNING, "reprojecting features");
+        }
+
         STRtree spatialIndex = loadNearFeatures(nearFeatures, nearIdField);
+
         SimpleFeatureIterator featureIter = inputFeatures.features();
         try {
             while (featureIter.hasNext()) {

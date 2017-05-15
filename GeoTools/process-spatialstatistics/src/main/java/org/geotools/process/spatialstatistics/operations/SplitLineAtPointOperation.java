@@ -23,14 +23,18 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
+import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -58,6 +62,14 @@ public class SplitLineAtPointOperation extends GeneralOperation {
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection lineFeatures,
             SimpleFeatureCollection pointFeatures, double tolerance) throws IOException {
+        // check coordinate reference system
+        CoordinateReferenceSystem crsT = lineFeatures.getSchema().getCoordinateReferenceSystem();
+        CoordinateReferenceSystem crsS = pointFeatures.getSchema().getCoordinateReferenceSystem();
+        if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
+            pointFeatures = new ReprojectFeatureCollection(pointFeatures, crsS, crsT, true);
+            LOGGER.log(Level.WARNING, "reprojecting features");
+        }
+
         STRtree spatialIndex = loadNearFeatures(pointFeatures);
 
         // prepare transactional feature store

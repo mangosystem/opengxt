@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics.operations;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -25,6 +26,8 @@ import org.geotools.process.spatialstatistics.SumLineLengthProcessFactory;
 import org.geotools.process.spatialstatistics.core.DataUtils;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
+import org.geotools.referencing.CRS;
 import org.geotools.util.Converters;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
@@ -32,6 +35,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.filter.Filter;
 import org.opengis.parameter.InvalidParameterValueException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
@@ -89,6 +93,14 @@ public class CalculateSumLineLengthOperation extends GeneralOperation {
         Class<?> countBinding = cntDsc.getType().getBinding();
 
         String the_geom = lines.getSchema().getGeometryDescriptor().getLocalName();
+
+        // check coordinate reference system
+        CoordinateReferenceSystem crsT = polygons.getSchema().getCoordinateReferenceSystem();
+        CoordinateReferenceSystem crsS = lines.getSchema().getCoordinateReferenceSystem();
+        if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
+            lines = new ReprojectFeatureCollection(lines, crsS, crsT, true);
+            LOGGER.log(Level.WARNING, "reprojecting features");
+        }
 
         // using SpatialIndexFeatureCollection
         SimpleFeatureCollection indexed = DataUtils.toSpatialIndexFeatureCollection(lines);

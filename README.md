@@ -52,6 +52,9 @@ any major spatial data source using open standards.
 * GeoServer WPS Processes Manual
   * [Korean v2.0](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.0.pdf)
   * [Korean v2.x-latest](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.latest.pdf)
+  
+* Presentation
+  * [SlideShare](https://www.slideshare.net/mapplus)
  
 ### Localization
 * [Transifex - English(defalut), Korean ...](https://www.transifex.com/projects/p/ss-rd/)

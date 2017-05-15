@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -27,9 +28,12 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
+import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryComponentFilter;
@@ -70,6 +74,15 @@ public class IntersectionPointsOperation extends GeneralOperation {
         if (intersectIDField != null && interSchema.indexOf(intersectIDField) != -1) {
             schema = FeatureTypes.add(schema, interSchema.getDescriptor(intersectIDField));
             hasIntersectID = true;
+        }
+
+        // check coordinate reference system
+        CoordinateReferenceSystem crsT = inputFeatures.getSchema().getCoordinateReferenceSystem();
+        CoordinateReferenceSystem crsS = intersectFeatures.getSchema()
+                .getCoordinateReferenceSystem();
+        if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
+            intersectFeatures = new ReprojectFeatureCollection(intersectFeatures, crsS, crsT, true);
+            LOGGER.log(Level.WARNING, "reprojecting features");
         }
 
         // build spatial index

@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics.transformation;
 
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -26,12 +27,14 @@ import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.filter.Filter;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Merge SimpleFeatureCollection Implementation
@@ -50,7 +53,16 @@ public class MergeFeatureCollection extends GXTSimpleFeatureCollection {
     public MergeFeatureCollection(SimpleFeatureCollection delegate, SimpleFeatureCollection features) {
         super(delegate);
 
-        this.features = features;
+        // check coordinate reference system
+        CoordinateReferenceSystem crsT = delegate.getSchema().getCoordinateReferenceSystem();
+        CoordinateReferenceSystem crsS = features.getSchema().getCoordinateReferenceSystem();
+        if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
+            this.features = new ReprojectFeatureCollection(features, crsS, crsT, true);
+            LOGGER.log(Level.WARNING, "reprojecting features");
+        } else {
+            this.features = features;
+        }
+
         this.schema = buildTargetSchema();
     }
 

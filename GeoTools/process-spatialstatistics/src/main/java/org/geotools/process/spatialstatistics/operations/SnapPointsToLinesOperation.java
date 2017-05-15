@@ -18,6 +18,7 @@ package org.geotools.process.spatialstatistics.operations;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -25,9 +26,12 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
+import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -56,6 +60,14 @@ public class SnapPointsToLinesOperation extends GeneralOperation {
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection pointFeatures,
             SimpleFeatureCollection lineFeatures, double tolerance) throws IOException {
+        // check coordinate reference system
+        CoordinateReferenceSystem crsT = pointFeatures.getSchema().getCoordinateReferenceSystem();
+        CoordinateReferenceSystem crsS = lineFeatures.getSchema().getCoordinateReferenceSystem();
+        if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
+            lineFeatures = new ReprojectFeatureCollection(lineFeatures, crsS, crsT, true);
+            LOGGER.log(Level.WARNING, "reprojecting features");
+        }
+
         STRtree spatialIndex = loadNearFeatures(lineFeatures);
 
         // prepare transactional feature store

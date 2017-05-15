@@ -55,6 +55,11 @@ public class ReprojectFeatureCollection extends GXTSimpleFeatureCollection {
     final GeometryCoordinateSequenceTransformer transformer = new GeometryCoordinateSequenceTransformer();
 
     public ReprojectFeatureCollection(SimpleFeatureCollection delegate,
+            CoordinateReferenceSystem targetCRS) {
+        this(delegate, null, targetCRS, true);
+    }
+
+    public ReprojectFeatureCollection(SimpleFeatureCollection delegate,
             CoordinateReferenceSystem forcedCRS, CoordinateReferenceSystem targetCRS,
             boolean lenient) {
         super(delegate);

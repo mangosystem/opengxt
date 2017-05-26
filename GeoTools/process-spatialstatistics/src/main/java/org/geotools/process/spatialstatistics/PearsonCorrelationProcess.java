@@ -26,8 +26,8 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.operations.PearsonOperation;
-import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
+import org.geotools.process.spatialstatistics.relationship.PearsonOperation;
+import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 

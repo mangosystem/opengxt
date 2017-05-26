@@ -11,9 +11,9 @@ import javax.xml.namespace.QName;
 
 import org.geoserver.config.util.SecureXStream;
 import org.geoserver.wps.ppio.XStreamPPIO;
-import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
-import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName;
-import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName.PearsonItem;
+import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult;
+import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult.PropertyName;
+import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult.PropertyName.PearsonItem;
 import org.xml.sax.ContentHandler;
 
 import com.thoughtworks.xstream.io.xml.DomDriver;

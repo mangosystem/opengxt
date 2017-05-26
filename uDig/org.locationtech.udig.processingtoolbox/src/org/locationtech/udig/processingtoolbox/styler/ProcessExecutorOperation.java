@@ -49,9 +49,10 @@ import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
-import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
 import org.geotools.process.spatialstatistics.pattern.QuadratOperation.QuadratResult;
+import org.geotools.process.spatialstatistics.relationship.OLSResult;
+import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult;
 import org.geotools.process.spatialstatistics.storage.DataStoreFactory;
 import org.geotools.process.spatialstatistics.storage.ShapeExportOperation;
 import org.geotools.process.spatialstatistics.styler.GraduatedColorStyleBuilder;
@@ -172,7 +173,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                                     .toString());
                             GridCoverage2D output = MapUtils.saveAsGeoTiff((GridCoverage2D) val,
                                     outputFile);
-                            
+
                             if (ToolboxView.getAddLayerAutomatically()) {
                                 MapUtils.addGridCoverageToMap(map, output, outputFile, null);
                             }
@@ -220,6 +221,8 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
             writer.writeNearestNeighbor((NearestNeighborResult) value);
         } else if (value instanceof PearsonResult) {
             writer.writePearson((PearsonResult) value);
+        } else if (value instanceof OLSResult) {
+            writer.writeOLSProcess((OLSResult) value);
         } else if (value instanceof JoinCountProcessResult) {
             writer.writeJoinCount((JoinCountProcessResult) value);
         } else if (value instanceof HistogramProcessResult) {
@@ -268,7 +271,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
         if (featureSource == null) {
             return;
         }
-        
+
         if (!ToolboxView.getAddLayerAutomatically()) {
             return;
         }
@@ -284,7 +287,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
         if (ToolboxView.getUseDefaultStyle()) {
             if (outputMeta.containsKey(Params.STYLES)) {
                 // KVP(Params.STYLES, "renderer.fieldname")
-                // renderer = LISA, UniqueValues, ClassBreaks, Density, Distance, Interpolation
+                // renderer = LISA, OLS, UniqueValues, ClassBreaks, Density, Distance, Interpolation
                 // ClassBreaks = EqualInterval, Quantile, NaturalBreaks, StdDev
 
                 try {
@@ -295,6 +298,8 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                     String functionName = null;
                     if (styleName.startsWith("LISA")) { //$NON-NLS-1$
                         style = ssBuilder.getLISAStyle("COType"); //$NON-NLS-1$
+                    } else if (styleName.startsWith("OLS")) { //$NON-NLS-1$
+                        style = ssBuilder.getOLSStyle(splits[1]);
                     } else if (styleName.startsWith("CL") || styleName.startsWith("JE") //$NON-NLS-1$ //$NON-NLS-2$
                             || styleName.startsWith("NA")) { //$NON-NLS-1$
                         functionName = "JenksNaturalBreaksFunction"; //$NON-NLS-1$

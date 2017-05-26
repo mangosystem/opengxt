@@ -9,6 +9,7 @@
  */
 package org.locationtech.udig.processingtoolbox.tools;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -24,11 +25,17 @@ import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
 import org.geotools.process.spatialstatistics.core.HistogramProcessResult.HistogramItem;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult.DataStatisticsItem;
-import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
-import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName;
-import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName.PearsonItem;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
 import org.geotools.process.spatialstatistics.pattern.QuadratOperation.QuadratResult;
+import org.geotools.process.spatialstatistics.relationship.OLSResult;
+import org.geotools.process.spatialstatistics.relationship.OLSResult.Diagnostics;
+import org.geotools.process.spatialstatistics.relationship.OLSResult.Variables.Variable;
+import org.geotools.process.spatialstatistics.relationship.OLSResult.Variance.RegressionItem;
+import org.geotools.process.spatialstatistics.relationship.OLSResult.Variance.ResidualItem;
+import org.geotools.process.spatialstatistics.relationship.OLSResult.Variance.SumItem;
+import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult;
+import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult.PropertyName;
+import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult.PropertyName.PearsonItem;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 
@@ -476,7 +483,7 @@ public class HtmlWriter {
 
     // NearestNeighborResult
     public void writeNearestNeighbor(NearestNeighborResult value) {
-        writeH1("Average Nearest Neighbor Summary");
+        writeH1("Average Nearest Neighbor");
         writeH2(value.getTypeName());
         write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
 
@@ -510,7 +517,7 @@ public class HtmlWriter {
 
     // HistogramProcessResult
     public void writeHistogramProcess(HistogramProcessResult value) {
-        writeH1("Histogram Summary");
+        writeH1("Histogram");
         writeH2(value.getTypeName() + ": " + value.getPropertyName());
         writeH2("Area: " + value.getArea());
         write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
@@ -535,7 +542,7 @@ public class HtmlWriter {
     }
 
     public void writeQuadratProcess(QuadratResult value) {
-        writeH1("Quadrat Analysis Summary");
+        writeH1("Quadrat Analysis");
         writeH2(value.getTypeName());
         write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
 
@@ -566,6 +573,105 @@ public class HtmlWriter {
         write("<tr><td>D value of Kolmogorov-Smirnov Test</td><td>" + value.getKolmogorov_Smirnov_Test() + "</td></tr>");
         write("<tr><td>Critical value at the 5% level</td><td>" + value.getCritical_Value_at_5percent() + "</td></tr>");
 
+        write("</table>");
+    }
+
+    public void writeOLSProcess(OLSResult value) {
+        writeH1("Ordinary Least Squares");
+        
+        // 1. Diagnostics
+        writeH2("Diagnostics");
+        write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+        // header
+        write("<colgroup>");
+        write("<col width=\"60%\" />");
+        write("<col width=\"40%\" />");
+        write("</colgroup>");
+
+        write("<tr bgcolor=\"#cccccc\">");
+        write("<td><strong>Category</strong></td>");
+        write("<td><strong>Value</strong></td>");
+        write("</tr>");
+
+        // body
+        Diagnostics diag = value.getDiagnostics();
+        write("<tr><td>R</td><td>" + format(diag.getR()) + "</td></tr>");
+        write("<tr><td>R-Squared</td><td>" + format(diag.getRSquared()) + "</td></tr>");
+        write("<tr><td>Adjusted R-Squared</td><td>" + format(diag.getAdjustedRSquared()) + "</td></tr>");
+        write("<tr><td>Standard Error</td><td>" + format(diag.getStandardError()) + "</td></tr>");
+        write("<tr><td>Number of Observations</td><td>" + format(diag.getNumberOfObservations()) + "</td></tr>");
+        write("</table>");
+        
+        // 2. Variance
+        writeH2("Model Variables");
+        write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+        // header
+        write("<colgroup>");
+        write("<col width=\"15%\" />");
+        write("<col width=\"5%\" />");
+        write("<col width=\"20%\" />");
+        write("<col width=\"20%\" />");
+        write("<col width=\"20%\" />");
+        write("<col width=\"20%\" />");
+        write("</colgroup>");
+
+        write("<tr bgcolor=\"#cccccc\">");
+        write("<td><strong>-</strong></td>");
+        write("<td><strong>DoF</strong></td>");
+        write("<td><strong>Sum of squares</strong></td>");
+        write("<td><strong>Square mean</strong></td>");
+        write("<td><strong>F-Statistic</strong></td>");
+        write("<td><strong>Probability</strong></td>");
+        write("</tr>");
+
+        // body
+        RegressionItem reg = value.getVariance().getRegression();
+        write("<tr><td>Residual</td><td>" + reg.getDegreesOfFreedom() + "</td><td>"
+                + format(reg.getSumOfSquare()) + "</td><td>" + format(reg.getSquareMean())
+                + "</td><td>" + format(reg.getfStatistic()) + "</td><td>"
+                + format(reg.getfProbability()) + "</td></tr>");
+
+        ResidualItem res = value.getVariance().getResidual();
+        write("<tr><td>Residual</td><td>" + res.getDegreesOfFreedom() + "</td><td>"
+                + format(res.getSumOfSquare()) + "</td><td>" + format(res.getSquareMean())
+                + "</td><td>-</td><td>-</td></tr>");
+        
+        SumItem sum = value.getVariance().getSum();
+        write("<tr><td>Sum</td><td>" + sum.getDegreesOfFreedom() + "</td><td>"
+                + format(sum.getSumOfSquare()) + "</td><td>-</td><td>-</td><td>-</td></tr>");
+        write("</table>");
+        
+        // 3. Model Variables
+        writeH2("Model Variables");
+        write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+        // header
+        write("<colgroup>");
+        write("<col width=\"20%\" />");
+        write("<col width=\"20%\" />");
+        write("<col width=\"20%\" />");
+        write("<col width=\"20%\" />");
+        write("<col width=\"20%\" />");
+        write("</colgroup>");
+
+        write("<tr bgcolor=\"#cccccc\">");
+        write("<td><strong>Variable</strong></td>");
+        write("<td><strong>Coefficient</strong></td>");
+        write("<td><strong>StdError</strong></td>");
+        write("<td><strong>t-Statistic</strong></td>");
+        write("<td><strong>Probability</strong></td>");
+        write("</tr>");
+
+        // body
+        List<Variable> items = value.getVariables().getItems();
+        for (Variable var : items) {
+            write("<tr><td>" + var.getVariable() + "</td><td>"
+                    + format(var.getCoefficient()) + "</td><td>" + format(var.getStdError())
+                    + "</td><td>" + format(var.gettStatistic()) + "</td><td>"
+                    + format(var.getProbability()) + "</td></tr>");
+        }
         write("</table>");
     }
 

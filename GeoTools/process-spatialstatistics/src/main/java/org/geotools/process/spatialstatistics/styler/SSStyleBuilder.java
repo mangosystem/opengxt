@@ -125,6 +125,20 @@ public class SSStyleBuilder {
 
         return buildStyle(propertyName, styleName, classBreaks, classDescs, colorList);
     }
+    
+    public Style getOLSStyle(String propertyName) {
+        final String styleName = "Standard Residual";
+
+        final double[] classBreaks = { -2.5, -1.5, -0.5, 0.5, 1.5, 2.5 };
+
+        final String[] classDescs = { "< -2.5", "-2.5 ~ -1.5", "-1.5 ~ -0.5", "-0.5 ~ 0.5", "0.5 ~ 1.5", "1.5 ~ 2.5", "> 2.5" };
+
+        final Color[] colorList = { new Color(69, 117, 181), new Color(132, 158, 186),
+                new Color(192, 204, 190), new Color(255, 255, 191), new Color(250, 185, 132),
+                new Color(237, 117, 81), new Color(214, 47, 39) };
+
+        return buildStyle(propertyName, styleName, classBreaks, classDescs, colorList);
+    }
 
     public Style buildStyle(String propertyName, String styleName, double[] classBreaks,
             String[] classDescs, Color[] colorList) {

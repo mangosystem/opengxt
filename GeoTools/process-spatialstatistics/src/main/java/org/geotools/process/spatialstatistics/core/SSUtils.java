@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics.core;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.util.logging.Logging;
@@ -106,6 +107,147 @@ public class SSUtils {
         }
 
         return pvalue;
+    }
+
+    public static double fProb(double x, int m, int n, StatEnum type) {
+        // Calculates the area under the curve for the F-distribution.
+        int a, b, i, j;
+        double w, z, p, y, d;
+
+        a = 2 * (m / 2) - m + 2;
+        b = 2 * (n / 2) - n + 2;
+        w = x * ((double) m / (double) n);
+        z = 1.0 / (1.0 + w);
+
+        p = 0;
+        y = 0.3183098862;
+
+        if (a == 1) {
+            if (b == 1) {
+                p = Math.sqrt(w);
+                d = y * z / p;
+                p = 2.0 * y * Math.atan(p);
+            } else {
+                p = Math.sqrt(w * z);
+                d = 0.5 * p * z / w;
+            }
+        } else {
+            if (b == 1) {
+                p = Math.sqrt(z);
+                d = 0.5 * z * p;
+                p = 1.0 - p;
+            } else {
+                d = z * z;
+                p = w * z;
+            }
+        }
+
+        y = 2.0 * w / z;
+        j = b + 2;
+        while (j <= n) {
+            d = (1 + (1.0 * a) / (j - 2)) * d * z;
+            if (a == 1) {
+                p = p + d * y / (j - 1);
+            } else {
+                p = (p + w) * z;
+            }
+            j += 2;
+        }
+
+        y = w * z;
+        z = 2.0 / z;
+        b = n - 2;
+        i = a + 2;
+        while (i <= m) {
+            j = i + b;
+            d = y * d * j / (i - 2);
+            p = p - z * d / j;
+            i += 2;
+        }
+
+        if (type == StatEnum.LEFT) {
+            p = 1.0 - p;
+        }
+
+        return p;
+    }
+
+    public static double tProb(double dof, double t, StatEnum type) {
+        // Calculates the area under the curve of the studentized-t distribution.
+        // NOTES: Source - Algorithm AS 66: Applied Statistics, Vol. 22(3), 1973
+
+        if (dof <= 1) {
+            LOGGER.log(Level.ALL, "Must hava more than One Degree of Freedom!");
+            throw new IllegalArgumentException();
+        }
+
+        if (2 <= dof && dof <= 4) {
+            LOGGER.log(Level.WARNING, "Degrees of Freedom is lesser than 5!");
+        }
+
+        double x1 = 0.09979441;
+        double x2 = -0.581821;
+        double x3 = 1.390993;
+        double x4 = -1.222452;
+        double x5 = 2.151185;
+        double x6 = 5.537409;
+        double x7 = 11.42343;
+        double x8 = 0.04431742;
+        double x9 = -0.2206018;
+        double x10 = -0.03317253;
+        double x11 = 5.679969;
+        double x12 = -12.96519;
+        double x13 = 5.166733;
+        double x14 = 13.49862;
+        double x15 = 0.009694901;
+        double x16 = -0.1408854;
+        double x17 = 1.88993;
+        double x18 = -12.75532;
+        double x19 = 25.77532;
+        double x20 = 4.233736;
+        double x21 = 14.3963;
+        double x22 = -9.187228E-5;
+        double x23 = 0.03789901;
+        double x24 = -1.280346;
+        double x25 = 9.249528;
+        double x26 = -19.08115;
+        double x27 = 2.777816;
+        double x28 = 16.46132;
+        double x29 = 5.79602E-4;
+        double x30 = -0.02763334;
+        double x31 = 0.4517029;
+        double x32 = -2.657697;
+        double x33 = 5.127212;
+        double x34 = 0.5657187;
+        double x35 = 21.83269;
+
+        double V = 1.0 / dof;
+        double abst = Math.abs(t);
+
+        double tmp = 1.
+                + abst
+                * (((x1 + V * (x2 + V * (x3 + V * (x4 + V * x5)))) / (1 - V * (x6 - V * x7))) + abst
+                        * (((x8 + V * (x9 + V * (x10 + V * (x11 + V * x12)))) / (1 - V
+                                * (x13 - V * x14))) + abst
+                                * (((x15 + V * (x16 + V * (x17 + V * (x18 + V * x19)))) / (1 - V
+                                        * (x20 - V * x21))) + abst
+                                        * (((x22 + V * (x23 + V * (x24 + V * (x25 + V * x26)))) / (1 - V
+                                                * (x27 - V * x28))) + abst
+                                                * ((x29 + V
+                                                        * (x30 + V * (x31 + V * (x32 + V * x33)))) / (1 - V
+                                                        * (x34 - V * x35)))))));
+
+        double pValue = 0.5 * Math.pow(tmp, -8.0);
+
+        if (type == StatEnum.LEFT) {
+            if (t > 0) {
+                pValue = 1.0 - pValue;
+            }
+        } else if (type == StatEnum.BOTH) {
+            pValue = 2.0 * pValue;
+        }
+
+        return pValue;
     }
 
     public static double convert2Degree(double radians) {

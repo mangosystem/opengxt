@@ -1,7 +1,9 @@
 org.geotools.process.spatialstatistics.CountFeaturesProcessFactory
 org.geotools.process.spatialstatistics.AreaProcessFactory
 org.geotools.process.spatialstatistics.StatisticsFeaturesProcessFactory
+
 org.geotools.process.spatialstatistics.PearsonCorrelationProcessFactory
+org.geotools.process.spatialstatistics.OLSProcessFactory
 
 org.geotools.process.spatialstatistics.NearestNeighborProcessFactory
 org.geotools.process.spatialstatistics.QuadratAnalysisProcessFactory

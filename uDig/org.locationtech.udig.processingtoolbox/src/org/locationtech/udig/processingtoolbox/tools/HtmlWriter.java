@@ -577,7 +577,7 @@ public class HtmlWriter {
     }
 
     public void writeOLSProcess(OLSResult value) {
-        writeH1("Ordinary Least Squares");
+        writeH1("Ordinary Least Squares (OLS)");
         
         // 1. Diagnostics
         writeH2("Diagnostics");
@@ -604,7 +604,7 @@ public class HtmlWriter {
         write("</table>");
         
         // 2. Variance
-        writeH2("Model Variables");
+        writeH2("Variance Analysis");
         write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
 
         // header

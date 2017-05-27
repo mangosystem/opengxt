@@ -19,6 +19,8 @@ package org.geotools.process.spatialstatistics.relationship;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.thoughtworks.xstream.annotations.XStreamImplicit;
+
 /**
  * Performs Ordinary Least Squares (OLS) linear regression result for WPS PPIO
  * 
@@ -258,6 +260,7 @@ public class OLSResult {
 
     public static class Variables {
 
+        @XStreamImplicit(itemFieldName = "Item")
         List<Variable> items = new ArrayList<Variable>();
 
         public List<Variable> getItems() {

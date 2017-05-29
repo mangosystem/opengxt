@@ -596,11 +596,13 @@ public class HtmlWriter {
 
         // body
         Diagnostics diag = value.getDiagnostics();
+        write("<tr><td>Number of Observations</td><td>" + format(diag.getNumberOfObservations()) + "</td></tr>");
         write("<tr><td>R</td><td>" + format(diag.getR()) + "</td></tr>");
         write("<tr><td>R-Squared</td><td>" + format(diag.getRSquared()) + "</td></tr>");
         write("<tr><td>Adjusted R-Squared</td><td>" + format(diag.getAdjustedRSquared()) + "</td></tr>");
         write("<tr><td>Standard Error</td><td>" + format(diag.getStandardError()) + "</td></tr>");
-        write("<tr><td>Number of Observations</td><td>" + format(diag.getNumberOfObservations()) + "</td></tr>");
+        write("<tr><td>Akaike's Information Criterion (AIC)</td><td>" + format(diag.getAIC()) + "</td></tr>");
+        write("<tr><td>Corrected Akaike's Information Criterion (AICc)</td><td>" + format(diag.getAICc()) + "</td></tr>");
         write("</table>");
         
         // 2. Variance
@@ -628,7 +630,7 @@ public class HtmlWriter {
 
         // body
         RegressionItem reg = value.getVariance().getRegression();
-        write("<tr><td>Residual</td><td>" + reg.getDegreesOfFreedom() + "</td><td>"
+        write("<tr><td>Regression</td><td>" + reg.getDegreesOfFreedom() + "</td><td>"
                 + format(reg.getSumOfSquare()) + "</td><td>" + format(reg.getSquareMean())
                 + "</td><td>" + format(reg.getfStatistic()) + "</td><td>"
                 + format(reg.getfProbability()) + "</td></tr>");

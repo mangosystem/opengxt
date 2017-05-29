@@ -72,6 +72,10 @@ public class OLSResult {
 
         Integer numberOfObservations = Integer.valueOf(0);
 
+        Double AIC = Double.valueOf(0.0);
+
+        Double AICc = Double.valueOf(0.0);
+
         public Double getR() {
             return R;
         }
@@ -110,6 +114,22 @@ public class OLSResult {
 
         public void setNumberOfObservations(Integer numberOfObservations) {
             this.numberOfObservations = numberOfObservations;
+        }
+
+        public Double getAICc() {
+            return AICc;
+        }
+
+        public void setAICc(Double AICc) {
+            this.AICc = AICc;
+        }
+
+        public Double getAIC() {
+            return AIC;
+        }
+
+        public void setAIC(Double AIC) {
+            this.AIC = AIC;
         }
 
     }

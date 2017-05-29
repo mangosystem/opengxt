@@ -62,7 +62,7 @@ public class OLSOperation extends GeneralOperation {
 
     private double SST, SSE, SSR, MSR, MSE, STDERR, F, sigF;
 
-    private double meanY, R, R2, R2adjusted;
+    private double meanY, R, R2, R2adjusted, AIC, AICc;
 
     private int n, k, dof1, dof2;
 
@@ -205,6 +205,13 @@ public class OLSOperation extends GeneralOperation {
         // Joint F-Statistic Probability (p-value)
         sigF = Math.abs(SSUtils.fProb(F, dof1, dof2, StatEnum.LEFT));
 
+        // AIC / AICc
+        double logLik = -(n / 2.0) * (1.0 + Math.log(2.0 * Math.PI)) - (n / 2.0)
+                * Math.log(SSE / n);
+        double k2 = k + 2;
+        AIC = -2.0 * logLik + 2.0 * k2;
+        AICc = -2.0 * logLik + 2.0 * k2 * (double) (n / (n - k2 - 1));
+
         // Step 2: Cholesky Decomposition
         CholeskyDecomposition<DenseMatrix64F> chol = null;
         chol = DecompositionFactory.chol(ZtrZ.numRows(), true);
@@ -237,7 +244,7 @@ public class OLSOperation extends GeneralOperation {
             ST.set(i, 3, pValue);
         }
 
-        // TODO build OLS Summary
+        // build OLS Summary
         this.buildOLSResult();
         if (false == analyzeResidual) {
             return OLS;
@@ -288,6 +295,8 @@ public class OLSOperation extends GeneralOperation {
         diagnostics.setAdjustedRSquared(R2adjusted);
         diagnostics.setStandardError(STDERR);
         diagnostics.setNumberOfObservations(n);
+        diagnostics.setAIC(AIC);
+        diagnostics.setAICc(AICc);
 
         // Variation
         Variance variance = OLS.getVariance();
@@ -415,11 +424,13 @@ public class OLSOperation extends GeneralOperation {
 
         System.out.println("\n----------------------------------------------------------------");
         System.out.println("#. OLS Diagnostics");
+        System.out.println("Number of Observations = " + n);
         System.out.println("R = " + format.format(R));
         System.out.println("R-Squared = " + format.format(R2));
         System.out.println("Adjusted R-Squared = " + format.format(R2adjusted));
         System.out.println("Standard Error = " + format.format(STDERR));
-        System.out.println("Number of Observations = " + n);
+        System.out.println("Akaike's Information Criterion (AIC) = " + format.format(AIC));
+        System.out.println("Corrected Akaike's Information Criterion (AICc) = " + format.format(AICc));
 
         System.out.println("\n#. OLS Results - Model Variables");
         System.out

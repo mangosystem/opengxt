@@ -379,6 +379,7 @@ public class Messages extends NLS {
     public static String ToolboxView_DescriptiveStatistics;
     public static String ToolboxView_PointPattern;
     public static String ToolboxView_Autocorrelation;
+    public static String ToolboxView_Relationsips;
     public static String ToolboxView_Cluster;
     public static String ToolboxView_Distribution;
     public static String ToolboxView_GeneralTools;

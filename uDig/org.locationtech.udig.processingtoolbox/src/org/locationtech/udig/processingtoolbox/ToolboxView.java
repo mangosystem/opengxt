@@ -316,8 +316,6 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent ssTools = new TreeParent(Messages.ToolboxView_SpatialStatistics, null, null);
         root.addChild(ssTools);
 
-        buildTool(ssTools, Messages.SpatialWeightsMatrixDialog_title, "SpatialWeightsMatrixDialog");
-
         // Descriptive Statistics
         TreeParent desTools = new TreeParent(Messages.ToolboxView_DescriptiveStatistics, null, null);
         ssTools.addChild(desTools);
@@ -326,8 +324,6 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(desTools, "org.geotools.process.spatialstatistics.StatisticsFeaturesProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.StandardizedScoresProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.FocalLQProcessFactory");
-        buildTool(desTools, "org.geotools.process.spatialstatistics.PearsonCorrelationProcessFactory");
-        buildTool(desTools, "org.geotools.process.spatialstatistics.OLSProcessFactory");
 
         // Point Pattern Analysis
         TreeParent patternTools = new TreeParent(Messages.ToolboxView_PointPattern, null, null);
@@ -336,7 +332,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(patternTools, "org.geotools.process.spatialstatistics.QuadratAnalysisProcessFactory");
         buildTool(patternTools, "org.geotools.process.spatialstatistics.KNearestNeighborMapProcessFactory");
         buildTool(patternTools, "org.geotools.process.spatialstatistics.KMeansClusteringProcessFactory");
-
+        
         // Global Spatial Autocorrelation
         TreeParent autoTools = new TreeParent(Messages.ToolboxView_Autocorrelation, null, null);
         ssTools.addChild(autoTools);
@@ -357,6 +353,13 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalLeesSProcessFactory");
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalLeesLProcessFactory");
         // buildTool(clusterTools, Messages.AmoebaWizardDialog_title, "AmoebaWizardDialog");
+        
+        // Spatial Relationships
+        TreeParent relTools = new TreeParent(Messages.ToolboxView_Relationsips, null, null);
+        ssTools.addChild(relTools);
+        buildTool(relTools, Messages.SpatialWeightsMatrixDialog_title, "SpatialWeightsMatrixDialog");
+        buildTool(relTools, "org.geotools.process.spatialstatistics.PearsonCorrelationProcessFactory");
+        buildTool(relTools, "org.geotools.process.spatialstatistics.OLSProcessFactory");
 
         // Spatial Distribution
         TreeParent distributionTools = new TreeParent(Messages.ToolboxView_Distribution, null, null);

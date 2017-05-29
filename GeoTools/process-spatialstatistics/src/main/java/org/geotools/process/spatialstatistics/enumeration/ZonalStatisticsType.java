@@ -17,60 +17,46 @@
 package org.geotools.process.spatialstatistics.enumeration;
 
 /**
- * StaticsType
+ * Zonal Statistics Type
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public enum StaticsType {
-    /**
-     * Finds the first record in the features and uses its specified field value.
-     */
-    First,
-
-    /**
-     * Finds the last record in the features and uses its specified field value.
-     */
-    Last,
-
-    /**
-     * Adds the total value for the specified field.
-     */
-    Sum,
-
-    /**
-     * Calculates the average for the specified field.
-     */
-    Mean,
-
-    /**
-     * Finds the smallest value for all records of the specified field.
-     */
-    Minimum,
-
-    /**
-     * Finds the largest value for all records of the specified field.
-     */
-    Maximum,
-
-    /**
-     * Finds the range of values (Maximum – Minimum) for the specified field.
-     */
-    Range,
-
-    /**
-     * Finds the standard deviation on values in the specified field.
-     */
-    StandardDeviation,
-
-    /**
-     * Finds the variance on values in the specified field.
-     */
-    Variance,
+public enum ZonalStatisticsType {
 
     /**
      * Finds the number of values included in statistical calculations.
      */
-    Count
+    Count,
+
+    /**
+     * Adds the total value of all cells in the value raster that belong to the same zone as the output cell.
+     */
+    Sum,
+
+    /**
+     * Calculates the average of all cells in the value raster that belong to the same zone as the output cell.
+     */
+    Mean,
+
+    /**
+     * Finds the smallest value of all cells in the value raster that belong to the same zone as the output cell.
+     */
+    Minimum,
+
+    /**
+     * Finds the largest value of all cells in the value raster that belong to the same zone as the output cell.
+     */
+    Maximum,
+
+    /**
+     * Finds the range of values (Maximum – Minimum) of all cells in the value raster that belong to the same zone as the output cell.
+     */
+    Range,
+
+    /**
+     * Finds the standard deviation on values of all cells in the value raster that belong to the same zone as the output cell.
+     */
+    StdDev
 }

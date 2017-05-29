@@ -34,6 +34,7 @@ import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor.DoubleStrategy;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitorResult;
+import org.geotools.process.spatialstatistics.enumeration.ZonalStatisticsType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
@@ -53,16 +54,22 @@ import com.vividsolutions.jts.geom.Geometry;
 public class RasterZonalOperation extends RasterProcessingOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterZonalOperation.class);
 
-    final String[] FIELDS = { "Count", "Area", "Min", "Max", "Range", "Mean", "StdDev", "Sum" };
-
     private double cellArea = 0.0;
+
+    private ZonalStatisticsType statisticsType = ZonalStatisticsType.Mean; // default
+
+    private String targetField = ZonalStatisticsType.Mean.name(); // default
 
     public RasterZonalOperation() {
 
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection zoneFeatures,
-            GridCoverage2D valueCoverage, Integer bandIndex) throws IOException {
+            String targetField, GridCoverage2D valueCoverage, Integer bandIndex,
+            ZonalStatisticsType statisticsType) throws IOException {
+        this.statisticsType = statisticsType;
+        this.targetField = targetField;
+
         // check crs
         CoordinateReferenceSystem gCRS = valueCoverage.getCoordinateReferenceSystem();
         CoordinateReferenceSystem fCRS = zoneFeatures.getSchema().getCoordinateReferenceSystem();
@@ -111,7 +118,7 @@ public class RasterZonalOperation extends RasterProcessingOperation {
             zoneIter.startPixels();
             inputIter.startPixels();
             while (!zoneIter.finishedPixels() && !inputIter.finishedPixels()) {
-                final double key = zoneIter.getSampleDouble(0); // one band
+                final Integer key = zoneIter.getSample(0); // one band
                 final double value = inputIter.getSampleDouble(bandIndex);
 
                 if (!SSUtils.compareDouble(zoneNoData, key)
@@ -159,26 +166,44 @@ public class RasterZonalOperation extends RasterProcessingOperation {
                 SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
 
+                // Count, Sum, Mean, Minimum, Maximum, Range, StdDev, Area
                 StatisticsVisitor visitor = visitorMap.get(featureID);
                 if (visitor == null) {
-                    newFeature.setAttribute(FIELDS[0], 0); // Count
-                    newFeature.setAttribute(FIELDS[1], null); // Min
-                    newFeature.setAttribute(FIELDS[2], null); // Max
-                    newFeature.setAttribute(FIELDS[3], null); // Range
-                    newFeature.setAttribute(FIELDS[4], null); // Mean
-                    newFeature.setAttribute(FIELDS[5], null); // StdDev
-                    newFeature.setAttribute(FIELDS[6], 0.0); // Sum
-                    newFeature.setAttribute(FIELDS[7], 0.0); // Area
+                    if (statisticsType == ZonalStatisticsType.Count) {
+                        newFeature.setAttribute(targetField, Integer.valueOf(0));
+                    } else {
+                        newFeature.setAttribute(targetField, null);
+                    }
+                    newFeature.setAttribute("Cell_Area", 0.0);
                 } else {
                     StatisticsVisitorResult ret = visitor.getResult();
-                    newFeature.setAttribute("Count", ret.getCount());
-                    newFeature.setAttribute("Min", ret.getMinimum());
-                    newFeature.setAttribute("Max", ret.getMaximum());
-                    newFeature.setAttribute("Range", ret.getRange());
-                    newFeature.setAttribute("Mean", ret.getMean());
-                    newFeature.setAttribute("Std", ret.getStandardDeviation());
-                    newFeature.setAttribute("Sum", ret.getSum());
-                    newFeature.setAttribute("Area", ret.getCount() * cellArea);
+                    switch (statisticsType) {
+                    case Count:
+                        newFeature.setAttribute(targetField, ret.getCount());
+                        break;
+                    case Maximum:
+                        newFeature.setAttribute(targetField, ret.getMaximum());
+                        break;
+                    case Mean:
+                        newFeature.setAttribute(targetField, ret.getMean());
+                        break;
+                    case Minimum:
+                        newFeature.setAttribute(targetField, ret.getMinimum());
+                        break;
+                    case Range:
+                        newFeature.setAttribute(targetField, ret.getRange());
+                        break;
+                    case StdDev:
+                        newFeature.setAttribute(targetField, ret.getStandardDeviation());
+                        break;
+                    case Sum:
+                        newFeature.setAttribute(targetField, ret.getSum());
+                        break;
+                    default:
+                        newFeature.setAttribute(targetField, ret.getMean());
+                        break;
+                    }
+                    newFeature.setAttribute("Cell_Area", ret.getCount() * cellArea);
                 }
                 featureWriter.write(newFeature);
                 featureID++;
@@ -194,10 +219,15 @@ public class RasterZonalOperation extends RasterProcessingOperation {
 
     private IFeatureInserter prepareFeatureWriter(SimpleFeatureCollection zoneSfs) {
         SimpleFeatureType featureType = zoneSfs.getSchema();
-        featureType = FeatureTypes.add(featureType, FIELDS[0], Integer.class, 38);
-        for (int index = 1; index < FIELDS.length; index++) {
-            featureType = FeatureTypes.add(featureType, FIELDS[index], Integer.class, 38);
+
+        if (statisticsType == ZonalStatisticsType.Count) {
+            featureType = FeatureTypes.add(featureType, targetField, Integer.class, 10);
+        } else {
+            featureType = FeatureTypes.add(featureType, targetField, Double.class, 19);
         }
+
+        // default
+        featureType = FeatureTypes.add(featureType, "Cell_Area", Double.class, 19);
 
         // prepare transactional feature store
         return getTransactionFeatureStore(featureType);

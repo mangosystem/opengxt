@@ -28,6 +28,7 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.ZonalStatisticsType;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterZonalOperation;
 import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
 import org.geotools.referencing.CRS;
@@ -54,11 +55,14 @@ public class RasterZonalStatisticsProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection zoneFeatures,
-            GridCoverage2D inputCoverage, Integer bandIndex, ProgressListener monitor) {
+            String targetField, GridCoverage2D inputCoverage, Integer bandIndex,
+            ZonalStatisticsType statisticsType, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(RasterZonalStatisticsProcessFactory.zoneFeatures.key, zoneFeatures);
+        map.put(RasterZonalStatisticsProcessFactory.targetField.key, targetField);
         map.put(RasterZonalStatisticsProcessFactory.valueCoverage.key, inputCoverage);
         map.put(RasterZonalStatisticsProcessFactory.bandIndex.key, bandIndex);
+        map.put(RasterZonalStatisticsProcessFactory.statisticsType.key, statisticsType);
 
         Process process = new RasterZonalStatisticsProcess(null);
         Map<String, Object> resultMap;
@@ -89,6 +93,18 @@ public class RasterZonalStatisticsProcess extends AbstractStatisticsProcess {
                 RasterZonalStatisticsProcessFactory.bandIndex,
                 RasterZonalStatisticsProcessFactory.bandIndex.sample);
 
+        ZonalStatisticsType statisticsType = (ZonalStatisticsType) Params.getValue(input,
+                RasterZonalStatisticsProcessFactory.statisticsType,
+                RasterZonalStatisticsProcessFactory.statisticsType.sample);
+
+        String targetField = (String) Params.getValue(input,
+                RasterZonalStatisticsProcessFactory.targetField,
+                RasterZonalStatisticsProcessFactory.targetField.sample);
+
+        if (targetField == null || targetField.isEmpty()) {
+            targetField = statisticsType.name();
+        }
+
         // reproject zoneFeatures's crs if needed
         boolean crsChanged = false;
         CoordinateReferenceSystem gCRS = valueCoverage.getCoordinateReferenceSystem();
@@ -102,7 +118,8 @@ public class RasterZonalStatisticsProcess extends AbstractStatisticsProcess {
         SimpleFeatureCollection result = null;
         try {
             RasterZonalOperation process = new RasterZonalOperation();
-            result = process.execute(zoneFeatures, valueCoverage, bandIndex);
+            result = process.execute(zoneFeatures, targetField, valueCoverage, bandIndex,
+                    statisticsType);
             if (crsChanged) {
                 result = new ReprojectFeatureCollection(result, gCRS, fCRS, true);
             }

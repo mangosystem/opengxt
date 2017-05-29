@@ -28,6 +28,9 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.ZonalStatisticsType;
+import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
 
@@ -45,7 +48,8 @@ public class RasterZonalStatisticsProcessFactory extends SpatialStatisticsProces
     private static final String PROCESS_NAME = "ZonalStatistics";
 
     /*
-     * ZonalStatistics(SimpleFeatureCollection zoneFeatures, GridCoverage2D valueCoverage, Integer bandIndex): SimpleFeatureCollection
+     * ZonalStatistics(SimpleFeatureCollection zoneFeatures, String targetField, GridCoverage2D valueCoverage, Integer bandIndex, ZonalStaticsType
+     * staticsType): SimpleFeatureCollection
      */
 
     public RasterZonalStatisticsProcessFactory() {
@@ -73,6 +77,12 @@ public class RasterZonalStatisticsProcessFactory extends SpatialStatisticsProces
             getResource("ZonalStatistics.zoneFeatures.title"),
             getResource("ZonalStatistics.zoneFeatures.description"), true, 1, 1, null, null);
 
+    /** targetField */
+    public static final Parameter<String> targetField = new Parameter<String>("targetField",
+            String.class, getResource("ZonalStatistics.targetField.title"),
+            getResource("ZonalStatistics.targetField.description"), false, 0, 1, "val", new KVP(
+                    Params.FIELD, "zoneFeatures.Number"));
+
     /** valueCoverage */
     public static final Parameter<GridCoverage2D> valueCoverage = new Parameter<GridCoverage2D>(
             "valueCoverage", GridCoverage2D.class,
@@ -85,12 +95,21 @@ public class RasterZonalStatisticsProcessFactory extends SpatialStatisticsProces
             getResource("ZonalStatistics.bandIndex.description"), false, 0, 1, Integer.valueOf(0),
             null);
 
+    /** statisticsType */
+    public static final Parameter<ZonalStatisticsType> statisticsType = new Parameter<ZonalStatisticsType>(
+            "statisticsType", ZonalStatisticsType.class,
+            getResource("ZonalStatistics.statisticsType.title"),
+            getResource("ZonalStatistics.statisticsType.description"), false, 0, 1,
+            ZonalStatisticsType.Mean, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(zoneFeatures.key, zoneFeatures);
+        parameterInfo.put(targetField.key, targetField);
         parameterInfo.put(valueCoverage.key, valueCoverage);
         parameterInfo.put(bandIndex.key, bandIndex);
+        parameterInfo.put(statisticsType.key, statisticsType);
         return parameterInfo;
     }
 

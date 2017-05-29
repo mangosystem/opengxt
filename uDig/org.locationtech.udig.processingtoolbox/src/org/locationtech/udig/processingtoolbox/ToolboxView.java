@@ -577,6 +577,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         // Conversion
         TreeParent conversionTool = new TreeParent(Messages.ToolboxView_Conversion, null, null);
         generalTool.addChild(conversionTool);
+        buildTool(conversionTool, "org.geotools.process.spatialstatistics.FeaturesToRasterProcessFactory");
+        buildTool(conversionTool, "org.geotools.process.spatialstatistics.PointsToRasterProcessFactory");
         buildTool(conversionTool, "org.geotools.process.spatialstatistics.RasterToPolygonProcessFactory");
 
         // Reclass
@@ -615,6 +617,11 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterProfileProcessFactory");
         buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterLinearLOSProcessFactory");
         buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterRadialLOSProcessFactory");
+        
+        // Surface Analysis
+        TreeParent zonalTool = new TreeParent(Messages.ToolboxView_RasterZonal, null, null);
+        generalTool.addChild(zonalTool);
+        buildTool(zonalTool, "org.geotools.process.spatialstatistics.RasterZonalStatisticsProcessFactory");
     }
 
     private void buildTool(TreeParent parent, String title, String dialogName) {

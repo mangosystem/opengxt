@@ -134,3 +134,4 @@ org.geotools.process.spatialstatistics.RasterToImageProcessFactory
 org.geotools.process.spatialstatistics.RasterZonalStatisticsProcessFactory
 org.geotools.process.spatialstatistics.FeaturesToRasterProcessFactory
 org.geotools.process.spatialstatistics.PointsToRasterProcessFactory
+org.geotools.process.spatialstatistics.GeometryToRasterProcessFactory

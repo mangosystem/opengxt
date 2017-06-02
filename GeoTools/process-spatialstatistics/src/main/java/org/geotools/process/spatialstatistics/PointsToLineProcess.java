@@ -50,11 +50,13 @@ public class PointsToLineProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            String lineField, String sortField, Boolean closeLine, ProgressListener monitor) {
+            String lineField, String sortField, Boolean useBezierCurve, Boolean closeLine,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(PointsToLineProcessFactory.inputFeatures.key, inputFeatures);
         map.put(PointsToLineProcessFactory.lineField.key, lineField);
         map.put(PointsToLineProcessFactory.sortField.key, sortField);
+        map.put(PointsToLineProcessFactory.useBezierCurve.key, useBezierCurve);
         map.put(PointsToLineProcessFactory.closeLine.key, closeLine);
 
         Process process = new PointsToLineProcess(null);
@@ -78,6 +80,9 @@ public class PointsToLineProcess extends AbstractStatisticsProcess {
                 null);
         String sortField = (String) Params.getValue(input, PointsToLineProcessFactory.sortField,
                 null);
+        Boolean useBezierCurve = (Boolean) Params.getValue(input,
+                PointsToLineProcessFactory.useBezierCurve,
+                PointsToLineProcessFactory.useBezierCurve.sample);
         Boolean closeLine = (Boolean) Params.getValue(input, PointsToLineProcessFactory.closeLine,
                 PointsToLineProcessFactory.closeLine.sample);
         if (inputFeatures == null) {
@@ -88,6 +93,8 @@ public class PointsToLineProcess extends AbstractStatisticsProcess {
         SimpleFeatureCollection resultFc = null;
         try {
             PointsToLineOperation operation = new PointsToLineOperation();
+            operation.setUseBezierCurve(useBezierCurve);
+            operation.setCloseLine(closeLine);
             resultFc = operation.execute(inputFeatures, lineField, sortField, closeLine);
         } catch (IOException e) {
             throw new ProcessException(e);

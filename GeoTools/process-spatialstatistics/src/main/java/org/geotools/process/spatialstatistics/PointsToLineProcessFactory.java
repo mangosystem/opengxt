@@ -45,7 +45,8 @@ public class PointsToLineProcessFactory extends SpatialStatisticsProcessFactory 
     private static final String PROCESS_NAME = "PointsToLine";
 
     /*
-     * PointsToLine(SimpleFeatureCollection inputFeatures, String lineField, String sortField, Boolean closeLine): SimpleFeatureCollection
+     * PointsToLine(SimpleFeatureCollection inputFeatures, String lineField, String sortField, Boolean useBezierCurve, Boolean closeLine):
+     * SimpleFeatureCollection
      */
 
     public PointsToLineProcessFactory() {
@@ -86,6 +87,12 @@ public class PointsToLineProcessFactory extends SpatialStatisticsProcessFactory 
             getResource("PointsToLine.sortField.description"), false, 0, 1, null, new KVP(
                     Params.FIELD, "inputFeatures.All"));
 
+    /** useBezierCurve */
+    public static final Parameter<Boolean> useBezierCurve = new Parameter<Boolean>(
+            "useBezierCurve", Boolean.class, getResource("PointsToLine.useBezierCurve.title"),
+            getResource("PointsToLine.useBezierCurve.description"), false, 0, 1, Boolean.FALSE,
+            null);
+
     /** closeLine */
     public static final Parameter<Boolean> closeLine = new Parameter<Boolean>("closeLine",
             Boolean.class, getResource("PointsToLine.closeLine.title"),
@@ -97,6 +104,7 @@ public class PointsToLineProcessFactory extends SpatialStatisticsProcessFactory 
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(lineField.key, lineField);
         parameterInfo.put(sortField.key, sortField);
+        parameterInfo.put(useBezierCurve.key, useBezierCurve);
         parameterInfo.put(closeLine.key, closeLine);
         return parameterInfo;
     }

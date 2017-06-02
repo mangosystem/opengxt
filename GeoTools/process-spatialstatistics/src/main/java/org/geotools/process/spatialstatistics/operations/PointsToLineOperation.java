@@ -24,6 +24,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.process.spatialstatistics.util.BezierCurve;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -54,17 +55,51 @@ public class PointsToLineOperation extends GeneralOperation {
 
     private String lineField = null;
 
+    private boolean useBezierCurve = false;
+
+    private BezierCurve bezierCurve = null;
+
+    public boolean isCloseLine() {
+        return closeLine;
+    }
+
+    public void setCloseLine(boolean closeLine) {
+        this.closeLine = closeLine;
+    }
+
+    public boolean isUseBezierCurve() {
+        return useBezierCurve;
+    }
+
+    public void setUseBezierCurve(boolean useBezierCurve) {
+        this.useBezierCurve = useBezierCurve;
+    }
+
+    public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, String lineField,
+            String sortField) throws IOException {
+        return execute(inputFeatures, lineField, sortField, this.closeLine);
+    }
+
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, String lineField,
             String sortField, boolean closeLine) throws IOException {
+        return execute(inputFeatures, lineField, sortField, closeLine, useBezierCurve);
+    }
 
+    public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, String lineField,
+            String sortField, boolean closeLine, boolean useBezierCurve) throws IOException {
         this.closeLine = closeLine;
+        this.useBezierCurve = useBezierCurve;
+        if (useBezierCurve) {
+            bezierCurve = new BezierCurve();
+            bezierCurve.setUseSegment(true);
+        }
 
         // prepare feature type
         SimpleFeatureType inputSchema = inputFeatures.getSchema();
         String typeName = inputSchema.getTypeName();
         CoordinateReferenceSystem crs = inputSchema.getCoordinateReferenceSystem();
         String geomName = inputFeatures.getSchema().getGeometryDescriptor().getLocalName();
-        
+
         SimpleFeatureType featureType = FeatureTypes.getDefaultType(typeName, geomName,
                 LineString.class, crs);
         if (closeLine) {
@@ -138,22 +173,27 @@ public class PointsToLineOperation extends GeneralOperation {
             featureIter.close();
         }
 
-        if (coordinates.size() <= 1) {
+        if ((coordinates.size() <= 1) || (closeLine && coordinates.size() < 3)) {
             return;
         }
 
         if (coordinates.size() > 1) {
             // create feature and set geometry
-            Geometry geometry = null;
-            if (closeLine) {
-                coordinates.add(coordinates.get(0), false);
-                geometry = gf.createPolygon(coordinates.toCoordinateArray());
-            } else {
-                geometry = gf.createLineString(coordinates.toCoordinateArray());
+            LineString line = gf.createLineString(coordinates.toCoordinateArray());
+            if (useBezierCurve) {
+                line = bezierCurve.create(line);
             }
 
+            Geometry geometry = line;
             if (geometry == null || geometry.isEmpty()) {
                 return;
+            }
+
+            if (closeLine) {
+                coordinates.clear();
+                coordinates.add(line.getCoordinates(), false);
+                coordinates.add(coordinates.get(0), false);
+                geometry = gf.createPolygon(coordinates.toCoordinateArray());
             }
 
             SimpleFeature newFeature = featureWriter.buildFeature();

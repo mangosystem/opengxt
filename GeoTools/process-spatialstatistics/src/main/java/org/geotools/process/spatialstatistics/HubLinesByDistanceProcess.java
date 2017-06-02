@@ -51,13 +51,15 @@ public class HubLinesByDistanceProcess extends AbstractStatisticsProcess {
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection hubFeatures,
             String hubIdField, SimpleFeatureCollection spokeFeatures, boolean preserveAttributes,
-            boolean useCentroid, double maximumDistance, ProgressListener monitor) {
+            boolean useCentroid, boolean useBezierCurve, double maximumDistance,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(HubLinesByDistanceProcessFactory.hubFeatures.key, hubFeatures);
         map.put(HubLinesByDistanceProcessFactory.hubIdField.key, hubIdField);
         map.put(HubLinesByDistanceProcessFactory.spokeFeatures.key, spokeFeatures);
         map.put(HubLinesByDistanceProcessFactory.preserveAttributes.key, preserveAttributes);
         map.put(HubLinesByDistanceProcessFactory.useCentroid.key, useCentroid);
+        map.put(HubLinesByDistanceProcessFactory.useBezierCurve.key, useBezierCurve);
         map.put(HubLinesByDistanceProcessFactory.maximumDistance.key, maximumDistance);
 
         Process process = new HubLinesByDistanceProcess(null);
@@ -92,6 +94,9 @@ public class HubLinesByDistanceProcess extends AbstractStatisticsProcess {
         Boolean useCentroid = (Boolean) Params.getValue(input,
                 HubLinesByDistanceProcessFactory.useCentroid,
                 HubLinesByDistanceProcessFactory.useCentroid.sample);
+        Boolean useBezierCurve = (Boolean) Params.getValue(input,
+                HubLinesByDistanceProcessFactory.useBezierCurve,
+                HubLinesByDistanceProcessFactory.useBezierCurve.sample);
         Double maximumDistance = (Double) Params.getValue(input,
                 HubLinesByDistanceProcessFactory.maximumDistance,
                 HubLinesByDistanceProcessFactory.maximumDistance.sample);
@@ -100,6 +105,7 @@ public class HubLinesByDistanceProcess extends AbstractStatisticsProcess {
         SimpleFeatureCollection resultFc = null;
         try {
             HubLinesByDistanceOperation operation = new HubLinesByDistanceOperation();
+            operation.setUseBezierCurve(useBezierCurve);
             resultFc = operation.execute(hubFeatures, hubIdField, spokeFeatures, useCentroid,
                     preserveAttributes, maximumDistance);
         } catch (IOException e) {

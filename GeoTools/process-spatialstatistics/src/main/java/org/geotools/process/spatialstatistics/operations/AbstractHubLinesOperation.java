@@ -18,6 +18,7 @@ package org.geotools.process.spatialstatistics.operations;
 
 import java.util.logging.Logger;
 
+import org.geotools.process.spatialstatistics.util.BezierCurve;
 import org.geotools.util.logging.Logging;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -39,7 +40,7 @@ public abstract class AbstractHubLinesOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(AbstractHubLinesOperation.class);
 
     protected static final String HUB_DIST = "hubdist";
-    
+
     protected static final String TYPE_NAME = "HubLines";
 
     protected double maximumDistance = Double.MAX_VALUE;
@@ -47,6 +48,16 @@ public abstract class AbstractHubLinesOperation extends GeneralOperation {
     protected boolean preserveAttributes = true;
 
     protected boolean useCentroid = true;
+
+    protected boolean useBezierCurve = false;
+
+    public boolean isUseBezierCurve() {
+        return useBezierCurve;
+    }
+
+    public void setUseBezierCurve(boolean useBezierCurve) {
+        this.useBezierCurve = useBezierCurve;
+    }
 
     public boolean isUseCentroid() {
         return useCentroid;
@@ -93,7 +104,12 @@ public abstract class AbstractHubLinesOperation extends GeneralOperation {
 
         Coordinate[] coordinates = DistanceOp.nearestPoints(start, end);
         LineString shortestLine = from.getFactory().createLineString(coordinates);
+        
+        if (useBezierCurve) {
+            shortestLine = new BezierCurve().create(shortestLine);
+        }
         shortestLine.setUserData(from.getUserData());
+
         return shortestLine;
     }
 

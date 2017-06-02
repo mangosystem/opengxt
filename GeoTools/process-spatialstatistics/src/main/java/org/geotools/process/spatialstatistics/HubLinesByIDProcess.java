@@ -51,8 +51,8 @@ public class HubLinesByIDProcess extends AbstractStatisticsProcess {
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection hubFeatures,
             String hubIdField, SimpleFeatureCollection spokeFeatures, String spokeIdField,
-            boolean preserveAttributes, boolean useCentroid, double maximumDistance,
-            ProgressListener monitor) {
+            boolean preserveAttributes, boolean useCentroid, boolean useBezierCurve,
+            double maximumDistance, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(HubLinesByIDProcessFactory.hubFeatures.key, hubFeatures);
         map.put(HubLinesByIDProcessFactory.hubIdField.key, hubIdField);
@@ -60,6 +60,7 @@ public class HubLinesByIDProcess extends AbstractStatisticsProcess {
         map.put(HubLinesByIDProcessFactory.spokeIdField.key, spokeIdField);
         map.put(HubLinesByIDProcessFactory.preserveAttributes.key, preserveAttributes);
         map.put(HubLinesByIDProcessFactory.useCentroid.key, useCentroid);
+        map.put(HubLinesByIDProcessFactory.useBezierCurve.key, useBezierCurve);
         map.put(HubLinesByIDProcessFactory.maximumDistance.key, maximumDistance);
 
         Process process = new HubLinesByIDProcess(null);
@@ -98,6 +99,9 @@ public class HubLinesByIDProcess extends AbstractStatisticsProcess {
         Boolean useCentroid = (Boolean) Params.getValue(input,
                 HubLinesByIDProcessFactory.useCentroid,
                 HubLinesByIDProcessFactory.useCentroid.sample);
+        Boolean useBezierCurve = (Boolean) Params.getValue(input,
+                HubLinesByIDProcessFactory.useBezierCurve,
+                HubLinesByIDProcessFactory.useBezierCurve.sample);
         Double maximumDistance = (Double) Params.getValue(input,
                 HubLinesByIDProcessFactory.maximumDistance,
                 HubLinesByIDProcessFactory.maximumDistance.sample);
@@ -106,6 +110,7 @@ public class HubLinesByIDProcess extends AbstractStatisticsProcess {
         SimpleFeatureCollection resultFc = null;
         try {
             HubLinesByIDOperation operation = new HubLinesByIDOperation();
+            operation.setUseBezierCurve(useBezierCurve);
             resultFc = operation.execute(hubFeatures, hubIdField, spokeFeatures, spokeIdField,
                     useCentroid, preserveAttributes, maximumDistance);
         } catch (IOException e) {

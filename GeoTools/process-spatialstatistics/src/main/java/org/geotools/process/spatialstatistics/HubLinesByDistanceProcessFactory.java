@@ -46,8 +46,8 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
     private static final String PROCESS_NAME = "HubLinesByDistance";
 
     /*
-     * HubLinesByDistance(SimpleFeatureCollection hubFeatures, String hubIdField, SimpleFeatureCollection spokeFeatures, boolean preserveAttributes,
-     * boolean useCentroid, double maximumDistance): SimpleFeatureCollection
+     * HubLinesByDistance(SimpleFeatureCollection hubFeatures, String hubIdField, SimpleFeatureCollection spokeFeatures, Boolean preserveAttributes,
+     * Boolean useCentroid, Boolean useBezierCurve, Double maximumDistance): SimpleFeatureCollection
      */
 
     public HubLinesByDistanceProcessFactory() {
@@ -100,6 +100,13 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
             getResource("HubLinesByDistance.useCentroid.description"), false, 0, 1, Boolean.TRUE,
             null);
 
+    /** useBezierCurve */
+    public static final Parameter<Boolean> useBezierCurve = new Parameter<Boolean>(
+            "useBezierCurve", Boolean.class,
+            getResource("HubLinesByDistance.useBezierCurve.title"),
+            getResource("HubLinesByDistance.useBezierCurve.description"), false, 0, 1,
+            Boolean.FALSE, null);
+
     /** maximumDistance */
     public static final Parameter<Double> maximumDistance = new Parameter<Double>(
             "maximumDistance", Double.class,
@@ -115,6 +122,7 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
         parameterInfo.put(spokeFeatures.key, spokeFeatures);
         parameterInfo.put(preserveAttributes.key, preserveAttributes);
         parameterInfo.put(useCentroid.key, useCentroid);
+        parameterInfo.put(useBezierCurve.key, useBezierCurve);
         parameterInfo.put(maximumDistance.key, maximumDistance);
         return parameterInfo;
     }

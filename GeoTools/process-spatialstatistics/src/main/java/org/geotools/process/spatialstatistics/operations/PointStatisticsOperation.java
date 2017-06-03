@@ -58,12 +58,25 @@ public class PointStatisticsOperation extends GeneralOperation {
 
     private double bufferDistance = 0.0d;
 
+    private int quadrantSegments = 12; // JTS default = 8
+
     public double getBufferDistance() {
         return bufferDistance;
     }
 
     public void setBufferDistance(double bufferDistance) {
         this.bufferDistance = bufferDistance;
+    }
+
+    public int getQuadrantSegments() {
+        return quadrantSegments;
+    }
+
+    public void setQuadrantSegments(int quadrantSegments) {
+        if (quadrantSegments <= 2) {
+            quadrantSegments = 2;
+        }
+        this.quadrantSegments = quadrantSegments;
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection polygons, String cntField,
@@ -130,7 +143,7 @@ public class PointStatisticsOperation extends GeneralOperation {
 
                 MultipleStatVisitor visitor = new MultipleStatVisitor(points.getSchema());
                 if (bufferDistance > 0) {
-                    geometry = geometry.buffer(bufferDistance);
+                    geometry = geometry.buffer(bufferDistance, quadrantSegments);
                 }
 
                 Filter filter = getIntersectsFilter(the_geom, geometry);

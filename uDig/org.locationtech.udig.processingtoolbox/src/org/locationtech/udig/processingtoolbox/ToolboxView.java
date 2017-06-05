@@ -603,6 +603,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent densityTool = new TreeParent(Messages.ToolboxView_Density, null, null);
         generalTool.addChild(densityTool);
         buildTool(densityTool, "org.geotools.process.spatialstatistics.KernelDensityProcessFactory");
+        buildTool(densityTool, "org.geotools.process.spatialstatistics.PointDensityProcessFactory");
 
         // Interpolation
         TreeParent interpolationTool = new TreeParent(Messages.ToolboxView_Interpolation, null,

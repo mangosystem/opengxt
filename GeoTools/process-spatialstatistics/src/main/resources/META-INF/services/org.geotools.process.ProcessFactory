@@ -119,6 +119,7 @@ org.geotools.process.spatialstatistics.RasterConProcessFactory
 org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory
 org.geotools.process.spatialstatistics.RasterReclassProcessFactory
 org.geotools.process.spatialstatistics.KernelDensityProcessFactory
+org.geotools.process.spatialstatistics.PointDensityProcessFactory
 org.geotools.process.spatialstatistics.IDWProcessFactory
 org.geotools.process.spatialstatistics.TPSProcessFactory
 org.geotools.process.spatialstatistics.HistogramGridCoverageProcessFactory

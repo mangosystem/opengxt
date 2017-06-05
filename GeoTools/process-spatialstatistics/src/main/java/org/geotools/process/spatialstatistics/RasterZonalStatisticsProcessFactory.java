@@ -75,7 +75,8 @@ public class RasterZonalStatisticsProcessFactory extends SpatialStatisticsProces
     public static final Parameter<SimpleFeatureCollection> zoneFeatures = new Parameter<SimpleFeatureCollection>(
             "zoneFeatures", SimpleFeatureCollection.class,
             getResource("ZonalStatistics.zoneFeatures.title"),
-            getResource("ZonalStatistics.zoneFeatures.description"), true, 1, 1, null, null);
+            getResource("ZonalStatistics.zoneFeatures.description"), true, 1, 1, null, new KVP(
+                    Params.FEATURES, Params.Polygon));
 
     /** targetField */
     public static final Parameter<String> targetField = new Parameter<String>("targetField",

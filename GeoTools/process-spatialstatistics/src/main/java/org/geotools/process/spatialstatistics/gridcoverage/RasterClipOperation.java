@@ -41,7 +41,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * @source $URL$
  */
 public class RasterClipOperation extends RasterProcessingOperation {
-    protected static final Logger LOGGER = Logging.getLogger(RasterKernelDensityOperation.class);
+    protected static final Logger LOGGER = Logging.getLogger(RasterClipOperation.class);
 
     public GridCoverage2D execute(GridCoverage2D inputCoverage, Geometry cropShape) {
         // must be same CRS!

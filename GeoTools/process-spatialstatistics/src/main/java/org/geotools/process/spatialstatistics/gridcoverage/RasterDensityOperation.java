@@ -51,7 +51,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * @source $URL$
  */
 public class RasterDensityOperation extends RasterProcessingOperation {
-    protected static final Logger LOGGER = Logging.getLogger(RasterKernelDensityOperation.class);
+    protected static final Logger LOGGER = Logging.getLogger(RasterDensityOperation.class);
 
     double scaleArea = 0.0;
 

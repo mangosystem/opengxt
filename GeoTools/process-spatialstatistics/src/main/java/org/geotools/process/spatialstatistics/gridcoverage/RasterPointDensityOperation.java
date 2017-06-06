@@ -45,7 +45,7 @@ import org.opengis.referencing.crs.GeographicCRS;
  * @source $URL$
  */
 public class RasterPointDensityOperation extends RasterDensityOperation {
-    protected static final Logger LOGGER = Logging.getLogger(RasterKernelDensityOperation.class);
+    protected static final Logger LOGGER = Logging.getLogger(RasterPointDensityOperation.class);
 
     // Silverman, B.W. Density Estimation for Statistics and Data Analysis. New York: Chapman and
     // Hall, 1986.

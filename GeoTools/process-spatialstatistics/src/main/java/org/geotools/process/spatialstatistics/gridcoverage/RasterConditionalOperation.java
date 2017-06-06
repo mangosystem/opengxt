@@ -41,7 +41,7 @@ import org.opengis.filter.expression.Literal;
  * @source $URL$
  */
 public class RasterConditionalOperation extends RasterProcessingOperation {
-    protected static final Logger LOGGER = Logging.getLogger(RasterKernelDensityOperation.class);
+    protected static final Logger LOGGER = Logging.getLogger(RasterConditionalOperation.class);
 
     public GridCoverage2D execute(GridCoverage2D inputGc, Integer bandIndex, Filter inputFilter) {
         return execute(inputGc, bandIndex, inputFilter, Integer.valueOf(1), Integer.MIN_VALUE);

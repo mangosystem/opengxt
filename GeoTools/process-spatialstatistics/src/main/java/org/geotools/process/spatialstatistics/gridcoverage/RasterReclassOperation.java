@@ -43,7 +43,7 @@ import org.jaitools.tiledimage.DiskMemImage;
  * @source $URL$
  */
 public class RasterReclassOperation extends RasterProcessingOperation {
-    protected static final Logger LOGGER = Logging.getLogger(RasterKernelDensityOperation.class);
+    protected static final Logger LOGGER = Logging.getLogger(RasterReclassOperation.class);
 
     private SortedMap<Double, ReclassRange> reclassRange = new TreeMap<Double, ReclassRange>();
 

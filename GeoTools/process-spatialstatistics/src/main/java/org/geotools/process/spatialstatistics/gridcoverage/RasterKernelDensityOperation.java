@@ -106,9 +106,7 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
             }
         }
 
-        densityImage = scaleUnit(densityImage);
-
-        return createGridCoverage("KernelDensity", densityImage);
+        return createGridCoverage("KernelDensity", scaleUnit(densityImage));
     }
 
     private KernelJAI getKernel(double searchRadius) {

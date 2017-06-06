@@ -47,8 +47,7 @@ import org.opengis.referencing.crs.GeographicCRS;
 public class RasterPointDensityOperation extends RasterDensityOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterPointDensityOperation.class);
 
-    // Silverman, B.W. Density Estimation for Statistics and Data Analysis. New York: Chapman and
-    // Hall, 1986.
+    // Silverman, B. W. Density Estimation for Statistics and Data Analysis. New York: Chapman and Hall, 1986.
 
     // default = circle, 8 * 8 cell unit
     RasterNeighborhood rnh = new RasterNeighborhood();
@@ -66,9 +65,9 @@ public class RasterPointDensityOperation extends RasterDensityOperation {
         return rnh;
     }
 
-    public GridCoverage2D execute(SimpleFeatureCollection pointFeatures, String weightField) {
+    public GridCoverage2D execute(SimpleFeatureCollection pointFeatures, String populationField) {
         // step 1 : convert point to gridcoverage : Sum
-        final PlanarImage outputImage = pointToRaster(pointFeatures, weightField);
+        final PlanarImage outputImage = pointToRaster(pointFeatures, populationField);
 
         // step 2 Only a circular neighborhood is possible
         final KernelJAI kernel = getKernel(this.rnh);
@@ -101,9 +100,7 @@ public class RasterPointDensityOperation extends RasterDensityOperation {
             }
         }
 
-        densityImage = scaleUnit(densityImage);
-
-        return createGridCoverage("PointDensity", densityImage);
+        return createGridCoverage("PointDensity", scaleUnit(densityImage));
     }
 
     private KernelJAI getKernel(RasterNeighborhood rnh) {
@@ -139,11 +136,16 @@ public class RasterPointDensityOperation extends RasterDensityOperation {
         // calculate area
         final double cellArea = CellSize * CellSize;
         final float[] data = kernel.getKernelData();
+        int valid = 0;
         for (int index = 0; index < data.length; index++) {
             if (data[index] != 0.0) {
                 scaleArea += cellArea;
+                valid++;
             }
         }
+
+        this.MinValue = 0.0;
+        this.MaxValue = MaxValue * valid;
 
         return kernel;
     }

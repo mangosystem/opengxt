@@ -125,9 +125,11 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
 
         // use cell's area
         final float[] data = binKernel.getKernelData();
+        int valid = 0;
         for (int index = 0; index < data.length; index++) {
             if (data[index] != 0.0) {
                 scaleArea += cellArea;
+                valid++;
             }
         }
 
@@ -207,6 +209,9 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
             kernel = new KernelJAI(width, width, tcWeights);
             break;
         }
+
+        this.MinValue = 0.0;
+        this.MaxValue = MaxValue * valid;
 
         return kernel;
     }

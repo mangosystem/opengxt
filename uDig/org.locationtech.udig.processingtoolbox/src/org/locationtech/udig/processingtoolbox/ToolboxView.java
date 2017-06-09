@@ -590,6 +590,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         // Extraction
         TreeParent extractionTool = new TreeParent(Messages.ToolboxView_Extract, null, null);
         generalTool.addChild(extractionTool);
+        buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterExtractionProcessFactory");
         buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByExtentProcessFactory");
         buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByGeometryProcessFactory");
         buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByCircleProcessFactory");
@@ -599,11 +600,17 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(conditionalTool);
         buildTool(conditionalTool, "org.geotools.process.spatialstatistics.RasterConProcessFactory");
 
+        // Distance
+        TreeParent distanceTool = new TreeParent(Messages.ToolboxView_RasterDistance, null, null);
+        generalTool.addChild(distanceTool);
+        buildTool(distanceTool, "org.geotools.process.spatialstatistics.EuclideanDistanceProcessFactory");
+
         // Density
         TreeParent densityTool = new TreeParent(Messages.ToolboxView_Density, null, null);
         generalTool.addChild(densityTool);
         buildTool(densityTool, "org.geotools.process.spatialstatistics.KernelDensityProcessFactory");
         buildTool(densityTool, "org.geotools.process.spatialstatistics.PointDensityProcessFactory");
+        buildTool(densityTool, "org.geotools.process.spatialstatistics.LineDensityProcessFactory");
 
         // Interpolation
         TreeParent interpolationTool = new TreeParent(Messages.ToolboxView_Interpolation, null,

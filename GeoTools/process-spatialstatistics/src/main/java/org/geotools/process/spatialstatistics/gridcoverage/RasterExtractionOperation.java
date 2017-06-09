@@ -24,12 +24,19 @@ import javax.media.jai.iterator.RectIterFactory;
 import javax.media.jai.iterator.WritableRectIter;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.factory.GeoTools;
+import org.geotools.geometry.jts.JTSFactoryFinder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
+import org.opengis.geometry.DirectPosition;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * Extracts the cells of a raster based on a logical query.
@@ -40,6 +47,8 @@ import org.opengis.filter.Filter;
  */
 public class RasterExtractionOperation extends RasterProcessingOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterExtractionOperation.class);
+
+    GeometryFactory gf = JTSFactoryFinder.getGeometryFactory(GeoTools.getDefaultHints());
 
     public GridCoverage2D execute(GridCoverage2D inputGc, Integer bandIndex, Filter filter) {
         if (filter == null || filter == Filter.INCLUDE) {
@@ -55,14 +64,20 @@ public class RasterExtractionOperation extends RasterProcessingOperation {
 
         PlanarImage inputImage = (PlanarImage) inputGc.getRenderedImage();
         this.NoData = RasterHelper.getNoDataValue(inputGc);
+        double cellSize = RasterHelper.getCellSize(inputGc);
+
+        ReferencedEnvelope extent = new ReferencedEnvelope(inputGc.getEnvelope());
+        GridTransformer trans = new GridTransformer(extent, cellSize);
 
         RectIter inputIter = RectIterFactory.create(inputImage, inputImage.getBounds());
         WritableRectIter writerIter = RectIterFactory.createWritable(outputImage,
                 outputImage.getBounds());
 
+        int row = 0;
         inputIter.startLines();
         writerIter.startLines();
         while (!inputIter.finishedLines() && !writerIter.finishedLines()) {
+            int column = 0;
             inputIter.startPixels();
             writerIter.startPixels();
             while (!inputIter.finishedPixels() && !writerIter.finishedPixels()) {
@@ -71,6 +86,10 @@ public class RasterExtractionOperation extends RasterProcessingOperation {
                 if (SSUtils.compareDouble(curVal, this.NoData)) {
                     writerIter.setSample(0, this.NoData);
                 } else {
+                    DirectPosition pos = trans.gridToWorld(column, row);
+                    Coordinate coord = new Coordinate(pos.getOrdinate(0), pos.getOrdinate(1));
+                    feature.setDefaultGeometry(gf.createPoint(coord));
+
                     feature.setAttribute(1, curVal); // raster name
                     feature.setAttribute(2, curVal); // Value
 
@@ -82,9 +101,11 @@ public class RasterExtractionOperation extends RasterProcessingOperation {
                     }
                 }
 
+                column++;
                 inputIter.nextPixel();
                 writerIter.nextPixel();
             }
+            row++;
             inputIter.nextLine();
             writerIter.nextLine();
         }

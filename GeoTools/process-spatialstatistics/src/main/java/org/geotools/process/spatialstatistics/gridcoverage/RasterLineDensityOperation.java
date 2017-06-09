@@ -29,7 +29,6 @@ import javax.media.jai.PlanarImage;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.jaitools.media.jai.kernel.KernelFactory;
@@ -74,7 +73,7 @@ public class RasterLineDensityOperation extends RasterDensityOperation {
                 Unit<?> unit = hor.getCoordinateSystem().getAxis(0).getUnit();
                 // UnitConverter converter = SI.METER.getConverterTo(unit);
                 if (unit != null && unit == SI.METRE) {
-                    this.scaleArea = scaleArea / 1000000.0;
+                    this.scaleArea = scaleArea / 1000.0;
                 }
             }
         }
@@ -96,7 +95,7 @@ public class RasterLineDensityOperation extends RasterDensityOperation {
         final float[] data = kernel.getKernelData();
         int valid = 0;
         for (int index = 0; index < data.length; index++) {
-            if (SSUtils.compareFloat(data[index], (float) CellSize)) {
+            if (data[index] != 0.0) {
                 scaleArea += cellArea;
                 valid++;
             }

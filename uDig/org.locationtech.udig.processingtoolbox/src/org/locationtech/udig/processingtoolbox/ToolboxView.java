@@ -580,6 +580,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(conversionTool, "org.geotools.process.spatialstatistics.FeaturesToRasterProcessFactory");
         buildTool(conversionTool, "org.geotools.process.spatialstatistics.PointsToRasterProcessFactory");
         buildTool(conversionTool, "org.geotools.process.spatialstatistics.GeometryToRasterProcessFactory");
+        buildTool(conversionTool, "org.geotools.process.spatialstatistics.RasterToPointProcessFactory");
         buildTool(conversionTool, "org.geotools.process.spatialstatistics.RasterToPolygonProcessFactory");
 
         // Reclass

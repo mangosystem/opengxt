@@ -39,7 +39,6 @@ import org.geotools.util.Converters;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.geometry.DirectPosition;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -93,21 +92,23 @@ public class RasterHighLowPointsOperation extends GeneralOperation {
             while (!readIter.finishedPixels()) {
                 double sampleValue = readIter.getSampleDouble(bandIndex);
                 if (!SSUtils.compareDouble(noData, sampleValue)) {
+                    Coordinate coordinate = trans.gridToWorldCoordinate(column, row);
+
                     // high
                     if (valueType == HighLowType.High || valueType == HighLowType.Both) {
                         if (high.value == sampleValue) {
-                            high.append(trans.gridToWorld(column, row));
+                            high.append(coordinate);
                         } else if (high.value < sampleValue) {
-                            high.init(sampleValue, trans.gridToWorld(column, row));
+                            high.init(sampleValue, coordinate);
                         }
                     }
 
                     // low
                     if (valueType == HighLowType.Low || valueType == HighLowType.Both) {
                         if (low.value == sampleValue) {
-                            low.append(trans.gridToWorld(column, row));
+                            low.append(coordinate);
                         } else if (low.value > sampleValue) {
-                            low.init(sampleValue, trans.gridToWorld(column, row));
+                            low.init(sampleValue, coordinate);
                         }
                     }
                 }
@@ -144,12 +145,11 @@ public class RasterHighLowPointsOperation extends GeneralOperation {
     private void insertFeatures(IFeatureInserter featureWriter, String category,
             HighLowPosition item) throws IOException {
         double value = item.value;
-        for (DirectPosition pos : item.points) {
+        for (Coordinate coord : item.points) {
             SimpleFeature newFeature = featureWriter.buildFeature();
             newFeature.setAttribute("cat", category);
             newFeature.setAttribute("val", Converters.convert(value, Double.class));
 
-            Coordinate coord = new Coordinate(pos.getOrdinate(0), pos.getOrdinate(1));
             newFeature.setDefaultGeometry(gf.createPoint(coord));
 
             featureWriter.write(newFeature);
@@ -189,20 +189,20 @@ public class RasterHighLowPointsOperation extends GeneralOperation {
     static class HighLowPosition {
         public double value;
 
+        public List<Coordinate> points = new ArrayList<Coordinate>();
+
         public HighLowPosition(double value) {
             this.value = value;
         }
 
-        public void init(double value, DirectPosition pos) {
+        public void init(double value, Coordinate coordinate) {
             this.value = value;
             points.clear();
-            points.add(pos);
+            points.add(coordinate);
         }
 
-        public void append(DirectPosition pos) {
-            points.add(pos);
+        public void append(Coordinate coordinate) {
+            points.add(coordinate);
         }
-
-        public List<DirectPosition> points = new ArrayList<DirectPosition>();
     }
 }

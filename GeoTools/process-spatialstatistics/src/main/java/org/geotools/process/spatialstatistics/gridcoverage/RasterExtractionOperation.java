@@ -33,7 +33,6 @@ import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
-import org.opengis.geometry.DirectPosition;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -86,8 +85,7 @@ public class RasterExtractionOperation extends RasterProcessingOperation {
                 if (SSUtils.compareDouble(curVal, this.NoData)) {
                     writerIter.setSample(0, this.NoData);
                 } else {
-                    DirectPosition pos = trans.gridToWorld(column, row);
-                    Coordinate coord = new Coordinate(pos.getOrdinate(0), pos.getOrdinate(1));
+                    Coordinate coord = trans.gridToWorldCoordinate(column, row);
                     feature.setDefaultGeometry(gf.createPoint(coord));
 
                     feature.setAttribute(1, curVal); // raster name

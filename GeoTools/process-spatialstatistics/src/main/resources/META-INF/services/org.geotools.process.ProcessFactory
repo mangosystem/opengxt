@@ -140,3 +140,5 @@ org.geotools.process.spatialstatistics.FeaturesToRasterProcessFactory
 org.geotools.process.spatialstatistics.PointsToRasterProcessFactory
 org.geotools.process.spatialstatistics.GeometryToRasterProcessFactory
 org.geotools.process.spatialstatistics.EuclideanDistanceProcessFactory
+org.geotools.process.spatialstatistics.RasterResampleProcessFactory
+org.geotools.process.spatialstatistics.RasterReprojectProcessFactory

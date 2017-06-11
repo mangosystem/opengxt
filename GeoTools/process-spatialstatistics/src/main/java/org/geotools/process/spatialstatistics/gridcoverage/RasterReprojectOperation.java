@@ -16,19 +16,26 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
-import java.util.logging.Level;
+import java.awt.Dimension;
 import java.util.logging.Logger;
 
 import javax.media.jai.Interpolation;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridEnvelope2D;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.coverage.processing.CoverageProcessingException;
 import org.geotools.coverage.processing.Operations;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.ProcessException;
+import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.ResampleType;
+import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
 /**
  * Reprojects the raster dataset from one projection to another.
@@ -37,54 +44,95 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  * 
  * @source $URL$
  */
-public class RasterReprojectOperation extends RasterProcessingOperation {
+public class RasterReprojectOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterReprojectOperation.class);
 
-    public GridCoverage2D execute(GridCoverage2D inputCoverage,
-            CoordinateReferenceSystem forcedCRS, CoordinateReferenceSystem targetCRS,
-            ResampleType resamplingType) throws ProcessException {
-        RasterForceCRSOperation process = new RasterForceCRSOperation();
-        GridCoverage2D definedGC = process.execute(inputCoverage, forcedCRS);
-
-        return execute(definedGC, targetCRS, resamplingType);
+    public GridCoverage2D execute(GridCoverage2D inputCoverage, CoordinateReferenceSystem targetCRS)
+            throws ProcessException {
+        return execute(inputCoverage, targetCRS, ResampleType.NEAREST);
     }
 
     public GridCoverage2D execute(GridCoverage2D inputCoverage,
             CoordinateReferenceSystem targetCRS, ResampleType resamplingType)
             throws ProcessException {
+        double cellSize = RasterHelper.getCellSize(inputCoverage);
+        return execute(inputCoverage, targetCRS, ResampleType.NEAREST, cellSize);
+    }
+
+    public GridCoverage2D execute(GridCoverage2D inputCoverage,
+            CoordinateReferenceSystem targetCRS, ResampleType resamplingType, double cellSize)
+            throws ProcessException {
+        return execute(inputCoverage, targetCRS, ResampleType.NEAREST, cellSize, null);
+    }
+
+    public GridCoverage2D execute(GridCoverage2D inputCoverage,
+            CoordinateReferenceSystem targetCRS, ResampleType resamplingType, double cellSize,
+            CoordinateReferenceSystem forcedCRS) throws ProcessException {
+        if (targetCRS == null) {
+            throw new ProcessException("targetCRS is null!");
+        }
+
+        // check forcedCRS
+        if (forcedCRS != null) {
+            RasterForceCRSOperation process = new RasterForceCRSOperation();
+            inputCoverage = process.execute(inputCoverage, forcedCRS);
+        }
+
         CoordinateReferenceSystem sourceCRS = inputCoverage.getCoordinateReferenceSystem();
         if (sourceCRS == null) {
             throw new ProcessException("inputCoverage has no CRS!");
         }
 
-        if (CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
-            LOGGER.log(Level.WARNING, "inputCoverage's CRS equals targetCRS!");
-            return inputCoverage;
+        if (cellSize <= 0) {
+            cellSize = RasterHelper.getCellSize(inputCoverage);
         }
 
-        GridCoverage2D resultGc = null;
+        if (CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
+            double sourceCellSize = RasterHelper.getCellSize(inputCoverage);
+            if (SSUtils.compareDouble(cellSize, sourceCellSize)) {
+                return inputCoverage;
+            } else {
+                RasterResampleOperation resample = new RasterResampleOperation();
+                return resample.execute(inputCoverage, cellSize, resamplingType);
+            }
+        }
 
-        Interpolation interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+        Interpolation interpolation = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
         switch (resamplingType) {
         case BICUBIC:
-            interp = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
+            interpolation = Interpolation.getInstance(Interpolation.INTERP_BICUBIC);
             break;
         case BILINEAR:
-            interp = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
+            interpolation = Interpolation.getInstance(Interpolation.INTERP_BILINEAR);
             break;
         default:
-            interp = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
+            interpolation = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
             break;
         }
+
+        // recalculate gridenvelope
+        ReferencedEnvelope srcEnv = new ReferencedEnvelope(inputCoverage.getEnvelope());
+
+        ReferencedEnvelope extent = null;
+        try {
+            extent = srcEnv.transform(targetCRS, true);
+        } catch (TransformException e) {
+            throw new ProcessException(e);
+        } catch (FactoryException e) {
+            throw new ProcessException(e);
+        }
+
+        extent = RasterHelper.getResolvedEnvelope(extent, cellSize);
+        Dimension dim = RasterHelper.getDimension(extent, cellSize);
+        GridEnvelope2D gridRange = new GridEnvelope2D(0, 0, dim.width, dim.height);
+        GridGeometry2D gridGeometry = new GridGeometry2D(gridRange, extent);
 
         // execute resample
         try {
-            resultGc = (GridCoverage2D) Operations.DEFAULT.resample(inputCoverage, targetCRS, null,
-                    interp);
+            return (GridCoverage2D) Operations.DEFAULT.resample(inputCoverage, targetCRS,
+                    gridGeometry, interpolation);
         } catch (CoverageProcessingException e) {
-            LOGGER.log(Level.ALL, e.getMessage(), e);
+            throw new ProcessException(e);
         }
-
-        return resultGc;
     }
 }

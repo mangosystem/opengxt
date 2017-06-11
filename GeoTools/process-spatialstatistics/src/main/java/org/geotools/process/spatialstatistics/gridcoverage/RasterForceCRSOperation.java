@@ -43,6 +43,10 @@ public class RasterForceCRSOperation {
 
     public GridCoverage2D execute(GridCoverage2D sourceCoverage, CoordinateReferenceSystem forcedCRS)
             throws ProcessException {
+        if (forcedCRS == null) {
+            throw new ProcessException("forcedCRS is null!");
+        }
+
         ReferencedEnvelope sourceEnv = new ReferencedEnvelope(sourceCoverage.getEnvelope());
         ReferencedEnvelope newEnv = new ReferencedEnvelope(sourceEnv, forcedCRS);
 

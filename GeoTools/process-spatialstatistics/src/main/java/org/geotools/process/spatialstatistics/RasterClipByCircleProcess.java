@@ -22,20 +22,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterClipOperation;
-import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.ProgressListener;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -95,26 +89,8 @@ public class RasterClipByCircleProcess extends AbstractStatisticsProcess {
         }
 
         // start process
-        Object userData = center.getUserData();
         CoordinateReferenceSystem tCrs = inputCoverage.getCoordinateReferenceSystem();
-        if (userData == null) {
-            center.setUserData(tCrs);
-        } else if (userData instanceof CoordinateReferenceSystem) {
-            CoordinateReferenceSystem sCrs = (CoordinateReferenceSystem) userData;
-            if (!CRS.equalsIgnoreMetadata(sCrs, tCrs)) {
-                try {
-                    MathTransform transform = CRS.findMathTransform(sCrs, tCrs, true);
-                    center = JTS.transform(center, transform);
-                    center.setUserData(tCrs);
-                } catch (FactoryException e) {
-                    throw new ProcessException(e);
-                } catch (MismatchedDimensionException e) {
-                    throw new ProcessException(e);
-                } catch (TransformException e) {
-                    throw new ProcessException(e);
-                }
-            }
-        }
+        center = transformGeometry(center, tCrs);
 
         Geometry cropShape = center.buffer(radius, 24);
         if (inside == Boolean.FALSE) {

@@ -98,11 +98,13 @@ public class RasterProfileProcess extends AbstractStatisticsProcess {
             interval = userLine.getLength() / 20; // default interval
         }
 
+        CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
+        userLine = transformGeometry(userLine, crs);
+
         RasterFunctionalSurface process = new RasterFunctionalSurface(inputCoverage);
         Geometry profileLine = process.getProfile(userLine, interval);
 
         // prepare feature type
-        CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
         SimpleFeatureType featureType = FeatureTypes.getDefaultType("profile", Point.class, crs);
         featureType = FeatureTypes.add(featureType, "distance", Double.class, 38);
         featureType = FeatureTypes.add(featureType, "value", Double.class, 38);

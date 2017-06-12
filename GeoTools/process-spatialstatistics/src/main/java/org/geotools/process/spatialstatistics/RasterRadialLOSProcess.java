@@ -132,6 +132,8 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
 
         // start process
         CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
+        observerPoint = transformGeometry(observerPoint, crs);
+
         SimpleFeatureType featureType = FeatureTypes.getDefaultType("RadialLineOfSight",
                 LineString.class, crs);
         featureType = FeatureTypes.add(featureType, ANGLE_FIELD, Double.class, 38);

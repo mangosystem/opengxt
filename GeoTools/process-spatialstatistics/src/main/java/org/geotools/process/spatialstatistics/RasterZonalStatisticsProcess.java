@@ -30,10 +30,7 @@ import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.ZonalStatisticsType;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterZonalOperation;
-import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
-import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.ProgressListener;
 
 /**
@@ -105,24 +102,12 @@ public class RasterZonalStatisticsProcess extends AbstractStatisticsProcess {
             targetField = statisticsType.name();
         }
 
-        // reproject zoneFeatures's crs if needed
-        boolean crsChanged = false;
-        CoordinateReferenceSystem gCRS = valueCoverage.getCoordinateReferenceSystem();
-        CoordinateReferenceSystem fCRS = zoneFeatures.getSchema().getCoordinateReferenceSystem();
-        if (!CRS.equalsIgnoreMetadata(gCRS, fCRS)) {
-            crsChanged = true;
-            zoneFeatures = new ReprojectFeatureCollection(zoneFeatures, fCRS, gCRS, true);
-        }
-
         // start process
         SimpleFeatureCollection result = null;
         try {
             RasterZonalOperation process = new RasterZonalOperation();
             result = process.execute(zoneFeatures, targetField, valueCoverage, bandIndex,
                     statisticsType);
-            if (crsChanged) {
-                result = new ReprojectFeatureCollection(result, gCRS, fCRS, true);
-            }
         } catch (IOException e) {
             throw new ProcessException(e);
         }

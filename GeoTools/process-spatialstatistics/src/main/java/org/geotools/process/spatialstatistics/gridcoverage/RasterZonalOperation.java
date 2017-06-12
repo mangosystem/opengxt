@@ -28,12 +28,12 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor.DoubleStrategy;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitorResult;
+import org.geotools.process.spatialstatistics.enumeration.ResampleType;
 import org.geotools.process.spatialstatistics.enumeration.ZonalStatisticsType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.referencing.CRS;
@@ -54,6 +54,8 @@ import com.vividsolutions.jts.geom.Geometry;
 public class RasterZonalOperation extends RasterProcessingOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterZonalOperation.class);
 
+    static final String AREA_FIELD = "Cell_Area";
+
     private double cellArea = 0.0;
 
     private ZonalStatisticsType statisticsType = ZonalStatisticsType.Mean; // default
@@ -71,38 +73,37 @@ public class RasterZonalOperation extends RasterProcessingOperation {
         this.targetField = targetField;
 
         // check crs
-        CoordinateReferenceSystem gCRS = valueCoverage.getCoordinateReferenceSystem();
-        CoordinateReferenceSystem fCRS = zoneFeatures.getSchema().getCoordinateReferenceSystem();
-        if (!CRS.equalsIgnoreMetadata(gCRS, fCRS)) {
-            throw new ProcessException("zoneFeatures's CRS must be the same as valueCoverage CRS!");
+        CoordinateReferenceSystem sCRS = valueCoverage.getCoordinateReferenceSystem();
+        CoordinateReferenceSystem tCRS = zoneFeatures.getSchema().getCoordinateReferenceSystem();
+        if (!CRS.equalsIgnoreMetadata(sCRS, tCRS)) {
+            // reproject raster
+            RasterReprojectOperation op = new RasterReprojectOperation();
+            valueCoverage = op.execute(valueCoverage, tCRS, ResampleType.NEAREST);
         }
 
         // test intersection
         ReferencedEnvelope gridEnv = new ReferencedEnvelope(valueCoverage.getEnvelope());
-        ReferencedEnvelope featureEnv = new ReferencedEnvelope(zoneFeatures.getBounds(), gCRS);
-        com.vividsolutions.jts.geom.Envelope jtsEnvelope = featureEnv.intersection(gridEnv);
-        if (jtsEnvelope == null || jtsEnvelope.isNull()) {
+        ReferencedEnvelope featureEnv = zoneFeatures.getBounds();
+        com.vividsolutions.jts.geom.Envelope intEnv = featureEnv.intersection(gridEnv);
+        if (intEnv == null || intEnv.isNull()) {
             // return empty result
             return insertFeatures(zoneFeatures, new Hashtable<Object, StatisticsVisitor>());
         }
 
         // crop coverage
-        final double inputNoData = RasterHelper.getNoDataValue(valueCoverage);
-        ReferencedEnvelope newExtent = new ReferencedEnvelope(jtsEnvelope, gCRS);
-
         RasterCropOperation cropOp = new RasterCropOperation();
-        GridCoverage2D cropGc = cropOp.execute(valueCoverage, newExtent);
+        GridCoverage2D cropGc = cropOp.execute(valueCoverage, new ReferencedEnvelope(intEnv, tCRS));
 
         // features to raster zone
-        newExtent = new ReferencedEnvelope(cropGc.getEnvelope2D(), gCRS);
         FeaturesToRasterOperation rsOp = new FeaturesToRasterOperation();
         rsOp.getRasterEnvironment().setCellSize(RasterHelper.getCellSize(valueCoverage));
-        rsOp.getRasterEnvironment().setExtent(newExtent);
+        rsOp.getRasterEnvironment().setExtent(new ReferencedEnvelope(cropGc.getEnvelope2D(), tCRS));
         GridCoverage2D zonalGc = rsOp.execute(zoneFeatures);
 
         // calculate statistics
         Hashtable<Object, StatisticsVisitor> visitorMap = new Hashtable<Object, StatisticsVisitor>();
 
+        final double inputNoData = RasterHelper.getNoDataValue(valueCoverage);
         final double zoneNoData = RasterHelper.getNoDataValue(zonalGc);
         final double cellSize = RasterHelper.getCellSize(zonalGc);
         cellArea = cellSize * cellSize;
@@ -174,7 +175,7 @@ public class RasterZonalOperation extends RasterProcessingOperation {
                     } else {
                         newFeature.setAttribute(targetField, null);
                     }
-                    newFeature.setAttribute("Cell_Area", 0.0);
+                    newFeature.setAttribute(AREA_FIELD, 0.0);
                 } else {
                     StatisticsVisitorResult ret = visitor.getResult();
                     switch (statisticsType) {
@@ -203,7 +204,7 @@ public class RasterZonalOperation extends RasterProcessingOperation {
                         newFeature.setAttribute(targetField, ret.getMean());
                         break;
                     }
-                    newFeature.setAttribute("Cell_Area", ret.getCount() * cellArea);
+                    newFeature.setAttribute(AREA_FIELD, ret.getCount() * cellArea);
                 }
                 featureWriter.write(newFeature);
                 featureID++;
@@ -227,7 +228,7 @@ public class RasterZonalOperation extends RasterProcessingOperation {
         }
 
         // default
-        featureType = FeatureTypes.add(featureType, "Cell_Area", Double.class, 19);
+        featureType = FeatureTypes.add(featureType, AREA_FIELD, Double.class, 19);
 
         // prepare transactional feature store
         return getTransactionFeatureStore(featureType);

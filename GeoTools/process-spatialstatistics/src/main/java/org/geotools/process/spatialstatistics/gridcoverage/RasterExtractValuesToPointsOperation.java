@@ -23,13 +23,16 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.enumeration.ResampleType;
 import org.geotools.process.spatialstatistics.enumeration.SlopeType;
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.referencing.CRS;
 import org.geotools.util.Converters;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -56,6 +59,15 @@ public class RasterExtractValuesToPointsOperation extends GeneralOperation {
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
             String valueField, GridCoverage2D surfaceRaster, ExtractionType valueType)
             throws IOException {
+        // check crs
+        CoordinateReferenceSystem sCRS = surfaceRaster.getCoordinateReferenceSystem();
+        CoordinateReferenceSystem tCRS = inputFeatures.getSchema().getCoordinateReferenceSystem();
+        if (!CRS.equalsIgnoreMetadata(sCRS, tCRS)) {
+            // reproject raster
+            RasterReprojectOperation op = new RasterReprojectOperation();
+            surfaceRaster = op.execute(surfaceRaster, tCRS, ResampleType.NEAREST);
+        }
+
         SimpleFeatureType inputSchema = inputFeatures.getSchema();
 
         // prepare feature type

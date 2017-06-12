@@ -125,6 +125,10 @@ public class RasterLinearLOSProcess extends AbstractStatisticsProcess {
         }
 
         // start process
+        CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
+        observerPoint = transformGeometry(observerPoint, crs);
+        targetPoint = transformGeometry(targetPoint, crs);
+
         LineSegment segment = new LineSegment(observerPoint.getCoordinate(),
                 targetPoint.getCoordinate());
         LineString userLine = segment.toGeometry(observerPoint.getFactory());
@@ -134,7 +138,6 @@ public class RasterLinearLOSProcess extends AbstractStatisticsProcess {
                 useRefraction, refractionFactor);
 
         // prepare feature type
-        CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
         SimpleFeatureType featureType = FeatureTypes.getDefaultType("LinearLineOfSight",
                 LineString.class, crs);
         featureType = FeatureTypes.add(featureType, VALUE_FIELD, Integer.class, 5);

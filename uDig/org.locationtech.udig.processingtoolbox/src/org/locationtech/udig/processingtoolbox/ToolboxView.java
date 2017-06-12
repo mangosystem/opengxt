@@ -636,6 +636,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         // Utilities
         TreeParent utilTool = new TreeParent(Messages.ToolboxView_Utilities, null, null);
         generalTool.addChild(utilTool);
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterForceCRSProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterReprojectProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterResampleProcessFactory");
     }

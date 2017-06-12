@@ -25,6 +25,9 @@ import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
 import org.geotools.process.spatialstatistics.core.HistogramProcessResult.HistogramItem;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult.DataStatisticsItem;
+import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
+import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName;
+import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName.PearsonItem;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
 import org.geotools.process.spatialstatistics.pattern.QuadratOperation.QuadratResult;
 import org.geotools.process.spatialstatistics.relationship.OLSResult;
@@ -33,9 +36,6 @@ import org.geotools.process.spatialstatistics.relationship.OLSResult.Variables.V
 import org.geotools.process.spatialstatistics.relationship.OLSResult.Variance.RegressionItem;
 import org.geotools.process.spatialstatistics.relationship.OLSResult.Variance.ResidualItem;
 import org.geotools.process.spatialstatistics.relationship.OLSResult.Variance.SumItem;
-import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult;
-import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult.PropertyName;
-import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult.PropertyName.PearsonItem;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 
@@ -58,8 +58,8 @@ public class HtmlWriter {
         sb.append("<!DOCTYPE html>").append(NEWLINE);
         sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">").append(NEWLINE);
         sb.append("<head>").append(NEWLINE);
-        sb.append("  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />")
-                .append(NEWLINE);
+        sb.append("  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />");
+        sb.append(NEWLINE);
         sb.append("  <title>" + title + "</title>").append(NEWLINE);
 
         sb.append("  <style type=\"text/css\">").append(NEWLINE);
@@ -142,7 +142,7 @@ public class HtmlWriter {
 
             sb.append("<li>" + Messages.ProcessDescriptor_Contact
                     + ": <a href=\"mailto:mapplus@gmail.com\">mapplus@gmail.com</a>, ");
-            sb.append("<a href=\"mailto:jya1210@gmail.com\">jya1210@gmail.com</a></li>");
+            sb.append("<a href=\"mailto:mango@mangosystem.com\">mango@mangosystem.com</a></li>");
             sb.append(NEWLINE);
         } else {
             sb.append("<li>" + Messages.ProcessDescriptor_Product + ": GeoTools</li>");
@@ -203,7 +203,7 @@ public class HtmlWriter {
             if (item.getCaseValue() != null) {
                 write("<tr><td>Case Value</td><td>" + item.getCaseValue() + "</td></tr>");
             }
-            
+
             write("<tr><td>Count</td><td>" + item.getCount() + "</td></tr>");
             write("<tr><td>Invalid Count</td><td>" + item.getInvalidCount() + "</td></tr>");
             write("<tr><td>Minimum</td><td>" + format(item.getMinimum()) + "</td></tr>");
@@ -568,17 +568,20 @@ public class HtmlWriter {
 
         write("<tr><td>Mean</td><td>" + value.getMean() + "</td></tr>");
         write("<tr><td>Variance</td><td>" + value.getVariance() + "</td></tr>");
-        write("<tr><td>Variance/Mean Ratio</td><td>" + value.getVariance_Mean_Ratio() + "</td></tr>");
-        
-        write("<tr><td>D value of Kolmogorov-Smirnov Test</td><td>" + value.getKolmogorov_Smirnov_Test() + "</td></tr>");
-        write("<tr><td>Critical value at the 5% level</td><td>" + value.getCritical_Value_at_5percent() + "</td></tr>");
+        write("<tr><td>Variance/Mean Ratio</td><td>" + value.getVariance_Mean_Ratio()
+                + "</td></tr>");
+
+        write("<tr><td>D value of Kolmogorov-Smirnov Test</td><td>"
+                + value.getKolmogorov_Smirnov_Test() + "</td></tr>");
+        write("<tr><td>Critical value at the 5% level</td><td>"
+                + value.getCritical_Value_at_5percent() + "</td></tr>");
 
         write("</table>");
     }
 
     public void writeOLSProcess(OLSResult value) {
         writeH1("Ordinary Least Squares (OLS)");
-        
+
         // 1. Diagnostics
         writeH2("Diagnostics");
         write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
@@ -596,15 +599,19 @@ public class HtmlWriter {
 
         // body
         Diagnostics diag = value.getDiagnostics();
-        write("<tr><td>Number of Observations</td><td>" + format(diag.getNumberOfObservations()) + "</td></tr>");
+        write("<tr><td>Number of Observations</td><td>" + format(diag.getNumberOfObservations())
+                + "</td></tr>");
         write("<tr><td>R</td><td>" + format(diag.getR()) + "</td></tr>");
         write("<tr><td>R-Squared</td><td>" + format(diag.getRSquared()) + "</td></tr>");
-        write("<tr><td>Adjusted R-Squared</td><td>" + format(diag.getAdjustedRSquared()) + "</td></tr>");
+        write("<tr><td>Adjusted R-Squared</td><td>" + format(diag.getAdjustedRSquared())
+                + "</td></tr>");
         write("<tr><td>Standard Error</td><td>" + format(diag.getStandardError()) + "</td></tr>");
-        write("<tr><td>Akaike's Information Criterion (AIC)</td><td>" + format(diag.getAIC()) + "</td></tr>");
-        write("<tr><td>Corrected Akaike's Information Criterion (AICc)</td><td>" + format(diag.getAICc()) + "</td></tr>");
+        write("<tr><td>Akaike's Information Criterion (AIC)</td><td>" + format(diag.getAIC())
+                + "</td></tr>");
+        write("<tr><td>Corrected Akaike's Information Criterion (AICc)</td><td>"
+                + format(diag.getAICc()) + "</td></tr>");
         write("</table>");
-        
+
         // 2. Variance
         writeH2("Variance Analysis");
         write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
@@ -639,12 +646,12 @@ public class HtmlWriter {
         write("<tr><td>Residual</td><td>" + res.getDegreesOfFreedom() + "</td><td>"
                 + format(res.getSumOfSquare()) + "</td><td>" + format(res.getSquareMean())
                 + "</td><td>-</td><td>-</td></tr>");
-        
+
         SumItem sum = value.getVariance().getSum();
         write("<tr><td>Sum</td><td>" + sum.getDegreesOfFreedom() + "</td><td>"
                 + format(sum.getSumOfSquare()) + "</td><td>-</td><td>-</td><td>-</td></tr>");
         write("</table>");
-        
+
         // 3. Model Variables
         writeH2("Model Variables");
         write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
@@ -669,10 +676,10 @@ public class HtmlWriter {
         // body
         List<Variable> items = value.getVariables().getItems();
         for (Variable var : items) {
-            write("<tr><td>" + var.getVariable() + "</td><td>"
-                    + format(var.getCoefficient()) + "</td><td>" + format(var.getStdError())
-                    + "</td><td>" + format(var.gettStatistic()) + "</td><td>"
-                    + format(var.getProbability()) + "</td></tr>");
+            write("<tr><td>" + var.getVariable() + "</td><td>" + format(var.getCoefficient())
+                    + "</td><td>" + format(var.getStdError()) + "</td><td>"
+                    + format(var.gettStatistic()) + "</td><td>" + format(var.getProbability())
+                    + "</td></tr>");
         }
         write("</table>");
     }

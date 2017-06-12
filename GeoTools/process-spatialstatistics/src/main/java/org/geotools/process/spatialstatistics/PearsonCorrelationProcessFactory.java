@@ -28,7 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult;
+import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;

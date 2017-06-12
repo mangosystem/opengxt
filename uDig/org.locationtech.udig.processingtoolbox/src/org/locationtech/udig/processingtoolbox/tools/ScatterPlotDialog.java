@@ -43,7 +43,7 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.process.spatialstatistics.PearsonCorrelationProcess;
 import org.geotools.process.spatialstatistics.StatisticsFeaturesProcess;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
-import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult;
+import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
 import org.geotools.util.logging.Logging;
 import org.jfree.chart.ChartMouseEvent;
 import org.jfree.chart.ChartMouseListener;

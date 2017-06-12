@@ -14,7 +14,7 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *    Lesser General Public License for more details.
  */
-package org.geotools.process.spatialstatistics.relationship;
+package org.geotools.process.spatialstatistics.operations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +23,8 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
-import org.geotools.process.spatialstatistics.operations.GeneralOperation;
-import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult.PropertyName;
-import org.geotools.process.spatialstatistics.relationship.PearsonOperation.PearsonResult.PropertyName.PearsonItem;
+import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName;
+import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult.PropertyName.PearsonItem;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;

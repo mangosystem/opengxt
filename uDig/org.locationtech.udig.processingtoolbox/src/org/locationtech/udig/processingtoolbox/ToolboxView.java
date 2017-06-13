@@ -66,6 +66,7 @@ import org.locationtech.udig.processingtoolbox.tools.SplitByAttributesDialog;
 import org.locationtech.udig.processingtoolbox.tools.SplitByFeaturesDialog;
 import org.locationtech.udig.processingtoolbox.tools.TextfileToPointDialog;
 import org.locationtech.udig.processingtoolbox.tools.ThematicMapDialog;
+import org.locationtech.udig.processingtoolbox.tools.ThematicMapRasterDialog;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.opengis.feature.type.Name;
@@ -229,6 +230,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                     dialog = new TextfileToPointDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("ThematicMapDialog")) {
                                     dialog = new ThematicMapDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("ThematicMapRasterDialog")) {
+                                    dialog = new ThematicMapRasterDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("GeometryToFeaturesDialog")) {
                                     dialog = new GeometryToFeaturesDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("SpatialWeightsMatrixDialog")) {
@@ -420,8 +423,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         // 0. general operation dialog
         TreeParent generalTool = new TreeParent(Messages.ToolboxView_GeneralTools, null, null);
         root.addChild(generalTool);
-
+        
         buildTool(generalTool, Messages.ThematicMapDialog_title, "ThematicMapDialog");
+        buildTool(generalTool, Messages.ThematicMapRasterDialog_title, "ThematicMapRasterDialog");
         // buildTool(generalTool, Messages.FieldCalculatorDialog_title, "FieldCalculatorDialog");
 
         // import

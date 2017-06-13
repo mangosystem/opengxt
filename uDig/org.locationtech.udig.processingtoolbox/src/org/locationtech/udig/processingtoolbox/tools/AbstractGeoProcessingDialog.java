@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
+import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureSource;
 import org.geotools.process.spatialstatistics.core.StringHelper;
@@ -49,6 +50,7 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget;
 import org.locationtech.udig.processingtoolbox.internal.ui.WidgetBuilder;
+import org.locationtech.udig.processingtoolbox.styler.MapUtils;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils.FieldType;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils.VectorLayerType;
 import org.locationtech.udig.project.ILayer;
@@ -56,6 +58,7 @@ import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.style.sld.SLDContent;
+import org.opengis.coverage.grid.GridCoverageReader;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
@@ -220,6 +223,21 @@ public abstract class AbstractGeoProcessingDialog extends TitleAreaDialog {
             ToolboxPlugin.log(e.getMessage());
         } catch (IOException e) {
             ToolboxPlugin.log(e.getMessage());
+        }
+    }
+
+    protected void fillRasterLayers(IMap map, Combo combo) {
+        combo.removeAll();
+        for (ILayer layer : map.getMapLayers()) {
+            if (layer.hasResource(GridCoverageReader.class)
+                    || layer.getGeoResource().canResolve(GridCoverageReader.class)) {
+                // must be one band!
+                GridCoverage2D coverage = MapUtils.getGridCoverage(layer);
+                int numBands = coverage.getNumSampleDimensions();
+                if (numBands == 1) {
+                    combo.add(layer.getName());
+                }
+            }
         }
     }
 

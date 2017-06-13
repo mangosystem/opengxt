@@ -372,6 +372,10 @@ public class Messages extends NLS {
     public static String ThematicMapDialog_Minimum;
     public static String ThematicMapDialog_Maximum;
     
+    public static String ThematicMapRasterDialog_title;
+    public static String ThematicMapRasterDialog_description;
+    public static String ThematicMapRasterDialog_NoData;
+    
     public static String ToolboxView_workspace;
     public static String ToolboxView_GeoTools;    
     public static String ToolboxView_Title;

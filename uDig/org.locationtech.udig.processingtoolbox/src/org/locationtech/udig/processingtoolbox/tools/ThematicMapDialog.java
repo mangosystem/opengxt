@@ -10,21 +10,15 @@
 package org.locationtech.udig.processingtoolbox.tools;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -40,11 +34,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.Spinner;
-import org.eclipse.ui.PlatformUI;
-import org.geotools.brewer.color.BrewerPalette;
-import org.geotools.brewer.color.ColorBrewer;
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.styler.GraduatedColorStyleBuilder;
@@ -54,19 +44,16 @@ import org.geotools.styling.Fill;
 import org.geotools.styling.PolygonSymbolizer;
 import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
-import org.geotools.styling.StyleFactory;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils.FieldType;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils.VectorLayerType;
-import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.locationtech.udig.style.sld.editor.BorderColorComboListener.Outline;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.FilterFactory2;
 
 /**
  * Histogram Dialog
@@ -75,31 +62,12 @@ import org.opengis.filter.FilterFactory2;
  * 
  * @source $URL$
  */
-public class ThematicMapDialog extends AbstractGeoProcessingDialog {
+public class ThematicMapDialog extends AbstractThematicMapDialog {
     protected static final Logger LOGGER = Logging.getLogger(ThematicMapDialog.class);
 
-    @SuppressWarnings("nls")
-    static final String[] NUMERIC_METHOD = new String[] { "Equal Interval", "Natural Breaks",
-            "Quantile", "Standard Deviation" };
-
-    @SuppressWarnings("nls")
-    static final String[] CATEGORY_METHOD = new String[] { "Unique Values", "LISA Style" };
-
-    private ColorBrewer brewer;
-
-    private StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
-
-    private FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
-
-    private ILayer activeLayer;
-
-    private Button chkReverse, chkSymbol;
+    private Button chkSymbol;
 
     private Combo cboLayer, cboField, cboMethod, cboNormal, cboOutline;
-
-    private Combo cboColorRamp;
-
-    private Label lblPreview;
 
     private Spinner spnClass, spnTransparency, spnLineWidth, spnMin, spnMax;
 
@@ -108,12 +76,9 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
     public ThematicMapDialog(Shell parentShell, IMap map) {
         super(parentShell, map);
 
-        setShellStyle(SWT.CLOSE | SWT.MIN | SWT.TITLE | SWT.BORDER | SWT.MODELESS | SWT.RESIZE);
-
         this.windowTitle = Messages.ThematicMapDialog_title;
         this.windowDesc = Messages.ThematicMapDialog_description;
         this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 550, 380);
-        this.brewer = ColorBrewer.instance();
     }
 
     @Override
@@ -284,58 +249,9 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
             }
         });
 
-        updateColorRamp(0);
+        updateColorRamp(0, 5);
         area.pack(true);
         return area;
-    }
-
-    private void updatePreview() {
-        int selIndex = cboColorRamp.getSelectionIndex();
-        if (selIndex == -1) {
-            return;
-        }
-
-        // draw image
-        String paletteName = cboColorRamp.getItem(selIndex).split("\\(")[0]; //$NON-NLS-1$
-        BrewerPalette palette = brewer.getPalette(paletteName);
-
-        org.eclipse.swt.graphics.Point size = cboColorRamp.getSize();
-        int width = size.x > 0 ? size.x : windowSize.x - 120;
-        int height = size.y > 0 ? size.y : 32;
-
-        java.awt.Color[] colors = palette.getColors();
-        if (chkReverse.getSelection()) {
-            ArrayUtils.reverse(colors);
-        }
-
-        Image image = paletteToImage(colors, width, height).createImage();
-        lblPreview.setImage(image);
-        lblPreview.update();
-    }
-
-    @SuppressWarnings("nls")
-    private void updateColorRamp(int selection) {
-        BrewerPalette[] palettes = null;
-        if (selection == 0) // All
-            palettes = brewer.getPalettes(ColorBrewer.ALL);
-        else if (selection == 1) // Numerical
-            palettes = brewer.getPalettes(ColorBrewer.SUITABLE_RANGED);
-        else if (selection == 2) // Sequential
-            palettes = brewer.getPalettes(ColorBrewer.SEQUENTIAL);
-        else if (selection == 3) // Diverging
-            palettes = brewer.getPalettes(ColorBrewer.DIVERGING);
-        else if (selection == 4) // Categorical
-            palettes = brewer.getPalettes(ColorBrewer.SUITABLE_UNIQUE);
-        else
-            palettes = brewer.getPalettes(ColorBrewer.ALL);
-
-        cboColorRamp.removeAll();
-        for (BrewerPalette palette : palettes) {
-            String name = String.format("%s(%s)", palette.getName(), palette.getDescription());
-            // Image image = Glyph.palette(palette.getColors()).createImage();
-            cboColorRamp.add(name);
-        }
-        cboColorRamp.select(cboColorRamp.getItemCount() > 5 ? 5 : 0);
     }
 
     @Override
@@ -344,8 +260,6 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
             openInformation(getShell(), Messages.Task_ParameterRequired);
             return;
         }
-
-        // Style origStyle = (Style) inputLayer.getStyleBlackboard().get(SLDContent.ID);
 
         Runnable runnable = new Runnable() {
             @Override
@@ -366,7 +280,8 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
                 }
 
                 int numClasses = spnClass.getSelection();
-                String functionName = getFunctionName();
+                String styleName = cboMethod.getText().toUpperCase();
+                String functionName = getFunctionName(styleName);
 
                 SimpleFeatureCollection features = MapUtils.getFeatures(activeLayer);
                 SimpleFeatureType schema = activeLayer.getSchema();
@@ -436,80 +351,5 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
             ToolboxPlugin.log(e);
             MessageDialog.openError(getParentShell(), Messages.General_Error, e.getMessage());
         }
-    }
-
-    @SuppressWarnings("nls")
-    private String getFunctionName() {
-        String styleName = cboMethod.getText().toUpperCase();
-
-        String functionName = null;
-        if (styleName.startsWith("LISA")) {
-            functionName = "LISA Style";
-        } else if (styleName.startsWith("ZSCORE")) {
-            functionName = "ZScore";
-        } else if (styleName.startsWith("ZSCORE STAND")) {
-            functionName = "ZScore Standard";
-        } else if (styleName.startsWith("CL") || styleName.startsWith("JE")
-                || styleName.startsWith("NA")) {
-            functionName = "JenksNaturalBreaksFunction";
-        } else if (styleName.startsWith("E")) {
-            functionName = "EqualIntervalFunction";
-        } else if (styleName.startsWith("S")) {
-            functionName = "StandardDeviationFunction";
-        } else if (styleName.startsWith("Q")) {
-            functionName = "QuantileFunction";
-        } else if (styleName.startsWith("U")) {
-            functionName = "UniqueIntervalFunction";
-        }
-
-        return functionName;
-    }
-
-    private ImageDescriptor paletteToImage(java.awt.Color colors[], final int width,
-            final int height) {
-        // remove null color
-        List<java.awt.Color> list = new ArrayList<java.awt.Color>();
-        for (java.awt.Color color : colors) {
-            if (color != null) {
-                list.add(color);
-            }
-        }
-
-        final java.awt.Color[] palettes = new java.awt.Color[list.size()];
-        list.toArray(palettes);
-
-        return new ImageDescriptor() {
-
-            public ImageData getImageData() {
-                Display display = PlatformUI.getWorkbench().getDisplay();
-
-                Image swtImage = new Image(display, width, height);
-                org.eclipse.swt.graphics.GC gc = new GC(swtImage);
-                gc.setAntialias(SWT.ON);
-
-                org.eclipse.swt.graphics.Color swtColor = null;
-                int interval = width / palettes.length;
-                for (int i = 0; i < palettes.length; i++) {
-                    try {
-                        java.awt.Color color = palettes[i];
-                        if (color == null) {
-                            continue;
-                        }
-
-                        swtColor = new org.eclipse.swt.graphics.Color(display, color.getRed(),
-                                color.getGreen(), color.getBlue());
-                        gc.setBackground(swtColor);
-                        gc.fillRectangle(interval * i, 1, interval * (i + 1), height - 1);
-                    } finally {
-                        swtColor.dispose();
-                    }
-                }
-
-                ImageData clone = (ImageData) swtImage.getImageData().clone();
-                swtImage.dispose();
-
-                return clone;
-            }
-        };
     }
 }

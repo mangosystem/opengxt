@@ -10,15 +10,21 @@
 package org.locationtech.udig.processingtoolbox.tools;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -29,10 +35,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.ui.PlatformUI;
 import org.geotools.brewer.color.BrewerPalette;
 import org.geotools.brewer.color.ColorBrewer;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -91,6 +99,8 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
 
     private Combo cboColorRamp;
 
+    private Label lblPreview;
+
     private Spinner spnClass, spnTransparency, spnLineWidth, spnMin, spnMax;
 
     private Slider sldTransparency;
@@ -102,7 +112,7 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
 
         this.windowTitle = Messages.ThematicMapDialog_title;
         this.windowDesc = Messages.ThematicMapDialog_description;
-        this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 550, 350);
+        this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 550, 380);
         this.brewer = ColorBrewer.instance();
     }
 
@@ -138,6 +148,11 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
         // Ramp
         uiBuilder.createLabel(container, Messages.ThematicMapDialog_ColorRamp, EMPTY, image, 1);
         cboColorRamp = uiBuilder.createCombo(container, 5, true);
+
+        // Preview ramp
+        uiBuilder.createLabel(container, EMPTY, EMPTY, null, 1);
+        lblPreview = new Label(container, SWT.NONE);
+        lblPreview.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 5, 1));
 
         // Reverse color ramp
         uiBuilder.createLabel(container, EMPTY, EMPTY, null, 1);
@@ -242,6 +257,19 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
             }
         });
 
+        cboColorRamp.addModifyListener(new ModifyListener() {
+            @Override
+            public void modifyText(ModifyEvent e) {
+                updatePreview();
+            }
+        });
+
+        chkReverse.addListener(SWT.Selection, new Listener() {
+            public void handleEvent(Event e) {
+                updatePreview();
+            }
+        });
+
         sldTransparency.addListener(SWT.Selection, new Listener() {
             @Override
             public void handleEvent(Event event) {
@@ -259,6 +287,30 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
         updateColorRamp(0);
         area.pack(true);
         return area;
+    }
+
+    private void updatePreview() {
+        int selIndex = cboColorRamp.getSelectionIndex();
+        if (selIndex == -1) {
+            return;
+        }
+
+        // draw image
+        String paletteName = cboColorRamp.getItem(selIndex).split("\\(")[0]; //$NON-NLS-1$
+        BrewerPalette palette = brewer.getPalette(paletteName);
+
+        org.eclipse.swt.graphics.Point size = cboColorRamp.getSize();
+        int width = size.x > 0 ? size.x : windowSize.x - 120;
+        int height = size.y > 0 ? size.y : 32;
+
+        java.awt.Color[] colors = palette.getColors();
+        if (chkReverse.getSelection()) {
+            ArrayUtils.reverse(colors);
+        }
+
+        Image image = paletteToImage(colors, width, height).createImage();
+        lblPreview.setImage(image);
+        lblPreview.update();
     }
 
     @SuppressWarnings("nls")
@@ -411,5 +463,53 @@ public class ThematicMapDialog extends AbstractGeoProcessingDialog {
         }
 
         return functionName;
+    }
+
+    private ImageDescriptor paletteToImage(java.awt.Color colors[], final int width,
+            final int height) {
+        // remove null color
+        List<java.awt.Color> list = new ArrayList<java.awt.Color>();
+        for (java.awt.Color color : colors) {
+            if (color != null) {
+                list.add(color);
+            }
+        }
+
+        final java.awt.Color[] palettes = new java.awt.Color[list.size()];
+        list.toArray(palettes);
+
+        return new ImageDescriptor() {
+
+            public ImageData getImageData() {
+                Display display = PlatformUI.getWorkbench().getDisplay();
+
+                Image swtImage = new Image(display, width, height);
+                org.eclipse.swt.graphics.GC gc = new GC(swtImage);
+                gc.setAntialias(SWT.ON);
+
+                org.eclipse.swt.graphics.Color swtColor = null;
+                int interval = width / palettes.length;
+                for (int i = 0; i < palettes.length; i++) {
+                    try {
+                        java.awt.Color color = palettes[i];
+                        if (color == null) {
+                            continue;
+                        }
+
+                        swtColor = new org.eclipse.swt.graphics.Color(display, color.getRed(),
+                                color.getGreen(), color.getBlue());
+                        gc.setBackground(swtColor);
+                        gc.fillRectangle(interval * i, 1, interval * (i + 1), height - 1);
+                    } finally {
+                        swtColor.dispose();
+                    }
+                }
+
+                ImageData clone = (ImageData) swtImage.getImageData().clone();
+                swtImage.dispose();
+
+                return clone;
+            }
+        };
     }
 }

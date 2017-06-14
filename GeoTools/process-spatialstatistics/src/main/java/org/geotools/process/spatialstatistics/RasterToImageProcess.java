@@ -22,33 +22,17 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.MapToImageParam;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.core.StatisticsVisitor;
-import org.geotools.process.spatialstatistics.core.StatisticsVisitor.DoubleStrategy;
-import org.geotools.process.spatialstatistics.core.StatisticsVisitor.StatisticsStrategy;
-import org.geotools.process.spatialstatistics.core.StatisticsVisitorResult;
-import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
-import org.geotools.styling.ChannelSelection;
-import org.geotools.styling.ColorMap;
-import org.geotools.styling.ContrastEnhancement;
-import org.geotools.styling.RasterSymbolizer;
-import org.geotools.styling.SLD;
-import org.geotools.styling.SelectedChannelType;
+import org.geotools.process.spatialstatistics.styler.SSStyleBuilder;
 import org.geotools.styling.Style;
-import org.geotools.styling.StyleBuilder;
-import org.geotools.styling.StyleFactory;
 import org.geotools.util.logging.Logging;
-import org.opengis.filter.FilterFactory2;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.style.ContrastMethod;
 import org.opengis.util.ProgressListener;
 
 /**
@@ -60,10 +44,6 @@ import org.opengis.util.ProgressListener;
  */
 public class RasterToImageProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(RasterToImageProcess.class);
-
-    private StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
-
-    private FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
 
     public RasterToImageProcess(ProcessFactory factory) {
         super(factory);
@@ -133,7 +113,8 @@ public class RasterToImageProcess extends AbstractStatisticsProcess {
         }
 
         if (style == null) {
-            style = getDefaultStyle(coverage);
+            SSStyleBuilder sb = new SSStyleBuilder(null);
+            style = sb.getDefaultGridCoverageStyle(coverage);
         }
 
         ReferencedEnvelope mapExtent = this.getBoundingBox(bbox, crs);
@@ -185,88 +166,5 @@ public class RasterToImageProcess extends AbstractStatisticsProcess {
         }
 
         return new ReferencedEnvelope(crs);
-    }
-
-    private Style getDefaultStyle(GridCoverage2D coverage) {
-        Style rasterStyle = null;
-        int numBands = coverage.getNumSampleDimensions();
-
-        if (numBands >= 3) {
-            rasterStyle = createRGBStyle(coverage);
-        } else {
-            Color[] colors = new Color[] { new Color(0, 0, 0, 0), Color.BLUE, Color.CYAN,
-                    Color.GREEN, Color.YELLOW, Color.RED };
-
-            StatisticsStrategy strategy = new DoubleStrategy();
-            strategy.setNoData(RasterHelper.getNoDataValue(coverage));
-
-            StatisticsVisitor visitor = new StatisticsVisitor(strategy);
-            visitor.visit(coverage, 0);
-            StatisticsVisitorResult ret = visitor.getResult();
-
-            String[] descs = new String[] { "No Data", "LL", "LM", "M", "MH", "HH" };
-
-            double mean = ret.getMean();
-            double nodata = Double.parseDouble(ret.getNoData().toString());
-            double[] values = new double[] { nodata, ret.getMinimum(),
-                    (ret.getMinimum() + mean) / 2.0, mean, (ret.getMaximum() + mean) / 2.0,
-                    ret.getMaximum() };
-
-            StyleBuilder sb = new StyleBuilder();
-            ColorMap colorMap = sb.createColorMap(descs, values, colors, ColorMap.TYPE_RAMP);
-            RasterSymbolizer rsDem = sb.createRasterSymbolizer(colorMap, 1);
-            rasterStyle = sb.createStyle(rsDem);
-        }
-
-        return rasterStyle;
-    }
-
-    private Style createRGBStyle(GridCoverage2D srcGc) {
-        // We need at least three bands to create an RGB style
-        int numBands = srcGc.getNumSampleDimensions();
-        if (numBands < 3) {
-            return null;
-        }
-        // Get the names of the bands
-        String[] sampleDimensionNames = new String[numBands];
-        for (int i = 0; i < numBands; i++) {
-            GridSampleDimension dim = srcGc.getSampleDimension(i);
-            sampleDimensionNames[i] = dim.getDescription().toString();
-        }
-
-        final int RED = 0, GREEN = 1, BLUE = 2;
-        int[] channelNum = { -1, -1, -1 };
-        // We examine the band names looking for "red...", "green...", "blue...".
-        // Note that the channel numbers we record are indexed from 1, not 0.
-        for (int i = 0; i < numBands; i++) {
-            String name = sampleDimensionNames[i].toLowerCase();
-            if (name != null) {
-                if (name.matches("red.*")) {
-                    channelNum[RED] = i + 1;
-                } else if (name.matches("green.*")) {
-                    channelNum[GREEN] = i + 1;
-                } else if (name.matches("blue.*")) {
-                    channelNum[BLUE] = i + 1;
-                }
-            }
-        }
-        // If we didn't find named bands "red...", "green...", "blue..."
-        // we fall back to using the first three bands in order
-        if (channelNum[RED] < 0 || channelNum[GREEN] < 0 || channelNum[BLUE] < 0) {
-            channelNum[RED] = 1;
-            channelNum[GREEN] = 2;
-            channelNum[BLUE] = 3;
-        }
-        // Now we create a RasterSymbolizer using the selected channels
-        SelectedChannelType[] sct = new SelectedChannelType[srcGc.getNumSampleDimensions()];
-        ContrastEnhancement ce = sf.contrastEnhancement(ff.literal(1.0), ContrastMethod.NORMALIZE);
-        for (int i = 0; i < 3; i++) {
-            sct[i] = sf.createSelectedChannelType(String.valueOf(channelNum[i]), ce);
-        }
-        RasterSymbolizer sym = sf.getDefaultRasterSymbolizer();
-        ChannelSelection sel = sf.channelSelection(sct[RED], sct[GREEN], sct[BLUE]);
-        sym.setChannelSelection(sel);
-
-        return SLD.wrapSymbolizers(sym);
     }
 }

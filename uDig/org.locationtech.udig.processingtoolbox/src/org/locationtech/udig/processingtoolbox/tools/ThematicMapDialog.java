@@ -108,7 +108,7 @@ public class ThematicMapDialog extends AbstractThematicMapDialog {
         cboMethod = uiBuilder.createCombo(container, 2, true);
 
         uiBuilder.createLabel(container, Messages.ThematicMapDialog_Classes, EMPTY, image, 1);
-        spnClass = uiBuilder.createSpinner(container, 5, 2, 20, 0, 1, 1, 2);
+        spnClass = uiBuilder.createSpinner(container, 5, 2, 12, 0, 1, 1, 2);
 
         // Ramp
         uiBuilder.createLabel(container, Messages.ThematicMapDialog_ColorRamp, EMPTY, image, 1);

@@ -24,10 +24,15 @@ import java.util.logging.Logger;
 
 import org.geotools.brewer.color.BrewerPalette;
 import org.geotools.brewer.color.ColorBrewer;
+import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.filter.function.RangedClassifier;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
+import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
+import org.geotools.process.spatialstatistics.transformation.CoverageToPointFeatureCollection;
+import org.geotools.styling.ColorMap;
+import org.geotools.styling.ColorMapEntry;
 import org.geotools.styling.FeatureTypeStyle;
 import org.geotools.styling.Fill;
 import org.geotools.styling.Graphic;
@@ -35,6 +40,7 @@ import org.geotools.styling.Mark;
 import org.geotools.styling.Rule;
 import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
+import org.geotools.styling.StyleBuilder;
 import org.geotools.styling.Symbolizer;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -55,6 +61,8 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
 
     String normalProperty;
 
+    ColorBrewer brewer = ColorBrewer.instance();
+
     public void setNormalProperty(String normalProperty) {
         this.normalProperty = normalProperty;
     }
@@ -63,17 +71,83 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
         return normalProperty;
     }
 
+    public Style createStyle(GridCoverage2D coverage, String methodName, int numClasses,
+            String brewerPaletteName) {
+        return createStyle(coverage, methodName, numClasses, brewerPaletteName, false, 1.0d);
+    }
+
+    public Style createStyle(GridCoverage2D coverage, String methodName, int numClasses,
+            String brewerPaletteName, boolean reverse) {
+        return createStyle(coverage, methodName, numClasses, brewerPaletteName, reverse, 1.0d);
+    }
+
+    private int checkNumClasses(int numClasses) {
+        numClasses = numClasses < 3 ? 3 : numClasses;
+        if (numClasses > 12) {
+            numClasses = numClasses > 12 ? 12 : numClasses;
+            LOGGER.log(Level.WARNING, "maximum numClasses cannot exceed 12!");
+        }
+        return numClasses;
+    }
+
+    public Style createStyle(GridCoverage2D coverage, String methodName, int numClasses,
+            String brewerPaletteName, boolean reverse, double opacity) {
+        numClasses = checkNumClasses(numClasses);
+
+        SimpleFeatureCollection inputFeatures = new CoverageToPointFeatureCollection(coverage);
+
+        RangedClassifier classifier = getClassifier(inputFeatures, "Value", methodName, numClasses); //$NON-NLS-1$
+        double[] breaks = getClassBreaks(classifier);
+
+        BrewerPalette brewerPalette = brewer.getPalette(brewerPaletteName);
+        Color[] colors = brewerPalette.getColors(breaks.length - 1);
+        if (reverse) {
+            Collections.reverse(Arrays.asList(colors));
+        }
+
+        StyleBuilder builder = new StyleBuilder();
+
+        // Set nodata
+        double noData = RasterHelper.getNoDataValue(coverage);
+        ColorMapEntry nodataEntry = sf.createColorMapEntry();
+        nodataEntry.setQuantity(ff.literal(noData));
+        nodataEntry.setColor(builder.colorExpression(colors[0]));
+        nodataEntry.setOpacity(ff.literal(0.0f));
+        nodataEntry.setLabel("No Data"); //$NON-NLS-1$
+
+        ColorMap colorMap = sf.createColorMap();
+        colorMap.setType(ColorMap.TYPE_RAMP);
+
+        if (noData < breaks[0]) {
+            colorMap.addColorMapEntry(nodataEntry);
+        }
+
+        for (int i = 0; i < colors.length; i++) {
+            colorMap.addColorMapEntry(createColorMapEntry(builder, breaks[i], colors[i]));
+        }
+
+        if (noData > breaks[breaks.length - 1]) {
+            colorMap.addColorMapEntry(nodataEntry);
+        }
+
+        return builder.createStyle(builder.createRasterSymbolizer(colorMap, opacity));
+    }
+
+    private ColorMapEntry createColorMapEntry(StyleBuilder sb, double quantity, Color color) {
+        ColorMapEntry entry = sf.createColorMapEntry();
+        entry.setQuantity(sb.literalExpression(quantity));
+        entry.setColor(sb.colorExpression(color));
+        entry.setOpacity(sb.literalExpression(color.getAlpha() / 255.0));
+        return entry;
+    }
+
     // Diverging: PuOr, BrBG, PRGn, PiYG, RdBu, RdGy, RdYlBu, Spectral, RdYlGn
     // Qualitative: Set1, Pastel1, Set2, Pastel2, Dark2, Set3, Paired, Accents,
     // Sequential: YlGn, YlGnBu, GnBu, BuGn, PuBuGn, PuBu, BuPu, RdPu, PuRd, OrRd, YlOrRd, YlOrBr,
     // Purples, Blues, Greens, Oranges, Reds, Grays,
     public Style createStyle(SimpleFeatureCollection inputFeatures, String propertyName,
             String methodName, int numClasses, String brewerPaletteName, boolean reverse) {
-        numClasses = numClasses < 3 ? 3 : numClasses;
-        if (numClasses > 12) {
-            numClasses = numClasses > 12 ? 12 : numClasses;
-            LOGGER.log(Level.WARNING, "maximum numClasses cannot exceed 12!");
-        }
+        numClasses = checkNumClasses(numClasses);
 
         // get classifier
         RangedClassifier classifier = null;
@@ -90,7 +164,6 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
             brewerPaletteName = "OrRd"; // default
         }
 
-        ColorBrewer brewer = ColorBrewer.instance();
         BrewerPalette brewerPalette = brewer.getPalette(brewerPaletteName);
 
         Color[] colors = brewerPalette.getColors(classBreaks.length - 1);

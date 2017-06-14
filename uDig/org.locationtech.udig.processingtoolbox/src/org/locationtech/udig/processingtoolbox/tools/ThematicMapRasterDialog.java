@@ -33,11 +33,11 @@ import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
+import org.geotools.process.spatialstatistics.styler.GraduatedColorStyleBuilder;
 import org.geotools.styling.Style;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
-import org.locationtech.udig.processingtoolbox.styler.GraduatedColorGridCoverageStyler;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.style.sld.SLDContent;
@@ -193,11 +193,10 @@ public class ThematicMapRasterDialog extends AbstractThematicMapDialog {
 
                 // crate thematic style
                 GridCoverage2D coverage = MapUtils.getGridCoverage(activeLayer);
-                GraduatedColorGridCoverageStyler builder = new GraduatedColorGridCoverageStyler(
-                        coverage, functionName, numClasses, paletteName, reverse);
-                builder.setOpacity(opacity);
+                GraduatedColorStyleBuilder builder = new GraduatedColorStyleBuilder();
+                Style style = builder.createStyle(coverage, functionName, numClasses, paletteName,
+                        reverse, opacity);
 
-                Style style = builder.getStyle();
                 if (style != null) {
                     // put the style on the blackboard
                     activeLayer.getStyleBlackboard().clear();

@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
 import org.geotools.referencing.CRS;
@@ -78,14 +79,41 @@ public class SplitLineAtPointOperation extends GeneralOperation {
 
         SimpleFeatureIterator featureIter = lineFeatures.features();
         try {
+            boolean isZeroTolerance = tolerance == 0;
+            List<Coordinate> coordinates = new ArrayList<Coordinate>();
+
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry line = (Geometry) feature.getDefaultGeometry();
                 NearFeature source = new NearFeature(line, feature.getID());
 
-                List<Coordinate> coordinates = new ArrayList<Coordinate>();
-                if (tolerance == 0) {
-                    // find nearest point feature
+                coordinates.clear();
+
+                // first, find all point features within search tolerance
+                Envelope searchEnv = line.getEnvelopeInternal();
+                if (!isZeroTolerance) {
+                    searchEnv.expandBy(tolerance);
+                }
+
+                for (@SuppressWarnings("unchecked")
+                Iterator<NearFeature> iter = (Iterator<NearFeature>) spatialIndex.query(searchEnv)
+                        .iterator(); iter.hasNext();) {
+                    NearFeature sample = iter.next();
+                    double distance = line.distance(sample.location);
+
+                    if (isZeroTolerance) {
+                        if (SSUtils.compareDouble(distance, tolerance)) {
+                            coordinates.add(sample.location.getCoordinate());
+                        }
+                    } else {
+                        if (distance <= tolerance) {
+                            coordinates.add(sample.location.getCoordinate());
+                        }
+                    }
+                }
+
+                // find nearest point feature
+                if (isZeroTolerance && coordinates.size() == 0) {
                     NearFeature nearest = (NearFeature) spatialIndex.nearestNeighbour(
                             line.getEnvelopeInternal(), source, new ItemDistance() {
                                 @Override
@@ -96,21 +124,6 @@ public class SplitLineAtPointOperation extends GeneralOperation {
                                 }
                             });
                     coordinates.add(nearest.location.getCoordinate());
-                } else {
-                    // find all point features within search tolerance
-                    Envelope searchEnv = line.getEnvelopeInternal();
-                    searchEnv.expandBy(tolerance);
-
-                    for (@SuppressWarnings("unchecked")
-                    Iterator<NearFeature> iter = (Iterator<NearFeature>) spatialIndex.query(
-                            searchEnv).iterator(); iter.hasNext();) {
-                        NearFeature sample = iter.next();
-                        double distance = line.distance(sample.location);
-                        if (distance > tolerance) {
-                            continue;
-                        }
-                        coordinates.add(sample.location.getCoordinate());
-                    }
                 }
 
                 // create & insert feature
@@ -144,15 +157,15 @@ public class SplitLineAtPointOperation extends GeneralOperation {
         LocationIndexedLine liLine = new LocationIndexedLine(line);
 
         // sort point along line
-        SortedMap<Integer, Coordinate> sortedMap = new TreeMap<Integer, Coordinate>();
+        SortedMap<Double, Coordinate> sortedMap = new TreeMap<Double, Coordinate>();
         for (Coordinate locator : coordinates) {
             LinearLocation index = liLine.indexOf(locator);
-            sortedMap.put(Integer.valueOf(index.getSegmentIndex()), locator);
+            sortedMap.put(Double.valueOf(index.getSegmentFraction()), locator);
         }
 
         // split
         LinearLocation startIndex = liLine.getStartIndex();
-        for (Entry<Integer, Coordinate> entrySet : sortedMap.entrySet()) {
+        for (Entry<Double, Coordinate> entrySet : sortedMap.entrySet()) {
             LinearLocation endIndex = liLine.indexOf(entrySet.getValue());
             Geometry left = liLine.extractLine(startIndex, endIndex);
             if (left != null && !left.isEmpty() && left.getLength() > 0) {

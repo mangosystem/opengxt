@@ -116,8 +116,7 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
     }
 
     public GridCoverage2D execute(SimpleFeatureCollection pointFeatures, int gridValue) {
-        return execute(pointFeatures, Integer.toString(gridValue),
-                PointAssignmentType.MostFrequent);
+        return execute(pointFeatures, Integer.toString(gridValue), PointAssignmentType.MostFrequent);
     }
 
     public GridCoverage2D execute(SimpleFeatureCollection pointFeatures, String fieldOrValue,
@@ -132,14 +131,11 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
             this.cellAssignment = PointAssignmentType.MostFrequent;
             valueType = ValueType.CONSTANT;
             gridValue = Integer.valueOf(fieldOrValue);
-            PixelType = gridValue < Short.MAX_VALUE ? RasterPixelType.SHORT
-                    : RasterPixelType.INTEGER;
+            PixelType = RasterPixelType.INTEGER;
         } else {
             this.cellAssignment = cellAssignment;
             valueType = ValueType.FIELD;
-            if (this.cellAssignment != PointAssignmentType.Count) {
-                return executeField(pointFeatures, fieldOrValue);
-            }
+            return executeField(pointFeatures, fieldOrValue);
         }
 
         // calculate extent & cellsize

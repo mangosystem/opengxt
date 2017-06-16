@@ -46,7 +46,7 @@ public class NearestNeighborCountProcessFactory extends SpatialStatisticsProcess
     private static final String PROCESS_NAME = "NearestNeighborCount";
 
     /*
-     * NearestNeighborCount(SimpleFeatureCollection inputFeatures, String countField, SimpleFeatureCollection nearFeatures, double maximumDistance):
+     * NearestNeighborCount(SimpleFeatureCollection inputFeatures, String countField, SimpleFeatureCollection nearFeatures, Double searchRadius):
      * SimpleFeatureCollection
      */
 
@@ -87,11 +87,11 @@ public class NearestNeighborCountProcessFactory extends SpatialStatisticsProcess
             getResource("NearestNeighborCount.nearFeatures.title"),
             getResource("NearestNeighborCount.nearFeatures.description"), true, 1, 1, null, null);
 
-    /** maximumDistance */
-    public static final Parameter<Double> maximumDistance = new Parameter<Double>(
-            "maximumDistance", Double.class,
-            getResource("NearestNeighborCount.maximumDistance.title"),
-            getResource("NearestNeighborCount.maximumDistance.description"), false, 0, 1,
+    /** searchRadius */
+    public static final Parameter<Double> searchRadius = new Parameter<Double>(
+            "searchRadius", Double.class,
+            getResource("NearestNeighborCount.searchRadius.title"),
+            getResource("NearestNeighborCount.searchRadius.description"), true, 1, 1,
             Double.valueOf(0d), null);
 
     @Override
@@ -100,7 +100,7 @@ public class NearestNeighborCountProcessFactory extends SpatialStatisticsProcess
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(countField.key, countField);
         parameterInfo.put(nearFeatures.key, nearFeatures);
-        parameterInfo.put(maximumDistance.key, maximumDistance);
+        parameterInfo.put(searchRadius.key, searchRadius);
         return parameterInfo;
     }
 

@@ -51,25 +51,24 @@ public class NearestNeighborCountOperation extends GeneralOperation {
 
     protected static final String COUNT_FIELD = "count";
 
-    protected double maximumDistance = Double.MAX_VALUE;
+    protected double searchRadius = Double.MAX_VALUE;
 
-    public void setMaximumDistance(double maximumDistance) {
-        if (Double.isNaN(maximumDistance) || Double.isInfinite(maximumDistance)
-                || maximumDistance <= 0) {
-            this.maximumDistance = Double.MAX_VALUE;
+    public void setMaximumDistance(double searchRadius) {
+        if (Double.isNaN(searchRadius) || Double.isInfinite(searchRadius) || searchRadius <= 0) {
+            this.searchRadius = Double.MAX_VALUE;
         } else {
-            this.maximumDistance = maximumDistance;
+            this.searchRadius = searchRadius;
         }
     }
 
-    public double getMaximumDistance() {
-        return maximumDistance;
+    public double getSearchRadius() {
+        return searchRadius;
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
-            String countField, SimpleFeatureCollection nearFeatures, double maximumDistance)
+            String countField, SimpleFeatureCollection nearFeatures, double searchRadius)
             throws IOException {
-        this.setMaximumDistance(maximumDistance);
+        this.setMaximumDistance(searchRadius);
         return execute(inputFeatures, countField, nearFeatures);
     }
 
@@ -144,8 +143,8 @@ public class NearestNeighborCountOperation extends GeneralOperation {
                             }
                         });
 
-                double minumumDistance = geometry.distance(nearest.location);
-                if (minumumDistance > maximumDistance) {
+                double nearestDistance = geometry.distance(nearest.location);
+                if (nearestDistance > searchRadius) {
                     continue;
                 }
 

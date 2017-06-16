@@ -50,13 +50,13 @@ public class NearestNeighborCountProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            String countField, SimpleFeatureCollection nearFeatures, double maximumDistance,
+            String countField, SimpleFeatureCollection nearFeatures, double searchRadius,
             ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(NearestNeighborCountProcessFactory.inputFeatures.key, inputFeatures);
         map.put(NearestNeighborCountProcessFactory.countField.key, countField);
         map.put(NearestNeighborCountProcessFactory.nearFeatures.key, nearFeatures);
-        map.put(NearestNeighborCountProcessFactory.maximumDistance.key, maximumDistance);
+        map.put(NearestNeighborCountProcessFactory.searchRadius.key, searchRadius);
 
         Process process = new NearestNeighborCountProcess(null);
         Map<String, Object> resultMap;
@@ -87,15 +87,19 @@ public class NearestNeighborCountProcess extends AbstractStatisticsProcess {
                 NearestNeighborCountProcessFactory.countField,
                 NearestNeighborCountProcessFactory.countField.sample);
 
-        Double maximumDistance = (Double) Params.getValue(input,
-                NearestNeighborCountProcessFactory.maximumDistance,
-                NearestNeighborCountProcessFactory.maximumDistance.sample);
+        Double searchRadius = (Double) Params.getValue(input,
+                NearestNeighborCountProcessFactory.searchRadius,
+                NearestNeighborCountProcessFactory.searchRadius.sample);
+
+        if (Double.isNaN(searchRadius) || Double.isInfinite(searchRadius) || searchRadius <= 0) {
+            throw new ProcessException("Search radius must be greater than 0!");
+        }
 
         // start process
         SimpleFeatureCollection resultFc = null;
         try {
             NearestNeighborCountOperation operation = new NearestNeighborCountOperation();
-            resultFc = operation.execute(inputFeatures, countField, nearFeatures, maximumDistance);
+            resultFc = operation.execute(inputFeatures, countField, nearFeatures, searchRadius);
         } catch (IOException e) {
             throw new ProcessException(e);
         }

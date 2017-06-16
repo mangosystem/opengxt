@@ -25,7 +25,6 @@
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <gs.version>2.8.5</gs.version>
     <gt.version>14.5</gt.version>
   </properties>
   
@@ -183,17 +182,17 @@
    <dependency>
       <groupId>org.geoserver</groupId>
       <artifactId>gs-ows</artifactId>
-      <version>${gs.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geoserver</groupId>
       <artifactId>gs-main</artifactId>
-      <version>${gs.version}</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geoserver.extension</groupId>
       <artifactId>gs-wps-core</artifactId>
-      <version>${gs.version}</version>
+      <version>${project.version}</version>
     </dependency> 
     <dependency>
       <groupId>junit</groupId>

@@ -17,9 +17,10 @@
 package org.geotools.process.spatialstatistics.operations;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -91,7 +92,7 @@ public class IntersectionPointsOperation extends GeneralOperation {
         IFeatureInserter featureWriter = getFeatureWriter(schema);
         SimpleFeatureIterator featureIter = inputFeatures.features();
         try {
-            final List<Point> points = new ArrayList<Point>();
+            final Map<Geometry, Object> points = new HashMap<Geometry, Object>();
             boolean isPolygon = FeatureTypes.getSimpleShapeType(inputFeatures) == SimpleShapeType.POLYGON;
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
@@ -99,48 +100,49 @@ public class IntersectionPointsOperation extends GeneralOperation {
                 if (isPolygon) {
                     geometry = geometry.getBoundary();
                 }
-                PreparedGeometry prepared = PreparedGeometryFactory.prepare(geometry);
 
-                // find coincident events
+                PreparedGeometry prepared = PreparedGeometryFactory.prepare(geometry);
+                points.clear();
+
+                // get intersection points, duplicated points should be removed!
                 for (@SuppressWarnings("unchecked")
                 Iterator<NearFeature> iter = (Iterator<NearFeature>) spatialIndex.query(
                         geometry.getEnvelopeInternal()).iterator(); iter.hasNext();) {
-                    NearFeature sample = iter.next();
+                    final NearFeature sample = iter.next();
                     if (prepared.intersects(sample.location)) {
-                        // insert points
                         Geometry intersections = geometry.intersection(sample.location);
-                        points.clear();
-
                         intersections.apply(new GeometryComponentFilter() {
                             @Override
                             public void filter(Geometry geom) {
                                 if (geom instanceof Point) {
-                                    points.add((Point) geom);
+                                    points.put(geom, sample.id);
                                 } else if (geom instanceof MultiPoint) {
                                     for (int idx = 0; idx < geom.getNumGeometries(); idx++) {
-                                        points.add((Point) geom.getGeometryN(idx));
+                                        points.put(geom.getGeometryN(idx), sample.id);
                                     }
                                 }
                             }
                         });
-
-                        if (points.size() == 0) {
-                            continue;
-                        }
-
-                        for (Point point : points) {
-                            // create & insert feature
-                            SimpleFeature newFeature = featureWriter.buildFeature();
-                            featureWriter.copyAttributes(feature, newFeature, false);
-                            newFeature.setDefaultGeometry(point);
-
-                            if (hasIntersectID) {
-                                newFeature.setAttribute(intersectIDField, sample.id);
-                            }
-
-                            featureWriter.write(newFeature);
-                        }
                     }
+                }
+
+                // insert geometries
+                if (points.size() == 0) {
+                    continue;
+                }
+
+                // insert features
+                for (Entry<Geometry, Object> entry : points.entrySet()) {
+                    // create & insert feature
+                    SimpleFeature newFeature = featureWriter.buildFeature();
+                    featureWriter.copyAttributes(feature, newFeature, false);
+                    newFeature.setDefaultGeometry(entry.getKey());
+
+                    if (hasIntersectID) {
+                        newFeature.setAttribute(intersectIDField, entry.getValue());
+                    }
+
+                    featureWriter.write(newFeature);
                 }
             }
         } catch (Exception e) {

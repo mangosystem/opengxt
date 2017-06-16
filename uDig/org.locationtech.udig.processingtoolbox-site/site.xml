@@ -3,5 +3,5 @@
    <description name="Spatial Statistics Toolbox" url="http://www.mangosystem.com:8080/s2toolbox_updates">
       Spatial Statistics Toolbox for uDig
    </description>
-   <feature url="features/org.locationtech.udig.processingtoolbox.feature_2.0.0.201706161123.jar" id="org.locationtech.udig.processingtoolbox.feature" version="2.0.0.201706161123"/>
+   <feature url="features/org.locationtech.udig.processingtoolbox.feature_2.0.0.201706161531.jar" id="org.locationtech.udig.processingtoolbox.feature" version="2.0.0.201706161531"/>
 </site>

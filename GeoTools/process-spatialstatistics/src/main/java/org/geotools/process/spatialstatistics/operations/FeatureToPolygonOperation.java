@@ -49,6 +49,8 @@ import com.vividsolutions.jts.operation.polygonize.Polygonizer;
 public class FeatureToPolygonOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(FeatureToPolygonOperation.class);
 
+    static final String ID_FIELD = "id";
+
     private double tolerance = 0.001d;
 
     private SimpleFeatureCollection labelFeatures = null;
@@ -85,6 +87,7 @@ public class FeatureToPolygonOperation extends GeneralOperation {
 
         List<Polygon> polygons = polygonize(lineFeatures);
         try {
+            int featureID = 1;
             for (Geometry polygon : polygons) {
                 SimpleFeature newFeature = featureWriter.buildFeature();
 
@@ -92,6 +95,7 @@ public class FeatureToPolygonOperation extends GeneralOperation {
                 if (labelFeature != null) {
                     featureWriter.copyAttributes(labelFeature, newFeature, false);
                 }
+                newFeature.setAttribute(ID_FIELD, featureID++);
                 newFeature.setDefaultGeometry(polygon);
                 featureWriter.write(newFeature);
             }
@@ -139,6 +143,8 @@ public class FeatureToPolygonOperation extends GeneralOperation {
         SimpleFeatureType featureType = FeatureTypes.getDefaultType(name, geomBinding, crs);
         if (labelFeatures != null) {
             featureType = FeatureTypes.build(labelFeatures.getSchema(), name, geomBinding, crs);
+        } else {
+            featureType = FeatureTypes.add(featureType, ID_FIELD, Integer.class);
         }
 
         return featureType;

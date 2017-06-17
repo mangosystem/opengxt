@@ -604,6 +604,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent conditionalTool = new TreeParent(Messages.ToolboxView_Conditional, null, null);
         generalTool.addChild(conditionalTool);
         buildTool(conditionalTool, "org.geotools.process.spatialstatistics.RasterConProcessFactory");
+        buildTool(conditionalTool, "org.geotools.process.spatialstatistics.RasterSetNullProcessFactory");
 
         // Distance
         TreeParent distanceTool = new TreeParent(Messages.ToolboxView_RasterDistance, null, null);

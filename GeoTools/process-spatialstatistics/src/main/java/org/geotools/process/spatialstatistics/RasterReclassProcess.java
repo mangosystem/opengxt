@@ -49,11 +49,12 @@ public class RasterReclassProcess extends AbstractStatisticsProcess {
     }
 
     public static GridCoverage2D process(GridCoverage2D inputCoverage, Integer bandIndex,
-            String ranges, ProgressListener monitor) {
+            String ranges, Boolean retainMissingValues, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(RasterReclassProcessFactory.inputCoverage.key, inputCoverage);
         map.put(RasterReclassProcessFactory.bandIndex.key, bandIndex);
         map.put(RasterReclassProcessFactory.ranges.key, ranges);
+        map.put(RasterReclassProcessFactory.retainMissingValues.key, retainMissingValues);
 
         Process process = new RasterReclassProcess(null);
         Map<String, Object> resultMap;
@@ -76,13 +77,17 @@ public class RasterReclassProcess extends AbstractStatisticsProcess {
         Integer bandIndex = (Integer) Params.getValue(input, RasterReclassProcessFactory.bandIndex,
                 RasterReclassProcessFactory.bandIndex.sample);
         String ranges = (String) Params.getValue(input, RasterReclassProcessFactory.ranges, null);
+        Boolean retainMissingValues = (Boolean) Params.getValue(input,
+                RasterReclassProcessFactory.retainMissingValues,
+                RasterReclassProcessFactory.retainMissingValues.sample);
         if (inputCoverage == null || ranges == null || ranges.isEmpty()) {
             throw new NullPointerException("inputCoverage, ranges parameters required");
         }
 
         // start process
         RasterReclassOperation process = new RasterReclassOperation();
-        GridCoverage2D cropedCoverage = process.execute(inputCoverage, bandIndex, ranges);
+        GridCoverage2D cropedCoverage = process.execute(inputCoverage, bandIndex, ranges,
+                retainMissingValues);
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

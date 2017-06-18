@@ -43,7 +43,7 @@ public class RasterReclassProcessFactory extends SpatialStatisticsProcessFactory
     private static final String PROCESS_NAME = "RasterReclass";
 
     /*
-     * RasterReclass(GridCoverage2D inputCoverage, Integer bandIndex, String ranges): GridCoverage2D
+     * RasterReclass(GridCoverage2D inputCoverage, Integer bandIndex, String ranges, Boolean retainMissingValues): GridCoverage2D
      */
 
     public RasterReclassProcessFactory() {
@@ -67,18 +67,27 @@ public class RasterReclassProcessFactory extends SpatialStatisticsProcessFactory
 
     /** inputCoverage */
     public static final Parameter<GridCoverage2D> inputCoverage = new Parameter<GridCoverage2D>(
-            "inputCoverage", GridCoverage2D.class, getResource("RasterReclass.inputCoverage.title"),
+            "inputCoverage", GridCoverage2D.class,
+            getResource("RasterReclass.inputCoverage.title"),
             getResource("RasterReclass.inputCoverage.description"), true, 1, 1, null, null);
 
     /** bandIndex */
     public static final Parameter<Integer> bandIndex = new Parameter<Integer>("bandIndex",
             Integer.class, getResource("RasterReclass.bandIndex.title"),
-            getResource("RasterReclass.bandIndex.description"), false, 0, 1, Integer.valueOf(0), null);
+            getResource("RasterReclass.bandIndex.description"), false, 0, 1, Integer.valueOf(0),
+            null);
 
     /** ranges */
     public static final Parameter<String> ranges = new Parameter<String>("ranges", String.class,
-            getResource("RasterReclass.ranges.title"), getResource("RasterReclass.ranges.description"),
-            true, 1, 1, null, null);
+            getResource("RasterReclass.ranges.title"),
+            getResource("RasterReclass.ranges.description"), true, 1, 1, null, null);
+
+    /** retainMissingValues */
+    public static final Parameter<Boolean> retainMissingValues = new Parameter<Boolean>(
+            "retainMissingValues", Boolean.class,
+            getResource("RasterReclass.retainMissingValues.title"),
+            getResource("RasterReclass.retainMissingValues.description"), false, 0, 1,
+            Boolean.TRUE, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -86,6 +95,7 @@ public class RasterReclassProcessFactory extends SpatialStatisticsProcessFactory
         parameterInfo.put(inputCoverage.key, inputCoverage);
         parameterInfo.put(bandIndex.key, bandIndex);
         parameterInfo.put(ranges.key, ranges);
+        parameterInfo.put(retainMissingValues.key, retainMissingValues);
         return parameterInfo;
     }
 

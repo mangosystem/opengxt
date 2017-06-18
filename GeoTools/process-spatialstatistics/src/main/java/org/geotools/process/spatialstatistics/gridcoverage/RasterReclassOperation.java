@@ -47,22 +47,16 @@ public class RasterReclassOperation extends RasterProcessingOperation {
 
     private SortedMap<Double, ReclassRange> reclassRange = new TreeMap<Double, ReclassRange>();
 
-    public GridCoverage2D execute(GridCoverage2D inputGc, Integer bandIndex, String ranges) {
+    public GridCoverage2D execute(GridCoverage2D inputGc, Integer bandIndex, String ranges,
+            boolean retainMissingValues) {
         // ranges: "0.00 30.00 1; 30.00 270.00 2; 270.00 365.00 3"
         if (!prepareRanges(ranges)) {
             throw new ProcessException(Errors.format(ErrorKeys.ILLEGAL_ARGUMENT_$1, "ranges"));
         }
 
-        RasterPixelType pixelType = RasterPixelType.SHORT;
-        if (reclassRange.lastKey() > Short.MAX_VALUE && reclassRange.lastKey() < Integer.MAX_VALUE) {
-            pixelType = RasterPixelType.INTEGER;
-        } else if (reclassRange.lastKey() > Integer.MAX_VALUE
-                && reclassRange.lastKey() < Float.MAX_VALUE) {
-            pixelType = RasterPixelType.FLOAT;
-        }
-
-        DiskMemImage outputImage = this.createDiskMemImage(inputGc, pixelType);
-        this.NoData = pixelType == RasterPixelType.INTEGER ? Integer.MIN_VALUE : Float.MIN_VALUE;
+        // output will always be of integer type.
+        DiskMemImage outputImage = this.createDiskMemImage(inputGc, RasterPixelType.INTEGER);
+        this.NoData = Integer.MIN_VALUE;
 
         final double inputNoData = RasterHelper.getNoDataValue(inputGc);
         PlanarImage inputImage = (PlanarImage) inputGc.getRenderedImage();
@@ -77,21 +71,29 @@ public class RasterReclassOperation extends RasterProcessingOperation {
             inputIter.startPixels();
             writerIter.startPixels();
             while (!inputIter.finishedPixels() && !writerIter.finishedPixels()) {
-                double gridVal = inputIter.getSampleDouble(bandIndex);
-
-                if (SSUtils.compareDouble(inputNoData, gridVal)) {
+                double value = inputIter.getSampleDouble(bandIndex);
+                if (SSUtils.compareDouble(inputNoData, value)) {
                     writerIter.setSample(0, NoData);
-                } else {
-                    double retVal = this.NoData;
-                    for (ReclassRange rge : reclassRange.values()) {
-                        if (gridVal >= rge.minimum
-                                && gridVal < (rge.maximum + SSUtils.DOUBLE_COMPARE_TOLERANCE)) {
-                            retVal = rge.key;
-                            updateStatistics(retVal);
-                            break;
-                        }
+                    inputIter.nextPixel();
+                    writerIter.nextPixel();
+                    continue;
+                }
+
+                double classValue = this.NoData;
+                boolean isMissing = true;
+                for (ReclassRange range : reclassRange.values()) {
+                    if (range.contains(value)) {
+                        classValue = range.key;
+                        isMissing = false;
+                        updateStatistics(classValue);
+                        break;
                     }
-                    writerIter.setSample(0, retVal);
+                }
+
+                if (retainMissingValues && isMissing) {
+                    writerIter.setSample(0, value);
+                } else {
+                    writerIter.setSample(0, classValue);
                 }
 
                 inputIter.nextPixel();
@@ -147,6 +149,10 @@ public class RasterReclassOperation extends RasterProcessingOperation {
             this.key = key;
             this.minimum = min;
             this.maximum = max;
+        }
+
+        public boolean contains(double value) {
+            return value >= minimum && value < (maximum + SSUtils.DOUBLE_COMPARE_TOLERANCE);
         }
 
         @Override

@@ -31,9 +31,9 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.coverage.processing.Operations;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
+import org.geotools.process.spatialstatistics.enumeration.ResampleType;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
@@ -50,16 +50,19 @@ public class RasterExtractByMaskOperation extends RasterProcessingOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterExtractByMaskOperation.class);
 
     public GridCoverage2D execute(GridCoverage2D inputCoverage, GridCoverage2D maskCoverage) {
+        NoData = RasterHelper.getNoDataValue(inputCoverage);
+        CellSize = RasterHelper.getCellSize(inputCoverage);
+
         CoordinateReferenceSystem inputCrs = inputCoverage.getCoordinateReferenceSystem();
         CoordinateReferenceSystem maskCrs = maskCoverage.getCoordinateReferenceSystem();
         if (!CRS.equalsIgnoreMetadata(inputCrs, maskCrs)) {
-            // TODO Reproject raster
-            throw new ProcessException("maskCoverage's CRS must be the same as inputCoverage CRS!");
+            // Reproject raster
+            RasterReprojectOperation reprojectOp = new RasterReprojectOperation();
+            maskCoverage = reprojectOp.execute(maskCoverage, inputCrs, ResampleType.BILINEAR,
+                    CellSize);
         }
 
         // init
-        NoData = RasterHelper.getNoDataValue(inputCoverage);
-        CellSize = RasterHelper.getCellSize(inputCoverage);
         final double maskNoData = RasterHelper.getNoDataValue(maskCoverage);
 
         // resample mask coverage

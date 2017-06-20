@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
@@ -57,6 +58,7 @@ import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
+import org.opengis.coverage.grid.GridCoverageReader;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.capability.FunctionName;
@@ -82,7 +84,9 @@ public class ExpressionBuilderDialog extends Dialog {
 
     private String initSQL = null;
 
-    private SimpleFeatureCollection source = null;
+    private ILayer layer = null;
+
+    private SimpleFeatureCollection features = null;
 
     private String geom_field = null;
 
@@ -92,16 +96,20 @@ public class ExpressionBuilderDialog extends Dialog {
 
     private Text txtExpression;
 
-    public ExpressionBuilderDialog(Shell parentShell, SimpleFeatureCollection source) {
+    private boolean isFeatureLayer;
+
+    public ExpressionBuilderDialog(Shell parentShell, SimpleFeatureCollection features) {
         super(parentShell);
 
-        this.source = source;
+        this.features = features;
+        this.isFeatureLayer = true;
         setShellStyle(SWT.CLOSE | SWT.MIN | SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL
                 | SWT.RESIZE);
     }
 
-    public ExpressionBuilderDialog(Shell parentShell, SimpleFeatureCollection source, String initSQL) {
-        this(parentShell, source);
+    public ExpressionBuilderDialog(Shell parentShell, SimpleFeatureCollection features,
+            String initSQL) {
+        this(parentShell, features);
         this.initSQL = initSQL;
     }
 
@@ -153,11 +161,16 @@ public class ExpressionBuilderDialog extends Dialog {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 try {
-                    Expression expression = ECQL.toExpression(txtExpression.getText());
-                    Object evaluated = expression.evaluate(source.features().next());
-                    String msg = "Evaluated value: " + evaluated;
-                    MessageDialog.openInformation(getParentShell(),
-                            Messages.ExpressionBuilderDialog_Test, msg);
+                    if (isFeatureLayer) {
+                        Expression expression = ECQL.toExpression(txtExpression.getText());
+                        Object evaluated = expression.evaluate(features.features().next());
+                        String msg = "Evaluated value: " + evaluated;
+                        MessageDialog.openInformation(getParentShell(),
+                                Messages.ExpressionBuilderDialog_Test, msg);
+                    } else {
+                        MessageDialog.openInformation(getParentShell(), Messages.QueryDialog_Test,
+                                "Ratser layer not yet available!");
+                    }
                 } catch (CQLException e) {
                     MessageDialog.openInformation(getParentShell(),
                             Messages.ExpressionBuilderDialog_Test, e.getLocalizedMessage());
@@ -203,16 +216,28 @@ public class ExpressionBuilderDialog extends Dialog {
             grpCombo.setLayout(new GridLayout(2, false));
             widget.createLabel(grpCombo, Messages.ExpressionBuilderDialog_Layer,
                     Messages.ExpressionBuilderDialog_Layer, 1);
+
             cboLayer = widget.createCombo(grpCombo, 1, true);
             for (ILayer layer : map.getMapLayers()) {
-                if (layer.hasResource(FeatureSource.class)) {
+                if (layer.hasResource(FeatureSource.class)
+                        || layer.hasResource(GridCoverage2D.class)
+                        || layer.getGeoResource().canResolve(GridCoverageReader.class)) {
                     cboLayer.add(layer.getName());
                 }
             }
+
             cboLayer.addModifyListener(new ModifyListener() {
                 @Override
                 public void modifyText(ModifyEvent e) {
-                    source = MapUtils.getFeatures(map, cboLayer.getText());
+                    if (cboLayer.getSelectionIndex() == -1) {
+                        return;
+                    }
+
+                    layer = MapUtils.getLayer(map, cboLayer.getText());
+                    isFeatureLayer = MapUtils.isFeatureLayer(layer);
+                    if (isFeatureLayer) {
+                        features = MapUtils.getFeatures(map, cboLayer.getText());
+                    }
                     updateFields();
                 }
             });
@@ -221,7 +246,7 @@ public class ExpressionBuilderDialog extends Dialog {
         // ========================================================
         // 1. fields
         // ========================================================
-        final int defaultWidth = 200;
+        final int defaultWidth = 300;
         Group grpFields = widget.createGroup(grpLayer, Messages.ExpressionBuilderDialog_Fields,
                 false, 1);
         GridData gridDataField = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1);
@@ -231,7 +256,7 @@ public class ExpressionBuilderDialog extends Dialog {
 
         fieldTable = widget.createListTable(grpFields,
                 new String[] { Messages.ExpressionBuilderDialog_Fields }, 1);
-        if (source != null) {
+        if (features != null) {
             updateFields();
         }
         fieldTable.getColumns()[0].setWidth(defaultWidth - 40);
@@ -327,7 +352,7 @@ public class ExpressionBuilderDialog extends Dialog {
             txtExpression.setText(initSQL);
         }
 
-        if (source == null && cboLayer.getItemCount() > 0) {
+        if (features == null && cboLayer.getItemCount() > 0) {
             cboLayer.select(0);
         }
 
@@ -338,18 +363,23 @@ public class ExpressionBuilderDialog extends Dialog {
 
     private void updateFields() {
         fieldTable.removeAll();
-        for (AttributeDescriptor descriptor : source.getSchema().getAttributeDescriptors()) {
-            if (descriptor instanceof GeometryDescriptor) {
-                this.geom_field = descriptor.getLocalName();
-                TableItem item = new TableItem(fieldTable, SWT.NULL);
-                item.setText(descriptor.getLocalName());
-                FontData fontData = item.getFont().getFontData()[0];
-                fontData.setStyle(SWT.BOLD);
-                item.setFont(new Font(item.getFont().getDevice(), fontData));
-            } else {
-                TableItem item = new TableItem(fieldTable, SWT.NULL);
-                item.setText(descriptor.getLocalName());
+        if (isFeatureLayer && features != null) {
+            for (AttributeDescriptor descriptor : features.getSchema().getAttributeDescriptors()) {
+                if (descriptor instanceof GeometryDescriptor) {
+                    this.geom_field = descriptor.getLocalName();
+                    TableItem item = new TableItem(fieldTable, SWT.NULL);
+                    item.setText(descriptor.getLocalName());
+                    FontData fontData = item.getFont().getFontData()[0];
+                    fontData.setStyle(SWT.BOLD);
+                    item.setFont(new Font(item.getFont().getDevice(), fontData));
+                } else {
+                    TableItem item = new TableItem(fieldTable, SWT.NULL);
+                    item.setText(descriptor.getLocalName());
+                }
             }
+        } else {
+            TableItem item = new TableItem(fieldTable, SWT.NULL);
+            item.setText("Value");
         }
     }
 

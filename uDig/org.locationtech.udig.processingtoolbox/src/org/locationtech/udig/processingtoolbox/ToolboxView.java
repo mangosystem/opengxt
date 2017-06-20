@@ -610,6 +610,11 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent distanceTool = new TreeParent(Messages.ToolboxView_RasterDistance, null, null);
         generalTool.addChild(distanceTool);
         buildTool(distanceTool, "org.geotools.process.spatialstatistics.EuclideanDistanceProcessFactory");
+        
+        // Math
+        TreeParent mathTool = new TreeParent(Messages.ToolboxView_RasterMath, null, null);
+        generalTool.addChild(mathTool);
+        buildTool(mathTool, "org.geotools.process.spatialstatistics.RasterMathProcessFactory");
 
         // Density
         TreeParent densityTool = new TreeParent(Messages.ToolboxView_Density, null, null);

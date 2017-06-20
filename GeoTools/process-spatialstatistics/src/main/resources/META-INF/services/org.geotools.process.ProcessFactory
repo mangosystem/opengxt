@@ -129,6 +129,8 @@ org.geotools.process.spatialstatistics.LineDensityProcessFactory
 
 org.geotools.process.spatialstatistics.EuclideanDistanceProcessFactory
 
+org.geotools.process.spatialstatistics.RasterMathProcessFactory
+
 org.geotools.process.spatialstatistics.IDWProcessFactory
 org.geotools.process.spatialstatistics.TPSProcessFactory
 

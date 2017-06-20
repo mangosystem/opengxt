@@ -408,6 +408,7 @@ public class Messages extends NLS {
     public static String ToolboxView_Editing;
     public static String ToolboxView_RasterZonal;
     public static String ToolboxView_RasterDistance;
+    public static String ToolboxView_RasterMath;
 
     static {
         // initialize resource bundle

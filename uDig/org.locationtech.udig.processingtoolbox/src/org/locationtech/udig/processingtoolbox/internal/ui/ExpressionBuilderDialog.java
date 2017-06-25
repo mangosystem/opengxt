@@ -204,6 +204,7 @@ public class ExpressionBuilderDialog extends Dialog {
         container.setLayoutData(new GridData(GridData.FILL_BOTH));
 
         WidgetBuilder widget = WidgetBuilder.newInstance();
+        int scale = (int) parent.getShell().getDisplay().getDPI().x / 96;
 
         // ========================================================
         // 1. layer
@@ -250,7 +251,7 @@ public class ExpressionBuilderDialog extends Dialog {
         Group grpFields = widget.createGroup(grpLayer, Messages.ExpressionBuilderDialog_Fields,
                 false, 1);
         GridData gridDataField = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1);
-        gridDataField.widthHint = defaultWidth;
+        gridDataField.widthHint = defaultWidth * scale;
         grpFields.setLayoutData(gridDataField);
         grpFields.setLayout(new GridLayout(1, true));
 
@@ -259,7 +260,7 @@ public class ExpressionBuilderDialog extends Dialog {
         if (features != null) {
             updateFields();
         }
-        fieldTable.getColumns()[0].setWidth(defaultWidth - 40);
+        fieldTable.getColumns()[0].setWidth(gridDataField.widthHint - 40);
 
         // double click event
         fieldTable.addListener(SWT.MouseDoubleClick, new Listener() {
@@ -281,7 +282,7 @@ public class ExpressionBuilderDialog extends Dialog {
         valueTable = widget.createListTable(grpValues,
                 new String[] { Messages.ExpressionBuilderDialog_Functions }, 1);
         updateFunctions();
-        valueTable.getColumns()[0].setWidth(340);
+        valueTable.getColumns()[0].setWidth(340 * scale);
         grpValues.setText(Messages.ExpressionBuilderDialog_Functions + "("
                 + valueTable.getItemCount() + ")");
 

@@ -212,6 +212,7 @@ public class QueryBuilderDialog extends Dialog {
         container.setLayoutData(new GridData(GridData.FILL_BOTH));
 
         WidgetBuilder widget = WidgetBuilder.newInstance();
+        int scale = (int) parent.getShell().getDisplay().getDPI().x / 96;
 
         // ========================================================
         // 1. layer
@@ -248,7 +249,11 @@ public class QueryBuilderDialog extends Dialog {
         // ========================================================
         // 1. fields
         // ========================================================
+        final int defaultWidth = 270;
         Group grpFields = widget.createGroup(grpLayer, Messages.QueryDialog_Fields, false, 1);
+        GridData gridDataField = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1);
+        gridDataField.widthHint = defaultWidth * scale;
+        grpFields.setLayoutData(gridDataField);
         grpFields.setLayout(new GridLayout(1, true));
 
         fieldTable = widget.createListTable(grpFields,
@@ -280,6 +285,7 @@ public class QueryBuilderDialog extends Dialog {
 
         valueTable = widget.createListTable(grpValues,
                 new String[] { Messages.QueryDialog_Fields }, 2);
+        valueTable.getColumns()[0].setWidth(defaultWidth * scale);
         // double click event
         valueTable.addListener(SWT.MouseDoubleClick, new Listener() {
             @Override

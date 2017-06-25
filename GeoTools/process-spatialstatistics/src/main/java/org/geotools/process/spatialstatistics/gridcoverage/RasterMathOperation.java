@@ -55,7 +55,7 @@ public class RasterMathOperation extends RasterProcessingOperation {
         SimpleFeature feature = super.createTemplateFeature(inputGc);
 
         // create image
-        RasterPixelType pixelType = RasterHelper.getTransferType(inputGc);
+        RasterPixelType pixelType = RasterPixelType.DOUBLE;
         DiskMemImage outputImage = this.createDiskMemImage(inputGc, pixelType);
 
         PlanarImage inputImage = (PlanarImage) inputGc.getRenderedImage();

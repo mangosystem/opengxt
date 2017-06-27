@@ -212,18 +212,21 @@ public class FeatureToLineOperation extends GeneralOperation {
         LocationIndexedLine liLine = new LocationIndexedLine(line);
 
         // sort point along line
-        SortedMap<Integer, Coordinate> sortedMap = new TreeMap<Integer, Coordinate>();
-        for (Coordinate locator : coordinates) {
-            LinearLocation index = liLine.indexOf(locator);
-            sortedMap.put(Integer.valueOf(index.getSegmentIndex()), locator);
+        SortedMap<Double, LinearLocation> sortedMap = new TreeMap<Double, LinearLocation>();
+        for (Coordinate coordinate : coordinates) {
+            LinearLocation location = liLine.indexOf(coordinate);
+            int segIndex = location.getSegmentIndex();
+            double segFraction = location.getSegmentFraction();
+            sortedMap.put(Double.valueOf(segIndex + segFraction), location);
         }
 
         // split
         LinearLocation startIndex = liLine.getStartIndex();
-        for (Entry<Integer, Coordinate> entrySet : sortedMap.entrySet()) {
-            LinearLocation endIndex = liLine.indexOf(entrySet.getValue());
-            Geometry left = liLine.extractLine(startIndex, endIndex);
+        for (Entry<Double, LinearLocation> entrySet : sortedMap.entrySet()) {
+            LinearLocation endIndex = entrySet.getValue();
+            LineString left = (LineString) liLine.extractLine(startIndex, endIndex);
             if (left != null && !left.isEmpty() && left.getLength() > 0) {
+                left.setUserData(entrySet.getValue());
                 splits.add(left);
             }
             startIndex = endIndex;

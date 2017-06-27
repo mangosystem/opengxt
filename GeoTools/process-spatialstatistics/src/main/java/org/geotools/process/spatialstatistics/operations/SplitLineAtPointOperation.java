@@ -40,6 +40,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.index.strtree.ItemBoundable;
 import com.vividsolutions.jts.index.strtree.ItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
@@ -153,22 +154,25 @@ public class SplitLineAtPointOperation extends GeneralOperation {
 
     private List<Geometry> splitLines(Geometry line, List<Coordinate> coordinates) {
         List<Geometry> splits = new ArrayList<Geometry>();
-
+        
         LocationIndexedLine liLine = new LocationIndexedLine(line);
 
         // sort point along line
-        SortedMap<Double, Coordinate> sortedMap = new TreeMap<Double, Coordinate>();
-        for (Coordinate locator : coordinates) {
-            LinearLocation index = liLine.indexOf(locator);
-            sortedMap.put(Double.valueOf(index.getSegmentFraction()), locator);
+        SortedMap<Double, LinearLocation> sortedMap = new TreeMap<Double, LinearLocation>();
+        for (Coordinate coordinate : coordinates) {
+            LinearLocation location = liLine.indexOf(coordinate);
+            int segIndex = location.getSegmentIndex();
+            double segFraction = location.getSegmentFraction();
+            sortedMap.put(Double.valueOf(segIndex + segFraction), location);
         }
 
         // split
         LinearLocation startIndex = liLine.getStartIndex();
-        for (Entry<Double, Coordinate> entrySet : sortedMap.entrySet()) {
-            LinearLocation endIndex = liLine.indexOf(entrySet.getValue());
-            Geometry left = liLine.extractLine(startIndex, endIndex);
+        for (Entry<Double, LinearLocation> entrySet : sortedMap.entrySet()) {
+            LinearLocation endIndex = entrySet.getValue();
+            LineString left = (LineString) liLine.extractLine(startIndex, endIndex);
             if (left != null && !left.isEmpty() && left.getLength() > 0) {
+                left.setUserData(entrySet.getValue());
                 splits.add(left);
             }
             startIndex = endIndex;

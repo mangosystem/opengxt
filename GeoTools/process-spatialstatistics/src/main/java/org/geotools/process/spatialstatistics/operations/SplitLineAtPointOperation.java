@@ -154,7 +154,7 @@ public class SplitLineAtPointOperation extends GeneralOperation {
 
     private List<Geometry> splitLines(Geometry line, List<Coordinate> coordinates) {
         List<Geometry> splits = new ArrayList<Geometry>();
-        
+
         LocationIndexedLine liLine = new LocationIndexedLine(line);
 
         // sort point along line
@@ -172,7 +172,7 @@ public class SplitLineAtPointOperation extends GeneralOperation {
             LinearLocation endIndex = entrySet.getValue();
             LineString left = (LineString) liLine.extractLine(startIndex, endIndex);
             if (left != null && !left.isEmpty() && left.getLength() > 0) {
-                left.setUserData(entrySet.getValue());
+                left.setUserData(line.getUserData());
                 splits.add(left);
             }
             startIndex = endIndex;
@@ -181,6 +181,7 @@ public class SplitLineAtPointOperation extends GeneralOperation {
         // add last segment
         Geometry left = liLine.extractLine(startIndex, liLine.getEndIndex());
         if (left != null && !left.isEmpty() && left.getLength() > 0) {
+            left.setUserData(line.getUserData());
             splits.add(left);
         }
 

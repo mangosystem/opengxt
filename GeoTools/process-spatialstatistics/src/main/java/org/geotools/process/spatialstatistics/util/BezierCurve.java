@@ -18,7 +18,6 @@ package org.geotools.process.spatialstatistics.util;
 
 import java.util.logging.Logger;
 
-import org.geotools.process.spatialstatistics.styler.GraduatedColorStyleBuilder;
 import org.geotools.util.logging.Logging;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -26,6 +25,7 @@ import com.vividsolutions.jts.geom.CoordinateList;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.linearref.LinearGeometryBuilder;
 
 /**
  * Converts LineString to Bezier Curve
@@ -35,7 +35,7 @@ import com.vividsolutions.jts.geom.LineString;
  * @source $URL$
  */
 public class BezierCurve {
-    protected static final Logger LOGGER = Logging.getLogger(GraduatedColorStyleBuilder.class);
+    protected static final Logger LOGGER = Logging.getLogger(BezierCurve.class);
 
     private int quality = 24; // default
 
@@ -59,6 +59,14 @@ public class BezierCurve {
 
     public void setOffsetDegree(double offsetDegree) {
         this.offsetDegree = offsetDegree;
+    }
+
+    public double getFraction() {
+        return fraction;
+    }
+
+    public void setFraction(double fraction) {
+        this.fraction = fraction;
     }
 
     public boolean isUseSegment() {
@@ -89,9 +97,10 @@ public class BezierCurve {
     }
 
     public LineString create(LineString line) {
-        CoordinateList list = new CoordinateList();
-        Coordinate[] coords = line.getCoordinates();
+        LinearGeometryBuilder builder = new LinearGeometryBuilder(line.getFactory());
+        builder.setFixInvalidLines(true);
 
+        Coordinate[] coords = line.getCoordinates();
         if (useSegment) {
             double precision = 1.0 / quality;
             for (int i = 0; i < coords.length - 1; i++) {
@@ -99,10 +108,10 @@ public class BezierCurve {
                 Coordinate to = coords[i + 1];
                 Coordinate control = getControlPoint(new LineSegment(from, to));
                 for (double step = 0; step < 1; step += precision) {
-                    list.add(quadraticBezier(from, to, control, step), false);
+                    builder.add(quadraticBezier(from, to, control, step), false);
                 }
             }
-            return line.getFactory().createLineString(list.toCoordinateArray());
+            return (LineString) builder.getGeometry();
         } else {
             return create(new LineSegment(coords[0], coords[coords.length - 1]));
         }
@@ -111,20 +120,21 @@ public class BezierCurve {
     public LineString create(LineString line, Coordinate control) {
         double precision = 1.0 / quality;
 
-        CoordinateList list = new CoordinateList();
-        Coordinate[] coords = line.getCoordinates();
+        LinearGeometryBuilder builder = new LinearGeometryBuilder(line.getFactory());
+        builder.setFixInvalidLines(true);
 
+        Coordinate[] coords = line.getCoordinates();
         if (useSegment) {
             for (int i = 0; i < coords.length - 1; i++) {
                 Coordinate from = coords[i];
                 Coordinate to = coords[i + 1];
                 for (double step = 0; step < 1; step += precision) {
-                    list.add(quadraticBezier(from, to, control, step), false);
+                    builder.add(quadraticBezier(from, to, control, step), false);
                 }
             }
             // add last coordinate
-            list.add(coords[coords.length - 1], false);
-            return line.getFactory().createLineString(list.toCoordinateArray());
+            builder.add(coords[coords.length - 1], false);
+            return (LineString) builder.getGeometry();
         } else {
             Coordinate from = coords[0];
             Coordinate to = coords[coords.length - 1];

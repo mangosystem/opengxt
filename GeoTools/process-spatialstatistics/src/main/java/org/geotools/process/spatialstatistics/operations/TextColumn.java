@@ -136,6 +136,14 @@ public class TextColumn {
     public boolean isY() {
         return type.equalsIgnoreCase("Y Coordinate");
     }
+    
+    public void setX() {
+        this.setType("X Coordinate");
+    }
+    
+    public void setY() {
+        this.setType("Y Coordinate");
+    }
 
     public boolean isGeometry() {
         return Geometry.class.isAssignableFrom(getBinding());
@@ -267,7 +275,6 @@ public class TextColumn {
         }
 
         TextColumn[] columns = null;
-
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(textFile),
@@ -275,7 +282,7 @@ public class TextColumn {
 
             int sampleSize = 1;
             String line = reader.readLine();
-            if (line == null) {
+            if (line == null || line.isEmpty()) {
                 return columns;
             }
             
@@ -306,6 +313,10 @@ public class TextColumn {
             int limitLength = columns.length - 1;
             while (line != null) {
                 line = reader.readLine();
+                if (line == null || line.isEmpty()) {
+                    continue;
+                }
+                
                 sampleSize++;
                 values = line.split(splitter);
 

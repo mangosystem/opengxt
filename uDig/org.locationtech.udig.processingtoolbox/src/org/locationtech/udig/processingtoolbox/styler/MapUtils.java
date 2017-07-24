@@ -122,6 +122,21 @@ public class MapUtils {
         return null;
     }
 
+    public static SimpleFeatureSource getFeatureSource(IMap map, String layerName) {
+        for (ILayer layer : map.getMapLayers()) {
+            if (layer.getName() != null && layer.getName().equals(layerName)
+                    && layer.hasResource(FeatureSource.class)) {
+                try {
+                    return (SimpleFeatureSource) layer.getResource(FeatureSource.class,
+                            new NullProgressMonitor());
+                } catch (IOException e) {
+                    LOGGER.log(Level.FINER, e.getMessage(), e);
+                }
+            }
+        }
+        return null;
+    }
+
     public static SimpleFeatureCollection getFeatures(IMap map, String layerName) {
         for (ILayer layer : map.getMapLayers()) {
             if (layer.getName() != null && layer.getName().equals(layerName)

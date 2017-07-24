@@ -12,6 +12,7 @@ package org.locationtech.udig.processingtoolbox.internal.ui;
 import java.io.File;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FilenameUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -33,7 +34,7 @@ import org.locationtech.udig.processingtoolbox.internal.Messages;
 /**
  * Output Data Viewer
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -41,7 +42,7 @@ public class OutputDataWidget extends AbstractToolboxWidget {
     protected static final Logger LOGGER = Logging.getLogger(OutputDataWidget.class);
 
     public enum FileDataType {
-        PGDB, SHAPEFILE, RASTER, EXCEL, FOLDER, WEIGHT_MATRIX
+        PGDB, SHAPEFILE, RASTER, EXCEL, FOLDER, WEIGHT_MATRIX, DXF
     }
 
     private Text txtPath;
@@ -82,13 +83,19 @@ public class OutputDataWidget extends AbstractToolboxWidget {
             break;
         case FOLDER:
             break;
+        case DXF:
+            fileNames = new String[] { "AutoCAD DXF (*.dxf)" };
+            fileExtensions = new String[] { "*.dxf" };
+            break;
+        default:
+            break;
         }
     }
 
     public void create(final Composite parent, final int style, final int colspan, final int rowspan) {
         composite = new Composite(parent, style);
         composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, colspan, rowspan));
-        
+
         GridLayout layout = new GridLayout(3, false);
         layout.marginTop = 0;
         layout.marginBottom = 0;
@@ -171,6 +178,10 @@ public class OutputDataWidget extends AbstractToolboxWidget {
 
     public String getFile() {
         return this.txtPath.getText();
+    }
+
+    public String getOutputName() {
+        return FilenameUtils.removeExtension(FilenameUtils.getName(getFile()));
     }
 
     public void setFile(String filePath) {

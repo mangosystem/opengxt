@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
-import org.apache.commons.io.FilenameUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -409,8 +408,7 @@ public class TextfileToPointDialog extends AbstractGeoProcessingDialog implement
                 targetCRS = (CoordinateReferenceSystem) txtTargetCrs.getData();
             }
 
-            String outputName = FilenameUtils.removeExtension(FilenameUtils.getName(locationView
-                    .getFile()));
+            String outputName = locationView.getOutputName();
 
             monitor.subTask(String.format(Messages.Task_Executing, windowTitle));
             TextfileToPointOperation process = new TextfileToPointOperation();

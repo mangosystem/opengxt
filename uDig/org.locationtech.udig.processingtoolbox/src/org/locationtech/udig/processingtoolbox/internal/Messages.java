@@ -88,6 +88,13 @@ public class Messages extends NLS {
     public static String CrsViewer_LayerCRS;
     public static String CrsViewer_MapCRS;
     
+    public static String ExcelToPointDialog_title;
+    public static String ExcelToPointDialog_description;
+    public static String ExcelToPointDialog_Excelfile;
+    public static String ExcelToPointDialog_Sheet;
+    public static String ExcelToPointDialog_SourceCRS;
+    public static String ExcelToPointDialog_TargetCRS;
+    
     public static String ExportStyleDialog_title;
     public static String ExportStyleDialog_description;
     public static String ExportStyleDialog_overwrite;

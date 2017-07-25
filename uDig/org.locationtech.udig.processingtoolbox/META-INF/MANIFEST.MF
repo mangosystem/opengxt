@@ -32,7 +32,13 @@ Export-Package: org.locationtech.udig.processingtoolbox;
    org.eclipse.swt.widgets,
    org.opengis.feature.type"
 Bundle-ClassPath: .,
- libs/gt-process-spatialstatistics-14.1.jar
+ libs/gt-process-spatialstatistics-14.1.jar,
+ libs/commons-collections4-4.1.jar,
+ libs/poi-3.16.jar,
+ libs/poi-excelant-3.16.jar,
+ libs/poi-ooxml-3.16.jar,
+ libs/poi-ooxml-schemas-3.16.jar,
+ libs/xmlbeans-2.6.0.jar
 Import-Package: javax.media.jai,
  javax.media.jai.iterator,
  javax.media.jai.operator,

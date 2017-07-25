@@ -53,6 +53,7 @@ import org.locationtech.udig.processingtoolbox.tools.AmoebaWizard;
 import org.locationtech.udig.processingtoolbox.tools.AmoebaWizardDialog;
 import org.locationtech.udig.processingtoolbox.tools.BoxPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.BubbleChartDialog;
+import org.locationtech.udig.processingtoolbox.tools.ExcelToPointDialog;
 import org.locationtech.udig.processingtoolbox.tools.ExportStyleDialog;
 import org.locationtech.udig.processingtoolbox.tools.FieldCalculatorDialog;
 import org.locationtech.udig.processingtoolbox.tools.FormatConversionDialog;
@@ -228,6 +229,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                     dialog = new ScatterPlotDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("TextfileToPointDialog")) {
                                     dialog = new TextfileToPointDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("ExcelToPointDialog")) {
+                                    dialog = new ExcelToPointDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("ThematicMapDialog")) {
                                     dialog = new ThematicMapDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("ThematicMapRasterDialog")) {
@@ -432,6 +435,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent importTool = new TreeParent(Messages.ToolboxView_Import, null, null);
         generalTool.addChild(importTool);
         buildTool(importTool, Messages.TextfileToPointDialog_title, "TextfileToPointDialog");
+        buildTool(importTool, Messages.ExcelToPointDialog_title, "ExcelToPointDialog");
         buildTool(importTool, Messages.GeometryToFeaturesDialog_title, "GeometryToFeaturesDialog");
 
         // export

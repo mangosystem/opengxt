@@ -36,6 +36,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.prep.PreparedGeometry;
 import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
@@ -151,13 +152,13 @@ public class ExtendLineOperation extends GeneralOperation {
         final double[] minDist = { Double.MAX_VALUE, Double.MAX_VALUE };
         final Point[] minPoint = { null, null };
         for (Point source : intersections) {
-            double startDist = source.distance(part.getStartPoint());
+            double startDist = source.distance(input.getStartPoint());
             if (startDist < minDist[0]) {
                 minDist[0] = startDist;
                 minPoint[0] = source;
             }
 
-            double endDist = source.distance(part.getEndPoint());
+            double endDist = source.distance(input.getEndPoint());
             if (endDist < minDist[1]) {
                 minDist[1] = endDist;
                 minPoint[1] = source;
@@ -189,6 +190,10 @@ public class ExtendLineOperation extends GeneralOperation {
             public void filter(Geometry geom) {
                 if (geom instanceof Point) {
                     points.add((Point) geom);
+                } else if (geom instanceof MultiPoint) {
+                    for (int n = 0, cnt = geom.getNumGeometries(); n < cnt; n++) {
+                        points.add((Point) geom.getGeometryN(n));
+                    }
                 }
             }
         });

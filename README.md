@@ -52,6 +52,9 @@ any major spatial data source using open standards.
 * GeoServer WPS Processes Manual
   * [Korean v2.0 - 25MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.0.pdf)
   * [Korean v2.x-latest - 30MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.latest.pdf)
+
+* GeoTools Developer Guide
+  * [Korean v1.0 - 2MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoTools_Process_1.0_Developer_Guide_ko_v.1.0.pdf)
   
 * Presentation
   * [SlideShare](https://www.slideshare.net/mapplus)

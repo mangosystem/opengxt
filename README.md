@@ -28,10 +28,12 @@ any major spatial data source using open standards.
 
 ### uDig Processing Toolbox Plugin Installation
 * Download and install uDig 2.0-SNAPSHOT (GeoTools 14.1)
-  * Windows [x86_64 Installer](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.exe)
-  * Windows [x86_64 zip](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.zip)
-  * Linux [x86_64 zip](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.linux.gtk.x86_64.zip)
-  * Mac OS/X [x86_64 zip](http://www.mangosystem.com:8080/udig/udig-2.0.0-SNAPSHOT.macosx.cocoa.x86_64.zip)
+  * Windows [x86_Installer](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86.exe)
+  * Windows [x86_zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86.zip)
+  * Windows [x86_64 Installer](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.exe)
+  * Windows [x86_64 zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.zip)
+  * Linux [x86_64 zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.linux.gtk.x86_64.zip)
+  * Mac OS/X [x86_64 zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.macosx.cocoa.x86_64.zip)
 * Start uDig application
 * Choose Help -> Find and Install... from the menu bar to open up the Install/Update window
 * Select Search for new features to install option and press Next.

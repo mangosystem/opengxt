@@ -57,6 +57,7 @@ any major spatial data source using open standards.
 
 * GeoTools Developer Guide
   * [Korean v1.0 - 2MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoTools_Process_1.0_Developer_Guide_ko_v.1.0.pdf)
+  * [Korean v1.0-latest - 2MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoTools_Process_1.0_Developer_Guide_ko_v.1.latest.pdf)
   
 * Presentation
   * [SlideShare](https://www.slideshare.net/mapplus)

@@ -348,6 +348,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalGearysCProcessFactory");
         buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalLeesSProcessFactory");
         buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalLeesLProcessFactory");
+        buildTool(autoTools, "org.geotools.process.spatialstatistics.GlobalRogersonRProcessFactory");
 
         // Local Spatial Autocorrelation: Spatial Cluster and Outlier
         TreeParent clusterTools = new TreeParent(Messages.ToolboxView_Cluster, null, null);
@@ -358,6 +359,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalGearysCProcessFactory");
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalLeesSProcessFactory");
         buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalLeesLProcessFactory");
+        buildTool(clusterTools, "org.geotools.process.spatialstatistics.LocalRogersonRProcessFactory");
         // buildTool(clusterTools, Messages.AmoebaWizardDialog_title, "AmoebaWizardDialog");
         
         // Spatial Relationships

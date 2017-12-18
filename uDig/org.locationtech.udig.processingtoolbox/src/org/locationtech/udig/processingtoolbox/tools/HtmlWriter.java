@@ -19,6 +19,7 @@ import org.geotools.process.spatialstatistics.GlobalGearysCProcess.GearysCProces
 import org.geotools.process.spatialstatistics.GlobalLeesLProcess.LeesLProcessResult;
 import org.geotools.process.spatialstatistics.GlobalLeesSProcess.LeesSProcessResult;
 import org.geotools.process.spatialstatistics.GlobalMoransIProcess.MoransIProcessResult;
+import org.geotools.process.spatialstatistics.GlobalRogersonRProcess.RogersonRProcessResult;
 import org.geotools.process.spatialstatistics.JoinCountStatisticsProcess.JoinCountProcessResult;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
@@ -375,6 +376,37 @@ public class HtmlWriter {
         write("<tr><td>Distance Method</td><td>" + value.getDistanceMethod() + "</td></tr>");
         write("<tr><td>Row Standardization</td><td>" + value.getRowStandardization() + "</td></tr>");
         write("<tr><td>Distance Threshold</td><td>" + value.getDistanceThreshold() + "</td></tr>");
+
+        write("</table>");
+    }
+
+    public void writeRogersonR(RogersonRProcessResult value) {
+        writeH1("Global Rogerson's R");
+        writeH2(value.getTypeName() + ": " + value.getxField() + " vs " + value.getyField());
+        write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+        // header
+        write("<colgroup>");
+        write("<col width=\"60%\" />");
+        write("<col width=\"40%\" />");
+        write("</colgroup>");
+
+        write("<tr bgcolor=\"#cccccc\">");
+        write("<td><strong>Category</strong></td>");
+        write("<td><strong>Value</strong></td>");
+        write("</tr>");
+
+        // body
+        write("<tr><td>Observed Rogerson's R</td><td>" + value.getObserved_Index() + "</td></tr>");
+        write("<tr><td>Expected Rogerson's R</td><td>" + value.getExpected_Index() + "</td></tr>");
+        write("<tr><td>Variance</td><td>" + value.getVariance() + "</td></tr>");
+        write("<tr><td>z Score</td><td>" + value.getZ_Score() + "</td></tr>");
+        write("<tr><td>p Value</td><td>" + value.getP_Value() + "</td></tr>");
+        write("<tr><td>Conceptualization</td><td>" + value.getConceptualization() + "</td></tr>");
+        write("<tr><td>Distance Method</td><td>" + value.getDistanceMethod() + "</td></tr>");
+        write("<tr><td>Row Standardization</td><td>" + value.getRowStandardization() + "</td></tr>");
+        write("<tr><td>Distance Threshold</td><td>" + value.getDistanceThreshold() + "</td></tr>");
+        write("<tr><td>Kappa</td><td>" + value.getKappa() + "</td></tr>");
 
         write("</table>");
     }

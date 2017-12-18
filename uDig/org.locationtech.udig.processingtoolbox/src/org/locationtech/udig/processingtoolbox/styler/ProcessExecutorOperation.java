@@ -42,6 +42,7 @@ import org.geotools.process.spatialstatistics.GlobalGearysCProcess.GearysCProces
 import org.geotools.process.spatialstatistics.GlobalLeesLProcess.LeesLProcessResult;
 import org.geotools.process.spatialstatistics.GlobalLeesSProcess.LeesSProcessResult;
 import org.geotools.process.spatialstatistics.GlobalMoransIProcess.MoransIProcessResult;
+import org.geotools.process.spatialstatistics.GlobalRogersonRProcess.RogersonRProcessResult;
 import org.geotools.process.spatialstatistics.JoinCountStatisticsProcess.JoinCountProcessResult;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
@@ -217,6 +218,8 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
             writer.writeLeesS((LeesSProcessResult) value);
         } else if (value instanceof LeesLProcessResult) {
             writer.writeLeesL((LeesLProcessResult) value);
+        } else if (value instanceof RogersonRProcessResult) {
+            writer.writeRogersonR((RogersonRProcessResult) value);
         } else if (value instanceof NearestNeighborResult) {
             writer.writeNearestNeighbor((NearestNeighborResult) value);
         } else if (value instanceof PearsonResult) {

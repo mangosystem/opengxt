@@ -61,6 +61,7 @@ public abstract class AbstractStatisticsOperation extends GeneralOperation {
 
     public void setDistanceType(DistanceMethod distanceType) {
         this.distanceType = distanceType;
+        this.factory.setDistanceType(distanceType);
     }
 
     public DistanceMethod getDistanceType() {

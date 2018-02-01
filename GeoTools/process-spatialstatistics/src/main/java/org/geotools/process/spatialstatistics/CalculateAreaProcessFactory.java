@@ -28,6 +28,8 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.AreaUnit;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -45,7 +47,8 @@ public class CalculateAreaProcessFactory extends SpatialStatisticsProcessFactory
     private static final String PROCESS_NAME = "CalculateArea";
 
     /*
-     * CalculateArea(SimpleFeatureCollection inputFeatures, String areaField, String perimeterField): SimpleFeatureCollection
+     * CalculateArea(SimpleFeatureCollection inputFeatures, String areaField, AreaUnit areaUnit, String perimeterField, DistanceUnit perimeterUnit):
+     * SimpleFeatureCollection
      */
 
     public CalculateAreaProcessFactory() {
@@ -80,18 +83,31 @@ public class CalculateAreaProcessFactory extends SpatialStatisticsProcessFactory
             getResource("CalculateArea.areaField.description"), false, 0, 1, "geom_area", new KVP(
                     Params.FIELD, "inputFeatures.All"));
 
+    /** areaUnit */
+    public static final Parameter<AreaUnit> areaUnit = new Parameter<AreaUnit>("areaUnit",
+            AreaUnit.class, getResource("CalculateArea.areaUnit.title"),
+            getResource("CalculateArea.areaUnit.description"), false, 0, 1, AreaUnit.Default, null);
+
     /** perimeterField */
     public static final Parameter<String> perimeterField = new Parameter<String>("perimeterField",
             String.class, getResource("CalculateArea.perimeterField.title"),
             getResource("CalculateArea.perimeterField.description"), false, 0, 1, null, new KVP(
                     Params.FIELD, "inputFeatures.All"));
 
+    /** perimeterUnit */
+    public static final Parameter<DistanceUnit> perimeterUnit = new Parameter<DistanceUnit>(
+            "perimeterUnit", DistanceUnit.class, getResource("CalculateArea.perimeterUnit.title"),
+            getResource("CalculateArea.perimeterUnit.description"), false, 0, 1,
+            DistanceUnit.Default, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(areaField.key, areaField);
+        parameterInfo.put(areaUnit.key, areaUnit);
         parameterInfo.put(perimeterField.key, perimeterField);
+        parameterInfo.put(perimeterUnit.key, perimeterUnit);
         return parameterInfo;
     }
 

@@ -24,6 +24,9 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.UnitCalculator;
+import org.geotools.process.spatialstatistics.enumeration.AreaUnit;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -44,7 +47,11 @@ public class AreaCalculationFeatureCollection extends GXTSimpleFeatureCollection
 
     private String areaField;
 
+    private AreaUnit areaUnit = AreaUnit.Default;
+
     private String perimeterField;
+
+    private DistanceUnit perimeterUnit = DistanceUnit.Default;
 
     private SimpleFeatureType schema;
 
@@ -54,6 +61,11 @@ public class AreaCalculationFeatureCollection extends GXTSimpleFeatureCollection
 
     public AreaCalculationFeatureCollection(SimpleFeatureCollection delegate, String areaField,
             String perimeterField) {
+        this(delegate, areaField, AreaUnit.Default, perimeterField, DistanceUnit.Default);
+    }
+
+    public AreaCalculationFeatureCollection(SimpleFeatureCollection delegate, String areaField,
+            AreaUnit areaUnit, String perimeterField, DistanceUnit perimeterUnit) {
         super(delegate);
 
         if (areaField == null || areaField.isEmpty()) {
@@ -61,7 +73,9 @@ public class AreaCalculationFeatureCollection extends GXTSimpleFeatureCollection
         }
 
         this.areaField = areaField;
+        this.areaUnit = areaUnit;
         this.perimeterField = perimeterField;
+        this.perimeterUnit = perimeterUnit;
 
         this.schema = FeatureTypes.build(delegate, delegate.getSchema().getTypeName());
         this.schema = FeatureTypes.add(schema, areaField, Double.class, 38);
@@ -72,8 +86,8 @@ public class AreaCalculationFeatureCollection extends GXTSimpleFeatureCollection
 
     @Override
     public SimpleFeatureIterator features() {
-        return new AreaCalculationFeatureIterator(delegate.features(), getSchema(), areaField,
-                perimeterField);
+        return new AreaCalculationFeatureIterator(delegate, getSchema(), areaField, areaUnit,
+                perimeterField, perimeterUnit);
     }
 
     @Override
@@ -94,20 +108,34 @@ public class AreaCalculationFeatureCollection extends GXTSimpleFeatureCollection
 
         private String areaField;
 
+        private AreaUnit areaUnit = AreaUnit.Default;
+
         private String perimeterField;
+
+        private DistanceUnit perimeterUnit = DistanceUnit.Default;
 
         private boolean hasLengthField = false;
 
         private SimpleFeatureBuilder builder;
 
-        public AreaCalculationFeatureIterator(SimpleFeatureIterator delegate,
-                SimpleFeatureType schema, String areaField, String perimeterField) {
-            this.delegate = delegate;
+        private UnitCalculator calculator;
+
+        public AreaCalculationFeatureIterator(SimpleFeatureCollection delegate,
+                SimpleFeatureType schema, String areaField, AreaUnit areaUnit,
+                String perimeterField, DistanceUnit perimeterUnit) {
+            this.delegate = delegate.features();
 
             this.areaField = areaField;
+            this.areaUnit = areaUnit;
             this.perimeterField = perimeterField;
+            this.perimeterUnit = perimeterUnit;
             this.hasLengthField = perimeterField != null && !perimeterField.isEmpty();
             this.builder = new SimpleFeatureBuilder(schema);
+
+            calculator = new UnitCalculator(schema.getCoordinateReferenceSystem());
+            if (calculator.isGeographic()) {
+                calculator.setupTransformation(delegate.getBounds());
+            }
         }
 
         public void close() {
@@ -127,9 +155,12 @@ public class AreaCalculationFeatureCollection extends GXTSimpleFeatureCollection
 
             // calculate area & perimeter
             Geometry geometry = (Geometry) sourceFeature.getDefaultGeometry();
-            nextFeature.setAttribute(areaField, geometry.getArea());
+
+            double area = calculator.getArea(geometry, areaUnit);
+            nextFeature.setAttribute(areaField, area);
             if (hasLengthField) {
-                nextFeature.setAttribute(perimeterField, geometry.getLength());
+                double length = calculator.getLength(geometry, perimeterUnit);
+                nextFeature.setAttribute(perimeterField, length);
             }
             return nextFeature;
         }

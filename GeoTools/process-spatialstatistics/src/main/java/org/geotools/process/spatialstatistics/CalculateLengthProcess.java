@@ -27,6 +27,7 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.transformation.LengthCalculationFeatureCollection;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
@@ -51,9 +52,16 @@ public class CalculateLengthProcess extends AbstractStatisticsProcess {
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
             String lengthField, ProgressListener monitor) {
+        return CalculateLengthProcess.process(inputFeatures, lengthField, DistanceUnit.Default,
+                monitor);
+    }
+
+    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+            String lengthField, DistanceUnit lengthUnit, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(CalculateLengthProcessFactory.inputFeatures.key, inputFeatures);
         map.put(CalculateLengthProcessFactory.lengthField.key, lengthField);
+        map.put(CalculateLengthProcessFactory.lengthUnit.key, lengthUnit);
 
         Process process = new CalculateLengthProcess(null);
         Map<String, Object> resultMap;
@@ -77,13 +85,17 @@ public class CalculateLengthProcess extends AbstractStatisticsProcess {
         String lengthField = (String) Params.getValue(input,
                 CalculateLengthProcessFactory.lengthField,
                 CalculateLengthProcessFactory.lengthField.sample);
+        DistanceUnit lengthUnit = (DistanceUnit) Params.getValue(input,
+                CalculateLengthProcessFactory.lengthUnit,
+                CalculateLengthProcessFactory.lengthUnit.sample);
         if (inputFeatures == null || lengthField == null || lengthField.trim().length() == 0) {
             throw new NullPointerException("inputFeatures, lengthField parameters required");
         }
 
         // start process
         SimpleFeatureCollection resultFc = DataUtilities
-                .simple(new LengthCalculationFeatureCollection(inputFeatures, lengthField));
+                .simple(new LengthCalculationFeatureCollection(inputFeatures, lengthField,
+                        lengthUnit));
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

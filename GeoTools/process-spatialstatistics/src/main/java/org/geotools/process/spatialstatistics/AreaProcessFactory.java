@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.AreaUnit;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.Filter;
@@ -46,7 +47,7 @@ public class AreaProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "SumAreas";
 
     /*
-     * SumAreas(SimpleFeatureCollection inputFeatures, Filter filter): double
+     * SumAreas(SimpleFeatureCollection inputFeatures, Filter filter, AreaUnit areaUnit): double
      */
 
     public AreaProcessFactory() {
@@ -79,11 +80,17 @@ public class AreaProcessFactory extends SpatialStatisticsProcessFactory {
             getResource("Area.filter.title"), getResource("Area.filter.description"), false, 0, 1,
             null, null);
 
+    /** areaUnit */
+    public static final Parameter<AreaUnit> areaUnit = new Parameter<AreaUnit>("areaUnit",
+            AreaUnit.class, getResource("Area.areaUnit.title"),
+            getResource("Area.areaUnit.description"), false, 0, 1, AreaUnit.Default, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(filter.key, filter);
+        parameterInfo.put(areaUnit.key, areaUnit);
         return parameterInfo;
     }
 

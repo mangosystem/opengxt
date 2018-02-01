@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -45,7 +46,7 @@ public class CalculateLengthProcessFactory extends SpatialStatisticsProcessFacto
     private static final String PROCESS_NAME = "CalculateLength";
 
     /*
-     * CalculateLength(SimpleFeatureCollection inputFeatures, String lengthField): SimpleFeatureCollection
+     * CalculateLength(SimpleFeatureCollection inputFeatures, String lengthField, DistanceUnit lengthUnit): SimpleFeatureCollection
      */
 
     public CalculateLengthProcessFactory() {
@@ -80,11 +81,18 @@ public class CalculateLengthProcessFactory extends SpatialStatisticsProcessFacto
             getResource("CalculateLength.lengthField.description"), false, 0, 1, "geom_len",
             new KVP(Params.FIELD, "inputFeatures.All"));
 
+    /** lengthUnit */
+    public static final Parameter<DistanceUnit> lengthUnit = new Parameter<DistanceUnit>(
+            "lengthUnit", DistanceUnit.class, getResource("CalculateLength.lengthUnit.title"),
+            getResource("CalculateLength.lengthUnit.description"), false, 0, 1,
+            DistanceUnit.Default, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(lengthField.key, lengthField);
+        parameterInfo.put(lengthUnit.key, lengthUnit);
         return parameterInfo;
     }
 

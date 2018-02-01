@@ -24,6 +24,8 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.UnitCalculator;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -44,9 +46,16 @@ public class LengthCalculationFeatureCollection extends GXTSimpleFeatureCollecti
 
     private String lengthField;
 
+    private DistanceUnit lengthUnit = DistanceUnit.Default;
+
     private SimpleFeatureType schema;
 
     public LengthCalculationFeatureCollection(SimpleFeatureCollection delegate, String lengthField) {
+        this(delegate, lengthField, DistanceUnit.Default);
+    }
+
+    public LengthCalculationFeatureCollection(SimpleFeatureCollection delegate, String lengthField,
+            DistanceUnit lengthUnit) {
         super(delegate);
 
         if (lengthField == null || lengthField.isEmpty()) {
@@ -54,14 +63,15 @@ public class LengthCalculationFeatureCollection extends GXTSimpleFeatureCollecti
         }
 
         this.lengthField = lengthField;
-        
+        this.lengthUnit = lengthUnit;
+
         this.schema = FeatureTypes.build(delegate, delegate.getSchema().getTypeName());
         this.schema = FeatureTypes.add(schema, lengthField, Double.class, 38);
     }
 
     @Override
     public SimpleFeatureIterator features() {
-        return new LengthCalculationFeatureIterator(delegate.features(), getSchema(), lengthField);
+        return new LengthCalculationFeatureIterator(delegate, getSchema(), lengthField, lengthUnit);
     }
 
     @Override
@@ -82,14 +92,24 @@ public class LengthCalculationFeatureCollection extends GXTSimpleFeatureCollecti
 
         private String lengthField;
 
+        private DistanceUnit lengthUnit = DistanceUnit.Default;
+
         private SimpleFeatureBuilder builder;
 
-        public LengthCalculationFeatureIterator(SimpleFeatureIterator delegate,
-                SimpleFeatureType schema, String lengthField) {
-            this.delegate = delegate;
+        private UnitCalculator calculator;
+
+        public LengthCalculationFeatureIterator(SimpleFeatureCollection delegate,
+                SimpleFeatureType schema, String lengthField, DistanceUnit lengthUnit) {
+            this.delegate = delegate.features();
 
             this.lengthField = lengthField;
+            this.lengthUnit = lengthUnit;
             this.builder = new SimpleFeatureBuilder(schema);
+
+            calculator = new UnitCalculator(schema.getCoordinateReferenceSystem());
+            if (calculator.isGeographic()) {
+                calculator.setupTransformation(delegate.getBounds());
+            }
         }
 
         public void close() {
@@ -109,7 +129,8 @@ public class LengthCalculationFeatureCollection extends GXTSimpleFeatureCollecti
 
             // calculate length
             Geometry geometry = (Geometry) sourceFeature.getDefaultGeometry();
-            nextFeature.setAttribute(lengthField, geometry.getLength());
+            double length = calculator.getLength(geometry, lengthUnit);
+            nextFeature.setAttribute(lengthField, length);
             return nextFeature;
         }
     }

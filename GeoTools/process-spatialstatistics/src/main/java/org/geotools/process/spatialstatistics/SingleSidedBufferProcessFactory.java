@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.expression.Expression;
@@ -46,7 +47,8 @@ public class SingleSidedBufferProcessFactory extends SpatialStatisticsProcessFac
     private static final String PROCESS_NAME = "SingleSidedBuffer";
 
     /*
-     * SingleSidedBuffer(SimpleFeatureCollection inputFeatures, Expression distance, Integer quadrantSegments): SimpleFeatureCollection
+     * SingleSidedBuffer(SimpleFeatureCollection inputFeatures, Expression distance, DistanceUnit distanceUnit, Integer quadrantSegments):
+     * SimpleFeatureCollection
      */
 
     public SingleSidedBufferProcessFactory() {
@@ -81,6 +83,13 @@ public class SingleSidedBufferProcessFactory extends SpatialStatisticsProcessFac
             getResource("SingleSidedBuffer.distance.description"), true, 1, 1, null, new KVP(
                     Params.FIELD, "inputFeatures.Number"));
 
+    /** distanceUnit */
+    public static final Parameter<DistanceUnit> distanceUnit = new Parameter<DistanceUnit>(
+            "distanceUnit", DistanceUnit.class,
+            getResource("SingleSidedBuffer.distanceUnit.title"),
+            getResource("SingleSidedBuffer.distanceUnit.description"), false, 0, 1,
+            DistanceUnit.Default, null);
+
     /** quadrantSegments */
     public static final Parameter<Integer> quadrantSegments = new Parameter<Integer>(
             "quadrantSegments", Integer.class,
@@ -93,6 +102,7 @@ public class SingleSidedBufferProcessFactory extends SpatialStatisticsProcessFac
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(distance.key, distance);
+        parameterInfo.put(distanceUnit.key, distanceUnit);
         parameterInfo.put(quadrantSegments.key, quadrantSegments);
         return parameterInfo;
     }

@@ -27,6 +27,7 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.transformation.SingleSidedBufferFeatureCollection;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.expression.Expression;
@@ -52,9 +53,17 @@ public class SingleSidedBufferProcess extends AbstractStatisticsProcess {
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
             Expression distance, Integer quadrantSegments, ProgressListener monitor) {
+        return SingleSidedBufferProcess.process(inputFeatures, distance, DistanceUnit.Default,
+                quadrantSegments, monitor);
+    }
+
+    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+            Expression distance, DistanceUnit distanceUnit, Integer quadrantSegments,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(SingleSidedBufferProcessFactory.inputFeatures.key, inputFeatures);
         map.put(SingleSidedBufferProcessFactory.distance.key, distance);
+        map.put(SingleSidedBufferProcessFactory.distanceUnit.key, distanceUnit);
         map.put(SingleSidedBufferProcessFactory.quadrantSegments.key, quadrantSegments);
 
         Process process = new SingleSidedBufferProcess(null);
@@ -75,8 +84,14 @@ public class SingleSidedBufferProcess extends AbstractStatisticsProcess {
             throws ProcessException {
         SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
                 SingleSidedBufferProcessFactory.inputFeatures, null);
+
         Expression distance = (Expression) Params.getValue(input,
                 SingleSidedBufferProcessFactory.distance, null);
+
+        DistanceUnit distanceUnit = (DistanceUnit) Params.getValue(input,
+                SingleSidedBufferProcessFactory.distanceUnit,
+                SingleSidedBufferProcessFactory.distanceUnit.sample);
+
         Integer quadrantSegments = (Integer) Params.getValue(input,
                 SingleSidedBufferProcessFactory.quadrantSegments,
                 SingleSidedBufferProcessFactory.quadrantSegments.sample);
@@ -87,7 +102,7 @@ public class SingleSidedBufferProcess extends AbstractStatisticsProcess {
         // start process
         SimpleFeatureCollection resultFc = DataUtilities
                 .simple(new SingleSidedBufferFeatureCollection(inputFeatures, distance,
-                        quadrantSegments));
+                        distanceUnit, quadrantSegments));
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

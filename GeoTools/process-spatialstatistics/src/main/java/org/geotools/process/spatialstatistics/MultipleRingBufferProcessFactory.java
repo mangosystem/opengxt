@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
 
@@ -44,7 +45,8 @@ public class MultipleRingBufferProcessFactory extends SpatialStatisticsProcessFa
     private static final String PROCESS_NAME = "MultipleRingBuffer";
 
     /*
-     * MultipleRingBuffer(SimpleFeatureCollection inputFeatures, String distances, Boolean outsideOnly, Boolean dissolve): SimpleFeatureCollection
+     * MultipleRingBuffer(SimpleFeatureCollection inputFeatures, String distances, DistanceUnit distanceUnit, Boolean outsideOnly, Boolean dissolve):
+     * SimpleFeatureCollection
      */
 
     public MultipleRingBufferProcessFactory() {
@@ -77,6 +79,13 @@ public class MultipleRingBufferProcessFactory extends SpatialStatisticsProcessFa
             String.class, getResource("MultipleRingBuffer.distances.title"),
             getResource("MultipleRingBuffer.distances.description"), true, 1, 1, null, null);
 
+    /** distanceUnit */
+    public static final Parameter<DistanceUnit> distanceUnit = new Parameter<DistanceUnit>(
+            "distanceUnit", DistanceUnit.class,
+            getResource("MultipleRingBuffer.distanceUnit.title"),
+            getResource("MultipleRingBuffer.distanceUnit.description"), false, 0, 1,
+            DistanceUnit.Default, null);
+
     /** outsideOnly */
     public static final Parameter<Boolean> outsideOnly = new Parameter<Boolean>("outsideOnly",
             Boolean.class, getResource("MultipleRingBuffer.outsideOnly.title"),
@@ -94,6 +103,7 @@ public class MultipleRingBufferProcessFactory extends SpatialStatisticsProcessFa
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(distances.key, distances);
+        parameterInfo.put(distanceUnit.key, distanceUnit);
         parameterInfo.put(outsideOnly.key, outsideOnly);
         parameterInfo.put(dissolve.key, dissolve);
         return parameterInfo;

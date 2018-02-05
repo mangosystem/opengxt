@@ -27,7 +27,10 @@ import javax.measure.unit.Unit;
 
 import org.geotools.process.spatialstatistics.enumeration.AreaUnit;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
+import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.crs.GeographicCRS;
 
 /**
  * Utility class for unit conversion
@@ -38,6 +41,41 @@ import org.geotools.util.logging.Logging;
  */
 public class UnitConverter {
     protected static final Logger LOGGER = Logging.getLogger(UnitConverter.class);
+
+    public static double convertDistance(double value, DistanceUnit valueUnit,
+            Unit<Length> targetUnit) {
+        Measure<Double, Length> measure = Measure.valueOf(value, SI.METER);
+
+        switch (valueUnit) {
+        case Default:
+            return value;
+        case Meters:
+            measure = Measure.valueOf(value, SI.METER);
+            break;
+        case Kilometers:
+            measure = Measure.valueOf(value, SI.KILOMETER);
+            break;
+        case Feet:
+            measure = Measure.valueOf(value, NonSI.FOOT);
+            break;
+        case Inches:
+            measure = Measure.valueOf(value, NonSI.INCH);
+            break;
+        case Miles:
+            measure = Measure.valueOf(value, NonSI.MILE);
+            break;
+        case NauticalMiles:
+            measure = Measure.valueOf(value, NonSI.NAUTICAL_MILE);
+            break;
+        case Yards:
+            measure = Measure.valueOf(value, NonSI.YARD);
+            break;
+        default:
+            return value;
+        }
+
+        return measure.doubleValue(targetUnit);
+    }
 
     public static double convertDistance(Measure<Double, Length> measure, DistanceUnit targetUnit) {
         double converted = measure.getValue();
@@ -111,5 +149,26 @@ public class UnitConverter {
         }
 
         return converted;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Unit<Length> getLengthUnit(CoordinateReferenceSystem crs) {
+        CoordinateReferenceSystem horCRS = CRS.getHorizontalCRS(crs);
+        if (horCRS instanceof GeographicCRS) {
+            return SI.METER; // default
+        } else {
+            return (Unit<Length>) horCRS.getCoordinateSystem().getAxis(0).getUnit();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Unit<Area> getAreaUnit(CoordinateReferenceSystem crs) {
+        CoordinateReferenceSystem horCRS = CRS.getHorizontalCRS(crs);
+        if (horCRS instanceof GeographicCRS) {
+            return SI.SQUARE_METRE; // default
+        } else {
+            Unit<?> distUnit = horCRS.getCoordinateSystem().getAxis(0).getUnit();
+            return (Unit<Area>) distUnit.times(distUnit);
+        }
     }
 }

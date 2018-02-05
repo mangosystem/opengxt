@@ -20,12 +20,17 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
+import javax.measure.quantity.Length;
+import javax.measure.unit.Unit;
+
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -54,15 +59,32 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
 
     public MultipleBufferFeatureCollection(SimpleFeatureCollection delegate, double[] distances,
             Boolean outsideOnly) {
-        super(delegate);
+        this(delegate, distances, DistanceUnit.Default, outsideOnly);
+    }
 
-        Arrays.sort(distances);
-        this.distances = distances;
-        this.outsideOnly = outsideOnly;
+    public MultipleBufferFeatureCollection(SimpleFeatureCollection delegate, double[] distances,
+            DistanceUnit distanceUnit, Boolean outsideOnly) {
+        super(delegate);
 
         String typeName = delegate.getSchema().getTypeName();
         this.schema = FeatureTypes.build(delegate.getSchema(), typeName, Polygon.class);
         this.schema = FeatureTypes.add(schema, bufferField, Double.class, 19);
+
+        // apply distance unit
+        Arrays.sort(distances);
+        if (distanceUnit == DistanceUnit.Default) {
+            this.distances = distances;
+        } else {
+            Unit<Length> targetUnit = UnitConverter.getLengthUnit(schema
+                    .getCoordinateReferenceSystem());
+            double[] converted = distances.clone();
+            for (int i = 0; i < converted.length; i++) {
+                converted[i] = UnitConverter
+                        .convertDistance(converted[i], distanceUnit, targetUnit);
+            }
+            this.distances = converted;
+        }
+        this.outsideOnly = outsideOnly;
     }
 
     @Override

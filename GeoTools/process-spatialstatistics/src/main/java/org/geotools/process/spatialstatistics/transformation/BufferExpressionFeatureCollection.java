@@ -19,6 +19,10 @@ package org.geotools.process.spatialstatistics.transformation;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
+import javax.measure.quantity.Length;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
+
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
@@ -26,6 +30,8 @@ import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -50,6 +56,8 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
 
     private Expression distance;
 
+    private DistanceUnit distanceUnit = DistanceUnit.Default;
+
     private int quadrantSegments = 8;
 
     private SimpleFeatureType schema;
@@ -59,8 +67,18 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
         this(delegate, ff.literal(distance), quadrantSegments);
     }
 
+    public BufferExpressionFeatureCollection(SimpleFeatureCollection delegate, double distance,
+            DistanceUnit distanceUnit, int quadrantSegments) {
+        this(delegate, ff.literal(distance), distanceUnit, quadrantSegments);
+    }
+
     public BufferExpressionFeatureCollection(SimpleFeatureCollection delegate, Expression distance,
             int quadrantSegments) {
+        this(delegate, distance, DistanceUnit.Default, quadrantSegments);
+    }
+
+    public BufferExpressionFeatureCollection(SimpleFeatureCollection delegate, Expression distance,
+            DistanceUnit distanceUnit, int quadrantSegments) {
         super(delegate);
 
         if (quadrantSegments <= 0) {
@@ -68,6 +86,7 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
         }
 
         this.distance = distance;
+        this.distanceUnit = distanceUnit;
         this.quadrantSegments = quadrantSegments;
 
         String typeName = delegate.getSchema().getTypeName();
@@ -78,7 +97,7 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
     @Override
     public SimpleFeatureIterator features() {
         return new BufferExpressionFeatureIterator(delegate.features(), getSchema(), distance,
-                quadrantSegments);
+                distanceUnit, quadrantSegments);
     }
 
     @Override
@@ -104,6 +123,8 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
 
         private Expression distance;
 
+        private DistanceUnit distanceUnit = DistanceUnit.Default;
+
         private int quadrantSegments = 8;
 
         private int count = 0;
@@ -112,13 +133,19 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
 
         private SimpleFeature next;
 
+        private Unit<Length> targetUnit = SI.METER;
+
         private String typeName;
 
         public BufferExpressionFeatureIterator(SimpleFeatureIterator delegate,
-                SimpleFeatureType schema, Expression distance, int quadrantSegments) {
+                SimpleFeatureType schema, Expression distance, DistanceUnit distanceUnit,
+                int quadrantSegments) {
             this.delegate = delegate;
 
             this.distance = distance;
+            this.distanceUnit = distanceUnit;
+            this.targetUnit = UnitConverter.getLengthUnit(schema.getCoordinateReferenceSystem());
+
             this.quadrantSegments = quadrantSegments;
             this.builder = new SimpleFeatureBuilder(schema);
             this.typeName = schema.getTypeName();
@@ -138,9 +165,12 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
                     // transfer attributes
                     transferAttribute(source, next);
 
-                    // envelope to polygon geometry
+                    // buffer
                     Geometry geometry = (Geometry) source.getDefaultGeometry();
-                    next.setDefaultGeometry(geometry.buffer(eval, quadrantSegments));
+
+                    double converted = UnitConverter
+                            .convertDistance(eval, distanceUnit, targetUnit);
+                    next.setDefaultGeometry(geometry.buffer(converted, quadrantSegments));
                     next.setAttribute(BUFFER_FIELD, eval);
 
                     builder.reset();

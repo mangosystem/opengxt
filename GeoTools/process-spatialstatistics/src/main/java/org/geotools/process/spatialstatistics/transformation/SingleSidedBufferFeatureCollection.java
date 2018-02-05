@@ -19,6 +19,10 @@ package org.geotools.process.spatialstatistics.transformation;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
+import javax.measure.quantity.Length;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
+
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
@@ -26,6 +30,8 @@ import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -52,6 +58,8 @@ public class SingleSidedBufferFeatureCollection extends GXTSimpleFeatureCollecti
 
     private Expression distance;
 
+    private DistanceUnit distanceUnit = DistanceUnit.Default;
+
     private int quadrantSegments = 8;
 
     private SimpleFeatureType schema;
@@ -61,8 +69,18 @@ public class SingleSidedBufferFeatureCollection extends GXTSimpleFeatureCollecti
         this(delegate, ff.literal(distance), quadrantSegments);
     }
 
+    public SingleSidedBufferFeatureCollection(SimpleFeatureCollection delegate, double distance,
+            DistanceUnit distanceUnit, int quadrantSegments) {
+        this(delegate, ff.literal(distance), distanceUnit, quadrantSegments);
+    }
+
     public SingleSidedBufferFeatureCollection(SimpleFeatureCollection delegate,
             Expression distance, int quadrantSegments) {
+        this(delegate, distance, DistanceUnit.Default, quadrantSegments);
+    }
+
+    public SingleSidedBufferFeatureCollection(SimpleFeatureCollection delegate,
+            Expression distance, DistanceUnit distanceUnit, int quadrantSegments) {
         super(delegate);
 
         if (quadrantSegments <= 0) {
@@ -70,6 +88,7 @@ public class SingleSidedBufferFeatureCollection extends GXTSimpleFeatureCollecti
         }
 
         this.distance = distance;
+        this.distanceUnit = distanceUnit;
         this.quadrantSegments = quadrantSegments;
 
         String typeName = delegate.getSchema().getTypeName();
@@ -80,7 +99,7 @@ public class SingleSidedBufferFeatureCollection extends GXTSimpleFeatureCollecti
     @Override
     public SimpleFeatureIterator features() {
         return new BufferExpressionFeatureIterator(delegate.features(), getSchema(), distance,
-                quadrantSegments);
+                distanceUnit, quadrantSegments);
     }
 
     @Override
@@ -106,6 +125,8 @@ public class SingleSidedBufferFeatureCollection extends GXTSimpleFeatureCollecti
 
         private Expression distance;
 
+        private DistanceUnit distanceUnit = DistanceUnit.Default;
+
         private int count = 0;
 
         private BufferParameters bufParams = new BufferParameters();
@@ -114,15 +135,22 @@ public class SingleSidedBufferFeatureCollection extends GXTSimpleFeatureCollecti
 
         private SimpleFeature next;
 
+        private Unit<Length> targetUnit = SI.METER;
+
         private String typeName;
 
         public BufferExpressionFeatureIterator(SimpleFeatureIterator delegate,
-                SimpleFeatureType schema, Expression distance, int quadrantSegments) {
+                SimpleFeatureType schema, Expression distance, DistanceUnit distanceUnit,
+                int quadrantSegments) {
             this.delegate = delegate;
 
             this.bufParams.setQuadrantSegments(quadrantSegments);
             this.bufParams.setSingleSided(true);
+
             this.distance = distance;
+            this.distanceUnit = distanceUnit;
+            this.targetUnit = UnitConverter.getLengthUnit(schema.getCoordinateReferenceSystem());
+
             this.builder = new SimpleFeatureBuilder(schema);
             this.typeName = schema.getTypeName();
         }
@@ -143,7 +171,10 @@ public class SingleSidedBufferFeatureCollection extends GXTSimpleFeatureCollecti
 
                     // envelope to polygon geometry
                     Geometry geometry = (Geometry) source.getDefaultGeometry();
-                    next.setDefaultGeometry(BufferOp.bufferOp(geometry, eval, bufParams));
+
+                    double converted = UnitConverter
+                            .convertDistance(eval, distanceUnit, targetUnit);
+                    next.setDefaultGeometry(BufferOp.bufferOp(geometry, converted, bufParams));
                     next.setAttribute(BUFFER_FIELD, eval);
 
                     builder.reset();

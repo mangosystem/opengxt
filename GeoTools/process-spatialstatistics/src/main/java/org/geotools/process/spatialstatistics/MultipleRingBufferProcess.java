@@ -37,6 +37,7 @@ import org.geotools.process.ProcessFactory;
 import org.geotools.process.RenderingProcess;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.transformation.MultipleBufferFeatureCollection;
 import org.geotools.util.logging.Logging;
 import org.opengis.coverage.grid.GridGeometry;
@@ -74,9 +75,17 @@ public class MultipleRingBufferProcess extends AbstractStatisticsProcess impleme
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
             String distances, Boolean outsideOnly, Boolean dissolve, ProgressListener monitor) {
+        return MultipleRingBufferProcess.process(inputFeatures, distances, DistanceUnit.Default,
+                outsideOnly, dissolve, monitor);
+    }
+
+    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+            String distances, DistanceUnit distanceUnit, Boolean outsideOnly, Boolean dissolve,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(MultipleRingBufferProcessFactory.inputFeatures.key, inputFeatures);
         map.put(MultipleRingBufferProcessFactory.distances.key, distances);
+        map.put(MultipleRingBufferProcessFactory.distanceUnit.key, distanceUnit);
         map.put(MultipleRingBufferProcessFactory.outsideOnly.key, outsideOnly);
         map.put(MultipleRingBufferProcessFactory.dissolve.key, dissolve);
 
@@ -99,11 +108,16 @@ public class MultipleRingBufferProcess extends AbstractStatisticsProcess impleme
             throws ProcessException {
         SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
                 MultipleRingBufferProcessFactory.inputFeatures, null);
+
         String distances = (String) Params.getValue(input,
                 MultipleRingBufferProcessFactory.distances, null);
         if (inputFeatures == null || distances == null || distances.trim().length() == 0) {
             throw new NullPointerException("inputFeatures, distances parameters required");
         }
+
+        DistanceUnit distanceUnit = (DistanceUnit) Params.getValue(input,
+                MultipleRingBufferProcessFactory.distanceUnit,
+                MultipleRingBufferProcessFactory.distanceUnit.sample);
 
         Boolean outsideOnly = (Boolean) Params.getValue(input,
                 MultipleRingBufferProcessFactory.outsideOnly,
@@ -124,7 +138,7 @@ public class MultipleRingBufferProcess extends AbstractStatisticsProcess impleme
         }
 
         SimpleFeatureCollection resultFc = new MultipleBufferFeatureCollection(inputFeatures,
-                bufferDistance, outsideOnly);
+                bufferDistance, distanceUnit, outsideOnly);
 
         if (dissolve) {
             Map<Double, List<Geometry>> map = new TreeMap<Double, List<Geometry>>();

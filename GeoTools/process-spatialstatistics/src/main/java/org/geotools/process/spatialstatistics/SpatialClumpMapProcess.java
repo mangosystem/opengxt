@@ -30,6 +30,7 @@ import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.RenderingProcess;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.transformation.SpatialClumpFeatureCollection;
 import org.geotools.util.logging.Logging;
 import org.opengis.coverage.grid.GridGeometry;
@@ -57,9 +58,17 @@ public class SpatialClumpMapProcess extends AbstractStatisticsProcess implements
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
             Expression radius, Integer quadrantSegments, ProgressListener monitor) {
+        return SpatialClumpMapProcess.process(inputFeatures, radius, DistanceUnit.Default,
+                quadrantSegments, monitor);
+    }
+
+    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+            Expression radius, DistanceUnit radiusUnit, Integer quadrantSegments,
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(SpatialClumpMapProcessFactory.inputFeatures.key, inputFeatures);
         map.put(SpatialClumpMapProcessFactory.radius.key, radius);
+        map.put(SpatialClumpMapProcessFactory.radiusUnit.key, radiusUnit);
         map.put(SpatialClumpMapProcessFactory.quadrantSegments.key, quadrantSegments);
 
         Process process = new SpatialClumpMapProcess(null);
@@ -82,6 +91,9 @@ public class SpatialClumpMapProcess extends AbstractStatisticsProcess implements
                 SpatialClumpMapProcessFactory.inputFeatures, null);
         Expression radius = (Expression) Params.getValue(input,
                 SpatialClumpMapProcessFactory.radius, null);
+        DistanceUnit radiusUnit = (DistanceUnit) Params.getValue(input,
+                SpatialClumpMapProcessFactory.radiusUnit,
+                SpatialClumpMapProcessFactory.radiusUnit.sample);
         Integer quadrantSegments = (Integer) Params.getValue(input,
                 SpatialClumpMapProcessFactory.quadrantSegments,
                 SpatialClumpMapProcessFactory.quadrantSegments.sample);
@@ -91,7 +103,7 @@ public class SpatialClumpMapProcess extends AbstractStatisticsProcess implements
 
         // start process
         SimpleFeatureCollection resultFc = DataUtilities.simple(new SpatialClumpFeatureCollection(
-                inputFeatures, radius, quadrantSegments));
+                inputFeatures, radius, radiusUnit, quadrantSegments));
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

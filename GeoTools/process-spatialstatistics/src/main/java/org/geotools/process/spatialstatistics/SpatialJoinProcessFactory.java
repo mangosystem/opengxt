@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.enumeration.SpatialJoinType;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -44,7 +45,7 @@ public class SpatialJoinProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "SpatialJoin";
 
     /*
-     * SpatialJoin(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection joinFeatures, SpatialJoinType joinType, Double searchRadius) :
+     * SpatialJoin(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection joinFeatures, SpatialJoinType joinType, Double searchRadius, DistanceUnit radiusUnit) :
      * SimpleFeatureCollection
      */
 
@@ -91,6 +92,12 @@ public class SpatialJoinProcessFactory extends SpatialStatisticsProcessFactory {
             getResource("SpatialJoin.searchRadius.description"), false, 0, 1, Double.valueOf(0.0d),
             null);
 
+    /** radiusUnit */
+    public static final Parameter<DistanceUnit> radiusUnit = new Parameter<DistanceUnit>(
+            "radiusUnit", DistanceUnit.class, getResource("SpatialJoin.radiusUnit.title"),
+            getResource("SpatialJoin.radiusUnit.description"), false, 0, 1,
+            DistanceUnit.Default, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
@@ -98,6 +105,7 @@ public class SpatialJoinProcessFactory extends SpatialStatisticsProcessFactory {
         parameterInfo.put(joinFeatures.key, joinFeatures);
         parameterInfo.put(joinType.key, joinType);
         parameterInfo.put(searchRadius.key, searchRadius);
+        parameterInfo.put(radiusUnit.key, radiusUnit);
         return parameterInfo;
     }
 

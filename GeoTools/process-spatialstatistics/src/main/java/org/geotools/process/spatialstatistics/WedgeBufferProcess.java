@@ -27,6 +27,7 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.transformation.WedgeBufferFeatureCollection;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.expression.Expression;
@@ -53,12 +54,20 @@ public class WedgeBufferProcess extends AbstractStatisticsProcess {
     public static SimpleFeatureCollection process(SimpleFeatureCollection pointFeatures,
             Expression azimuth, Expression wedgeAngle, Expression innerRadius,
             Expression outerRadius, ProgressListener monitor) {
+        return WedgeBufferProcess.process(pointFeatures, azimuth, wedgeAngle, innerRadius,
+                outerRadius, DistanceUnit.Default, monitor);
+    }
+
+    public static SimpleFeatureCollection process(SimpleFeatureCollection pointFeatures,
+            Expression azimuth, Expression wedgeAngle, Expression innerRadius,
+            Expression outerRadius, DistanceUnit radiusUnit, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(WedgeBufferProcessFactory.pointFeatures.key, pointFeatures);
         map.put(WedgeBufferProcessFactory.azimuth.key, azimuth);
         map.put(WedgeBufferProcessFactory.wedgeAngle.key, wedgeAngle);
         map.put(WedgeBufferProcessFactory.innerRadius.key, innerRadius);
         map.put(WedgeBufferProcessFactory.outerRadius.key, outerRadius);
+        map.put(WedgeBufferProcessFactory.radiusUnit.key, radiusUnit);
 
         Process process = new WedgeBufferProcess(null);
         Map<String, Object> resultMap;
@@ -85,6 +94,8 @@ public class WedgeBufferProcess extends AbstractStatisticsProcess {
                 WedgeBufferProcessFactory.innerRadius, null);
         Expression outerRadius = (Expression) Params.getValue(input,
                 WedgeBufferProcessFactory.outerRadius, null);
+        DistanceUnit radiusUnit = (DistanceUnit) Params.getValue(input,
+                WedgeBufferProcessFactory.radiusUnit, WedgeBufferProcessFactory.radiusUnit.sample);
 
         if (pointFeatures == null || azimuth == null || wedgeAngle == null || outerRadius == null) {
             throw new NullPointerException(
@@ -93,7 +104,7 @@ public class WedgeBufferProcess extends AbstractStatisticsProcess {
 
         // start process
         SimpleFeatureCollection resultFc = DataUtilities.simple(new WedgeBufferFeatureCollection(
-                pointFeatures, azimuth, wedgeAngle, innerRadius, outerRadius));
+                pointFeatures, azimuth, wedgeAngle, innerRadius, outerRadius, radiusUnit));
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

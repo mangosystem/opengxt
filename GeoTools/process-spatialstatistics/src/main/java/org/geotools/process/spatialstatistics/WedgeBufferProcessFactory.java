@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.expression.Expression;
@@ -46,8 +47,8 @@ public class WedgeBufferProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "WedgeBuffer";
 
     /*
-     * WedgeBuffer(SimpleFeatureCollection pointFeatures, Expression azimuth, Expression wedgeAngle, Expression innerRadius, Expression outerRadius):
-     * SimpleFeatureCollection
+     * WedgeBuffer(SimpleFeatureCollection pointFeatures, Expression azimuth, Expression wedgeAngle, Expression innerRadius, Expression outerRadius,
+     * DistanceUnit radiusUnit): SimpleFeatureCollection
      */
 
     public WedgeBufferProcessFactory() {
@@ -99,6 +100,12 @@ public class WedgeBufferProcessFactory extends SpatialStatisticsProcessFactory {
             getResource("WedgeBuffer.outerRadius.description"), true, 1, 1, null, new KVP(
                     Params.FIELD, "pointFeatures.Number"));
 
+    /** radiusUnit */
+    public static final Parameter<DistanceUnit> radiusUnit = new Parameter<DistanceUnit>(
+            "radiusUnit", DistanceUnit.class, getResource("WedgeBuffer.radiusUnit.title"),
+            getResource("WedgeBuffer.radiusUnit.description"), false, 0, 1, DistanceUnit.Default,
+            null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
@@ -107,6 +114,7 @@ public class WedgeBufferProcessFactory extends SpatialStatisticsProcessFactory {
         parameterInfo.put(wedgeAngle.key, wedgeAngle);
         parameterInfo.put(innerRadius.key, innerRadius);
         parameterInfo.put(outerRadius.key, outerRadius);
+        parameterInfo.put(radiusUnit.key, radiusUnit);
         return parameterInfo;
     }
 

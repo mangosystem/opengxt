@@ -22,9 +22,14 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.measure.quantity.Length;
+import javax.measure.unit.Unit;
+
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
 import org.geotools.referencing.CRS;
@@ -49,31 +54,25 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 public class NearestNeighborCountOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(NearestNeighborCountOperation.class);
 
-    protected static final String COUNT_FIELD = "count";
+    private static final String COUNT_FIELD = "count";
 
-    protected double searchRadius = Double.MAX_VALUE;
+    private double searchRadius = Double.MAX_VALUE;
 
-    public void setMaximumDistance(double searchRadius) {
-        if (Double.isNaN(searchRadius) || Double.isInfinite(searchRadius) || searchRadius <= 0) {
-            this.searchRadius = Double.MAX_VALUE;
-        } else {
-            this.searchRadius = searchRadius;
-        }
-    }
-
-    public double getSearchRadius() {
-        return searchRadius;
+    public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
+            String countField, SimpleFeatureCollection nearFeatures) throws IOException {
+        return execute(inputFeatures, countField, nearFeatures, Double.MAX_VALUE,
+                DistanceUnit.Default);
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
             String countField, SimpleFeatureCollection nearFeatures, double searchRadius)
             throws IOException {
-        this.setMaximumDistance(searchRadius);
-        return execute(inputFeatures, countField, nearFeatures);
+        return execute(inputFeatures, countField, nearFeatures, searchRadius, DistanceUnit.Default);
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
-            String countField, SimpleFeatureCollection nearFeatures) throws IOException {
+            String countField, SimpleFeatureCollection nearFeatures, double searchRadius,
+            DistanceUnit radiusUnit) throws IOException {
         if (countField == null || countField.isEmpty()) {
             countField = COUNT_FIELD;
         }
@@ -84,6 +83,20 @@ public class NearestNeighborCountOperation extends GeneralOperation {
         if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
             nearFeatures = new ReprojectFeatureCollection(nearFeatures, crsS, crsT, true);
             LOGGER.log(Level.WARNING, "reprojecting features");
+        }
+
+        if (Double.isNaN(searchRadius) || Double.isInfinite(searchRadius) || searchRadius <= 0
+                || searchRadius == Double.MAX_VALUE) {
+            this.searchRadius = Double.MAX_VALUE;
+        } else {
+            // convert distance unit
+            if (radiusUnit == DistanceUnit.Default) {
+                this.searchRadius = searchRadius;
+            } else {
+                Unit<Length> targetUnit = UnitConverter.getLengthUnit(crsT);
+                this.searchRadius = UnitConverter.convertDistance(searchRadius, radiusUnit,
+                        targetUnit);
+            }
         }
 
         // 1. pre calculate

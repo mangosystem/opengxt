@@ -27,6 +27,7 @@ import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -54,6 +55,11 @@ public class SpatialClumpFeatureCollection extends GXTSimpleFeatureCollection {
 
     public SpatialClumpFeatureCollection(SimpleFeatureCollection delegate, Expression radius,
             int quadrantSegments) {
+        this(delegate, radius, DistanceUnit.Default, quadrantSegments);
+    }
+
+    public SpatialClumpFeatureCollection(SimpleFeatureCollection delegate, Expression radius,
+            DistanceUnit radiusUnit, int quadrantSegments) {
         super(delegate);
 
         String typeName = delegate.getSchema().getTypeName();
@@ -65,13 +71,13 @@ public class SpatialClumpFeatureCollection extends GXTSimpleFeatureCollection {
             quadrantSegments = 8; // default
         }
 
-        this.buildGeometries(delegate, radius, quadrantSegments);
+        this.buildGeometries(delegate, radius, radiusUnit, quadrantSegments);
     }
 
     private void buildGeometries(SimpleFeatureCollection features, Expression radius,
-            int quadrantSegments) {
+            DistanceUnit radiusUnit, int quadrantSegments) {
         SimpleFeatureCollection buffered = new BufferExpressionFeatureCollection(features, radius,
-                quadrantSegments);
+                radiusUnit, quadrantSegments);
 
         List<Geometry> geometries = new ArrayList<Geometry>();
         SimpleFeatureIterator featureIter = buffered.features();

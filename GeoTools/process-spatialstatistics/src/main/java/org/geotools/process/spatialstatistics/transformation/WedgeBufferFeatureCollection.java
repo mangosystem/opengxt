@@ -20,6 +20,10 @@ import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.measure.quantity.Length;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
+
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
@@ -27,6 +31,8 @@ import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -58,22 +64,38 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
 
     private Expression outerRadius;
 
+    private DistanceUnit distanceUnit = DistanceUnit.Default;
+
     private SimpleFeatureType schema;
 
     public WedgeBufferFeatureCollection(SimpleFeatureCollection delegate, String azimuthField,
             String wedgeAngleField, String innerRadiusField, String outerRadiusField) {
+        this(delegate, azimuthField, wedgeAngleField, innerRadiusField, outerRadiusField,
+                DistanceUnit.Default);
+    }
+
+    public WedgeBufferFeatureCollection(SimpleFeatureCollection delegate, String azimuthField,
+            String wedgeAngleField, String innerRadiusField, String outerRadiusField,
+            DistanceUnit distanceUnit) {
         this(delegate, ff.literal(azimuthField), ff.literal(wedgeAngleField), ff
-                .literal(innerRadiusField), ff.literal(outerRadiusField));
+                .literal(innerRadiusField), ff.literal(outerRadiusField), distanceUnit);
     }
 
     public WedgeBufferFeatureCollection(SimpleFeatureCollection delegate, Expression azimuth,
             Expression wedgeAngle, Expression innerRadius, Expression outerRadius) {
+        this(delegate, azimuth, wedgeAngle, innerRadius, outerRadius, DistanceUnit.Default);
+    }
+
+    public WedgeBufferFeatureCollection(SimpleFeatureCollection delegate, Expression azimuth,
+            Expression wedgeAngle, Expression innerRadius, Expression outerRadius,
+            DistanceUnit distanceUnit) {
         super(delegate);
 
         this.azimuth = azimuth;
         this.wedgeAngle = wedgeAngle;
         this.innerRadius = innerRadius;
         this.outerRadius = outerRadius;
+        this.distanceUnit = distanceUnit;
 
         String typeName = delegate.getSchema().getTypeName();
         this.schema = FeatureTypes.build(delegate.getSchema(), typeName, Polygon.class);
@@ -82,7 +104,7 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
     @Override
     public SimpleFeatureIterator features() {
         return new WedgeBufferFeatureIterator(delegate.features(), getSchema(), azimuth,
-                wedgeAngle, innerRadius, outerRadius);
+                wedgeAngle, innerRadius, outerRadius, distanceUnit);
     }
 
     @Override
@@ -116,6 +138,10 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
 
         private Expression innerRadiusExp;
 
+        private DistanceUnit distanceUnit = DistanceUnit.Default;
+
+        private Unit<Length> targetUnit = SI.METER;
+
         private int count = 0;
 
         private SimpleFeatureBuilder builder;
@@ -126,13 +152,16 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
 
         public WedgeBufferFeatureIterator(SimpleFeatureIterator delegate, SimpleFeatureType schema,
                 Expression azimuth, Expression wedgeAngle, Expression innerRadius,
-                Expression outerRadius) {
+                Expression outerRadius, DistanceUnit distanceUnit) {
             this.delegate = delegate;
 
             this.azimuthExp = azimuth;
             this.wedgeAngleExp = wedgeAngle;
             this.innerRadiusExp = innerRadius;
             this.outerRadiusExp = outerRadius;
+            this.distanceUnit = distanceUnit;
+            this.targetUnit = UnitConverter.getLengthUnit(schema.getCoordinateReferenceSystem());
+
             this.builder = new SimpleFeatureBuilder(schema);
             this.typeName = schema.getTypeName();
         }
@@ -170,13 +199,15 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
                     continue;
                 }
 
+                double inner = UnitConverter.convertDistance(innerRadius, distanceUnit, targetUnit);
+                double outer = UnitConverter.convertDistance(outerRadius, distanceUnit, targetUnit);
+
                 Geometry geometry = (Geometry) source.getDefaultGeometry();
                 Point centroid = geometry.getCentroid();
                 Geometry buffered = null;
 
                 try {
-                    buffered = this.bufferWedge(centroid, azimuth, wedgeAngle, innerRadius,
-                            outerRadius);
+                    buffered = this.bufferWedge(centroid, azimuth, wedgeAngle, inner, outer);
                 } catch (IllegalArgumentException e) {
                     LOGGER.log(Level.INFO, e.getMessage());
                 }

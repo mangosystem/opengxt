@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.filter.expression.Expression;
@@ -46,7 +47,8 @@ public class SpatialClumpMapProcessFactory extends SpatialStatisticsProcessFacto
     private static final String PROCESS_NAME = "SpatialClumpMap";
 
     /*
-     * SpatialClumpMap(SimpleFeatureCollection inputFeatures, Expression radius, Integer quadrantSegments): SimpleFeatureCollection
+     * SpatialClumpMap(SimpleFeatureCollection inputFeatures, Expression radius, DistanceUnit radiusUnit, Integer quadrantSegments):
+     * SimpleFeatureCollection
      */
 
     public SpatialClumpMapProcessFactory() {
@@ -80,6 +82,12 @@ public class SpatialClumpMapProcessFactory extends SpatialStatisticsProcessFacto
             getResource("SpatialClumpMap.radius.description"), true, 1, 1, null, new KVP(
                     Params.FIELD, "inputFeatures.Number"));
 
+    /** radiusUnit */
+    public static final Parameter<DistanceUnit> radiusUnit = new Parameter<DistanceUnit>(
+            "radiusUnit", DistanceUnit.class, getResource("SpatialClumpMap.radiusUnit.title"),
+            getResource("SpatialClumpMap.radiusUnit.description"), false, 0, 1,
+            DistanceUnit.Default, null);
+
     /** quadrantSegments */
     public static final Parameter<Integer> quadrantSegments = new Parameter<Integer>(
             "quadrantSegments", Integer.class,
@@ -92,6 +100,7 @@ public class SpatialClumpMapProcessFactory extends SpatialStatisticsProcessFacto
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(radius.key, radius);
+        parameterInfo.put(radiusUnit.key, radiusUnit);
         parameterInfo.put(quadrantSegments.key, quadrantSegments);
         return parameterInfo;
     }

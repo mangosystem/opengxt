@@ -20,9 +20,14 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.measure.quantity.Length;
+import javax.measure.unit.Unit;
+
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
 import org.geotools.referencing.CRS;
@@ -50,30 +55,21 @@ public class NearOperation extends GeneralOperation {
 
     protected static final String DIST_FIELD = "dist";
 
-    protected double maximumDistance = Double.MAX_VALUE;
-
-    public void setMaximumDistance(double maximumDistance) {
-        if (Double.isNaN(maximumDistance) || Double.isInfinite(maximumDistance)
-                || maximumDistance == 0) {
-            this.maximumDistance = Double.MAX_VALUE;
-        } else {
-            this.maximumDistance = maximumDistance;
-        }
-    }
-
-    public double getMaximumDistance() {
-        return maximumDistance;
+    public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
+            SimpleFeatureCollection nearFeatures, String nearIdField) throws IOException {
+        return execute(inputFeatures, nearFeatures, nearIdField, Double.MAX_VALUE);
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
             SimpleFeatureCollection nearFeatures, String nearIdField, double maximumDistance)
             throws IOException {
-        this.setMaximumDistance(maximumDistance);
-        return execute(inputFeatures, nearFeatures, nearIdField);
+        return execute(inputFeatures, nearFeatures, nearIdField, maximumDistance,
+                DistanceUnit.Default);
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
-            SimpleFeatureCollection nearFeatures, String nearIdField) throws IOException {
+            SimpleFeatureCollection nearFeatures, String nearIdField, double maximumDistance,
+            DistanceUnit distanceUnit) throws IOException {
         SimpleFeatureType inputSchema = inputFeatures.getSchema();
 
         SimpleFeatureType featureType = null;
@@ -95,6 +91,14 @@ public class NearOperation extends GeneralOperation {
         if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
             nearFeatures = new ReprojectFeatureCollection(nearFeatures, crsS, crsT, true);
             LOGGER.log(Level.WARNING, "reprojecting features");
+        }
+
+        double maxDistance = maximumDistance;
+        if (maximumDistance > 0 && maximumDistance != Double.MAX_VALUE
+                && distanceUnit != DistanceUnit.Default) {
+            // convert distance unit
+            Unit<Length> targetUnit = UnitConverter.getLengthUnit(crsT);
+            maxDistance = UnitConverter.convertDistance(maximumDistance, distanceUnit, targetUnit);
         }
 
         STRtree spatialIndex = loadNearFeatures(nearFeatures, nearIdField);
@@ -124,7 +128,7 @@ public class NearOperation extends GeneralOperation {
                 SimpleFeature newFeature = featureWriter.buildFeature();
                 featureWriter.copyAttributes(feature, newFeature, true);
 
-                if (maximumDistance < minumumDistance) {
+                if (maxDistance < minumumDistance) {
                     if (hasID) {
                         newFeature.setAttribute(nearIdField, null);
                     }

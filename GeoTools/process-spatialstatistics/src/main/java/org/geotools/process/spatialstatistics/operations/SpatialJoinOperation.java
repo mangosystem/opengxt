@@ -21,9 +21,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.measure.quantity.Length;
+import javax.measure.unit.Unit;
+
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.enumeration.SpatialJoinType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
@@ -50,18 +55,20 @@ import com.vividsolutions.jts.index.strtree.STRtree;
 public class SpatialJoinOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(SpatialJoinOperation.class);
 
-    private double searchRadius = 0.0d;
-
-    public double getSearchRadius() {
-        return searchRadius;
-    }
-
-    public void setSearchRadius(double searchRadius) {
-        this.searchRadius = searchRadius;
+    public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
+            SimpleFeatureCollection joinFeatures, SpatialJoinType joinType) throws IOException {
+        return execute(inputFeatures, joinFeatures, joinType, 0.0d);
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
-            SimpleFeatureCollection joinFeatures, SpatialJoinType joinType) throws IOException {
+            SimpleFeatureCollection joinFeatures, SpatialJoinType joinType, double searchRadius)
+            throws IOException {
+        return execute(inputFeatures, joinFeatures, joinType, searchRadius, DistanceUnit.Default);
+    }
+
+    public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
+            SimpleFeatureCollection joinFeatures, SpatialJoinType joinType, double searchRadius,
+            DistanceUnit radiusUnit) throws IOException {
         String typeName = inputFeatures.getSchema().getTypeName();
         SimpleFeatureType schema = FeatureTypes.build(inputFeatures.getSchema(), typeName);
 
@@ -86,6 +93,13 @@ public class SpatialJoinOperation extends GeneralOperation {
         if (crsT != null && crsS != null && !CRS.equalsIgnoreMetadata(crsT, crsS)) {
             // reproject joinFeatures to inputFeatures CRS
             joinFeatures = new ReprojectFeatureCollection(joinFeatures, crsS, crsT, true);
+        }
+
+        // convert distance unit
+        double maxRadius = searchRadius;
+        if (radiusUnit != DistanceUnit.Default) {
+            Unit<Length> targetUnit = UnitConverter.getLengthUnit(crsT);
+            maxRadius = UnitConverter.convertDistance(searchRadius, radiusUnit, targetUnit);
         }
 
         STRtree spatialIndex = loadFeatures(joinFeatures);
@@ -113,10 +127,11 @@ public class SpatialJoinOperation extends GeneralOperation {
                             }
                         });
 
-                Geometry target = (Geometry) joinFeature.getDefaultGeometry();
-                double distance = source.distance(target);
-                if (searchRadius > 0 && searchRadius < distance) {
-                    joinFeature = null;
+                if (maxRadius > 0) {
+                    Geometry target = (Geometry) joinFeature.getDefaultGeometry();
+                    if (maxRadius < source.distance(target)) {
+                        joinFeature = null;
+                    }
                 }
 
                 // create & insert feature

@@ -27,6 +27,7 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.enumeration.SpatialJoinType;
 import org.geotools.process.spatialstatistics.operations.SpatialJoinOperation;
 import org.geotools.util.logging.Logging;
@@ -53,11 +54,19 @@ public class SpatialJoinProcess extends AbstractStatisticsProcess {
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
             SimpleFeatureCollection joinFeatures, SpatialJoinType joinType, Double searchRadius,
             ProgressListener monitor) {
+        return SpatialJoinProcess.process(inputFeatures, joinFeatures, joinType, searchRadius,
+                DistanceUnit.Default, monitor);
+    }
+
+    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+            SimpleFeatureCollection joinFeatures, SpatialJoinType joinType, Double searchRadius,
+            DistanceUnit radiusUnit, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(SpatialJoinProcessFactory.inputFeatures.key, inputFeatures);
         map.put(SpatialJoinProcessFactory.joinFeatures.key, joinFeatures);
         map.put(SpatialJoinProcessFactory.joinType.key, joinType);
         map.put(SpatialJoinProcessFactory.searchRadius.key, searchRadius);
+        map.put(SpatialJoinProcessFactory.radiusUnit.key, radiusUnit);
 
         Process process = new SpatialJoinProcess(null);
         Map<String, Object> resultMap;
@@ -86,13 +95,15 @@ public class SpatialJoinProcess extends AbstractStatisticsProcess {
         Double searchRadius = (Double) Params.getValue(input,
                 SpatialJoinProcessFactory.searchRadius,
                 SpatialJoinProcessFactory.searchRadius.sample);
+        DistanceUnit radiusUnit = (DistanceUnit) Params.getValue(input,
+                SpatialJoinProcessFactory.radiusUnit, SpatialJoinProcessFactory.radiusUnit.sample);
 
         // start process
         SimpleFeatureCollection resultFc = null;
         try {
             SpatialJoinOperation operation = new SpatialJoinOperation();
-            operation.setSearchRadius(searchRadius);
-            resultFc = operation.execute(inputFeatures, joinFeatures, joinType);
+            resultFc = operation.execute(inputFeatures, joinFeatures, joinType, searchRadius,
+                    radiusUnit);
         } catch (IOException e) {
             throw new ProcessException(e);
         }

@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -46,8 +47,8 @@ public class NearestNeighborCountProcessFactory extends SpatialStatisticsProcess
     private static final String PROCESS_NAME = "NearestNeighborCount";
 
     /*
-     * NearestNeighborCount(SimpleFeatureCollection inputFeatures, String countField, SimpleFeatureCollection nearFeatures, Double searchRadius):
-     * SimpleFeatureCollection
+     * NearestNeighborCount(SimpleFeatureCollection inputFeatures, String countField, SimpleFeatureCollection nearFeatures, Double searchRadius,
+     * DistanceUnit radiusUnit): SimpleFeatureCollection
      */
 
     public NearestNeighborCountProcessFactory() {
@@ -88,11 +89,16 @@ public class NearestNeighborCountProcessFactory extends SpatialStatisticsProcess
             getResource("NearestNeighborCount.nearFeatures.description"), true, 1, 1, null, null);
 
     /** searchRadius */
-    public static final Parameter<Double> searchRadius = new Parameter<Double>(
-            "searchRadius", Double.class,
-            getResource("NearestNeighborCount.searchRadius.title"),
+    public static final Parameter<Double> searchRadius = new Parameter<Double>("searchRadius",
+            Double.class, getResource("NearestNeighborCount.searchRadius.title"),
             getResource("NearestNeighborCount.searchRadius.description"), true, 1, 1,
             Double.valueOf(0d), null);
+
+    /** radiusUnit */
+    public static final Parameter<DistanceUnit> radiusUnit = new Parameter<DistanceUnit>(
+            "radiusUnit", DistanceUnit.class, getResource("NearestNeighborCount.radiusUnit.title"),
+            getResource("NearestNeighborCount.radiusUnit.description"), false, 0, 1,
+            DistanceUnit.Default, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -101,6 +107,7 @@ public class NearestNeighborCountProcessFactory extends SpatialStatisticsProcess
         parameterInfo.put(countField.key, countField);
         parameterInfo.put(nearFeatures.key, nearFeatures);
         parameterInfo.put(searchRadius.key, searchRadius);
+        parameterInfo.put(radiusUnit.key, radiusUnit);
         return parameterInfo;
     }
 

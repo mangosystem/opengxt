@@ -144,7 +144,10 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
 
             this.distance = distance;
             this.distanceUnit = distanceUnit;
-            this.targetUnit = UnitConverter.getLengthUnit(schema.getCoordinateReferenceSystem());
+            if (distanceUnit != DistanceUnit.Default) {
+                this.targetUnit = UnitConverter
+                        .getLengthUnit(schema.getCoordinateReferenceSystem());
+            }
 
             this.quadrantSegments = quadrantSegments;
             this.builder = new SimpleFeatureBuilder(schema);
@@ -168,8 +171,10 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
                     // buffer
                     Geometry geometry = (Geometry) source.getDefaultGeometry();
 
-                    double converted = UnitConverter
-                            .convertDistance(eval, distanceUnit, targetUnit);
+                    double converted = eval;
+                    if (distanceUnit != DistanceUnit.Default) {
+                        converted = UnitConverter.convertDistance(eval, distanceUnit, targetUnit);
+                    }
                     next.setDefaultGeometry(geometry.buffer(converted, quadrantSegments));
                     next.setAttribute(BUFFER_FIELD, eval);
 

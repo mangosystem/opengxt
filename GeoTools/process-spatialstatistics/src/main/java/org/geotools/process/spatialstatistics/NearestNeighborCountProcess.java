@@ -27,6 +27,7 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.operations.NearestNeighborCountOperation;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
@@ -52,11 +53,19 @@ public class NearestNeighborCountProcess extends AbstractStatisticsProcess {
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
             String countField, SimpleFeatureCollection nearFeatures, double searchRadius,
             ProgressListener monitor) {
+        return NearestNeighborCountProcess.process(inputFeatures, countField, nearFeatures,
+                searchRadius, DistanceUnit.Default, monitor);
+    }
+
+    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+            String countField, SimpleFeatureCollection nearFeatures, double searchRadius,
+            DistanceUnit radiusUnit, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(NearestNeighborCountProcessFactory.inputFeatures.key, inputFeatures);
         map.put(NearestNeighborCountProcessFactory.countField.key, countField);
         map.put(NearestNeighborCountProcessFactory.nearFeatures.key, nearFeatures);
         map.put(NearestNeighborCountProcessFactory.searchRadius.key, searchRadius);
+        map.put(NearestNeighborCountProcessFactory.radiusUnit.key, radiusUnit);
 
         Process process = new NearestNeighborCountProcess(null);
         Map<String, Object> resultMap;
@@ -91,6 +100,10 @@ public class NearestNeighborCountProcess extends AbstractStatisticsProcess {
                 NearestNeighborCountProcessFactory.searchRadius,
                 NearestNeighborCountProcessFactory.searchRadius.sample);
 
+        DistanceUnit radiusUnit = (DistanceUnit) Params.getValue(input,
+                NearestNeighborCountProcessFactory.radiusUnit,
+                NearestNeighborCountProcessFactory.radiusUnit.sample);
+
         if (Double.isNaN(searchRadius) || Double.isInfinite(searchRadius) || searchRadius <= 0) {
             throw new ProcessException("Search radius must be greater than 0!");
         }
@@ -99,7 +112,8 @@ public class NearestNeighborCountProcess extends AbstractStatisticsProcess {
         SimpleFeatureCollection resultFc = null;
         try {
             NearestNeighborCountOperation operation = new NearestNeighborCountOperation();
-            resultFc = operation.execute(inputFeatures, countField, nearFeatures, searchRadius);
+            resultFc = operation.execute(inputFeatures, countField, nearFeatures, searchRadius,
+                    radiusUnit);
         } catch (IOException e) {
             throw new ProcessException(e);
         }

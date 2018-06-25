@@ -74,8 +74,8 @@ public class RasterResampleProcessFactory extends SpatialStatisticsProcessFactor
 
     /** cellSize */
     public static final Parameter<Double> cellSize = new Parameter<Double>("cellSize",
-            Double.class, getResource("KernelDensity.cellSize.title"),
-            getResource("KernelDensity.cellSize.description"), true, 1, 1, Double.valueOf(0.0),
+            Double.class, getResource("RasterResample.cellSize.title"),
+            getResource("RasterResample.cellSize.description"), true, 1, 1, Double.valueOf(0.0),
             null);
 
     /** resamplingType */

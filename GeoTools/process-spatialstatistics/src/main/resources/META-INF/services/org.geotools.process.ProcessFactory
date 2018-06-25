@@ -148,6 +148,14 @@ org.geotools.process.spatialstatistics.RasterProfileProcessFactory
 org.geotools.process.spatialstatistics.RasterRadialLOSProcessFactory
 org.geotools.process.spatialstatistics.RasterLinearLOSProcessFactory
 org.geotools.process.spatialstatistics.RasterHighLowProcessFactory
+org.geotools.process.spatialstatistics.RasterSlopeProcessFactory
+org.geotools.process.spatialstatistics.RasterAspectProcessFactory
+org.geotools.process.spatialstatistics.RasterHillshadeProcessFactory
+org.geotools.process.spatialstatistics.RasterTPIProcessFactory
+org.geotools.process.spatialstatistics.RasterTRIProcessFactory
+org.geotools.process.spatialstatistics.RasterRoughnessProcessFactory
+org.geotools.process.spatialstatistics.RasterCurvatureProcessFactory
+
 org.geotools.process.spatialstatistics.RasterToImageProcessFactory
 
 org.geotools.process.spatialstatistics.FeaturesToRasterProcessFactory

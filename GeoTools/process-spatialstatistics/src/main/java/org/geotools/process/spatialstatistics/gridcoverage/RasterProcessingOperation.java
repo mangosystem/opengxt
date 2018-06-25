@@ -97,6 +97,8 @@ public abstract class RasterProcessingOperation {
     }
 
     public ProgressListener Progress = new NullProgressListener();
+    
+    protected int MIN_CELL_COUNT = 600;
 
     // it is the shorter of the width or the height of the extent of the input point features
     // in the input spatial reference, divided by 250.

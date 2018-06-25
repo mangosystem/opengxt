@@ -213,7 +213,7 @@ public class RasterFunctionalSurface {
             GridCoordinates2D pos = gg2D.worldToGrid(gdPos);
             retVal = this.getSlope(pos);
 
-            if (slopeType == SlopeType.DEGREE) {
+            if (slopeType == SlopeType.Degree) {
                 retVal = Math.toDegrees(retVal);
             } else {
                 retVal = Math.tan(retVal) * 100;

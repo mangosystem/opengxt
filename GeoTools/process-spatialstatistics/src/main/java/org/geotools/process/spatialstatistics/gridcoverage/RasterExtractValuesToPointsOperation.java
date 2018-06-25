@@ -104,10 +104,10 @@ public class RasterExtractValuesToPointsOperation extends GeneralOperation {
                     val = surface.getElevation(geometry.getCentroid());
                     break;
                 case SlopeAsDegree:
-                    val = surface.getSlope(geometry.getCentroid(), SlopeType.DEGREE);
+                    val = surface.getSlope(geometry.getCentroid(), SlopeType.Degree);
                     break;
                 case SlopeAsPercentrise:
-                    val = surface.getSlope(geometry.getCentroid(), SlopeType.PERCENTRISE);
+                    val = surface.getSlope(geometry.getCentroid(), SlopeType.Percentrise);
                     break;
                 case Aspect:
                     val = surface.getAspect(geometry.getCentroid());

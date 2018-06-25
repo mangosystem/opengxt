@@ -27,10 +27,10 @@ public enum SlopeType {
     /**
      * The inclination of slope will be calculated in degrees.
      */
-    DEGREE,
+    Degree,
 
     /**
      * Keyword to output the percent rise, also referred to as the percent slope.
      */
-    PERCENTRISE
+    Percentrise
 }

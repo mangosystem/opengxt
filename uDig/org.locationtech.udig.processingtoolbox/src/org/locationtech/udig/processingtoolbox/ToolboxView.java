@@ -643,6 +643,13 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterProfileProcessFactory");
         buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterLinearLOSProcessFactory");
         buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterRadialLOSProcessFactory");
+        buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterSlopeProcessFactory");
+        buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterAspectProcessFactory");
+        buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterHillshadeProcessFactory");
+        buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterTPIProcessFactory");
+        buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterTRIProcessFactory");
+        buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterRoughnessProcessFactory");
+        buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterCurvatureProcessFactory");
         
         // Zonal Tools
         TreeParent zonalTool = new TreeParent(Messages.ToolboxView_RasterZonal, null, null);

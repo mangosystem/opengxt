@@ -393,13 +393,13 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                 ssTools.addChild(node);
             }
         } catch (ClassNotFoundException e) {
-            LOGGER.log(Level.FINEST, e.getMessage(), e);
+            ToolboxPlugin.log(e.getMessage());
         } catch (InstantiationException e) {
-            LOGGER.log(Level.FINEST, e.getMessage(), e);
+            ToolboxPlugin.log(e.getMessage());
         } catch (IllegalAccessException e) {
-            LOGGER.log(Level.FINEST, e.getMessage(), e);
+            ToolboxPlugin.log(e.getMessage());
         } catch (Throwable t) {
-            LOGGER.log(Level.FINEST, t.getMessage(), t);
+            ToolboxPlugin.log(t.getMessage());
         }
     }
 
@@ -662,6 +662,11 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterForceCRSProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterReprojectProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterResampleProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterFlipProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterMirrorProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterRescaleProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterRotateProcessFactory");
+        buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterShiftProcessFactory");
     }
 
     private void buildTool(TreeParent parent, String title, String dialogName) {

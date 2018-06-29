@@ -165,3 +165,8 @@ org.geotools.process.spatialstatistics.GeometryToRasterProcessFactory
 org.geotools.process.spatialstatistics.RasterResampleProcessFactory
 org.geotools.process.spatialstatistics.RasterReprojectProcessFactory
 org.geotools.process.spatialstatistics.RasterForceCRSProcessFactory
+org.geotools.process.spatialstatistics.RasterFlipProcessFactory
+org.geotools.process.spatialstatistics.RasterMirrorProcessFactory
+org.geotools.process.spatialstatistics.RasterRescaleProcessFactory
+org.geotools.process.spatialstatistics.RasterRotateProcessFactory
+org.geotools.process.spatialstatistics.RasterShiftProcessFactory

@@ -40,6 +40,7 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Turns a raster dataset around the specified pivot point by the angle specified angle in degrees. <br>
@@ -65,19 +66,16 @@ public class RasterRotateOperation extends AbstractTransformationOperation {
         this.interpolation = interpolation;
     }
 
-    /**
-     * Turns a raster dataset around the specified pivot point by the angle specified angle in degrees.
-     * 
-     * @param inputCoverage The input raster dataset.
-     * @param angle The angle in degrees to rotate the raster. This can be any floating-point number.
-     * @return GridCoverage2D
-     */
     public GridCoverage2D execute(GridCoverage2D inputCoverage, double angle) {
         // The default is the lower left corner of the input raster dataset.
         DirectPosition origin = inputCoverage.getEnvelope().getLowerCorner();
-        Coordinate ancorPoint = new Coordinate(origin.getOrdinate(0), origin.getOrdinate(1));
+        Coordinate anchorPoint = new Coordinate(origin.getOrdinate(0), origin.getOrdinate(1));
 
-        return execute(inputCoverage, ancorPoint, angle);
+        return execute(inputCoverage, anchorPoint, angle);
+    }
+
+    public GridCoverage2D execute(GridCoverage2D inputCoverage, Point anchorPoint, double angle) {
+        return execute(inputCoverage, anchorPoint.getCoordinate(), angle);
     }
 
     /**

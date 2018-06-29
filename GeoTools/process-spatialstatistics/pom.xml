@@ -52,6 +52,14 @@
       </snapshots>
     </repository>
     <repository>
+      <id>geosolutions</id>
+      <name>GeoSolutions Repository</name>
+      <url>http://maven.geo-solutions.it</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
       <id>maven-restlet</id>
       <name>Restlet Maven Repository</name>
       <url>http://maven.restlet.org</url>

@@ -74,12 +74,12 @@ public class RasterRescaleProcessFactory extends SpatialStatisticsProcessFactory
     /** xScale */
     public static final Parameter<Double> xScale = new Parameter<Double>("xScale", Double.class,
             getResource("RasterRescale.xScale.title"),
-            getResource("RasterRescale.xScale.description"), false, 0, 1, Double.valueOf(0d), null);
+            getResource("RasterRescale.xScale.description"), false, 0, 1, Double.valueOf(1.0d), null);
 
     /** yScale */
     public static final Parameter<Double> yScale = new Parameter<Double>("yScale", Double.class,
             getResource("RasterRescale.yScale.title"),
-            getResource("RasterRescale.yScale.description"), false, 0, 1, Double.valueOf(0d), null);
+            getResource("RasterRescale.yScale.description"), false, 0, 1, Double.valueOf(1.0d), null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

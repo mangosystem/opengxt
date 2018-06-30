@@ -17,13 +17,19 @@
 package org.geotools.process.spatialstatistics.gridcoverage;
 
 import java.awt.geom.AffineTransform;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.media.jai.PlanarImage;
 
+import org.geotools.coverage.CoverageFactoryFinder;
+import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.resources.i18n.Vocabulary;
+import org.geotools.resources.i18n.VocabularyKeys;
 import org.geotools.util.logging.Logging;
 import org.opengis.parameter.InvalidParameterValueException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -42,28 +48,31 @@ public class RasterRescaleOperation extends AbstractTransformationOperation {
      * Resizes a raster by the specified x and y scale factors.
      * 
      * @param inputCoverage The input raster.
-     * @param x_scale The factor in which to scale the cell size in the x direction. The factor must be greater than zero.
-     * @param y_scale The factor in which to scale the cell size in the y direction. The factor must be greater than zero.
+     * @param xScale The factor in which to scale the cell size in the x direction. The factor must be greater than zero.
+     * @param yScale The factor in which to scale the cell size in the y direction. The factor must be greater than zero.
      * @return GridCoverage2D
      */
-    public GridCoverage2D execute(GridCoverage2D inputCoverage, double x_scale, double y_scale) {
-        if (x_scale <= 0) {
-            throw new InvalidParameterValueException("x_scale must be greater than zero",
-                    "x_scale", x_scale);
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public GridCoverage2D execute(GridCoverage2D inputCoverage, double xScale, double yScale) {
+        if (xScale <= 0) {
+            throw new InvalidParameterValueException("xScale must be greater than zero", "xScale",
+                    xScale);
         }
 
-        if (y_scale <= 0) {
-            throw new InvalidParameterValueException("y_scale must be greater than zero",
-                    "y_scale", y_scale);
+        if (yScale <= 0) {
+            throw new InvalidParameterValueException("yScale must be greater than zero", "yScale",
+                    yScale);
         }
 
         this.initilizeVariables(inputCoverage);
 
+        final int numBands = inputCoverage.getNumSampleDimensions();
+
         ReferencedEnvelope extent = new ReferencedEnvelope(inputCoverage.getEnvelope());
         GridGeometry2D gridGeometry2D = inputCoverage.getGridGeometry();
         AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
-        final double cellSizeX = Math.abs(gridToWorld.getScaleX()) * x_scale;
-        final double cellSizeY = Math.abs(gridToWorld.getScaleY()) * y_scale;
+        final double cellSizeX = Math.abs(gridToWorld.getScaleX()) * xScale;
+        final double cellSizeY = Math.abs(gridToWorld.getScaleY()) * yScale;
         CellSize = Math.max(cellSizeX, cellSizeY);
 
         // 1. The output size is multiplied by the scale factor for both the x and y directions. The
@@ -84,6 +93,21 @@ public class RasterRescaleOperation extends AbstractTransformationOperation {
         CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
         Extent = new ReferencedEnvelope(extent.getMinX(), maxX, extent.getMinY(), maxY, crs);
 
-        return createGridCoverage(inputCoverage.getName(), inputImage);
+        if (numBands == 1) {
+            return createGridCoverage(inputCoverage.getName(), inputImage);
+        } else {
+            GridSampleDimension[] bands = inputCoverage.getSampleDimensions();
+
+            double[] nodataValues = bands[0].getNoDataValues();
+            Object noData = nodataValues == null ? Integer.MAX_VALUE : nodataValues[0];
+
+            Map properties = inputCoverage.getProperties();
+            properties.put(Vocabulary.formatInternational(VocabularyKeys.NODATA), noData);
+            properties.put("GC_NODATA", noData);
+
+            GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
+            return factory.create(inputCoverage.getName(), inputImage, Extent, bands, null,
+                    properties);
+        }
     }
 }

@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics.gridcoverage;
 
 import java.awt.geom.AffineTransform;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,12 +26,17 @@ import javax.media.jai.JAI;
 import javax.media.jai.ParameterBlockJAI;
 import javax.media.jai.PlanarImage;
 
+import org.geotools.coverage.CoverageFactoryFinder;
+import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.referencing.operation.transform.AffineTransform2D;
+import org.geotools.resources.i18n.Vocabulary;
+import org.geotools.resources.i18n.VocabularyKeys;
 import org.geotools.util.logging.Logging;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.geometry.MismatchedDimensionException;
@@ -86,6 +92,7 @@ public class RasterRotateOperation extends AbstractTransformationOperation {
      * @param angle The angle in degrees to rotate the raster. This can be any floating-point number.
      * @return GridCoverage2D
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public GridCoverage2D execute(GridCoverage2D inputCoverage, Coordinate anchorPoint, double angle) {
         this.initilizeVariables(inputCoverage);
 
@@ -150,6 +157,23 @@ public class RasterRotateOperation extends AbstractTransformationOperation {
 
         Extent = new ReferencedEnvelope(newExt.getMinX(), maxX, newExt.getMinY(), maxY, crs);
 
-        return createGridCoverage(inputCoverage.getName(), outputImage);
+        final int numBands = inputCoverage.getNumSampleDimensions();
+
+        if (numBands == 1) {
+            return createGridCoverage(inputCoverage.getName(), outputImage);
+        } else {
+            GridSampleDimension[] bands = inputCoverage.getSampleDimensions();
+
+            double[] nodataValues = bands[0].getNoDataValues();
+            Object noData = nodataValues == null ? Integer.MAX_VALUE : nodataValues[0];
+
+            Map properties = inputCoverage.getProperties();
+            properties.put(Vocabulary.formatInternational(VocabularyKeys.NODATA), noData);
+            properties.put("GC_NODATA", noData);
+
+            GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
+            return factory.create(inputCoverage.getName(), outputImage, Extent, bands, null,
+                    properties);
+        }
     }
 }

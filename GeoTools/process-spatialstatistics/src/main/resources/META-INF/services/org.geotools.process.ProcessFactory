@@ -95,6 +95,7 @@ org.geotools.process.spatialstatistics.AttributeJoinProcessFactory
 org.geotools.process.spatialstatistics.PointStatisticsProcessFactory
 org.geotools.process.spatialstatistics.BufferStatisticsProcessFactory
 org.geotools.process.spatialstatistics.SumLineLengthProcessFactory
+org.geotools.process.spatialstatistics.ReprojectProcessFactory
 
 org.geotools.process.spatialstatistics.HexagonProcessFactory
 org.geotools.process.spatialstatistics.FishnetCountProcessFactory

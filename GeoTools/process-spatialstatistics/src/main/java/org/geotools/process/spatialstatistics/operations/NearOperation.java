@@ -93,7 +93,7 @@ public class NearOperation extends GeneralOperation {
             LOGGER.log(Level.WARNING, "reprojecting features");
         }
 
-        double maxDistance = maximumDistance;
+        double maxDistance = maximumDistance == 0 ? Double.MAX_VALUE : maximumDistance;
         if (maximumDistance > 0 && maximumDistance != Double.MAX_VALUE
                 && distanceUnit != DistanceUnit.Default) {
             // convert distance unit
@@ -130,7 +130,7 @@ public class NearOperation extends GeneralOperation {
 
                 if (maxDistance < minumumDistance) {
                     if (hasID) {
-                        newFeature.setAttribute(nearIdField, null);
+                        newFeature.setAttribute(nearIdField, nearest.id);
                     }
                     newFeature.setAttribute(DIST_FIELD, null);
                 } else {

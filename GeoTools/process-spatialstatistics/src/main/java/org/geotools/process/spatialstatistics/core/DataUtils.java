@@ -26,13 +26,16 @@ import org.geotools.data.collection.SpatialIndexFeatureCollection;
 import org.geotools.data.collection.TreeSetFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.store.ContentFeatureCollection;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.collection.DecoratingSimpleFeatureCollection;
 import org.geotools.filter.visitor.ExtractBoundsFilterVisitor;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.sort.SortBy;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -47,6 +50,16 @@ import com.vividsolutions.jts.index.strtree.STRtree;
  */
 public class DataUtils {
     protected static final Logger LOGGER = Logging.getLogger(DataUtils.class);
+
+    public static SimpleFeatureCollection toSpatialIndexFeatureCollection(
+            SimpleFeatureCollection features, ReferencedEnvelope bounds) {
+        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+
+        String geomName = features.getSchema().getGeometryDescriptor().getLocalName();
+        Filter filter = ff.bbox(ff.property(geomName), bounds);
+
+        return toSpatialIndexFeatureCollection(features.subCollection(filter));
+    }
 
     public static SimpleFeatureCollection toSpatialIndexFeatureCollection(
             SimpleFeatureCollection features) {

@@ -60,9 +60,6 @@ public class ClipWithFeaturesOperation extends GeneralOperation {
             SimpleFeatureCollection clipFeatures) throws IOException {
         SimpleFeatureType featureType = buildTargetSchema(inputFeatures.getSchema());
 
-        // using SpatialIndexFeatureCollection
-        inputFeatures = DataUtils.toSpatialIndexFeatureCollection(inputFeatures);
-
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);
 
@@ -74,9 +71,13 @@ public class ClipWithFeaturesOperation extends GeneralOperation {
             LOGGER.log(Level.WARNING, "reprojecting features");
         }
 
+        // using SpatialIndexFeatureCollection
+        inputFeatures = DataUtils.toSpatialIndexFeatureCollection(inputFeatures,
+                clipFeatures.getBounds());
+
         SimpleFeatureIterator clipIter = clipFeatures.features();
         try {
-            final String geomName = featureType.getGeometryDescriptor().getLocalName();
+            String geomName = featureType.getGeometryDescriptor().getLocalName();
             while (clipIter.hasNext()) {
                 SimpleFeature feature = clipIter.next();
                 Geometry clipGeometry = (Geometry) feature.getDefaultGeometry();

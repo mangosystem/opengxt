@@ -23,12 +23,17 @@ import java.util.logging.Logger;
 
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.transformation.ClipWithGeometryFeatureCollection;
 import org.geotools.util.logging.Logging;
+import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory2;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.ProgressListener;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -42,6 +47,8 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public class ClipWithGeometryProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(ClipWithGeometryProcess.class);
+
+    final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
 
     public ClipWithGeometryProcess(ProcessFactory factory) {
         super(factory);
@@ -83,8 +90,19 @@ public class ClipWithGeometryProcess extends AbstractStatisticsProcess {
         }
 
         // start process
+        // apply bbox filter
+        String geomName = inputFeatures.getSchema().getGeometryDescriptor().getLocalName();
+
+        CoordinateReferenceSystem crs = inputFeatures.getSchema().getCoordinateReferenceSystem();
+        clipGeometry = transformGeometry(clipGeometry, crs);
+
+        Filter filter = ff.bbox(ff.property(geomName),
+                new ReferencedEnvelope(clipGeometry.getEnvelopeInternal(), crs));
+
+        // clip
         SimpleFeatureCollection resultFc = DataUtilities
-                .simple(new ClipWithGeometryFeatureCollection(inputFeatures, clipGeometry));
+                .simple(new ClipWithGeometryFeatureCollection(inputFeatures.subCollection(filter),
+                        clipGeometry));
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

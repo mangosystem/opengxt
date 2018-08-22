@@ -26,6 +26,7 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.referencing.CRS;
@@ -38,6 +39,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
@@ -53,6 +55,8 @@ public class ReprojectFeatureCollection extends GXTSimpleFeatureCollection {
     private SimpleFeatureType schema;
 
     final GeometryCoordinateSequenceTransformer transformer = new GeometryCoordinateSequenceTransformer();
+
+    final MathTransform transform;
 
     public ReprojectFeatureCollection(SimpleFeatureCollection delegate,
             CoordinateReferenceSystem targetCRS) {
@@ -76,7 +80,8 @@ public class ReprojectFeatureCollection extends GXTSimpleFeatureCollection {
             throw new NullPointerException("targetCRS CoordinateReferenceSystem");
         }
 
-        this.transformer.setMathTransform(transform(forcedCRS, targetCRS, lenient));
+        transform = transform(forcedCRS, targetCRS, lenient);
+        this.transformer.setMathTransform(transform);
         this.transformer.setCoordinateReferenceSystem(targetCRS);
 
         this.schema = FeatureTypes.build(schema, schema.getTypeName(), targetCRS);
@@ -101,7 +106,13 @@ public class ReprojectFeatureCollection extends GXTSimpleFeatureCollection {
     }
 
     public ReferencedEnvelope getBounds() {
-        return DataUtilities.bounds(features());
+        try {
+            Envelope envelope = JTS.transform(delegate.getBounds(), transform);
+            return new ReferencedEnvelope(envelope, getSchema().getCoordinateReferenceSystem());
+        } catch (TransformException e) {
+            LOGGER.log(Level.FINER, e.getMessage(), e);
+            return DataUtilities.bounds(features());
+        }
     }
 
     private MathTransform transform(CoordinateReferenceSystem source,

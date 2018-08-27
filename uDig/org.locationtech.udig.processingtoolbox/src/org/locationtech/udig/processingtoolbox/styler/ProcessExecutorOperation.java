@@ -9,11 +9,13 @@
  */
 package org.locationtech.udig.processingtoolbox.styler;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +29,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.geotools.brewer.color.BrewerPalette;
+import org.geotools.brewer.color.ColorBrewer;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.Parameter;
@@ -34,9 +38,9 @@ import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.JTS;
-import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.GlobalGStatisticsProcess.GStatisticsProcessResult;
 import org.geotools.process.spatialstatistics.GlobalGearysCProcess.GearysCProcessResult;
 import org.geotools.process.spatialstatistics.GlobalLeesLProcess.LeesLProcessResult;
@@ -49,6 +53,7 @@ import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
 import org.geotools.process.spatialstatistics.pattern.NNIOperation.NearestNeighborResult;
@@ -60,7 +65,11 @@ import org.geotools.process.spatialstatistics.styler.GraduatedColorStyleBuilder;
 import org.geotools.process.spatialstatistics.styler.GraduatedSymbolStyleBuilder;
 import org.geotools.process.spatialstatistics.styler.SSStyleBuilder;
 import org.geotools.process.spatialstatistics.transformation.ForceCRSFeatureCollection;
+import org.geotools.styling.ColorMap;
+import org.geotools.styling.ColorMapEntry;
 import org.geotools.styling.Style;
+import org.geotools.styling.StyleBuilder;
+import org.geotools.styling.StyleFactory;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.ICatalog;
@@ -77,6 +86,7 @@ import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.FilterFactory2;
 import org.opengis.geometry.BoundingBox;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.ProgressListener;
@@ -168,23 +178,8 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                                 outputParams.get(entrySet.getKey()),
                                 resultInfo.get(entrySet.getKey()).metadata, monitor);
                     } else if (val instanceof GridCoverage2D) {
-                        ToolboxPlugin.log(Messages.Task_AddingLayer);
-                        try {
-                            File outputFile = new File(outputParams.get(entrySet.getKey())
-                                    .toString());
-                            GridCoverage2D output = MapUtils.saveAsGeoTiff((GridCoverage2D) val,
-                                    outputFile);
-
-                            if (ToolboxView.getAddLayerAutomatically()) {
-                                MapUtils.addGridCoverageToMap(map, output, outputFile, null);
-                            }
-                        } catch (IllegalArgumentException e) {
-                            ToolboxPlugin.log(e.getMessage());
-                        } catch (IndexOutOfBoundsException e) {
-                            ToolboxPlugin.log(e.getMessage());
-                        } catch (IOException e) {
-                            ToolboxPlugin.log(e.getMessage());
-                        }
+                        postProcessing((GridCoverage2D) val, outputParams.get(entrySet.getKey()),
+                                resultInfo.get(entrySet.getKey()).metadata, monitor);
                     } else {
                         postProcessing(val);
                     }
@@ -192,7 +187,7 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                 }
             }
             monitor.worked(increment);
-        } catch (ProcessException e) {
+        } catch (Exception e) {
             // always show log
             boolean showLog = ToolboxView.getShowLog();
             ToolboxView.setShowLog(true);
@@ -202,6 +197,90 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
             ToolboxPlugin.log(String.format(Messages.Task_Completed, windowTitle));
             monitor.done();
         }
+    }
+
+    private void postProcessing(GridCoverage2D source, Object outputPath,
+            Map<String, Object> outputMeta, IProgressMonitor monitor) {
+        try {
+            monitor.setTaskName(Messages.Task_WritingResult);
+            File outputFile = new File(outputPath.toString());
+            GridCoverage2D output = MapUtils.saveAsGeoTiff(source, outputFile);
+
+            if (ToolboxView.getAddLayerAutomatically()) {
+                monitor.setTaskName(Messages.Task_AddingLayer);
+
+                // create default style
+                Style style = null;
+
+                Object minValue = source.getProperty("Minimum"); //$NON-NLS-1$
+                Object maxValue = source.getProperty("Maximum"); //$NON-NLS-1$
+                int numBands = source.getNumSampleDimensions();
+
+                if (maxValue == null || minValue == null || numBands > 1) {
+                    SSStyleBuilder builder = new SSStyleBuilder(null);
+                    style = builder.getDefaultGridCoverageStyle(source);
+                } else {
+                    Double noData = RasterHelper.getNoDataValue(source);
+                    style = buildCoverageStyle((Double) minValue, (Double) maxValue, noData);
+                }
+
+                MapUtils.addGridCoverageToMap(map, output, outputFile, style);
+            }
+        } catch (IllegalArgumentException e) {
+            ToolboxPlugin.log(e.getMessage());
+        } catch (IndexOutOfBoundsException e) {
+            ToolboxPlugin.log(e.getMessage());
+        } catch (IOException e) {
+            ToolboxPlugin.log(e.getMessage());
+        }
+    }
+
+    private Style buildCoverageStyle(double minValue, double maxValue, Double noData) {
+        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+        StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
+
+        int numClasses = 7;
+
+        double[] breaks = new double[numClasses + 1];
+        double interval = (maxValue - minValue) / numClasses;
+
+        ColorBrewer brewer = ColorBrewer.instance();
+        BrewerPalette brewerPalette = brewer.getPalette("RdYlGn"); //$NON-NLS-1$
+
+        Color[] colors = brewerPalette.getColors(breaks.length);
+        Collections.reverse(Arrays.asList(colors)); // reverse
+
+        StyleBuilder builder = new StyleBuilder();
+
+        ColorMapEntry nodataEntry = sf.createColorMapEntry();
+        nodataEntry.setQuantity(ff.literal(noData));
+        nodataEntry.setColor(builder.colorExpression(new java.awt.Color(255, 255, 255, 0)));
+        nodataEntry.setOpacity(ff.literal(0.0f));
+        nodataEntry.setLabel("No Data"); //$NON-NLS-1$
+
+        ColorMap colorMap = sf.createColorMap();
+        colorMap.setType(ColorMap.TYPE_RAMP);
+
+        if (noData < breaks[0]) {
+            colorMap.addColorMapEntry(nodataEntry);
+        }
+
+        for (int i = 0; i < breaks.length; i++) {
+            breaks[i] = minValue + (i * interval);
+
+            ColorMapEntry entry = sf.createColorMapEntry();
+            entry.setQuantity(builder.literalExpression(breaks[i]));
+            entry.setColor(builder.colorExpression(colors[i]));
+            entry.setOpacity(builder.literalExpression(colors[i].getAlpha() / 255.0));
+
+            colorMap.addColorMapEntry(entry);
+        }
+
+        if (noData > breaks[breaks.length - 1]) {
+            colorMap.addColorMapEntry(nodataEntry);
+        }
+
+        return builder.createStyle(builder.createRasterSymbolizer(colorMap, 1.0d));
     }
 
     private void postProcessing(Object value) {

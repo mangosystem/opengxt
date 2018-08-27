@@ -622,6 +622,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         TreeParent mathTool = new TreeParent(Messages.ToolboxView_RasterMath, null, null);
         generalTool.addChild(mathTool);
         buildTool(mathTool, "org.geotools.process.spatialstatistics.RasterMathProcessFactory");
+        buildTool(mathTool, "org.geotools.process.spatialstatistics.RasterNDVIProcessFactory");
 
         // Density
         TreeParent densityTool = new TreeParent(Messages.ToolboxView_Density, null, null);

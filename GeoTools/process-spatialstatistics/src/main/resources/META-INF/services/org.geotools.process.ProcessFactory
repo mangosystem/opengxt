@@ -172,3 +172,5 @@ org.geotools.process.spatialstatistics.RasterMirrorProcessFactory
 org.geotools.process.spatialstatistics.RasterRescaleProcessFactory
 org.geotools.process.spatialstatistics.RasterRotateProcessFactory
 org.geotools.process.spatialstatistics.RasterShiftProcessFactory
+
+org.geotools.process.spatialstatistics.RasterNDVIProcessFactory

@@ -46,6 +46,7 @@ public class RasterClipOperation extends RasterProcessingOperation {
     public GridCoverage2D execute(GridCoverage2D inputCoverage, Geometry cropShape) {
         // must be same CRS!
         GridCoverage2D clipped = null;
+        cropShape = transformGeometry(cropShape, inputCoverage.getCoordinateReferenceSystem());
 
         ReferencedEnvelope gridExtent = new ReferencedEnvelope(inputCoverage.getEnvelope());
         RasterCropOperation cropOp = new RasterCropOperation();

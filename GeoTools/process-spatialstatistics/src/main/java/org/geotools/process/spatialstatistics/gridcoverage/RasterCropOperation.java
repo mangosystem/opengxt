@@ -51,6 +51,8 @@ public class RasterCropOperation extends RasterProcessingOperation {
     public GridCoverage2D execute(GridCoverage2D inputCoverage, Geometry cropShape) {
         // get the bounds
         CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
+
+        cropShape = transformGeometry(cropShape, crs);
         ReferencedEnvelope envelope = new ReferencedEnvelope(cropShape.getEnvelopeInternal(), crs);
 
         return execute(inputCoverage, cropShape, envelope);
@@ -74,6 +76,7 @@ public class RasterCropOperation extends RasterProcessingOperation {
     public GridCoverage2D execute(GridCoverage2D inputCoverage, Geometry cropShape,
             ReferencedEnvelope extent) {
         GeneralEnvelope bounds = new GeneralEnvelope(extent);
+        cropShape = transformGeometry(cropShape, inputCoverage.getCoordinateReferenceSystem());
 
         // force it to a collection if necessary
         GeometryCollection roi = null;

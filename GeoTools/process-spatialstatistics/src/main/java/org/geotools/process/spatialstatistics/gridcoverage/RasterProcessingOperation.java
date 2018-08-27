@@ -57,13 +57,16 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.process.spatialstatistics.storage.FeatureInserter;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.storage.RasterExportOperation;
+import org.geotools.referencing.CRS;
 import org.geotools.resources.i18n.Vocabulary;
 import org.geotools.resources.i18n.VocabularyKeys;
 import org.geotools.util.NullProgressListener;
@@ -72,8 +75,14 @@ import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.geometry.MismatchedDimensionException;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.ProgressListener;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 /**
@@ -588,5 +597,31 @@ public abstract class RasterProcessingOperation {
         schema = FeatureTypes.add(schema, typeName, Double.class);
         schema = FeatureTypes.add(schema, "Value", Double.class);
         return new SimpleFeatureBuilder(schema).buildFeature(null);
+    }
+
+    protected Geometry transformGeometry(Geometry input, CoordinateReferenceSystem targetCRS) {
+        Geometry output = input;
+        Object userData = input.getUserData();
+
+        if (userData != null && userData instanceof CoordinateReferenceSystem) {
+            CoordinateReferenceSystem sourceCRS = (CoordinateReferenceSystem) userData;
+            if (!CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
+                try {
+                    MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, true);
+                    output = JTS.transform(input, transform);
+                    output.setUserData(targetCRS);
+                } catch (FactoryException e) {
+                    throw new ProcessException(e);
+                } catch (MismatchedDimensionException e) {
+                    throw new ProcessException(e);
+                } catch (TransformException e) {
+                    throw new ProcessException(e);
+                }
+            }
+        }
+
+        output.setUserData(targetCRS);
+
+        return output;
     }
 }

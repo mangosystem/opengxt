@@ -27,7 +27,12 @@ any major spatial data source using open standards.
   * Restart GeoServer
 
 ### uDig Processing Toolbox Plugin Installation
-* Download and install uDig 2.0-SNAPSHOT (GeoTools 14.1)
+* Visit [uDig Download Site](http://udig.refractions.net/download/)
+  * Download and install official uDig Release 2.0.0 (GeoTools 14.1)
+
+* Or
+
+* Download and install customized uDig 2.0-SNAPSHOT (GeoTools 14.1)
   * Windows [x86_Installer](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86.exe)
   * Windows [x86_zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86.zip)
   * Windows [x86_64 Installer](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.exe)

@@ -439,6 +439,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(importTool, Messages.TextfileToPointDialog_title, "TextfileToPointDialog");
         buildTool(importTool, Messages.ExcelToPointDialog_title, "ExcelToPointDialog");
         buildTool(importTool, Messages.GeometryToFeaturesDialog_title, "GeometryToFeaturesDialog");
+        buildTool(importTool, "org.geotools.process.spatialstatistics.GeometryToFeaturesProcessFactory");
 
         // export
         TreeParent exportTool = new TreeParent(Messages.ToolboxView_Export, null, null);

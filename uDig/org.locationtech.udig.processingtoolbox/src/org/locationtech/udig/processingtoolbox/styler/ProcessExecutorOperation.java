@@ -15,12 +15,12 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -216,12 +216,13 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
                 Object maxValue = source.getProperty("Maximum"); //$NON-NLS-1$
                 int numBands = source.getNumSampleDimensions();
 
-                if (maxValue == null || minValue == null || numBands > 1) {
-                    SSStyleBuilder builder = new SSStyleBuilder(null);
-                    style = builder.getDefaultGridCoverageStyle(source);
-                } else {
+                if (minValue != null && minValue instanceof Number && maxValue != null
+                        && maxValue instanceof Number && numBands == 1) {
                     Double noData = RasterHelper.getNoDataValue(source);
                     style = buildCoverageStyle((Double) minValue, (Double) maxValue, noData);
+                } else {
+                    SSStyleBuilder builder = new SSStyleBuilder(null);
+                    style = builder.getDefaultGridCoverageStyle(source);
                 }
 
                 MapUtils.addGridCoverageToMap(map, output, outputFile, style);
@@ -239,16 +240,20 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
         FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
         StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
 
-        int numClasses = 7;
+        @SuppressWarnings("nls")
+        String[] palettes = { "RdYlGn", "YlOrRd", "YlOrBr", "Oranges", "YlGnBu", "Spectral" };
+
+        int numClasses = 8;
 
         double[] breaks = new double[numClasses + 1];
         double interval = (maxValue - minValue) / numClasses;
 
         ColorBrewer brewer = ColorBrewer.instance();
-        BrewerPalette brewerPalette = brewer.getPalette("RdYlGn"); //$NON-NLS-1$
+        Random random = new Random();
+        BrewerPalette brewerPalette = brewer.getPalette(palettes[random.nextInt(palettes.length)]);
 
         Color[] colors = brewerPalette.getColors(breaks.length);
-        Collections.reverse(Arrays.asList(colors)); // reverse
+        // Collections.reverse(Arrays.asList(colors)); // reverse
 
         StyleBuilder builder = new StyleBuilder();
 

@@ -606,6 +606,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByExtentProcessFactory");
         buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByGeometryProcessFactory");
         buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByCircleProcessFactory");
+        buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByFeaturesProcessFactory");
 
         // Conditional Tool
         TreeParent conditionalTool = new TreeParent(Messages.ToolboxView_Conditional, null, null);

@@ -11,7 +11,6 @@ import javax.xml.namespace.QName;
 
 import org.geoserver.config.util.SecureXStream;
 import org.geoserver.wps.ppio.XStreamPPIO;
-import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterDescribeOperation.BandStatistics;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterDescribeOperation.Extent;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterDescribeOperation.RasterDescribeResult;
@@ -58,7 +57,7 @@ public class RasterDescribeResultPPIO extends XStreamPPIO {
         xstream.alias("RasterDescription", RasterDescribeResult.class);
         xstream.alias("Band", BandStatistics.class);
         xstream.alias("Extent", Extent.class);
-        xstream.addImplicitCollection(HistogramProcessResult.class, "bands");
+        xstream.addImplicitCollection(RasterDescribeResult.class, "bands");
 
         return xstream;
     }

@@ -24,6 +24,9 @@ import org.geotools.process.spatialstatistics.JoinCountStatisticsProcess.JoinCou
 import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
 import org.geotools.process.spatialstatistics.core.HistogramProcessResult.HistogramItem;
+import org.geotools.process.spatialstatistics.gridcoverage.RasterDescribeOperation.BandStatistics;
+import org.geotools.process.spatialstatistics.gridcoverage.RasterDescribeOperation.Extent;
+import org.geotools.process.spatialstatistics.gridcoverage.RasterDescribeOperation.RasterDescribeResult;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult.DataStatisticsItem;
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
@@ -107,6 +110,14 @@ public class HtmlWriter {
 
     public void writeH2(String value) {
         sb.append("<h2>" + value + "</h2>").append(NEWLINE);
+    }
+
+    public void writeH3(String value) {
+        sb.append("<h3>" + value + "</h3>").append(NEWLINE);
+    }
+
+    public void writePre(String value) {
+        sb.append("<pre>" + value + "</pre>").append(NEWLINE);
     }
 
     public void write(String value) {
@@ -714,6 +725,115 @@ public class HtmlWriter {
                     + "</td></tr>");
         }
         write("</table>");
+    }
+
+    public void writeRasterDescribeProcess(RasterDescribeResult value) {
+        writeH1("Raster Description");
+
+        // 1. General
+        writeH2("General");
+        write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+        // header
+        write("<colgroup>");
+        write("<col width=\"60%\" />");
+        write("<col width=\"40%\" />");
+        write("</colgroup>");
+
+        write("<tr bgcolor=\"#cccccc\">");
+        write("<td><strong>Category</strong></td>");
+        write("<td><strong>Value</strong></td>");
+        write("</tr>");
+
+        // body
+        write("<tr><td>Name</td><td>" + value.getName() + "</td></tr>");
+        write("<tr><td>Columns</td><td>" + value.getColumns() + "</td></tr>");
+        write("<tr><td>Rows</td><td>" + value.getRows() + "</td></tr>");
+        write("<tr><td>Number of Bands</td><td>" + value.getNumberOfBands() + "</td></tr>");
+        write("<tr><td>X Cell Size</td><td>" + format(value.getCellSizeX()) + "</td></tr>");
+        write("<tr><td>Y Cell Size</td><td>" + format(value.getCellSizeY()) + "</td></tr>");
+        write("<tr><td>Pixel Type</td><td>" + value.getPixelType() + "</td></tr>");
+        write("<tr><td>Pixel Depth</td><td>" + value.getPixelDepth() + "</td></tr>");
+        write("<tr><td>NoData</td><td>" + value.getNoData() + "</td></tr>");
+        write("</table>");
+
+        // 2. Extent
+        writeH2("Extent");
+        write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+        // header
+        write("<colgroup>");
+        write("<col width=\"60%\" />");
+        write("<col width=\"40%\" />");
+        write("</colgroup>");
+
+        write("<tr bgcolor=\"#cccccc\">");
+        write("<td><strong>Category</strong></td>");
+        write("<td><strong>Value</strong></td>");
+        write("</tr>");
+
+        // body
+        Extent extent = value.getExtent();
+        write("<tr><td>X Min</td><td>" + format(extent.getxMin()) + "</td></tr>");
+        write("<tr><td>Y Min</td><td>" + format(extent.getyMin()) + "</td></tr>");
+        write("<tr><td>X Max</td><td>" + format(extent.getxMax()) + "</td></tr>");
+        write("<tr><td>Y Max</td><td>" + format(extent.getyMax()) + "</td></tr>");
+        write("</table>");
+
+        // 3. Band
+        List<BandStatistics> bands = value.getBands();
+        if (bands != null && bands.size() > 0) {
+            writeH2("Bands");
+            for (int index = 0; index < bands.size(); index++) {
+                BandStatistics band = bands.get(index);
+                
+                writeH3("Band " + band.getBandIndex());
+                write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+                // header
+                write("<colgroup>");
+                write("<col width=\"60%\" />");
+                write("<col width=\"40%\" />");
+                write("</colgroup>");
+
+                write("<tr bgcolor=\"#cccccc\">");
+                write("<td><strong>Category</strong></td>");
+                write("<td><strong>Value</strong></td>");
+                write("</tr>");
+
+                // body
+                write("<tr><td>Band Index</td><td>" + band.getBandIndex() + "</td></tr>");
+                write("<tr><td>Band Name</td><td>" + band.getDescription() + "</td></tr>");
+                write("<tr><td>Count</td><td>" + band.getCount() + "</td></tr>");
+                write("<tr><td>Minimum</td><td>" + format(band.getMinimun()) + "</td></tr>");
+                write("<tr><td>Maximum</td><td>" + format(band.getMaximin()) + "</td></tr>");
+                write("<tr><td>Mean</td><td>" + format(band.getMean()) + "</td></tr>");
+                write("<tr><td>Sum</td><td>" + format(band.getSum()) + "</td></tr>");
+                write("<tr><td>Variance</td><td>" + format(band.getVariance()) + "</td></tr>");
+                write("<tr><td>Standard Deviation</td><td>" + format(band.getStandardDeviation()) + "</td></tr>");
+                write("<tr><td>NoData</td><td>" + band.getNoData() + "</td></tr>");
+                write("</table>");
+            }
+        }
+
+        // 4. SpatialReference
+        writeH2("Coordinate Reference System");
+        
+        write("<table width=\"100%\" border=\"1\"  rules=\"none\" frame=\"hsides\">");
+
+        // header
+        write("<colgroup>");
+        write("<col width=\"100%\" />");
+        write("</colgroup>");
+
+        write("<tr bgcolor=\"#cccccc\">");
+        write("<td><strong>Well Known Text (WKT)</strong></td>");
+        write("</tr>");
+
+        // body
+        write("<tr><td><pre>" + value.getSpatialReference() + "</pre></td></tr>");
+        write("</table>");
+
     }
 
     private String format(double value) {

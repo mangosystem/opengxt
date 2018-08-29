@@ -583,6 +583,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         // Descriptive Statistics
         TreeParent desTools = new TreeParent(Messages.ToolboxView_DescriptiveStatistics, null, null);
         generalTool.addChild(desTools);
+        buildTool(desTools, "org.geotools.process.spatialstatistics.RasterDescribeProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.StatisticsGridCoverageProcessFactory");
         buildTool(desTools, "org.geotools.process.spatialstatistics.HistogramGridCoverageProcessFactory");
 

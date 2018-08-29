@@ -18,6 +18,7 @@
     <bean id="HistogramGridCoveragePPIO" class="org.geoserver.wps.spatialstatistics.ppio.HistogramGridCoveragePPIO" />
     <bean id="QuadratResultPPIO" class="org.geoserver.wps.spatialstatistics.ppio.QuadratResultPPIO" />
     <bean id="MapImagePPIO" class="org.geoserver.wps.spatialstatistics.ppio.MapImagePPIO" />
+    <bean id="RasterDescribeResultPPIO" class="org.geoserver.wps.spatialstatistics.ppio.RasterDescribeResultPPIO" />
 
     <!-- native format support --> 
     <bean id="FeatureCollectionGML311PPIO" class="org.geoserver.wps.spatialstatistics.ppio.FeatureCollectionGML311PPIO" />

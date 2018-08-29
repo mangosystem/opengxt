@@ -53,6 +53,7 @@ import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.core.FormatUtils;
 import org.geotools.process.spatialstatistics.core.HistogramProcessResult;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.gridcoverage.RasterDescribeOperation.RasterDescribeResult;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
 import org.geotools.process.spatialstatistics.operations.PearsonOperation.PearsonResult;
@@ -316,10 +317,12 @@ public class ProcessExecutorOperation implements IRunnableWithProgress {
             writer.writeHistogramProcess((HistogramProcessResult) value);
         } else if (value instanceof QuadratResult) {
             writer.writeQuadratProcess((QuadratResult) value);
+        } else if (value instanceof RasterDescribeResult) {
+            writer.writeRasterDescribeProcess((RasterDescribeResult) value);
         } else if (Number.class.isAssignableFrom(value.getClass())) {
             writer.writeH2(FormatUtils.format(Double.parseDouble(value.toString())));
         } else {
-            writer.writeH2(value.toString());
+            writer.writePre(value.toString());
         }
         outputBuffer.append(writer.getHTML());
     }

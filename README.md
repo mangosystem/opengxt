@@ -27,20 +27,21 @@ any major spatial data source using open standards.
   * Restart GeoServer
 
 ### uDig Processing Toolbox Plugin Installation
-* Visit [uDig Download Site](http://udig.refractions.net/download/)
-  * 1. Download and install official uDig Release 2.0.0 (GeoTools 14.1)
-    * Visit http://udig.refractions.net/download/
+* Official uDig 2.0.0
+  * Recommended!
+    * Visit [uDig Download Site](http://udig.refractions.net/download/)
     * Download  Release 2.0.0
     * Install uDig
 
-    * Visit https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/
-    * Download latest version : ex> org.locationtech.udig.processingtoolbox_2.0.0.201808292219.jar
-    * Copy plugin file to [udig-2.0.0.win32.win32.x86_64\udig\plugins] folder
+    * Visit [Processing Toolbox Plugin Site] (https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/)
+    * Download latest version : ex> org.locationtech.udig.processingtoolbox_2.0.0.xxxxxxxxxx.jar
+    * Copy plugin file to [uDig Installed Folder\udig\plugins] folder
     * Restart uDig
 
-  * Or
+* Or
 
-  * 2. Download and install customized uDig 2.0-SNAPSHOT (GeoTools 14.1)
+* Customized uDig 2.0.0-SNAPSHOT
+  * Will be deprecated in 2018!
     * Windows [x86_Installer](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86.exe)
     * Windows [x86_zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86.zip)
     * Windows [x86_64 Installer](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.exe)

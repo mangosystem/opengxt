@@ -49,16 +49,16 @@ any major spatial data source using open standards.
     * Linux [x86_64 zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.linux.gtk.x86_64.zip)
     * Mac OS/X [x86_64 zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.macosx.cocoa.x86_64.zip)
   
-    * Start uDig application
-    * Choose Help -> Find and Install... from the menu bar to open up the Install/Update window
-    * Select Search for new features to install option and press Next.
-    * Click on the New Remote Site button and enter the location and name for the site
+    * Install uDig and start uDig application
+    * Choose [Help] -> [Find and Install...] from the menu bar to open up the Install/Update window
+    * Select [Search for new features] to install option and press [Next].
+    * Click on the [New Remote Site] button and enter the location and name for the site
     ```
         Name: Spatial Statistics Toolbox
         URL : http://www.mangosystem.com:8080/s2toolbox_updates
     ```
-    * Press OK and Finish
-    * Install and restart uDig application
+    * Press [OK] and Finish
+    * Install plugin and restart uDig
 
 ### Manual & Documents
 * uDig Processing Toolbox Manual

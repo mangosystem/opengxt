@@ -33,7 +33,7 @@ any major spatial data source using open standards.
     * Download  Release 2.0.0
     * Install uDig
 
-    * Visit [Processing Toolbox Plugin Site] (https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/)
+    * Visit [Processing Toolbox Plugin Site](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/)
     * Download latest version : ex> org.locationtech.udig.processingtoolbox_2.0.0.xxxxxxxxxx.jar
     * Copy plugin file to [uDig Installed Folder\udig\plugins] folder
     * Restart uDig

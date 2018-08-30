@@ -29,27 +29,35 @@ any major spatial data source using open standards.
 ### uDig Processing Toolbox Plugin Installation
 * Visit [uDig Download Site](http://udig.refractions.net/download/)
   * Download and install official uDig Release 2.0.0 (GeoTools 14.1)
+    * Visit http://udig.refractions.net/download/
+    * Download  Release 2.0.0
+    * Install uDig
+
+    * Visit https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/
+    * Download latest version : ex> org.locationtech.udig.processingtoolbox_2.0.0.201808292219.jar
+    * Copy plugin file to [udig-2.0.0.win32.win32.x86_64\udig\plugins] folder
+    * Restart uDig
 
 * Or
 
 * Download and install customized uDig 2.0-SNAPSHOT (GeoTools 14.1)
-  * Windows [x86_Installer](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86.exe)
-  * Windows [x86_zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86.zip)
-  * Windows [x86_64 Installer](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.exe)
-  * Windows [x86_64 zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.zip)
-  * Linux [x86_64 zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.linux.gtk.x86_64.zip)
-  * Mac OS/X [x86_64 zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.macosx.cocoa.x86_64.zip)
-* Start uDig application
-* Choose Help -> Find and Install... from the menu bar to open up the Install/Update window
-* Select Search for new features to install option and press Next.
-* Click on the New Remote Site button and enter the location and name for the site
-```
-    Name: Spatial Statistics Toolbox
-    URL : http://www.mangosystem.com:8080/s2toolbox_updates
-```
-* Press OK and Finish
-* Install and restart uDig application
-* Enjoy!
+    * Windows [x86_Installer](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86.exe)
+    * Windows [x86_zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86.zip)
+    * Windows [x86_64 Installer](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.exe)
+    * Windows [x86_64 zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.win32.win32.x86_64.zip)
+    * Linux [x86_64 zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.linux.gtk.x86_64.zip)
+    * Mac OS/X [x86_64 zip](https://sourceforge.net/projects/mango-spatialstatistics/files/uDig/2.0.0/udig-2.0.0-SNAPSHOT.macosx.cocoa.x86_64.zip)
+  
+  * Start uDig application
+  * Choose Help -> Find and Install... from the menu bar to open up the Install/Update window
+  * Select Search for new features to install option and press Next.
+  * Click on the New Remote Site button and enter the location and name for the site
+  ```
+      Name: Spatial Statistics Toolbox
+      URL : http://www.mangosystem.com:8080/s2toolbox_updates
+  ```
+  * Press OK and Finish
+  * Install and restart uDig application
 
 ### Manual & Documents
 * uDig Processing Toolbox Manual

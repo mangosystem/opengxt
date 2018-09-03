@@ -52,10 +52,16 @@ public class RasterToPointProcess extends AbstractStatisticsProcess {
 
     public static SimpleFeatureCollection process(GridCoverage2D inputCoverage, Integer bandIndex,
             String valueField, ProgressListener monitor) {
+        return process(inputCoverage, bandIndex, valueField, Boolean.FALSE, monitor);
+    }
+
+    public static SimpleFeatureCollection process(GridCoverage2D inputCoverage, Integer bandIndex,
+            String valueField, Boolean retainNoData, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(RasterToPointProcessFactory.inputCoverage.key, inputCoverage);
         map.put(RasterToPointProcessFactory.bandIndex.key, bandIndex);
         map.put(RasterToPointProcessFactory.valueField.key, valueField);
+        map.put(RasterToPointProcessFactory.retainNoData.key, retainNoData);
 
         Process process = new RasterToPointProcess(null);
         Map<String, Object> resultMap;
@@ -75,19 +81,23 @@ public class RasterToPointProcess extends AbstractStatisticsProcess {
             throws ProcessException {
         GridCoverage2D inputCoverage = (GridCoverage2D) Params.getValue(input,
                 RasterToPointProcessFactory.inputCoverage, null);
+        if (inputCoverage == null) {
+            throw new NullPointerException("inputCoverage parameter required");
+        }
+
         Integer bandIndex = (Integer) Params.getValue(input, RasterToPointProcessFactory.bandIndex,
                 RasterToPointProcessFactory.bandIndex.sample);
         String valueField = (String) Params.getValue(input, RasterToPointProcessFactory.valueField,
                 RasterToPointProcessFactory.valueField.sample);
-        if (inputCoverage == null) {
-            throw new NullPointerException("inputCoverage parameter required");
-        }
+        Boolean retainNoData = (Boolean) Params.getValue(input,
+                RasterToPointProcessFactory.retainNoData,
+                RasterToPointProcessFactory.retainNoData.sample);
 
         // start process
         SimpleFeatureCollection resultFc = null;
         try {
             RasterToPointOperation process = new RasterToPointOperation();
-            resultFc = process.execute(inputCoverage, bandIndex, valueField);
+            resultFc = process.execute(inputCoverage, bandIndex, valueField, retainNoData);
         } catch (IOException e) {
             throw new ProcessException(e);
         }

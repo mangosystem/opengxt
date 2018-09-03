@@ -60,6 +60,11 @@ public class RasterToPointOperation extends GeneralOperation {
 
     public SimpleFeatureCollection execute(GridCoverage2D inputGc, Integer bandIndex,
             String valueField) throws IOException {
+        return execute(inputGc, bandIndex, VALUE_FIELD, Boolean.FALSE);
+    }
+
+    public SimpleFeatureCollection execute(GridCoverage2D inputGc, Integer bandIndex,
+            String valueField, Boolean retainNoData) throws IOException {
         CoordinateReferenceSystem crs = inputGc.getCoordinateReferenceSystem();
         String name = inputGc.getName().toString();
         SimpleFeatureType featureType = FeatureTypes.getDefaultType(name, Point.class, crs);
@@ -96,27 +101,27 @@ public class RasterToPointOperation extends GeneralOperation {
                 int column = 0;
                 inputIter.startPixels();
                 while (!inputIter.finishedPixels()) {
-                    final double curVal = inputIter.getSampleDouble(bandIndex);
-                    if (!SSUtils.compareDouble(curVal, noData)) {
+                    double curVal = inputIter.getSampleDouble(bandIndex);
+                    if (retainNoData) {
                         Coordinate coord = trans.gridToWorldCoordinate(column, row);
 
                         // create feature and set geometry
                         SimpleFeature newFeature = featureWriter.buildFeature();
                         newFeature.setDefaultGeometry(gf.createPoint(coord));
-
-                        switch (pixelType) {
-                        case BYTE:
-                        case SHORT:
-                        case INTEGER:
-                            newFeature.setAttribute(valueField, (int) curVal);
-                            break;
-                        case FLOAT:
-                        case DOUBLE:
-                            newFeature.setAttribute(valueField, curVal);
-                            break;
-                        }
+                        newFeature.setAttribute(valueField, getPixelValue(curVal, pixelType));
 
                         featureWriter.write(newFeature);
+                    } else {
+                        if (!SSUtils.compareDouble(curVal, noData)) {
+                            Coordinate coord = trans.gridToWorldCoordinate(column, row);
+
+                            // create feature and set geometry
+                            SimpleFeature newFeature = featureWriter.buildFeature();
+                            newFeature.setDefaultGeometry(gf.createPoint(coord));
+                            newFeature.setAttribute(valueField, getPixelValue(curVal, pixelType));
+
+                            featureWriter.write(newFeature);
+                        }
                     }
 
                     column++;
@@ -132,5 +137,19 @@ public class RasterToPointOperation extends GeneralOperation {
         }
 
         return featureWriter.getFeatureCollection();
+    }
+
+    private Object getPixelValue(double curVal, RasterPixelType pixelType) {
+        switch (pixelType) {
+        case BYTE:
+        case SHORT:
+        case INTEGER:
+            return (int) curVal;
+        case FLOAT:
+        case DOUBLE:
+            return curVal;
+        }
+
+        return curVal;
     }
 }

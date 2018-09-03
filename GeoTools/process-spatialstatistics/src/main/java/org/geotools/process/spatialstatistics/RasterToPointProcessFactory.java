@@ -44,7 +44,7 @@ public class RasterToPointProcessFactory extends SpatialStatisticsProcessFactory
     private static final String PROCESS_NAME = "RasterToPoint";
 
     /*
-     * RasterToPoint(GridCoverage2D inputCoverage, Integer bandIndex, String valueField): SimpleFeatureCollection
+     * RasterToPoint(GridCoverage2D inputCoverage, Integer bandIndex, String valueField, Boolean retainNoData): SimpleFeatureCollection
      */
 
     public RasterToPointProcessFactory() {
@@ -83,12 +83,18 @@ public class RasterToPointProcessFactory extends SpatialStatisticsProcessFactory
             String.class, getResource("RasterToPoint.valueField.title"),
             getResource("RasterToPoint.valueField.description"), false, 0, 1, "value", null);
 
+    /** retainNoData */
+    public static final Parameter<Boolean> retainNoData = new Parameter<Boolean>("retainNoData",
+            Boolean.class, getResource("RasterToPoint.retainNoData.title"),
+            getResource("RasterToPoint.retainNoData.description"), false, 0, 1, Boolean.FALSE, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputCoverage.key, inputCoverage);
         parameterInfo.put(bandIndex.key, bandIndex);
         parameterInfo.put(valueField.key, valueField);
+        parameterInfo.put(retainNoData.key, retainNoData);
         return parameterInfo;
     }
 

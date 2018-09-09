@@ -113,7 +113,8 @@ public class RasterPointDensityOperation extends RasterDensityOperation {
             int radius = (int) rnh.getRadius();
             if (rnh.getNeighborUnits() == NeighborUnits.MAP) {
                 // convert map unit to cell unit
-                radius = (int) Math.floor(rnh.getRadius() / CellSize);
+                double cellSize = Math.max(CellSizeX, CellSizeY);
+                radius = (int) Math.floor(rnh.getRadius() / cellSize);
             }
 
             // Creates a circular kernel with width 2*radius + 1
@@ -124,8 +125,8 @@ public class RasterPointDensityOperation extends RasterDensityOperation {
             int rh = (int) rnh.getHeight();
             if (rnh.getNeighborUnits() == NeighborUnits.MAP) {
                 // convert map unit to cell unit
-                rw = (int) Math.floor(rnh.getWidth() / CellSize);
-                rh = (int) Math.floor(rnh.getHeight() / CellSize);
+                rw = (int) Math.floor(rnh.getWidth() / CellSizeX);
+                rh = (int) Math.floor(rnh.getHeight() / CellSizeY);
             }
 
             // Creates a rectangular kernel where all elements have value 1.0.
@@ -134,7 +135,7 @@ public class RasterPointDensityOperation extends RasterDensityOperation {
         }
 
         // calculate area
-        final double cellArea = CellSize * CellSize;
+        final double cellArea = CellSizeX * CellSizeY;
         final float[] data = kernel.getKernelData();
         int valid = 0;
         for (int index = 0; index < data.length; index++) {

@@ -26,7 +26,6 @@ import javax.media.jai.iterator.WritableRectIter;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.factory.GeoTools;
 import org.geotools.geometry.jts.JTSFactoryFinder;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.logging.Logging;
@@ -60,10 +59,7 @@ public class RasterMathOperation extends RasterProcessingOperation {
 
         PlanarImage inputImage = (PlanarImage) inputGc.getRenderedImage();
         this.NoData = RasterHelper.getNoDataValue(inputGc);
-        double cellSize = RasterHelper.getCellSize(inputGc);
-
-        ReferencedEnvelope extent = new ReferencedEnvelope(inputGc.getEnvelope());
-        GridTransformer trans = new GridTransformer(extent, cellSize);
+        GridTransformer trans = new GridTransformer(inputGc.getGridGeometry());
 
         RectIter inputIter = RectIterFactory.create(inputImage, inputImage.getBounds());
         WritableRectIter writerIter = RectIterFactory.createWritable(outputImage,

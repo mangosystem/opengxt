@@ -51,10 +51,21 @@ public class RasterResampleOperation extends GeneralOperation {
             inputCoverage = process.execute(inputCoverage, forcedCRS);
         }
 
-        return execute(inputCoverage, cellSize, resamplingType);
+        return execute(inputCoverage, cellSize, cellSize, resamplingType);
     }
 
-    public GridCoverage2D execute(GridCoverage2D inputCoverage, double cellSize,
+    public GridCoverage2D execute(GridCoverage2D inputCoverage,
+            CoordinateReferenceSystem forcedCRS, double cellSizeX, double cellSizeY,
+            ResampleType resamplingType) throws ProcessException {
+        if (forcedCRS != null) {
+            RasterForceCRSOperation process = new RasterForceCRSOperation();
+            inputCoverage = process.execute(inputCoverage, forcedCRS);
+        }
+
+        return execute(inputCoverage, cellSizeX, cellSizeY, resamplingType);
+    }
+
+    public GridCoverage2D execute(GridCoverage2D inputCoverage, double cellSizeX, double cellSizeY,
             ResampleType resamplingType) throws ProcessException {
         Interpolation interpolation = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
         switch (resamplingType) {
@@ -72,9 +83,9 @@ public class RasterResampleOperation extends GeneralOperation {
         // recalculate gridenvelope
         CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
         ReferencedEnvelope extent = RasterHelper.getResolvedEnvelope(new ReferencedEnvelope(
-                inputCoverage.getEnvelope()), cellSize);
+                inputCoverage.getEnvelope()), cellSizeX, cellSizeY);
 
-        Dimension dim = RasterHelper.getDimension(extent, cellSize);
+        Dimension dim = RasterHelper.getDimension(extent, cellSizeX, cellSizeY);
         GridEnvelope2D gridRange = new GridEnvelope2D(0, 0, dim.width, dim.height);
         GridGeometry2D gridGeometry = new GridGeometry2D(gridRange, extent);
 

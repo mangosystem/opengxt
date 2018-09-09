@@ -106,7 +106,8 @@ public class PointsToRasterProcess extends AbstractStatisticsProcess {
 
         PointsToRasterOperation process = new PointsToRasterOperation();
         process.getRasterEnvironment().setExtent(boundingBox);
-        process.getRasterEnvironment().setCellSize(cellSize);
+        process.getRasterEnvironment().setCellSizeX(cellSize);
+        process.getRasterEnvironment().setCellSizeY(cellSize);
 
         GridCoverage2D resultGc = process.execute(inputFeatures, inputField, cellAssignment);
         // end process

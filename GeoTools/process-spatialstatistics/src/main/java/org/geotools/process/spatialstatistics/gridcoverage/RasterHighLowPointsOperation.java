@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
+import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ import javax.media.jai.iterator.RectIter;
 import javax.media.jai.iterator.RectIterFactory;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -74,12 +76,17 @@ public class RasterHighLowPointsOperation extends GeneralOperation {
 
         // 1. find points
         final double noData = RasterHelper.getNoDataValue(coverage);
-        final double cellSize = RasterHelper.getCellSize(coverage);
         PlanarImage inputImage = (PlanarImage) coverage.getRenderedImage();
         RectIter readIter = RectIterFactory.create(inputImage, inputImage.getBounds());
 
+        GridGeometry2D gridGeometry2D = coverage.getGridGeometry();
+        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+        double cellSizeX = Math.abs(gridToWorld.getScaleX());
+        double cellSizeY = Math.abs(gridToWorld.getScaleY());
+
         ReferencedEnvelope extent = new ReferencedEnvelope(coverage.getEnvelope());
-        GridTransformer trans = new GridTransformer(extent, cellSize);
+        GridTransformer trans = new GridTransformer(extent, cellSizeX, cellSizeY);
 
         HighLowPosition high = new HighLowPosition(Double.MIN_VALUE);
         HighLowPosition low = new HighLowPosition(Double.MAX_VALUE);

@@ -89,7 +89,8 @@ public class RasterRadialLOSProcessFactory extends SpatialStatisticsProcessFacto
     /** radius */
     public static final Parameter<Double> radius = new Parameter<Double>("radius", Double.class,
             getResource("RadialLineOfSight.radius.title"),
-            getResource("RadialLineOfSight.radius.description"), true, 1, 1, null, null);
+            getResource("RadialLineOfSight.radius.description"), true, 1, 1, Double.valueOf(0d),
+            null);
 
     /** sides */
     public static final Parameter<Integer> sides = new Parameter<Integer>("sides", Integer.class,

@@ -101,7 +101,7 @@ public class RasterDensityOperation extends RasterProcessingOperation {
         String the_geom = pointFeatures.getSchema().getGeometryDescriptor().getLocalName();
         Filter filter = ff.bbox(ff.property(the_geom), Extent);
 
-        GridTransformer trans = new GridTransformer(Extent, CellSize);
+        GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
         SimpleFeatureIterator featureIter = pointFeatures.subCollection(filter).features();
         try {
             Expression weightExp = ff.property(populationField);
@@ -134,7 +134,7 @@ public class RasterDensityOperation extends RasterProcessingOperation {
     protected PlanarImage lineToRaster(SimpleFeatureCollection lineFeatures, String populationField) {
         // calculate extent & cellsize
         calculateExtentAndCellSize(lineFeatures, Integer.MIN_VALUE);
-        Extent = RasterHelper.getResolvedEnvelope(Extent, CellSize);
+        Extent = RasterHelper.getResolvedEnvelope(Extent, CellSizeX, CellSizeY);
 
         Expression valueExp = ff.literal(1.0); // default
         if (!StringHelper.isNullOrEmpty(populationField)) {
@@ -146,7 +146,7 @@ public class RasterDensityOperation extends RasterProcessingOperation {
         DiskMemImage dmImage;
         ColorModel colorModel = ColorModel.getRGBdefault();
         SampleModel smpModel = colorModel.createCompatibleSampleModel(64, 64);
-        Dimension dim = RasterHelper.getDimension(Extent, CellSize);
+        Dimension dim = RasterHelper.getDimension(Extent, CellSizeX, CellSizeY);
         dmImage = new DiskMemImage(0, 0, dim.width, dim.height, 0, 0, smpModel, colorModel);
 
         dmImage.setUseCommonCache(true);

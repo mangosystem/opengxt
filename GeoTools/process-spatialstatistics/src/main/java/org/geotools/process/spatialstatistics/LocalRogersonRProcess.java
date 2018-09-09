@@ -132,7 +132,6 @@ public class LocalRogersonRProcess extends AbstractStatisticsProcess {
         process.setDistanceType(distanceMethod);
         process.setStandardizationType(standardization);
         process.setKappa(kappa);
-        ;
 
         // searchDistance
         if (searchDistance > 0 && !Double.isNaN(searchDistance)) {

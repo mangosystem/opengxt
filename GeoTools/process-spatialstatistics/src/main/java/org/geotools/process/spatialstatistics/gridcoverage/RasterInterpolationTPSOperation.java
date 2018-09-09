@@ -61,35 +61,22 @@ public class RasterInterpolationTPSOperation extends RasterInterpolationOperator
 
         // create image & write pixels
         final DiskMemImage oi = this.createDiskMemImage(Extent, pixelType);
-        final GridTransformer trans = new GridTransformer(Extent, CellSize);
+        final GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
 
         // divide 500 pixels
         final java.awt.Rectangle bounds = oi.getBounds();
-        final int count = Math.max(bounds.width, bounds.height) / 500;
-        if (count == 0) {
-            WritableRectIter writer = RectIterFactory.createWritable(oi, bounds);
+        final int count = Math.max(bounds.width, bounds.height) / MIN_CELL_COUNT;
 
-            int y = 0;
-            writer.startLines();
-            while (!writer.finishedLines()) {
-                writer.startPixels();
-                int x = 0;
-                while (!writer.finishedPixels()) {
-                    final Coordinate realPos = trans.gridToWorldCoordinate(x, y);
-                    final double retVal = interpolator.getValue(realPos);
-                    writer.setSample(0, retVal);
-                    updateStatistics(retVal);
-                    writer.nextPixel();
-                    x++;
-                }
-                writer.nextLine();
-                y++;
-            }
+        List<Thread> threads = new ArrayList<Thread>();
+
+        if (count == 0) {
+            Thread thread = new Thread(new PartialInterpolator(oi, bounds, interpolator, trans));
+            thread.start();
+            threads.add(thread);
         } else {
             final int sizeX = bounds.width / count;
             final int sizeY = bounds.height / count;
 
-            List<Thread> threads = new ArrayList<Thread>();
             for (int x = 0; x < count; x++) {
                 int posX = x == 0 ? x : (x * sizeX) + x;
                 for (int y = 0; y < count; y++) {
@@ -101,13 +88,13 @@ public class RasterInterpolationTPSOperation extends RasterInterpolationOperator
                     threads.add(thread);
                 }
             }
+        }
 
-            for (int i = 0; i < threads.size(); i++) {
-                try {
-                    threads.get(i).join();
-                } catch (InterruptedException e) {
-                    LOGGER.log(Level.FINER, e.getMessage(), e);
-                }
+        for (int i = 0; i < threads.size(); i++) {
+            try {
+                threads.get(i).join();
+            } catch (InterruptedException e) {
+                LOGGER.log(Level.FINER, e.getMessage(), e);
             }
         }
 

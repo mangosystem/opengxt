@@ -47,6 +47,10 @@ public class RasterCurvatureOperation extends AbstractSurfaceOperation {
 
     private double x2L;
 
+    private double yL2;
+
+    private double y2L;
+
     public GridCoverage2D execute(GridCoverage2D inputGc) {
         return execute(inputGc, 1.0);
     }
@@ -57,8 +61,12 @@ public class RasterCurvatureOperation extends AbstractSurfaceOperation {
         grid2D = inputGc;
         srcNoData = RasterHelper.getNoDataValue(inputGc);
         NoData = -9999;
-        xL2 = CellSize * CellSize;
-        x2L = 2.0 * CellSize;
+
+        xL2 = CellSizeX * CellSizeX;
+        x2L = 2.0 * CellSizeX;
+
+        yL2 = CellSizeY * CellSizeY;
+        y2L = 2.0 * CellSizeY;
 
         final java.awt.Rectangle bounds = outputImage.getBounds();
         WritableRectIter writer = RectIterFactory.createWritable(outputImage, bounds);
@@ -119,7 +127,7 @@ public class RasterCurvatureOperation extends AbstractSurfaceOperation {
         double D = ((mx[0][1] + mx[2][1]) / 2.0 - mx[1][1]) / xL2;
 
         // E = [(Z2 + Z8) /2 - Z5] / L2
-        double E = ((mx[1][0] + mx[1][2]) / 2.0 - mx[1][1]) / xL2;
+        double E = ((mx[1][0] + mx[1][2]) / 2.0 - mx[1][1]) / yL2;
 
         // F = (-Z1 + Z3 + Z7 - Z9) / 4L2
         // double F = (mx[2][0] - mx[0][0] + mx[0][2] - mx[2][2]) / x4L2;
@@ -128,7 +136,7 @@ public class RasterCurvatureOperation extends AbstractSurfaceOperation {
         double G = (mx[2][1] - mx[0][1]) / x2L;
 
         // H = (Z2 - Z8) / 2L
-        double H = (mx[1][0] - mx[1][2]) / x2L;
+        double H = (mx[1][0] - mx[1][2]) / y2L;
 
         // I = Z5
         // double I = Z5;

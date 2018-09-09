@@ -110,10 +110,14 @@ public class TPSProcess extends AbstractStatisticsProcess {
         process.getRasterEnvironment().setExtent(boundingBox);
 
         if (cellSize > 0) {
-            double origCellSize = process.getRasterEnvironment().getCellSize();
-            process.getRasterEnvironment().setCellSize(cellSize);
+            double origCellSizeX = process.getRasterEnvironment().getCellSizeX();
+            double origCellSizeY = process.getRasterEnvironment().getCellSizeY();
+            process.getRasterEnvironment().setCellSizeX(cellSize);
+            process.getRasterEnvironment().setCellSizeY(cellSize);
+
             resultGc = process.execute(inputFeatures, inputField);
-            process.getRasterEnvironment().setCellSize(origCellSize);
+            process.getRasterEnvironment().setCellSizeX(origCellSizeX);
+            process.getRasterEnvironment().setCellSizeY(origCellSizeY);
         } else {
             resultGc = process.execute(inputFeatures, inputField);
         }

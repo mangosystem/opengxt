@@ -113,12 +113,13 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
         scaleArea = 0.0;
 
         // http://en.wikipedia.org/wiki/Kernel_(statistics)
-        final int radius = (int) Math.floor(searchRadius / CellSize);
-        final int width = 2 * radius + 1;
+        double cellSize = Math.max(CellSizeX, CellSizeY);
+        int radius = (int) Math.floor(searchRadius / cellSize);
+        int width = 2 * radius + 1;
         final double r2 = radius * radius;
 
         // calculate area
-        final double cellArea = CellSize * CellSize;
+        final double cellArea = CellSizeX * CellSizeY;
 
         // build kernel
         final KernelJAI binKernel = KernelFactory.createCircle(radius, ValueType.BINARY);

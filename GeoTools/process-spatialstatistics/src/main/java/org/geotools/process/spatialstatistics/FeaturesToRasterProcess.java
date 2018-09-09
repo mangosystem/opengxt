@@ -105,7 +105,8 @@ public class FeaturesToRasterProcess extends AbstractStatisticsProcess {
 
         FeaturesToRasterOperation process = new FeaturesToRasterOperation();
         process.getRasterEnvironment().setExtent(boundingBox);
-        process.getRasterEnvironment().setCellSize(cellSize);
+        process.getRasterEnvironment().setCellSizeX(cellSize);
+        process.getRasterEnvironment().setCellSizeY(cellSize);
 
         GridCoverage2D resultGc = process.execute(inputFeatures, inputField);
         // end process

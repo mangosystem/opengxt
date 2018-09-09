@@ -125,8 +125,9 @@ public class GeometryToRasterProcess extends AbstractStatisticsProcess {
         }
 
         GeometryToRasterOperation process = new GeometryToRasterOperation();
-        process.getRasterEnvironment().setCellSize(cellSize);
         process.getRasterEnvironment().setExtent(extent);
+        process.getRasterEnvironment().setCellSizeX(cellSize);
+        process.getRasterEnvironment().setCellSizeY(cellSize);
 
         GridCoverage2D resultGc = process
                 .execute(inputGeometry, forcedCRS, defaultValue, pixelType);

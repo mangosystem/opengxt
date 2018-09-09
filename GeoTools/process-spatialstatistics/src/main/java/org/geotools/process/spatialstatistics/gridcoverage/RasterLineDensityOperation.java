@@ -85,13 +85,14 @@ public class RasterLineDensityOperation extends RasterDensityOperation {
         scaleArea = 0.0;
 
         // convert map unit to cell unit
-        int radius = (int) Math.floor(searchRadius / CellSize);
+        double cellSize = Math.max(CellSizeX, CellSizeY);
+        int radius = (int) Math.floor(searchRadius / cellSize);
 
         // Creates a circular kernel with width 2*radius + 1
-        KernelJAI kernel = KernelFactory.createConstantCircle(radius, (float) CellSize);
+        KernelJAI kernel = KernelFactory.createConstantCircle(radius, (float) cellSize);
 
         // calculate area
-        final double cellArea = CellSize * CellSize;
+        final double cellArea = CellSizeX * CellSizeY;
         final float[] data = kernel.getKernelData();
         int valid = 0;
         for (int index = 0; index < data.length; index++) {

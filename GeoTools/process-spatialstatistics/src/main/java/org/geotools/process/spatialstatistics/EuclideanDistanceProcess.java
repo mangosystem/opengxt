@@ -106,7 +106,8 @@ public class EuclideanDistanceProcess extends AbstractStatisticsProcess {
         GridCoverage2D resultGc = null;
         RasterEuclideanDistanceOperation process = new RasterEuclideanDistanceOperation();
         process.getRasterEnvironment().setExtent(boundingBox);
-        process.getRasterEnvironment().setCellSize(cellSize);
+        process.getRasterEnvironment().setCellSizeX(cellSize);
+        process.getRasterEnvironment().setCellSizeY(cellSize);
 
         resultGc = process.execute(inputFeatures, maximumDistance);
         // end process

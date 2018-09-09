@@ -90,7 +90,7 @@ public class RasterResampleProcess extends AbstractStatisticsProcess {
 
         // start process
         RasterResampleOperation process = new RasterResampleOperation();
-        GridCoverage2D extractedGC = process.execute(inputCoverage, cellSize, resamplingType);
+        GridCoverage2D extractedGC = process.execute(inputCoverage, cellSize, cellSize, resamplingType);
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

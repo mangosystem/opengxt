@@ -152,8 +152,8 @@ public class RasterRotateOperation extends AbstractTransformationOperation {
         // adjust extent
         final int column = outputImage.getWidth();
         final int row = outputImage.getHeight();
-        final double maxX = newExt.getMinX() + (column * CellSize);
-        final double maxY = newExt.getMinY() + (row * CellSize);
+        final double maxX = newExt.getMinX() + (column * CellSizeX);
+        final double maxY = newExt.getMinY() + (row * CellSizeY);
 
         Extent = new ReferencedEnvelope(newExt.getMinX(), maxX, newExt.getMinY(), maxY, crs);
 

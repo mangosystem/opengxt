@@ -40,7 +40,9 @@ public abstract class AbstractSurfaceOperation extends RasterProcessingOperation
 
     protected double srcNoData = -Float.MAX_VALUE;
 
-    protected double _8DX = CellSize * 8;
+    protected double _8DX = CellSizeX * 8;
+
+    protected double _8DY = CellSizeY * 8;
 
     protected double[][] getSubMatrix(GridCoverage2D gc, GridCoordinates2D pos, int width,
             int height) {

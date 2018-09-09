@@ -96,6 +96,8 @@ public class RasterProfileProcess extends AbstractStatisticsProcess {
         // start process
         if (interval == null || interval <= 0) {
             interval = userLine.getLength() / 20; // default interval
+        } else {
+            interval = userLine.getLength() / interval;
         }
 
         CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();

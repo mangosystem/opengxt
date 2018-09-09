@@ -16,10 +16,14 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
+import java.awt.geom.AffineTransform;
 import java.util.logging.Logger;
 
 import org.geotools.coverage.grid.GridCoordinates2D;
+import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.DirectPosition2D;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.util.logging.Logging;
 import org.opengis.geometry.DirectPosition;
 
@@ -55,21 +59,22 @@ public class GridTransformer {
      * Creates a new transform.
      * 
      * @param extent the envelope defining one coordinate system
-     * @param cellSize the size of the grid cell
-     */
-    public GridTransformer(Envelope extent, double cellSize) {
-        init(extent, cellSize, cellSize);
-    }
-
-    /**
-     * Creates a new transform.
-     * 
-     * @param extent the envelope defining one coordinate system
      * @param dx the x size of the grid cell
      * @param dy the y size of the grid cell
      */
     public GridTransformer(Envelope extent, double dx, double dy) {
         init(extent, dx, dy);
+    }
+
+    public GridTransformer(GridCoverage2D coverage) {
+        this(coverage.getGridGeometry());
+    }
+
+    public GridTransformer(GridGeometry2D gridGeometry2D) {
+        ReferencedEnvelope extent = new ReferencedEnvelope(gridGeometry2D.getEnvelope());
+        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+        init(extent, Math.abs(gridToWorld.getScaleX()), Math.abs(gridToWorld.getScaleY()));
     }
 
     private void init(Envelope extent, double dx, double dy) {

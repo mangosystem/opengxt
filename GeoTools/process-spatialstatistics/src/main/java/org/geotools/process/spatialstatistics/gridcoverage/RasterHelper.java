@@ -162,25 +162,26 @@ public class RasterHelper {
         return new Rectangle(x, y, width, height);
     }
 
-    public static Dimension getDimension(ReferencedEnvelope inputBounds, double cellSize) {
+    public static Dimension getDimension(ReferencedEnvelope inputBounds, double cellSizeX,
+            double cellSizeY) {
         double aoiWidth = inputBounds.getMaxX() - inputBounds.getMinX();
         double aoiHeight = inputBounds.getMaxY() - inputBounds.getMinY();
 
-        int columnCount = (int) Math.floor((aoiWidth / cellSize) + 0.5d);
-        int rowCount = (int) Math.floor((aoiHeight / cellSize) + 0.5d);
+        int columnCount = (int) Math.floor((aoiWidth / cellSizeX) + 0.5d);
+        int rowCount = (int) Math.floor((aoiHeight / cellSizeY) + 0.5d);
 
         return new Dimension(columnCount, rowCount);
     }
 
     public static ReferencedEnvelope getResolvedEnvelope(ReferencedEnvelope inputBounds,
-            double cellSize) {
+            double cellSizeX, double cellSizeY) {
         CoordinateReferenceSystem crs = inputBounds.getCoordinateReferenceSystem();
 
-        Dimension gridDim = RasterHelper.getDimension(inputBounds, cellSize);
+        Dimension gridDim = RasterHelper.getDimension(inputBounds, cellSizeX, cellSizeY);
 
         // Recalculate coverage extent
-        double maxX = inputBounds.getMinX() + (gridDim.width * cellSize);
-        double maxY = inputBounds.getMinY() + (gridDim.height * cellSize);
+        double maxX = inputBounds.getMinX() + (gridDim.width * cellSizeX);
+        double maxY = inputBounds.getMinY() + (gridDim.height * cellSizeY);
 
         return new ReferencedEnvelope(inputBounds.getMinX(), maxX, inputBounds.getMinY(), maxY, crs);
     }
@@ -410,12 +411,12 @@ public class RasterHelper {
         Color[] colors = new Color[] { Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED };
 
         CharSequence noDataName = Vocabulary.formatInternational(VocabularyKeys.NODATA);
-        
+
         Category nan = new Category(noDataName, new Color[] { new Color(255, 255, 255, 0) },
                 NumberRange.create(noDataValue, noDataValue));
 
         Category values = new Category("values", colors, NumberRange.create(minValue, maxValue));
-        
+
         GridSampleDimension[] bands = null;
         GridSampleDimension band = null;
 

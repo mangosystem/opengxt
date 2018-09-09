@@ -97,7 +97,7 @@ public class RasterReprojectProcess extends AbstractStatisticsProcess {
         // start process
         RasterReprojectOperation process = new RasterReprojectOperation();
         GridCoverage2D extractedGC = process.execute(inputCoverage, targetCRS, resamplingType,
-                cellSize, forcedCRS);
+                cellSize, cellSize, forcedCRS);
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
+import java.awt.geom.AffineTransform;
 import java.util.logging.Logger;
 
 import javax.media.jai.PlanarImage;
@@ -24,6 +25,7 @@ import javax.media.jai.iterator.RectIterFactory;
 import javax.media.jai.iterator.WritableRectIter;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
@@ -55,8 +57,15 @@ public class RasterNDVIOperation extends RasterProcessingOperation {
         redNoData = RasterHelper.getNoDataValue(redCoverage);
         this.NoData = nirNoData; // default nodata
 
-        double nirCellSize = RasterHelper.getCellSize(nirCoverage);
-        double redCellSize = RasterHelper.getCellSize(redCoverage);
+        GridGeometry2D gridGeometry2D = nirCoverage.getGridGeometry();
+        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+        double nirSX = Math.abs(gridToWorld.getScaleX());
+        double nirSY = Math.abs(gridToWorld.getScaleY());
+
+        gridGeometry2D = redCoverage.getGridGeometry();
+        gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+        double redSX = Math.abs(gridToWorld.getScaleX());
+        double redSY = Math.abs(gridToWorld.getScaleY());
 
         ReferencedEnvelope nirExtent = new ReferencedEnvelope(nirCoverage.getEnvelope());
         ReferencedEnvelope redExtent = new ReferencedEnvelope(redCoverage.getEnvelope());
@@ -65,39 +74,53 @@ public class RasterNDVIOperation extends RasterProcessingOperation {
         CoordinateReferenceSystem redCRS = redCoverage.getCoordinateReferenceSystem();
 
         // create image
-        if (nirExtent.equals(redExtent) && nirCellSize == redCellSize) {
+        double rTol = 0.0001;
+        if (nirExtent.equals(redExtent) && SSUtils.compareDouble(nirSX, redSX, rTol)
+                && SSUtils.compareDouble(nirSY, redSY, rTol)) {
             return executeNDVI(nirCoverage, nirIndex, redCoverage, redIndex);
-        } else if (nirExtent.equals(redExtent) && nirCellSize != redCellSize) {
+        } else if (nirExtent.equals(redExtent)
+                && (!SSUtils.compareDouble(nirSX, redSX, rTol) || !SSUtils.compareDouble(nirSY,
+                        redSY, rTol))) {
             // resample
             RasterResampleOperation resample = new RasterResampleOperation();
-            GridCoverage2D resampled = resample.execute(redCoverage, nirCellSize,
+            GridCoverage2D resampled = resample.execute(redCoverage, nirSX, nirSY,
                     ResampleType.NEAREST);
 
             return executeNDVI(nirCoverage, nirIndex, resampled, redIndex);
         } else {
             boolean equalCRS = CRS.equalsIgnoreMetadata(nirCRS, redCRS);
-            if (equalCRS) {
-                ReferencedEnvelope extent = nirExtent.intersection(redExtent); // intersection
 
-                RasterCropOperation crop = new RasterCropOperation();
-
-                if (!extent.equals(nirExtent)) {
-                    nirCoverage = crop.execute(nirCoverage, extent);
-                }
-
-                if (!extent.equals(redExtent)) {
-                    redCoverage = crop.execute(redCoverage, extent);
-                }
-
-                return execute(nirCoverage, nirIndex, redCoverage, redIndex);
-            } else {
+            // reproject coverage
+            if (false == equalCRS) {
                 // reproject
                 RasterReprojectOperation reproject = new RasterReprojectOperation();
-                redCoverage = reproject.execute(redCoverage, nirCRS, ResampleType.NEAREST,
-                        nirCellSize);
-
-                return execute(nirCoverage, nirIndex, redCoverage, redIndex);
+                redCoverage = reproject.execute(redCoverage, nirCRS, ResampleType.NEAREST, nirSX,
+                        nirSY);
+                redSX = nirSX;
+                redSY = nirSY;
             }
+
+            // resize cell size
+            if (!SSUtils.compareDouble(nirSX, redSX, rTol)
+                    || !SSUtils.compareDouble(nirSY, redSY, rTol)) {
+                RasterResampleOperation resample = new RasterResampleOperation();
+                redCoverage = resample.execute(redCoverage, nirSX, nirSY, ResampleType.NEAREST);
+            }
+
+            // finally crop coverage
+            ReferencedEnvelope extent = nirExtent.intersection(redExtent); // intersection
+
+            RasterCropOperation crop = new RasterCropOperation();
+
+            if (!extent.equals(nirExtent)) {
+                nirCoverage = crop.execute(nirCoverage, extent);
+            }
+
+            if (!extent.equals(redExtent)) {
+                redCoverage = crop.execute(redCoverage, extent);
+            }
+
+            return executeNDVI(nirCoverage, nirIndex, redCoverage, redIndex);
         }
     }
 
@@ -131,7 +154,6 @@ public class RasterNDVIOperation extends RasterProcessingOperation {
                     // NDVI = ((IR - R)/(IR + R)) = -1.0 ~ 1.0
                     double ndviValue = (nir - red) / (nir + red);
                     writerIter.setSample(0, ndviValue);
-                    // updateStatistics(ndviValue); // skip
                 }
                 nirIter.nextPixel();
                 redIter.nextPixel();

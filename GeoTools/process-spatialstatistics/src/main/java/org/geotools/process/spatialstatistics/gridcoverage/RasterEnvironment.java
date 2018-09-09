@@ -36,9 +36,11 @@ import org.opengis.geometry.Envelope;
 public class RasterEnvironment {
     protected static final Logger LOGGER = Logging.getLogger(RasterEnvironment.class);
 
-    private double cellSize = Double.NaN;
+    private double cellSizeX = Double.NaN;
 
-    private ReferencedEnvelope extent = null;
+    private double cellSizeY = Double.NaN;
+
+    private ReferencedEnvelope extent = new ReferencedEnvelope();
 
     private GridCoverage2D maskDataset = null;
 
@@ -46,12 +48,26 @@ public class RasterEnvironment {
 
     private String workspace = null;
 
-    public double getCellSize() {
-        return cellSize;
+    public double getCellSizeX() {
+        if (cellSizeX == Double.NaN || cellSizeX <= 0) {
+            return Math.min(extent.getWidth(), extent.getHeight()) / 250.0;
+        }
+        return cellSizeX;
     }
 
-    public void setCellSize(double cellSize) {
-        this.cellSize = cellSize;
+    public void setCellSizeX(double cellSizeX) {
+        this.cellSizeX = cellSizeX;
+    }
+
+    public double getCellSizeY() {
+        if (cellSizeY == Double.NaN || cellSizeY <= 0) {
+            return Math.min(extent.getWidth(), extent.getHeight()) / 250.0;
+        }
+        return cellSizeY;
+    }
+
+    public void setCellSizeY(double cellSizeY) {
+        this.cellSizeY = cellSizeY;
     }
 
     public ReferencedEnvelope getExtent() {

@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics.gridcoverage;
 
 import java.awt.Dimension;
+import java.awt.geom.AffineTransform;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,7 +52,12 @@ public class RasterExtractByMaskOperation extends RasterProcessingOperation {
 
     public GridCoverage2D execute(GridCoverage2D inputCoverage, GridCoverage2D maskCoverage) {
         NoData = RasterHelper.getNoDataValue(inputCoverage);
-        CellSize = RasterHelper.getCellSize(inputCoverage);
+
+        GridGeometry2D gridGeometry2D = inputCoverage.getGridGeometry();
+        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+        CellSizeX = Math.abs(gridToWorld.getScaleX());
+        CellSizeY = Math.abs(gridToWorld.getScaleY());
 
         CoordinateReferenceSystem inputCrs = inputCoverage.getCoordinateReferenceSystem();
         CoordinateReferenceSystem maskCrs = maskCoverage.getCoordinateReferenceSystem();
@@ -59,16 +65,24 @@ public class RasterExtractByMaskOperation extends RasterProcessingOperation {
             // Reproject raster
             RasterReprojectOperation reprojectOp = new RasterReprojectOperation();
             maskCoverage = reprojectOp.execute(maskCoverage, inputCrs, ResampleType.BILINEAR,
-                    CellSize);
+                    CellSizeX, CellSizeY);
         }
 
         // init
         final double maskNoData = RasterHelper.getNoDataValue(maskCoverage);
 
         // resample mask coverage
-        if (!SSUtils.compareDouble(CellSize, RasterHelper.getCellSize(maskCoverage))) {
+
+        GridGeometry2D gg2D = maskCoverage.getGridGeometry();
+        AffineTransform gtw = (AffineTransform) gg2D.getGridToCRS2D();
+
+        double maskSizeX = Math.abs(gtw.getScaleX());
+        double maskSizeY = Math.abs(gtw.getScaleY());
+
+        if (!SSUtils.compareDouble(CellSizeX, maskSizeX)
+                || !SSUtils.compareDouble(CellSizeY, maskSizeY)) {
             LOGGER.log(Level.WARNING, "Resampling mask coverage...");
-            maskCoverage = resampleNearest(maskCoverage, CellSize);
+            maskCoverage = resampleNearest(maskCoverage, CellSizeX, CellSizeY);
         }
         Extent = new ReferencedEnvelope(maskCoverage.getEnvelope());
 
@@ -121,13 +135,14 @@ public class RasterExtractByMaskOperation extends RasterProcessingOperation {
         return createGridCoverage(inputCoverage.getName(), outputImage);
     }
 
-    private GridCoverage2D resampleNearest(GridCoverage2D coverage, Double cellSize) {
+    private GridCoverage2D resampleNearest(GridCoverage2D coverage, double cellSizeX,
+            double cellSizeY) {
         Interpolation interpolation = Interpolation.getInstance(Interpolation.INTERP_NEAREST);
 
         CoordinateReferenceSystem crs = coverage.getCoordinateReferenceSystem();
         ReferencedEnvelope extent = new ReferencedEnvelope(coverage.getEnvelope());
 
-        Dimension dim = RasterHelper.getDimension(extent, cellSize);
+        Dimension dim = RasterHelper.getDimension(extent, cellSizeX, cellSizeY);
         GridEnvelope2D gridRange = new GridEnvelope2D(0, 0, dim.width, dim.height);
         GridGeometry2D gg2D = new GridGeometry2D(gridRange, extent);
 

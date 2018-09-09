@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
+import java.awt.geom.AffineTransform;
 import java.util.logging.Logger;
 
 import javax.media.jai.BorderExtenderConstant;
@@ -26,6 +27,7 @@ import javax.media.jai.iterator.RectIter;
 import javax.media.jai.iterator.RectIterFactory;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.util.logging.Logging;
@@ -72,16 +74,21 @@ public class RasterClipOperation extends RasterProcessingOperation {
             clipped = cropOp.execute(inputCoverage, extent);
         } else {
             NoData = RasterHelper.getNoDataValue(inputCoverage);
-            CellSize = RasterHelper.getCellSize(inputCoverage);
-            Extent = RasterHelper.getResolvedEnvelope(extent, CellSize);
+
+            GridGeometry2D gridGeometry2D = inputCoverage.getGridGeometry();
+            AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+            CellSizeX = Math.abs(gridToWorld.getScaleX());
+            CellSizeY = Math.abs(gridToWorld.getScaleY());
+            Extent = RasterHelper.getResolvedEnvelope(extent, CellSizeX, CellSizeY);
 
             int bandCount = inputCoverage.getNumSampleDimensions();
 
             // calculate pad
-            int leftPad = calculatePad(gridExtent.getMinX(), Extent.getMinX(), CellSize, false);
-            int rightPad = calculatePad(gridExtent.getMaxX(), Extent.getMaxX(), CellSize, true);
-            int bottomPad = calculatePad(gridExtent.getMinY(), Extent.getMinY(), CellSize, false);
-            int topPad = calculatePad(gridExtent.getMaxY(), Extent.getMaxY(), CellSize, true);
+            int leftPad = calculatePad(gridExtent.getMinX(), Extent.getMinX(), CellSizeX, false);
+            int rightPad = calculatePad(gridExtent.getMaxX(), Extent.getMaxX(), CellSizeX, true);
+            int bottomPad = calculatePad(gridExtent.getMinY(), Extent.getMinY(), CellSizeY, false);
+            int topPad = calculatePad(gridExtent.getMaxY(), Extent.getMaxY(), CellSizeY, true);
 
             final PlanarImage inputImage = (PlanarImage) inputCoverage.getRenderedImage();
 

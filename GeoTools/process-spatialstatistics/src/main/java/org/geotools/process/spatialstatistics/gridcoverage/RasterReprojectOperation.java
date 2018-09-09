@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics.gridcoverage;
 
 import java.awt.Dimension;
+import java.awt.geom.AffineTransform;
 import java.util.logging.Logger;
 
 import javax.media.jai.Interpolation;
@@ -57,49 +58,24 @@ public class RasterReprojectOperation extends GeneralOperation {
     public GridCoverage2D execute(GridCoverage2D inputCoverage,
             CoordinateReferenceSystem targetCRS, ResampleType resamplingType)
             throws ProcessException {
-        return execute(inputCoverage, targetCRS, ResampleType.NEAREST, 0.0);
+        return execute(inputCoverage, targetCRS, resamplingType, 0.0);
     }
 
     public GridCoverage2D execute(GridCoverage2D inputCoverage,
             CoordinateReferenceSystem targetCRS, ResampleType resamplingType, double cellSize)
             throws ProcessException {
-        return execute(inputCoverage, targetCRS, ResampleType.NEAREST, cellSize, null);
-    }
-
-    private double getCellSize(GridCoverage2D inputCoverage, CoordinateReferenceSystem targetCRS) {
-        double cellSize = RasterHelper.getCellSize(inputCoverage);
-
-        // check Geographic CRS
-        CoordinateReferenceSystem sCRS = inputCoverage.getCoordinateReferenceSystem();
-        if (sCRS instanceof DefaultGeographicCRS) {
-            // recalculate cell size
-            ReferencedEnvelope extent = null;
-            try {
-                ReferencedEnvelope bounds = new ReferencedEnvelope(inputCoverage.getEnvelope());
-                extent = bounds.transform(targetCRS, true);
-            } catch (TransformException e) {
-                throw new ProcessException(e);
-            } catch (FactoryException e) {
-                throw new ProcessException(e);
-            }
-
-            GridEnvelope grid = inputCoverage.getGridGeometry().getGridRange();
-            int columns = grid.getHigh(0) + 1;
-            int rows = grid.getHigh(1) + 1;
-
-            double sizeX = extent.getWidth() / columns;
-            double sizeY = extent.getHeight() / rows;
-
-            // use minimum value!
-            cellSize = Math.min(sizeX, sizeY);
-        }
-
-        return cellSize;
+        return execute(inputCoverage, targetCRS, resamplingType, cellSize, cellSize);
     }
 
     public GridCoverage2D execute(GridCoverage2D inputCoverage,
-            CoordinateReferenceSystem targetCRS, ResampleType resamplingType, double cellSize,
-            CoordinateReferenceSystem forcedCRS) throws ProcessException {
+            CoordinateReferenceSystem targetCRS, ResampleType resamplingType, double cellSizeX,
+            double cellSizeY) throws ProcessException {
+        return execute(inputCoverage, targetCRS, resamplingType, cellSizeX, cellSizeY, null);
+    }
+
+    public GridCoverage2D execute(GridCoverage2D inputCoverage,
+            CoordinateReferenceSystem targetCRS, ResampleType resamplingType, double cellSizeX,
+            double cellSizeY, CoordinateReferenceSystem forcedCRS) throws ProcessException {
         if (targetCRS == null) {
             throw new ProcessException("targetCRS is null!");
         }
@@ -115,17 +91,49 @@ public class RasterReprojectOperation extends GeneralOperation {
             throw new ProcessException("inputCoverage has no CRS!");
         }
 
-        if (cellSize <= 0) {
-            cellSize = getCellSize(inputCoverage, targetCRS);
+        if (cellSizeX <= 0 || cellSizeY <= 0) {
+            // recalculate cell size
+            GridGeometry2D gridGeometry2D = inputCoverage.getGridGeometry();
+            AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+            cellSizeX = Math.abs(gridToWorld.getScaleX());
+            cellSizeY = Math.abs(gridToWorld.getScaleY());
+
+            // check Geographic CRS
+            CoordinateReferenceSystem sCRS = inputCoverage.getCoordinateReferenceSystem();
+            if (sCRS instanceof DefaultGeographicCRS) {
+                ReferencedEnvelope extent = null;
+                try {
+                    ReferencedEnvelope bounds = new ReferencedEnvelope(inputCoverage.getEnvelope());
+                    extent = bounds.transform(targetCRS, true);
+                } catch (TransformException e) {
+                    throw new ProcessException(e);
+                } catch (FactoryException e) {
+                    throw new ProcessException(e);
+                }
+
+                GridEnvelope grid = inputCoverage.getGridGeometry().getGridRange();
+                int columns = grid.getHigh(0) + 1;
+                int rows = grid.getHigh(1) + 1;
+
+                cellSizeX = extent.getWidth() / columns;
+                cellSizeY = extent.getHeight() / rows;
+            }
         }
 
         if (CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
-            double sourceCellSize = RasterHelper.getCellSize(inputCoverage);
-            if (SSUtils.compareDouble(cellSize, sourceCellSize)) {
+            GridGeometry2D gridGeometry2D = inputCoverage.getGridGeometry();
+            AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+            double sourceX = Math.abs(gridToWorld.getScaleX());
+            double sourceY = Math.abs(gridToWorld.getScaleY());
+
+            if (SSUtils.compareDouble(sourceX, cellSizeX)
+                    && SSUtils.compareDouble(sourceY, cellSizeY)) {
                 return inputCoverage;
             } else {
                 RasterResampleOperation resample = new RasterResampleOperation();
-                return resample.execute(inputCoverage, cellSize, resamplingType);
+                return resample.execute(inputCoverage, cellSizeX, cellSizeY, resamplingType);
             }
         }
 
@@ -154,8 +162,8 @@ public class RasterReprojectOperation extends GeneralOperation {
             throw new ProcessException(e);
         }
 
-        extent = RasterHelper.getResolvedEnvelope(extent, cellSize);
-        Dimension dim = RasterHelper.getDimension(extent, cellSize);
+        extent = RasterHelper.getResolvedEnvelope(extent, cellSizeX, cellSizeY);
+        Dimension dim = RasterHelper.getDimension(extent, cellSizeX, cellSizeY);
         GridEnvelope2D gridRange = new GridEnvelope2D(0, 0, dim.width, dim.height);
         GridGeometry2D gridGeometry = new GridGeometry2D(gridRange, extent);
 

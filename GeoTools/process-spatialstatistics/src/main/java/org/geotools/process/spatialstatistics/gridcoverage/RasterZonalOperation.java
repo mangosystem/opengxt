@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
+import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.logging.Logger;
@@ -25,6 +26,7 @@ import javax.media.jai.iterator.RectIter;
 import javax.media.jai.iterator.RectIterFactory;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -94,9 +96,17 @@ public class RasterZonalOperation extends RasterProcessingOperation {
         RasterCropOperation cropOp = new RasterCropOperation();
         GridCoverage2D cropGc = cropOp.execute(valueCoverage, new ReferencedEnvelope(intEnv, tCRS));
 
+        // cell size
+        GridGeometry2D gridGeometry2D = valueCoverage.getGridGeometry();
+        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+        double cellSizeX = Math.abs(gridToWorld.getScaleX());
+        double cellSizeY = Math.abs(gridToWorld.getScaleY());
+
         // features to raster zone
         FeaturesToRasterOperation rsOp = new FeaturesToRasterOperation();
-        rsOp.getRasterEnvironment().setCellSize(RasterHelper.getCellSize(valueCoverage));
+        rsOp.getRasterEnvironment().setCellSizeX(cellSizeX);
+        rsOp.getRasterEnvironment().setCellSizeY(cellSizeY);
         rsOp.getRasterEnvironment().setExtent(new ReferencedEnvelope(cropGc.getEnvelope2D(), tCRS));
         GridCoverage2D zonalGc = rsOp.execute(zoneFeatures);
 
@@ -105,8 +115,7 @@ public class RasterZonalOperation extends RasterProcessingOperation {
 
         final double inputNoData = RasterHelper.getNoDataValue(valueCoverage);
         final double zoneNoData = RasterHelper.getNoDataValue(zonalGc);
-        final double cellSize = RasterHelper.getCellSize(zonalGc);
-        cellArea = cellSize * cellSize;
+        cellArea = cellSizeX * cellSizeY;
 
         PlanarImage zoneImage = (PlanarImage) zonalGc.getRenderedImage();
         PlanarImage inputImage = (PlanarImage) cropGc.getRenderedImage();

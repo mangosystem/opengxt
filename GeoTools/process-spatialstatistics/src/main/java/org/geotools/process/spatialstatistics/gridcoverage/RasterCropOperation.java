@@ -44,6 +44,8 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 public class RasterCropOperation extends RasterProcessingOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterCropOperation.class);
 
+    static final double roiTolerance = 0.0;
+
     static {
         JAIExt.initJAIEXT();
     }
@@ -68,7 +70,7 @@ public class RasterCropOperation extends RasterProcessingOperation {
         final ParameterValueGroup param = cropOperation.getParameters();
         param.parameter("Source").setValue(inputCoverage);
         param.parameter("Envelope").setValue(bounds);
-        param.parameter("ROITolerance").setValue(0.6); // default
+        param.parameter("ROITolerance").setValue(roiTolerance); // default
 
         return doOperation(param, null);
     }
@@ -94,7 +96,7 @@ public class RasterCropOperation extends RasterProcessingOperation {
         param.parameter("Source").setValue(inputCoverage);
         param.parameter("Envelope").setValue(bounds);
         param.parameter("ROI").setValue(roi);
-        param.parameter("ROITolerance").setValue(0.6); // default
+        param.parameter("ROITolerance").setValue(roiTolerance); // default
 
         return doOperation(param, null);
     }

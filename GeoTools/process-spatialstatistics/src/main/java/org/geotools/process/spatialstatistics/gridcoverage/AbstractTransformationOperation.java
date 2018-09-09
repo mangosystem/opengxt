@@ -16,9 +16,11 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
+import java.awt.geom.AffineTransform;
 import java.util.logging.Logger;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.util.logging.Logging;
 
@@ -32,11 +34,17 @@ import org.geotools.util.logging.Logging;
 public abstract class AbstractTransformationOperation extends RasterProcessingOperation {
     protected static final Logger LOGGER = Logging.getLogger(AbstractTransformationOperation.class);
 
-    protected void initilizeVariables(GridCoverage2D inputCoverage) {
-        NoData = RasterHelper.getNoDataValue(inputCoverage);
-        CellSize = RasterHelper.getCellSize(inputCoverage);
+    protected void initilizeVariables(GridCoverage2D coverage) {
+        NoData = RasterHelper.getNoDataValue(coverage);
+
+        GridGeometry2D gridGeometry2D = coverage.getGridGeometry();
+        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+        CellSizeX = Math.abs(gridToWorld.getScaleX());
+        CellSizeY = Math.abs(gridToWorld.getScaleY());
+
         MaxValue = 1;
         MinValue = 0;
-        Extent = new ReferencedEnvelope(inputCoverage.getEnvelope());
+        Extent = new ReferencedEnvelope(coverage.getEnvelope());
     }
 }

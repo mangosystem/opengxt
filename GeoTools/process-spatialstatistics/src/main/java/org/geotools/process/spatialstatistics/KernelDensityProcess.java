@@ -112,7 +112,8 @@ public class KernelDensityProcess extends AbstractStatisticsProcess {
         GridCoverage2D resultGc = null;
         RasterKernelDensityOperation process = new RasterKernelDensityOperation();
         process.getRasterEnvironment().setExtent(boundingBox);
-        process.getRasterEnvironment().setCellSize(cellSize);
+        process.getRasterEnvironment().setCellSizeX(cellSize);
+        process.getRasterEnvironment().setCellSizeY(cellSize);
         process.setKernelType(kernelType);
         resultGc = process.execute(inputFeatures, populationField, searchRadius);
         // end process

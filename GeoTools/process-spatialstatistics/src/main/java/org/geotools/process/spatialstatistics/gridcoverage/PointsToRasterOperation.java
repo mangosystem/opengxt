@@ -82,7 +82,7 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
         String the_geom = pointFeatures.getSchema().getGeometryDescriptor().getLocalName();
         Filter filter = ff.bbox(ff.property(the_geom), Extent);
 
-        GridTransformer trans = new GridTransformer(Extent, CellSize);
+        GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
         SimpleFeatureIterator featureIter = null;
         try {
             featureIter = pointFeatures.subCollection(filter).features();
@@ -147,7 +147,7 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
         // initialize nodata value
         initializeDefaultValue(outputImage, this.NoData);
 
-        GridTransformer trans = new GridTransformer(Extent, CellSize);
+        GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
         SimpleFeatureIterator featureIter = pointFeatures.features();
         try {
             while (featureIter.hasNext()) {
@@ -210,7 +210,7 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
         field = FeatureTypes.validateProperty(pointFeatures.getSchema(), field);
         int fieldIndex = pointFeatures.getSchema().indexOf(field);
 
-        GridTransformer trans = new GridTransformer(Extent, CellSize);
+        GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
         SimpleFeatureIterator featureIter = pointFeatures.features();
         try {
             while (featureIter.hasNext()) {

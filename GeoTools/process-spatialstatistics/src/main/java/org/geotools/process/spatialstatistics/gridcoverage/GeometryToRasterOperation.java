@@ -48,6 +48,7 @@ import org.jaitools.tiledimage.DiskMemImage;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
@@ -80,8 +81,8 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
             Number gridValue, RasterPixelType pixelType) {
         shapeType = FeatureTypes.getSimpleShapeType(inputGeometry.getClass());
 
-        ReferencedEnvelope gridExtent = new ReferencedEnvelope(inputGeometry.getEnvelopeInternal(),
-                forcedCRS);
+        Envelope geomEnvelope = inputGeometry.getEnvelopeInternal();
+        ReferencedEnvelope gridExtent = new ReferencedEnvelope(geomEnvelope, forcedCRS);
 
         initializeTiledImage(gridExtent, pixelType);
 
@@ -101,7 +102,7 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
         PixelType = transferType;
 
         // recalculate coverage extent
-        Extent = RasterHelper.getResolvedEnvelope(Extent, CellSize);
+        Extent = RasterHelper.getResolvedEnvelope(Extent, CellSizeX, CellSizeY);
 
         final int tw = 64;
         final int th = 64;
@@ -109,7 +110,7 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
         ColorModel colorModel = ColorModel.getRGBdefault();
         SampleModel smpModel = colorModel.createCompatibleSampleModel(tw, th);
 
-        Dimension dim = RasterHelper.getDimension(Extent, CellSize);
+        Dimension dim = RasterHelper.getDimension(Extent, CellSizeX, CellSizeY);
 
         dmImage = new DiskMemImage(0, 0, dim.width, dim.height, 0, 0, smpModel, colorModel);
         dmImage.setUseCommonCache(true);
@@ -198,13 +199,14 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
         Coordinate[] cs = lineString.getCoordinates();
 
         // Offset like ArcGIS
-        double offset = shapeType == SimpleShapeType.POLYGON ? CellSize / 2.0 : 0;
+        double offsetX = shapeType == SimpleShapeType.POLYGON ? CellSizeX / 2.0 : 0;
+        double offsetY = shapeType == SimpleShapeType.POLYGON ? CellSizeY / 2.0 : 0;
 
         for (int i = 0; i < cs.length; i++) {
             if (i == 0) {
-                targetPath.moveTo(cs[i].x - offset, cs[i].y);
+                targetPath.moveTo(cs[i].x - offsetX, cs[i].y);
             } else {
-                targetPath.lineTo(cs[i].x - offset, cs[i].y);
+                targetPath.lineTo(cs[i].x - offsetY, cs[i].y);
             }
         }
 

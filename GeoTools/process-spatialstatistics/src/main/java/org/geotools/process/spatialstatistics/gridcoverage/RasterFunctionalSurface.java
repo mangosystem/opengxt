@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics.gridcoverage;
 
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.util.Arrays;
@@ -68,13 +69,27 @@ public class RasterFunctionalSurface {
 
     private Double noData = Double.NaN;
 
-    private double cellSize = 0;
+    private double cellSizeX = 0;
+
+    private double cellSizeY = 0;
+
+    private double _8DX = cellSizeX * 8;
+
+    private double _8DY = cellSizeY * 8;
 
     private GeometryFactory gf = JTSFactoryFinder.getGeometryFactory(GeoTools.getDefaultHints());
 
     public RasterFunctionalSurface(GridCoverage2D srcCoverage) {
         this.grid2D = srcCoverage;
-        this.cellSize = RasterHelper.getCellSize(srcCoverage);
+
+        GridGeometry2D gridGeometry2D = srcCoverage.getGridGeometry();
+        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+        this.cellSizeX = Math.abs(gridToWorld.getScaleX());
+        this.cellSizeY = Math.abs(gridToWorld.getScaleY());
+        this._8DX = cellSizeX * 8;
+        this._8DY = cellSizeY * 8;
+
         this.noData = RasterHelper.getNoDataValue(srcCoverage);
     }
 
@@ -119,8 +134,8 @@ public class RasterFunctionalSurface {
         double sinAngle = Math.sin(segAngle);
         double sumOfDistance = from.distance(to);
 
-        int xCellCount = (int) ((to.x - from.x) / cellSize);
-        int yCellCount = (int) ((to.y - from.y) / cellSize);
+        int xCellCount = (int) ((to.x - from.x) / cellSizeX);
+        int yCellCount = (int) ((to.y - from.y) / cellSizeY);
         int maxCellCount = Math.max(Math.abs(xCellCount), Math.abs(yCellCount));
         if (maxCellCount == 0) {
             ros.add(new Coordinate(to.x, to.y, 0));
@@ -296,7 +311,6 @@ public class RasterFunctionalSurface {
     }
 
     private double getAspect(GridCoordinates2D pos) {
-        final double _8DX = this.cellSize * 8;
 
         // http://webhelp.esri.com/arcgisdesktop/9.2/index.cfm?TopicName=How%20Aspect%20works
         // Burrough, P. A. and McDonell, R.A., 1998. Principles of Geographical Information Systems
@@ -345,8 +359,6 @@ public class RasterFunctionalSurface {
     @SuppressWarnings("unused")
     private double getHillShade(GridCoordinates2D pos, final double azimuth, final double altitude,
             final double zFactor) {
-        final double _8DX = this.cellSize * 8;
-
         // http://webhelp.esri.com/arcgisdesktop/9.2/index.cfm?TopicName=How%20Hillshade%20works
         // Burrough, P. A. and McDonell, R.A., 1998. Principles of Geographical Information Systems
         // (Oxford University Press, New York), p. 190.
@@ -366,7 +378,7 @@ public class RasterFunctionalSurface {
         double dZdX = ((mx[2][0] + 2 * mx[2][1] + mx[2][2]) - (mx[0][0] + 2 * mx[0][1] + mx[0][2]))
                 / (_8DX);
         double dZdY = ((mx[0][2] + 2 * mx[1][2] + mx[2][2]) - (mx[0][0] + 2 * mx[1][0] + mx[2][0]))
-                / (_8DX);
+                / (_8DY);
         if (Double.isNaN(dZdX) || Double.isNaN(dZdY)) {
             return noData;
         }
@@ -408,8 +420,6 @@ public class RasterFunctionalSurface {
     }
 
     private double getSlope(GridCoordinates2D pos) {
-        final double _8DX = this.cellSize * 8;
-
         // http://webhelp.esri.com/arcgisdesktop/9.2/index.cfm?TopicName=How%20Slope%20works
         // Burrough, P. A. and McDonell, R.A., 1998. Principles of Geographical Information Systems
         // (Oxford University Press, New York), p. 190.
@@ -430,7 +440,7 @@ public class RasterFunctionalSurface {
         double dZdX = ((mx[2][0] + 2 * mx[2][1] + mx[2][2]) - (mx[0][0] + 2 * mx[0][1] + mx[0][2]))
                 / (_8DX);
         double dZdY = ((mx[0][2] + 2 * mx[1][2] + mx[2][2]) - (mx[0][0] + 2 * mx[1][0] + mx[2][0]))
-                / (_8DX);
+                / (_8DY);
         double rise_run = (dZdX * dZdX) + (dZdY * dZdY);
         if (Double.isNaN(rise_run)) {
             return noData;

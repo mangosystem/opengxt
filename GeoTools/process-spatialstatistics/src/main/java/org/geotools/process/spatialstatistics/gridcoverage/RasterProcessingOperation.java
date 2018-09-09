@@ -21,6 +21,7 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
+import java.awt.geom.AffineTransform;
 import java.awt.image.ColorModel;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
@@ -49,6 +50,7 @@ import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.data.DataStore;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.Transaction;
@@ -106,13 +108,15 @@ public abstract class RasterProcessingOperation {
     }
 
     public ProgressListener Progress = new NullProgressListener();
-    
+
     protected int MIN_CELL_COUNT = 600;
 
     // it is the shorter of the width or the height of the extent of the input point features
     // in the input spatial reference, divided by 250.
 
-    protected double CellSize = 30.0d;
+    protected double CellSizeX = 30.0d;
+
+    protected double CellSizeY = 30.0d;
 
     protected ReferencedEnvelope Extent = null;
 
@@ -398,7 +402,8 @@ public abstract class RasterProcessingOperation {
 
     protected void calculateExtentAndCellSize(ReferencedEnvelope srcExtent, Object noDataValue) {
         // calculate extent & cellsize
-        CellSize = this.getRasterEnvironment().getCellSize();
+        CellSizeX = this.getRasterEnvironment().getCellSizeX();
+        CellSizeY = this.getRasterEnvironment().getCellSizeY();
         NoData = Double.parseDouble(noDataValue.toString());
         Extent = this.getRasterEnvironment().getExtent();
 
@@ -408,21 +413,26 @@ public abstract class RasterProcessingOperation {
             boundUpdated = true;
         }
 
-        if (Double.isNaN(CellSize)) {
+        if (Double.isNaN(CellSizeX) && Double.isNaN(CellSizeX)) {
             // it is the shorter of the width or the height of the extent of the input point
             // features in the input spatial reference, divided by 250.
-            this.CellSize = Math.min(Extent.getWidth(), Extent.getHeight()) / 250.0;
+            this.CellSizeX = Math.min(Extent.getWidth(), Extent.getHeight()) / 250.0;
+            this.CellSizeY = Math.min(Extent.getWidth(), Extent.getHeight()) / 250.0;
         }
 
         if (boundUpdated) {
-            Extent.expandBy(CellSize / 2.0);
+            Extent.expandBy(CellSizeX / 2.0, CellSizeY / 2.0);
         }
     }
 
     protected DiskMemImage createDiskMemImage(GridCoverage2D srcCoverage,
             RasterPixelType transferType) {
         Extent = new ReferencedEnvelope(srcCoverage.getEnvelope());
-        CellSize = RasterHelper.getCellSize(srcCoverage);
+        GridGeometry2D gridGeometry2D = srcCoverage.getGridGeometry();
+        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+        CellSizeX = Math.abs(gridToWorld.getScaleX());
+        CellSizeY = Math.abs(gridToWorld.getScaleY());
 
         final RenderedImage img = srcCoverage.getRenderedImage();
         return createDiskMemImage(Extent, transferType, img.getTileWidth(), img.getTileHeight());
@@ -442,7 +452,7 @@ public abstract class RasterProcessingOperation {
         PixelType = transferType;
 
         // recalculate coverage extent
-        Extent = RasterHelper.getResolvedEnvelope(extent, CellSize);
+        Extent = RasterHelper.getResolvedEnvelope(extent, CellSizeX, CellSizeY);
 
         // initialize statistics
         MinValue = Double.MAX_VALUE;
@@ -480,7 +490,7 @@ public abstract class RasterProcessingOperation {
         }
 
         // Create a TiledImage using the SampleModel.
-        Dimension dm = RasterHelper.getDimension(Extent, CellSize);
+        Dimension dm = RasterHelper.getDimension(Extent, CellSizeX, CellSizeY);
 
         DiskMemImage diskMemImage = null;
         diskMemImage = new DiskMemImage(0, 0, dm.width, dm.height, 0, 0, sampleModel, cm);
@@ -504,6 +514,7 @@ public abstract class RasterProcessingOperation {
                 featureStore = (SimpleFeatureStore) sfs;
                 Transaction transaction = new DefaultTransaction(typeName);
                 featureStore.setTransaction(transaction);
+                return new FeatureInserter(featureStore);
             } else {
                 LOGGER.log(Level.FINE, sfs.getName().toString()
                         + " does not support SimpleFeatureStore interface!");
@@ -512,7 +523,7 @@ public abstract class RasterProcessingOperation {
             LOGGER.log(Level.FINE, e.getMessage(), e);
         }
 
-        return new FeatureInserter(featureStore);
+        return null;
     }
 
     protected GridCoverage2D createGridCoverage(CharSequence name, RenderedImage image,

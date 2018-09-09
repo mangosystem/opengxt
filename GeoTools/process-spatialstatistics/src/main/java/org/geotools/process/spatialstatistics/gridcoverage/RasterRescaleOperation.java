@@ -71,9 +71,8 @@ public class RasterRescaleOperation extends AbstractTransformationOperation {
         ReferencedEnvelope extent = new ReferencedEnvelope(inputCoverage.getEnvelope());
         GridGeometry2D gridGeometry2D = inputCoverage.getGridGeometry();
         AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
-        final double cellSizeX = Math.abs(gridToWorld.getScaleX()) * xScale;
-        final double cellSizeY = Math.abs(gridToWorld.getScaleY()) * yScale;
-        CellSize = Math.max(cellSizeX, cellSizeY);
+        CellSizeX = Math.abs(gridToWorld.getScaleX()) * xScale;
+        CellSizeY = Math.abs(gridToWorld.getScaleY()) * yScale;
 
         // 1. The output size is multiplied by the scale factor for both the x and y directions. The
         // number of columns and rows stays the same in this process, but the cell size is
@@ -87,8 +86,8 @@ public class RasterRescaleOperation extends AbstractTransformationOperation {
 
         // Rescale extent
         final PlanarImage inputImage = (PlanarImage) inputCoverage.getRenderedImage();
-        double maxX = extent.getMinX() + (inputImage.getWidth() * cellSizeX);
-        double maxY = extent.getMinY() + (inputImage.getHeight() * cellSizeY);
+        double maxX = extent.getMinX() + (inputImage.getWidth() * CellSizeX);
+        double maxY = extent.getMinY() + (inputImage.getHeight() * CellSizeY);
 
         CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
         Extent = new ReferencedEnvelope(extent.getMinX(), maxX, extent.getMinY(), maxY, crs);

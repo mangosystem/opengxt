@@ -35,6 +35,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Extracts the cell values of a raster based on a set of point features and records the values in the attribute table of an output feature class.
@@ -97,20 +98,22 @@ public class RasterExtractValuesToPointsOperation extends GeneralOperation {
                     continue;
                 }
 
+                Point position = geometry.getCentroid();
+
                 // do process
                 double val = noData;
                 switch (valueType) {
                 case Default:
-                    val = surface.getElevation(geometry.getCentroid());
+                    val = surface.getElevation(position);
                     break;
                 case SlopeAsDegree:
-                    val = surface.getSlope(geometry.getCentroid(), SlopeType.Degree);
+                    val = surface.getSlope(position, SlopeType.Degree);
                     break;
                 case SlopeAsPercentrise:
-                    val = surface.getSlope(geometry.getCentroid(), SlopeType.Percentrise);
+                    val = surface.getSlope(position, SlopeType.Percentrise);
                     break;
                 case Aspect:
-                    val = surface.getAspect(geometry.getCentroid());
+                    val = surface.getAspect(position);
                     break;
                 }
 

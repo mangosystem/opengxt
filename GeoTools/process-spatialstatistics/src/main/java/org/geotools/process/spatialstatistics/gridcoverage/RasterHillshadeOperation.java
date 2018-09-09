@@ -59,7 +59,8 @@ public class RasterHillshadeOperation extends AbstractSurfaceOperation {
         grid2D = inputGc;
         srcNoData = RasterHelper.getNoDataValue(inputGc);
         NoData = -9999;
-        _8DX = this.CellSize * 8;
+        _8DX = this.CellSizeX * 8;
+        _8DY = this.CellSizeY * 8;
 
         final java.awt.Rectangle bounds = outputImage.getBounds();
         WritableRectIter writer = RectIterFactory.createWritable(outputImage, bounds);
@@ -110,7 +111,7 @@ public class RasterHillshadeOperation extends AbstractSurfaceOperation {
         double dZdX = ((mx[2][0] + 2 * mx[2][1] + mx[2][2]) - (mx[0][0] + 2 * mx[0][1] + mx[0][2]))
                 / (_8DX);
         double dZdY = ((mx[0][2] + 2 * mx[1][2] + mx[2][2]) - (mx[0][0] + 2 * mx[1][0] + mx[2][0]))
-                / (_8DX);
+                / (_8DY);
 
         if (Double.isNaN(dZdX) || Double.isNaN(dZdY) || Double.isInfinite(dZdX)
                 || Double.isInfinite(dZdY)) {

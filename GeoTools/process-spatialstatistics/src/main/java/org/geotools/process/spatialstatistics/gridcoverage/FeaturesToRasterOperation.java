@@ -256,7 +256,7 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
         PixelType = transferType;
 
         // recalculate coverage extent
-        Extent = RasterHelper.getResolvedEnvelope(Extent, CellSize);
+        Extent = RasterHelper.getResolvedEnvelope(Extent, CellSizeX, CellSizeY);
 
         final int tw = 64;
         final int th = 64;
@@ -264,7 +264,7 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
         ColorModel colorModel = ColorModel.getRGBdefault();
         SampleModel smpModel = colorModel.createCompatibleSampleModel(tw, th);
 
-        Dimension dim = RasterHelper.getDimension(Extent, CellSize);
+        Dimension dim = RasterHelper.getDimension(Extent, CellSizeX, CellSizeY);
 
         dmImage = new DiskMemImage(0, 0, dim.width, dim.height, 0, 0, smpModel, colorModel);
         dmImage.setUseCommonCache(true);
@@ -362,8 +362,8 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
 
         // Offset like ArcGIS
         if (shapeType == SimpleShapeType.POLYGON) {
-            xOffset = CellSize / 2.0;
-            yOffset = CellSize / 2.0;
+            xOffset = CellSizeX / 2.0;
+            yOffset = CellSizeY / 2.0;
         }
 
         for (int i = 0; i < cs.length; i++) {

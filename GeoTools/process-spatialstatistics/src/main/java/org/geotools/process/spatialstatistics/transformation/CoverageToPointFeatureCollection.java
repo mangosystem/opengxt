@@ -59,16 +59,23 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
     protected static final Logger LOGGER = Logging
             .getLogger(CoverageToPointFeatureCollection.class);
 
-    static final String VALUE_FIELD = "Value";
+    static String VALUE_FIELD = "Value";
 
     private SimpleFeatureType schema;
 
     private GridCoverage2D coverage;
 
+    private int bandIndex = 0; // default
+
     public CoverageToPointFeatureCollection(GridCoverage2D coverage) {
+        this(coverage, 0);
+    }
+
+    public CoverageToPointFeatureCollection(GridCoverage2D coverage, int bandIndex) {
         super(null);
 
         this.coverage = coverage;
+        this.bandIndex = bandIndex;
         this.schema = createTemplateFeature(coverage);
     }
 
@@ -89,6 +96,9 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
         case DOUBLE:
             schema = FeatureTypes.add(schema, VALUE_FIELD, Double.class);
             break;
+        default:
+            schema = FeatureTypes.add(schema, VALUE_FIELD, Double.class);
+            break;
         }
 
         return schema;
@@ -96,7 +106,7 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
 
     @Override
     public SimpleFeatureIterator features() {
-        return new CoverageToPointFeatureIterator(coverage, getSchema());
+        return new CoverageToPointFeatureIterator(coverage, bandIndex, getSchema());
     }
 
     @Override
@@ -136,6 +146,8 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
 
         private int column = 0;
 
+        private int bandIndex = 0; // default
+
         private double noData;
 
         private GridTransformer trans;
@@ -148,14 +160,14 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
 
         private List<Coordinate> coordinates = new ArrayList<Coordinate>();
 
-        public CoverageToPointFeatureIterator(GridCoverage2D coverage, SimpleFeatureType schema) {
+        public CoverageToPointFeatureIterator(GridCoverage2D coverage, int bandIndex,
+                SimpleFeatureType schema) {
+            this.bandIndex = bandIndex;
             this.noData = RasterHelper.getNoDataValue(coverage);
             this.builder = new SimpleFeatureBuilder(schema);
             this.typeName = coverage.getName().toString();
             this.pixelType = RasterHelper.getTransferType(coverage);
-
-            ReferencedEnvelope extent = new ReferencedEnvelope(coverage.getEnvelope());
-            this.trans = new GridTransformer(extent, RasterHelper.getCellSize(coverage));
+            this.trans = new GridTransformer(coverage.getGridGeometry());
 
             PlanarImage inputImage = (PlanarImage) coverage.getRenderedImage();
             this.readIter = RectIterFactory.create(inputImage, inputImage.getBounds());
@@ -174,7 +186,7 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
             column = 0;
             readIter.startPixels();
             while (!readIter.finishedPixels()) {
-                double sampleValue = readIter.getSampleDouble(0);
+                double sampleValue = readIter.getSampleDouble(bandIndex);
                 if (!SSUtils.compareDouble(noData, sampleValue)) {
                     Coordinate coord = trans.gridToWorldCoordinate(column, row);
                     coord.z = sampleValue;
@@ -198,18 +210,7 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
 
                     next = builder.buildFeature(buildID(typeName, ++featureID));
                     next.setDefaultGeometry(gf.createPoint(coord));
-
-                    switch (pixelType) {
-                    case BYTE:
-                    case SHORT:
-                    case INTEGER:
-                        next.setAttribute(VALUE_FIELD, (int) coord.z);
-                        break;
-                    case FLOAT:
-                    case DOUBLE:
-                        next.setAttribute(VALUE_FIELD, coord.z);
-                        break;
-                    }
+                    next.setAttribute(VALUE_FIELD, getPixelValue(coord.z, pixelType));
 
                     coordinates.remove(0);
                 }
@@ -226,6 +227,20 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
             SimpleFeature result = next;
             next = null;
             return result;
+        }
+
+        private Object getPixelValue(double curVal, RasterPixelType pixelType) {
+            switch (pixelType) {
+            case BYTE:
+            case SHORT:
+            case INTEGER:
+                return (int) curVal;
+            case FLOAT:
+            case DOUBLE:
+                return curVal;
+            }
+
+            return curVal;
         }
     }
 }

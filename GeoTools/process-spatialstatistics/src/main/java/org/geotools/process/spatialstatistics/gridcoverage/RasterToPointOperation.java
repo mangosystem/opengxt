@@ -25,7 +25,6 @@ import javax.media.jai.iterator.RectIterFactory;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
@@ -83,9 +82,7 @@ public class RasterToPointOperation extends GeneralOperation {
         }
 
         double noData = RasterHelper.getNoDataValue(inputGc);
-        double cellSize = RasterHelper.getCellSize(inputGc);
-        ReferencedEnvelope extent = new ReferencedEnvelope(inputGc.getEnvelope());
-        GridTransformer trans = new GridTransformer(extent, cellSize);
+        GridTransformer trans = new GridTransformer(inputGc);
 
         // prepare transactional feature store
         IFeatureInserter featureWriter = getFeatureWriter(featureType);

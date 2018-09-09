@@ -70,8 +70,9 @@ public class RasterEuclideanDistanceOperation extends RasterProcessingOperation 
             int featureCount = inputFeatures.subCollection(filter).size();
             if (featureCount == 0) {
                 // 1. feature to raster as origin extent
-                process.getRasterEnvironment().setCellSize(getRasterEnvironment().getCellSize());
                 process.getRasterEnvironment().setExtent(inputFeatures.getBounds());
+                process.getRasterEnvironment().setCellSizeX(getRasterEnvironment().getCellSizeX());
+                process.getRasterEnvironment().setCellSizeY(getRasterEnvironment().getCellSizeY());
 
                 GridCoverage2D distGc = process.execute(inputFeatures, gridVal);
 
@@ -313,7 +314,7 @@ public class RasterEuclideanDistanceOperation extends RasterProcessingOperation 
             if (val == INT_MAX) {
                 outputImage.setSample(col, row, 0, NoData);
             } else {
-                double distance = Math.sqrt(val) * CellSize;
+                double distance = Math.sqrt(val) * CellSizeX;
                 if (maximumDistance < distance) {
                     outputImage.setSample(col, row, 0, NoData);
                 } else {

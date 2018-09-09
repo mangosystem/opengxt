@@ -25,6 +25,8 @@
     <bean id="GeometryGeoJSONPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GeometryGeoJSONPPIO" />
     <bean id="ExpressionPPIO" class="org.geoserver.wps.spatialstatistics.ppio.ExpressionPPIO" />
     <bean id="BoundingBoxDataPPIO" class="org.geoserver.wps.spatialstatistics.ppio.BoundingBoxDataPPIO" />
+    <bean id="GeoJSONFeaturesPPIO2" class="org.geoserver.wps.spatialstatistics.ppio.ApplicationGeoJSONPPIO.FeatureCollections2" />
+    <bean id="GeoJSONGeometriesPPIO2" class="org.geoserver.wps.spatialstatistics.ppio.ApplicationGeoJSONPPIO.Geometries2" />
     <!-- bean id="GridCoverageURLPPIO" class="org.geoserver.wps.spatialstatistics.ppio.GridCoverageURLPPIO">
         <constructor-arg ref="geoServer" />
         <constructor-arg ref="wpsResourceManager" />

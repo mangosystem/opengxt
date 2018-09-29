@@ -16,7 +16,6 @@
  */
 package org.geotools.process.spatialstatistics;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -28,7 +27,7 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.gridcoverage.RasterToPointOperation;
+import org.geotools.process.spatialstatistics.transformation.CoverageToPointFeatureCollection;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
 
@@ -94,13 +93,8 @@ public class RasterToPointProcess extends AbstractStatisticsProcess {
                 RasterToPointProcessFactory.retainNoData.sample);
 
         // start process
-        SimpleFeatureCollection resultFc = null;
-        try {
-            RasterToPointOperation process = new RasterToPointOperation();
-            resultFc = process.execute(inputCoverage, bandIndex, valueField, retainNoData);
-        } catch (IOException e) {
-            throw new ProcessException(e);
-        }
+        SimpleFeatureCollection resultFc = new CoverageToPointFeatureCollection(inputCoverage,
+                bandIndex, valueField, retainNoData);
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

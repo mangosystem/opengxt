@@ -76,10 +76,17 @@ public class RasterHelper {
 
     public static void describe(GridCoverage2D gc) {
         System.out.println("Name = " + gc.getName());
-        System.out.println("CellSize = " + RasterHelper.getCellSize(gc));
+
+        GridGeometry2D gridGeometry2D = gc.getGridGeometry();
+        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+        double cellSizeX = Math.abs(gridToWorld.getScaleX());
+        double cellSizeY = Math.abs(gridToWorld.getScaleY());
+        System.out.println("CellSizeX = " + cellSizeX);
+        System.out.println("CellSizeY = " + cellSizeY);
 
         final RenderedImage image = gc.getRenderedImage();
-        System.out.println("Colomns = " + image.getWidth());
+        System.out.println("Columns = " + image.getWidth());
         System.out.println("Rows = " + image.getHeight());
         System.out.println("NumberOfBands = " + gc.getNumSampleDimensions());
 

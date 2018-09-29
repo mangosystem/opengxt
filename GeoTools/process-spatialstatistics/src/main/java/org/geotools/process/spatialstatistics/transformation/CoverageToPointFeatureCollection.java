@@ -59,6 +59,8 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
     protected static final Logger LOGGER = Logging
             .getLogger(CoverageToPointFeatureCollection.class);
 
+    static final String ID_FIELD = "id";
+
     static String VALUE_FIELD = "Value";
 
     private SimpleFeatureType schema;
@@ -67,15 +69,31 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
 
     private int bandIndex = 0; // default
 
+    private String valueField = VALUE_FIELD;
+
+    private boolean retainNoData = Boolean.FALSE;
+
     public CoverageToPointFeatureCollection(GridCoverage2D coverage) {
         this(coverage, 0);
     }
 
     public CoverageToPointFeatureCollection(GridCoverage2D coverage, int bandIndex) {
+        this(coverage, bandIndex, VALUE_FIELD);
+    }
+
+    public CoverageToPointFeatureCollection(GridCoverage2D coverage, Integer bandIndex,
+            String valueField) {
+        this(coverage, bandIndex, valueField, Boolean.FALSE);
+    }
+
+    public CoverageToPointFeatureCollection(GridCoverage2D coverage, Integer bandIndex,
+            String valueField, boolean retainNoData) {
         super(null);
 
         this.coverage = coverage;
         this.bandIndex = bandIndex;
+        this.valueField = valueField == null || valueField.isEmpty() ? VALUE_FIELD : valueField;
+        this.retainNoData = retainNoData;
         this.schema = createTemplateFeature(coverage);
     }
 
@@ -83,21 +101,24 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
         String typeName = coverage.getName().toString();
         SimpleFeatureType schema = FeatureTypes.getDefaultType(typeName, Point.class,
                 coverage.getCoordinateReferenceSystem());
-        schema = FeatureTypes.add(schema, typeName, Double.class);
+        schema = FeatureTypes.add(schema, ID_FIELD, Integer.class);
 
         RasterPixelType pixelType = RasterHelper.getTransferType(coverage);
         switch (pixelType) {
         case BYTE:
         case SHORT:
         case INTEGER:
-            schema = FeatureTypes.add(schema, VALUE_FIELD, Integer.class);
+            schema = FeatureTypes.add(schema, typeName, Integer.class);
+            schema = FeatureTypes.add(schema, valueField, Integer.class);
             break;
         case FLOAT:
         case DOUBLE:
-            schema = FeatureTypes.add(schema, VALUE_FIELD, Double.class);
+            schema = FeatureTypes.add(schema, typeName, Double.class);
+            schema = FeatureTypes.add(schema, valueField, Double.class);
             break;
         default:
-            schema = FeatureTypes.add(schema, VALUE_FIELD, Double.class);
+            schema = FeatureTypes.add(schema, typeName, Double.class);
+            schema = FeatureTypes.add(schema, valueField, Double.class);
             break;
         }
 
@@ -106,7 +127,8 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
 
     @Override
     public SimpleFeatureIterator features() {
-        return new CoverageToPointFeatureIterator(coverage, bandIndex, getSchema());
+        return new CoverageToPointFeatureIterator(coverage, bandIndex, valueField, retainNoData,
+                getSchema());
     }
 
     @Override
@@ -140,13 +162,19 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
 
         private RectIter readIter;
 
+        private java.awt.Rectangle bounds;
+
         private String typeName;
 
-        private int row = 0;
+        private int currentRow = 0;
 
-        private int column = 0;
+        private int rowCount = 0;
 
-        private int bandIndex = 0; // default
+        private int bandIndex = 0;
+
+        private String valueField = "value";
+
+        private boolean retainNoData = Boolean.FALSE;
 
         private double noData;
 
@@ -161,8 +189,10 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
         private List<Coordinate> coordinates = new ArrayList<Coordinate>();
 
         public CoverageToPointFeatureIterator(GridCoverage2D coverage, int bandIndex,
-                SimpleFeatureType schema) {
+                String valueField, boolean retainNoData, SimpleFeatureType schema) {
             this.bandIndex = bandIndex;
+            this.valueField = valueField;
+            this.retainNoData = retainNoData;
             this.noData = RasterHelper.getNoDataValue(coverage);
             this.builder = new SimpleFeatureBuilder(schema);
             this.typeName = coverage.getName().toString();
@@ -170,9 +200,11 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
             this.trans = new GridTransformer(coverage.getGridGeometry());
 
             PlanarImage inputImage = (PlanarImage) coverage.getRenderedImage();
-            this.readIter = RectIterFactory.create(inputImage, inputImage.getBounds());
+            this.readIter = RectIterFactory.create(inputImage, bounds);
+            this.bounds = inputImage.getBounds();
 
-            row = 0;
+            currentRow = 0;
+            rowCount = inputImage.getHeight();
             this.readIter.startLines();
         }
 
@@ -183,34 +215,44 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
 
         private void extractValues() {
             coordinates.clear();
-            column = 0;
+            int column = bounds.x;
+            int row = bounds.y + currentRow;
             readIter.startPixels();
             while (!readIter.finishedPixels()) {
                 double sampleValue = readIter.getSampleDouble(bandIndex);
-                if (!SSUtils.compareDouble(noData, sampleValue)) {
+                if (retainNoData) {
                     Coordinate coord = trans.gridToWorldCoordinate(column, row);
                     coord.z = sampleValue;
                     coordinates.add(coord);
+                } else {
+                    if (!SSUtils.compareDouble(noData, sampleValue)) {
+                        Coordinate coord = trans.gridToWorldCoordinate(column, row);
+                        coord.z = sampleValue;
+                        coordinates.add(coord);
+                    }
                 }
                 column++;
                 readIter.nextPixel();
             }
-            row++;
+            currentRow++;
             readIter.nextLine();
         }
 
         public boolean hasNext() {
-            while (next == null && !readIter.finishedLines()) {
+            while (next == null && (rowCount > currentRow || coordinates.size() > 0)) {
                 if (coordinates.size() == 0) {
                     extractValues();
                 }
 
                 if (coordinates.size() > 0) {
                     Coordinate coord = coordinates.get(0);
+                    Object value = getPixelValue(coord.z, pixelType);
 
                     next = builder.buildFeature(buildID(typeName, ++featureID));
                     next.setDefaultGeometry(gf.createPoint(coord));
-                    next.setAttribute(VALUE_FIELD, getPixelValue(coord.z, pixelType));
+                    next.setAttribute(ID_FIELD, featureID);
+                    next.setAttribute(typeName, value);
+                    next.setAttribute(valueField, value);
 
                     coordinates.remove(0);
                 }

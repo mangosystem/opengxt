@@ -77,24 +77,18 @@ public class RasterHighLowPointsOperation extends GeneralOperation {
         // 1. find points
         final double noData = RasterHelper.getNoDataValue(coverage);
         PlanarImage inputImage = (PlanarImage) coverage.getRenderedImage();
-        RectIter readIter = RectIterFactory.create(inputImage, inputImage.getBounds());
+        java.awt.Rectangle inputBounds = inputImage.getBounds();
+        RectIter readIter = RectIterFactory.create(inputImage, inputBounds);
 
-        GridGeometry2D gridGeometry2D = coverage.getGridGeometry();
-        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
-
-        double cellSizeX = Math.abs(gridToWorld.getScaleX());
-        double cellSizeY = Math.abs(gridToWorld.getScaleY());
-
-        ReferencedEnvelope extent = new ReferencedEnvelope(coverage.getEnvelope());
-        GridTransformer trans = new GridTransformer(extent, cellSizeX, cellSizeY);
+        GridTransformer trans = new GridTransformer(coverage);
 
         HighLowPosition high = new HighLowPosition(Double.MIN_VALUE);
         HighLowPosition low = new HighLowPosition(Double.MAX_VALUE);
 
-        int row = 0;
+        int row = inputBounds.y;
         readIter.startLines();
         while (!readIter.finishedLines()) {
-            int column = 0;
+            int column = inputBounds.x;
             readIter.startPixels();
             while (!readIter.finishedPixels()) {
                 double sampleValue = readIter.getSampleDouble(bandIndex);

@@ -64,15 +64,16 @@ public class RasterExtractionOperation extends RasterProcessingOperation {
         this.NoData = RasterHelper.getNoDataValue(inputGc);
         GridTransformer trans = new GridTransformer(inputGc.getGridGeometry());
 
-        RectIter inputIter = RectIterFactory.create(inputImage, inputImage.getBounds());
+        java.awt.Rectangle inputBounds = inputImage.getBounds();
+        RectIter inputIter = RectIterFactory.create(inputImage, inputBounds);
         WritableRectIter writerIter = RectIterFactory.createWritable(outputImage,
                 outputImage.getBounds());
 
-        int row = 0;
+        int row = inputBounds.y;
         inputIter.startLines();
         writerIter.startLines();
         while (!inputIter.finishedLines() && !writerIter.finishedLines()) {
-            int column = 0;
+            int column = inputBounds.x;
             inputIter.startPixels();
             writerIter.startPixels();
             while (!inputIter.finishedPixels() && !writerIter.finishedPixels()) {

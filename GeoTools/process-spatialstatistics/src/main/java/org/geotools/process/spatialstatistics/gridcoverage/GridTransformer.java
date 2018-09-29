@@ -247,4 +247,38 @@ public class GridTransformer {
         int row = getRow(y);
         return new GridCoordinates2D(column, row);
     }
+
+    public java.awt.Rectangle worldToGridBounds(ReferencedEnvelope envelope) {
+        int x = getColumn(envelope.getMinX());
+        int y = getRow(envelope.getMaxY());
+
+        int width = (int) Math.ceil((envelope.getWidth() / dx) + 0.5);
+        int height = (int) Math.ceil((envelope.getHeight() / dy) + 0.5);
+
+        if (x < 0) {
+            width += x;
+            x = 0;
+        } else if (x >= columns) {
+            x = columns;
+            width = 0;
+        }
+
+        if (y < 0) {
+            height += y;
+            y = 0;
+        } else if (y >= rows) {
+            y = rows;
+            height = 0;
+        }
+
+        if ((x + width) > columns) {
+            width = columns - x;
+        }
+
+        if ((y + height) > rows) {
+            height = rows - y;
+        }
+
+        return new java.awt.Rectangle(x, y, width, height);
+    }
 }

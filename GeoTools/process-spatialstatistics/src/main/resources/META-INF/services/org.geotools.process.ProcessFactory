@@ -119,6 +119,7 @@ org.geotools.process.spatialstatistics.SpatialClumpMapProcessFactory
 org.geotools.process.spatialstatistics.NearestNeighborCountProcessFactory
 
 org.geotools.process.spatialstatistics.RasterToPointProcessFactory
+org.geotools.process.spatialstatistics.RasterToGridPolygonProcessFactory
 org.geotools.process.spatialstatistics.RasterToPolygonProcessFactory
 org.geotools.process.spatialstatistics.ExtractValuesToPointsProcessFactory
 

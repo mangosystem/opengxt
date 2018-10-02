@@ -39,23 +39,24 @@ import org.jaitools.tiledimage.DiskMemImage;
 public class RasterTPIOperation extends AbstractSurfaceOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterTPIOperation.class);
 
+    public RasterTPIOperation() {
+
+    }
+
     public GridCoverage2D execute(GridCoverage2D inputGc) {
+        this.initSurface(inputGc);
+
         DiskMemImage outputImage = this.createDiskMemImage(inputGc, RasterPixelType.FLOAT);
-
-        grid2D = inputGc;
-        srcNoData = RasterHelper.getNoDataValue(inputGc);
-        NoData = -9999;
-
-        final java.awt.Rectangle bounds = outputImage.getBounds();
-        WritableRectIter writer = RectIterFactory.createWritable(outputImage, bounds);
+        WritableRectIter writer = RectIterFactory.createWritable(outputImage,
+                outputImage.getBounds());
 
         GridCoordinates2D pos = new GridCoordinates2D();
 
-        int y = 0;
+        int y = bounds.y;
         writer.startLines();
         while (!writer.finishedLines()) {
 
-            int x = 0;
+            int x = bounds.x;
             writer.startPixels();
             while (!writer.finishedPixels()) {
                 pos.setLocation(x, y);
@@ -79,7 +80,7 @@ public class RasterTPIOperation extends AbstractSurfaceOperation {
         // | 3 4 5 |>| d e f |
         // | 6 7 8 | | g h i |
         // +-------+ +-------+
-        double[][] mx = getSubMatrix(grid2D, pos, 3, 3);
+        double[][] mx = getSubMatrix(pos, 3, 3);
         if (Double.isNaN(mx[1][1]) || SSUtils.compareDouble(srcNoData, mx[1][1])) {
             writer.setSample(0, NoData);
             return;

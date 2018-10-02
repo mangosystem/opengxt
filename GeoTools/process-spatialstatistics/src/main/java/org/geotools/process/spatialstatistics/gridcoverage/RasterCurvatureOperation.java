@@ -51,16 +51,16 @@ public class RasterCurvatureOperation extends AbstractSurfaceOperation {
 
     private double y2L;
 
+    public RasterCurvatureOperation() {
+
+    }
+
     public GridCoverage2D execute(GridCoverage2D inputGc) {
         return execute(inputGc, 1.0);
     }
 
     public GridCoverage2D execute(GridCoverage2D inputGc, double zFactor) {
-        DiskMemImage outputImage = this.createDiskMemImage(inputGc, RasterPixelType.FLOAT);
-
-        grid2D = inputGc;
-        srcNoData = RasterHelper.getNoDataValue(inputGc);
-        NoData = -9999;
+        this.initSurface(inputGc);
 
         xL2 = CellSizeX * CellSizeX;
         x2L = 2.0 * CellSizeX;
@@ -68,16 +68,17 @@ public class RasterCurvatureOperation extends AbstractSurfaceOperation {
         yL2 = CellSizeY * CellSizeY;
         y2L = 2.0 * CellSizeY;
 
-        final java.awt.Rectangle bounds = outputImage.getBounds();
-        WritableRectIter writer = RectIterFactory.createWritable(outputImage, bounds);
+        DiskMemImage outputImage = this.createDiskMemImage(inputGc, RasterPixelType.FLOAT);
+        WritableRectIter writer = RectIterFactory.createWritable(outputImage,
+                outputImage.getBounds());
 
         GridCoordinates2D pos = new GridCoordinates2D();
 
-        int y = 0;
+        int y = bounds.y;
         writer.startLines();
         while (!writer.finishedLines()) {
 
-            int x = 0;
+            int x = bounds.x;
             writer.startPixels();
             while (!writer.finishedPixels()) {
                 pos.setLocation(x, y);
@@ -101,7 +102,7 @@ public class RasterCurvatureOperation extends AbstractSurfaceOperation {
         // Topography.
         // Earth Surface Processes and Landforms 12: 47–56.
 
-        double[][] mx = getSubMatrix(grid2D, pos, 3, 3, zFactor);
+        double[][] mx = getSubMatrix(pos, 3, 3, zFactor);
         if (Double.isNaN(mx[1][1]) || SSUtils.compareDouble(srcNoData, mx[1][1])) {
             writer.setSample(0, NoData);
             return;

@@ -17,12 +17,15 @@
 package org.geotools.process.spatialstatistics.gridcoverage;
 
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
-import java.awt.image.RenderedImage;
 import java.util.logging.Logger;
+
+import javax.media.jai.PlanarImage;
 
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.util.logging.Logging;
 
@@ -36,40 +39,60 @@ import org.geotools.util.logging.Logging;
 public abstract class AbstractSurfaceOperation extends RasterProcessingOperation {
     protected static final Logger LOGGER = Logging.getLogger(AbstractSurfaceOperation.class);
 
-    protected GridCoverage2D grid2D;
-
     protected double srcNoData = -Float.MAX_VALUE;
 
     protected double _8DX = CellSizeX * 8;
 
     protected double _8DY = CellSizeY * 8;
 
-    protected double[][] getSubMatrix(GridCoverage2D gc, GridCoordinates2D pos, int width,
-            int height) {
-        return getSubMatrix(gc, pos, width, height, 1.0);
+    protected PlanarImage image;
+
+    protected java.awt.Rectangle bounds;
+
+    protected void initSurface(GridCoverage2D gc) {
+        GridGeometry2D gridGeometry2D = gc.getGridGeometry();
+        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+        CellSizeX = Math.abs(gridToWorld.getScaleX());
+        CellSizeY = Math.abs(gridToWorld.getScaleY());
+
+        srcNoData = RasterHelper.getNoDataValue(gc);
+        NoData = -9999;
+
+        _8DX = CellSizeX * 8;
+        _8DY = CellSizeY * 8;
+
+        image = (PlanarImage) gc.getRenderedImage();
+        bounds = image.getBounds();
+
     }
 
-    protected double[][] getSubMatrix(GridCoverage2D gc, GridCoordinates2D pos, int width,
-            int height, double zFactor) {
-        final int posX = width / 2;
-        final int posY = height / 2;
+    protected double[][] getSubMatrix(GridCoordinates2D pos, int width, int height) {
+        return getSubMatrix(pos, width, height, 1.0);
+    }
+
+    protected double[][] getSubMatrix(GridCoordinates2D pos, int width, int height, double zFactor) {
+        int posX = width / 2;
+        int posY = height / 2;
 
         // upper-left corner
-        final GridCoordinates2D ulPos = new GridCoordinates2D(pos.x - posX, pos.y - posY);
-        final Rectangle rect = new Rectangle(ulPos.x, ulPos.y, width, height);
+        GridCoordinates2D ulPos = new GridCoordinates2D(pos.x - posX, pos.y - posY);
+        Rectangle rect = new Rectangle(ulPos.x, ulPos.y, width, height);
 
-        final RenderedImage image = gc.getRenderedImage();
-        final Raster subsetRs = image.getData(rect);
+        Raster subsetRs = image.getData(rect);
+
+        int maxCol = bounds.x + image.getWidth();
+        int maxRow = bounds.y + image.getHeight();
 
         boolean hasNAN = false;
         double[][] mx = new double[width][height];
-        for (int dy = ulPos.y, drow = 0; drow < subsetRs.getHeight(); dy++, drow++) {
-            for (int dx = ulPos.x, dcol = 0; dcol < subsetRs.getWidth(); dx++, dcol++) {
-                if (dx < 0 || dy < 0 || dx >= image.getWidth() || dy >= image.getHeight()) {
+        for (int dy = ulPos.y, drow = 0; drow < height; dy++, drow++) {
+            for (int dx = ulPos.x, dcol = 0; dcol < width; dx++, dcol++) {
+                if (dx < 0 || dy < 0 || dx >= maxCol || dy >= maxRow) {
                     mx[dcol][drow] = Double.NaN;
                     hasNAN = true;
                 } else {
-                    final double ret = subsetRs.getSampleDouble(dx, dy, 0);
+                    double ret = subsetRs.getSampleDouble(dx, dy, 0);
                     if (SSUtils.compareDouble(ret, this.srcNoData)) {
                         mx[dcol][drow] = Double.NaN;
                         hasNAN = true;
@@ -86,8 +109,7 @@ public abstract class AbstractSurfaceOperation extends RasterProcessingOperation
 
         // http://help.arcgis.com/en/arcgisdesktop/10.0/help/index.html#/How_Slope_works/009z000000vz000000/
         // If any neighborhood cells are NoData, they are assigned the value of the center cell;
-        // then the slope is computed.they are assigned the value of the center cell; then the slope
-        // is computed.
+        // then the slope is computed.
         if (hasNAN) {
             for (int drow = 0; drow < height; drow++) {
                 for (int dcol = 0; dcol < width; dcol++) {

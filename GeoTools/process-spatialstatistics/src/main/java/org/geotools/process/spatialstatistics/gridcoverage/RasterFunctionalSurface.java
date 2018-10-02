@@ -19,11 +19,12 @@ package org.geotools.process.spatialstatistics.gridcoverage;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
-import java.awt.image.RenderedImage;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.media.jai.PlanarImage;
 
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -67,6 +68,10 @@ public class RasterFunctionalSurface {
 
     private GridCoverage2D grid2D;
 
+    private PlanarImage image;
+
+    private java.awt.Rectangle bounds;
+
     private Double noData = Double.NaN;
 
     private double cellSizeX = 0;
@@ -91,6 +96,9 @@ public class RasterFunctionalSurface {
         this._8DY = cellSizeY * 8;
 
         this.noData = RasterHelper.getNoDataValue(srcCoverage);
+
+        image = (PlanarImage) srcCoverage.getRenderedImage();
+        bounds = image.getBounds();
     }
 
     public LineString getLineOfSight(Coordinate observer, Coordinate target, double observerOffset,
@@ -324,7 +332,7 @@ public class RasterFunctionalSurface {
         // | 3 4 5 |>| d e f |
         // | 6 7 8 | | g h i |
         // +-------+ +-------+
-        double[][] mx = getSubMatrix(grid2D, pos, 3, 3);
+        double[][] mx = getSubMatrix(pos, 3, 3);
         if (noData == mx[1][1]) {
             return noData;
         }
@@ -370,7 +378,7 @@ public class RasterFunctionalSurface {
         // | 3 4 5 |>| d e f |
         // | 6 7 8 | | g h i |
         // +-------+ +-------+
-        double[][] mx = getSubMatrix(grid2D, pos, 3, 3);
+        double[][] mx = getSubMatrix(pos, 3, 3);
         if (noData == mx[1][1]) {
             return noData;
         }
@@ -432,7 +440,7 @@ public class RasterFunctionalSurface {
         // | 3 4 5 |>| d e f |
         // | 6 7 8 | | g h i |
         // +-------+ +-------+
-        double[][] mx = getSubMatrix(grid2D, pos, 3, 3);
+        double[][] mx = getSubMatrix(pos, 3, 3);
         if (noData == mx[1][1]) {
             return noData;
         }
@@ -449,27 +457,28 @@ public class RasterFunctionalSurface {
         return Math.atan(Math.sqrt(rise_run));
     }
 
-    private double[][] getSubMatrix(GridCoverage2D gc, GridCoordinates2D pos, int width, int height) {
-        return getSubMatrix(gc, pos, width, height, 1.0);
+    private double[][] getSubMatrix(GridCoordinates2D pos, int width, int height) {
+        return getSubMatrix(pos, width, height, 1.0);
     }
 
-    private double[][] getSubMatrix(GridCoverage2D gc, GridCoordinates2D pos, int width,
-            int height, double zFactor) {
-        final int posX = width / 2;
-        final int posY = height / 2;
+    private double[][] getSubMatrix(GridCoordinates2D pos, int width, int height, double zFactor) {
+        int posX = width / 2;
+        int posY = height / 2;
 
         // upper-left corner
-        final GridCoordinates2D ulPos = new GridCoordinates2D(pos.x - posX, pos.y - posY);
-        final Rectangle rect = new Rectangle(ulPos.x, ulPos.y, width, height);
+        GridCoordinates2D ulPos = new GridCoordinates2D(pos.x - posX, pos.y - posY);
+        Rectangle rect = new Rectangle(ulPos.x, ulPos.y, width, height);
 
-        final RenderedImage image = gc.getRenderedImage();
-        final Raster subsetRs = image.getData(rect);
+        Raster subsetRs = image.getData(rect);
+
+        int maxCol = bounds.x + image.getWidth();
+        int maxRow = bounds.y + image.getHeight();
 
         boolean hasNAN = false;
         double[][] mx = new double[width][height];
         for (int dy = ulPos.y, drow = 0; drow < subsetRs.getHeight(); dy++, drow++) {
             for (int dx = ulPos.x, dcol = 0; dcol < subsetRs.getWidth(); dx++, dcol++) {
-                if (dx < 0 || dy < 0 || dx >= image.getWidth() || dy >= image.getHeight()) {
+                if (dx < 0 || dy < 0 || dx >= maxCol || dy >= maxRow) {
                     mx[dcol][drow] = Double.NaN;
                     hasNAN = true;
                 } else {

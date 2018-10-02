@@ -85,15 +85,23 @@ public class RasterHelper {
         System.out.println("CellSizeX = " + cellSizeX);
         System.out.println("CellSizeY = " + cellSizeY);
 
-        final RenderedImage image = gc.getRenderedImage();
+        PlanarImage image = (PlanarImage) gc.getRenderedImage();
         System.out.println("Columns = " + image.getWidth());
         System.out.println("Rows = " + image.getHeight());
         System.out.println("NumberOfBands = " + gc.getNumSampleDimensions());
+        System.out.println("Bounds = " + image.getBounds());
 
         System.out.println("PixelType = " + RasterHelper.getTransferType(gc));
         System.out.println("NoData = " + RasterHelper.getNoDataValue(gc));
 
         System.out.println("Extent = " + gc.getEnvelope());
+
+        CoordinateReferenceSystem crs = gc.getCoordinateReferenceSystem();
+        if (crs != null) {
+            System.out.println(crs.toWKT());
+        } else {
+            System.out.println("CoordinateReferenceSystem is null!");
+        }
     }
 
     public static GridCoverage2D openGridCoverage(File gridFile) {

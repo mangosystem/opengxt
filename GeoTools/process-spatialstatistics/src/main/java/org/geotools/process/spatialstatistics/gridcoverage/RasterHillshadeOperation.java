@@ -44,6 +44,10 @@ public class RasterHillshadeOperation extends AbstractSurfaceOperation {
 
     private final double HALFPI = Math.PI / 2.0;
 
+    public RasterHillshadeOperation() {
+
+    }
+
     public GridCoverage2D execute(GridCoverage2D inputGc) {
         return execute(inputGc, 315.0, 45.0, 1.0);
     }
@@ -54,24 +58,19 @@ public class RasterHillshadeOperation extends AbstractSurfaceOperation {
 
     public GridCoverage2D execute(GridCoverage2D inputGc, double azimuth, double altitude,
             double zFactor) {
+        this.initSurface(inputGc);
+
         DiskMemImage outputImage = this.createDiskMemImage(inputGc, RasterPixelType.FLOAT);
-
-        grid2D = inputGc;
-        srcNoData = RasterHelper.getNoDataValue(inputGc);
-        NoData = -9999;
-        _8DX = this.CellSizeX * 8;
-        _8DY = this.CellSizeY * 8;
-
-        final java.awt.Rectangle bounds = outputImage.getBounds();
-        WritableRectIter writer = RectIterFactory.createWritable(outputImage, bounds);
+        WritableRectIter writer = RectIterFactory.createWritable(outputImage,
+                outputImage.getBounds());
 
         GridCoordinates2D pos = new GridCoordinates2D();
 
-        int y = 0;
+        int y = bounds.y;
         writer.startLines();
         while (!writer.finishedLines()) {
 
-            int x = 0;
+            int x = bounds.x;
             writer.startPixels();
             while (!writer.finishedPixels()) {
                 pos.setLocation(x, y);
@@ -102,7 +101,7 @@ public class RasterHillshadeOperation extends AbstractSurfaceOperation {
         // | 3 4 5 |>| d e f |
         // | 6 7 8 | | g h i |
         // +-------+ +-------+
-        double[][] mx = getSubMatrix(grid2D, pos, 3, 3, zFactor);
+        double[][] mx = getSubMatrix(pos, 3, 3, zFactor);
         if (Double.isNaN(mx[1][1]) || SSUtils.compareDouble(srcNoData, mx[1][1])) {
             writer.setSample(0, NoData);
             return;

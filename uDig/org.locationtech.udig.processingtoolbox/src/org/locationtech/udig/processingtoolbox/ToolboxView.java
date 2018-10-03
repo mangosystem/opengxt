@@ -13,7 +13,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jface.action.Action;
@@ -45,6 +44,7 @@ import org.eclipse.ui.part.ViewPart;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.Processors;
+import org.geotools.process.spatialstatistics.RasterToGridPolygonProcessFactory;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;
@@ -61,6 +61,7 @@ import org.locationtech.udig.processingtoolbox.tools.GeometryToFeaturesDialog;
 import org.locationtech.udig.processingtoolbox.tools.HistogramDialog;
 import org.locationtech.udig.processingtoolbox.tools.MergeFeaturesDialog;
 import org.locationtech.udig.processingtoolbox.tools.MoranScatterPlotDialog;
+import org.locationtech.udig.processingtoolbox.tools.RasterCalculatorDialog;
 import org.locationtech.udig.processingtoolbox.tools.ScatterPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.SpatialWeightsMatrixDialog;
 import org.locationtech.udig.processingtoolbox.tools.SplitByAttributesDialog;
@@ -249,6 +250,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                     dialog = new ExportStyleDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("AmoebaWizardDialog")) {
                                     dialog = new AmoebaWizardDialog(shell, new AmoebaWizard(map));
+                                } else if (nodeName.equalsIgnoreCase("RasterCalculatorDialog")) {
+                                    dialog = new RasterCalculatorDialog(shell, map);
                                 }
                             } else {
                                 dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
@@ -431,7 +434,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         
         buildTool(generalTool, Messages.ThematicMapDialog_title, "ThematicMapDialog");
         buildTool(generalTool, Messages.ThematicMapRasterDialog_title, "ThematicMapRasterDialog");
-        // buildTool(generalTool, Messages.FieldCalculatorDialog_title, "FieldCalculatorDialog");
+        //buildTool(generalTool, Messages.FieldCalculatorDialog_title, "FieldCalculatorDialog");
 
         // import
         TreeParent importTool = new TreeParent(Messages.ToolboxView_Import, null, null);
@@ -594,8 +597,9 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(conversionTool, "org.geotools.process.spatialstatistics.PointsToRasterProcessFactory");
         buildTool(conversionTool, "org.geotools.process.spatialstatistics.GeometryToRasterProcessFactory");
         buildTool(conversionTool, "org.geotools.process.spatialstatistics.RasterToPointProcessFactory");
+        buildTool(conversionTool, "org.geotools.process.spatialstatistics.RasterToGridPolygonProcessFactory");
         buildTool(conversionTool, "org.geotools.process.spatialstatistics.RasterToPolygonProcessFactory");
-
+        
         // Reclass
         TreeParent reclassTool = new TreeParent(Messages.ToolboxView_Reclass, null, null);
         generalTool.addChild(reclassTool);
@@ -626,6 +630,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(mathTool);
         buildTool(mathTool, "org.geotools.process.spatialstatistics.RasterMathProcessFactory");
         buildTool(mathTool, "org.geotools.process.spatialstatistics.RasterNDVIProcessFactory");
+        buildTool(mathTool, Messages.RasterCalculatorDialog_title, "RasterCalculatorDialog");
 
         // Density
         TreeParent densityTool = new TreeParent(Messages.ToolboxView_Density, null, null);

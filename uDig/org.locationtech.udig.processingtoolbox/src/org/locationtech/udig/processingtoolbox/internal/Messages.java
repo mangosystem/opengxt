@@ -259,6 +259,18 @@ public class Messages extends NLS {
     public static String QueryDialog_Operators;
     public static String QueryDialog_SQL_where_clause;
     
+    public static String RasterCalculatorDialog_title;
+    public static String RasterCalculatorDialog_description;
+    public static String RasterCalculatorDialog_ExtentandCell;
+    public static String RasterCalculatorDialog_Extent;
+    public static String RasterCalculatorDialog_Cell;
+    public static String RasterCalculatorDialog_Intersection;
+    public static String RasterCalculatorDialog_Union;
+    public static String RasterCalculatorDialog_Maximum;
+    public static String RasterCalculatorDialog_Minimum;
+    public static String RasterCalculatorDialog_LayersandFunctions;
+    public static String RasterCalculatorDialog_RasterLayers;
+    
     public static String ScatterPlotDialog_title;
     public static String ScatterPlotDialog_description;
     public static String ScatterPlotDialog_Graph;
@@ -330,6 +342,7 @@ public class Messages extends NLS {
     public static String TableSelectionWidget_SwitchSelection;
 
     public static String Task_AddingLayer;
+    public static String Task_Canceled;
     public static String Task_Completed;
     public static String Task_ParameterRequired;
     public static String Task_ConfirmErrorFile;

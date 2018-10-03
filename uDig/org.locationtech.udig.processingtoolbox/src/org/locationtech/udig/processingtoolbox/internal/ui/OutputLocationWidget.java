@@ -10,7 +10,9 @@
 package org.locationtech.udig.processingtoolbox.internal.ui;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.swt.SWT;
@@ -38,7 +40,7 @@ import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget.File
 /**
  * Output location control
  * 
- * @author Minpa Lee, MangoSystem  
+ * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
@@ -49,13 +51,13 @@ public class OutputLocationWidget extends AbstractToolboxWidget {
     private FileDataType fileDataType = FileDataType.RASTER;
 
     private int fileDialogStyle = SWT.SAVE;
-    
+
     private Text txtPath;
 
     private String[] fileNames;
 
     private String[] fileExtensions;
-    
+
     private String fileExtension;
 
     public OutputLocationWidget(FileDataType fileDataType, int fileDialogStyle) {
@@ -90,12 +92,43 @@ public class OutputLocationWidget extends AbstractToolboxWidget {
             break;
         case FOLDER:
             break;
+        case DXF:
+            fileNames = new String[] { "AutoCAD DXF (*.dxf)" };
+            fileExtensions = new String[] { "*.dxf" };
+            break;
+        default:
+            break;
         }
     }
-    
+
     public void setOutputName(String name) {
-        File file = new File(ToolboxView.getWorkspace(), name + fileExtension);
+        File file = getUniqueName(ToolboxView.getWorkspace(), name);
         txtPath.setText(file.getPath());
+    }
+
+    private File getUniqueName(final String directory, final String prefix) {
+        File[] files = new File(directory).listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                name = name.toLowerCase();
+                return name.startsWith(prefix.toLowerCase()) && name.endsWith(fileExtension);
+            }
+        });
+
+        int max = 1;
+        if (files.length > 0) {
+            for (File file : files) {
+                try {
+                    String name = file.getName().toLowerCase().substring(prefix.length());
+                    name = name.substring(0, name.length() - fileExtension.length());
+                    int num = Integer.parseInt(name);
+                    max = Math.max(max, ++num);
+                } catch (NumberFormatException e) {
+                    LOGGER.log(Level.FINER, e.getMessage());
+                }
+            }
+        }
+
+        return new File(directory, prefix + String.format("%02d", max) + fileExtension);
     }
 
     public void create(final Composite parent, final int style,
@@ -140,7 +173,7 @@ public class OutputLocationWidget extends AbstractToolboxWidget {
                 }
             }
         });
-        
+
         if (param.sample != null) {
             txtPath.setText(param.sample.toString());
         } else {

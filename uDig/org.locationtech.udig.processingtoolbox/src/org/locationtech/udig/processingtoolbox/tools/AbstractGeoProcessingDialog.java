@@ -9,6 +9,7 @@
  */
 package org.locationtech.udig.processingtoolbox.tools;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -21,6 +22,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,12 +38,19 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
+import org.geotools.brewer.color.BrewerPalette;
+import org.geotools.brewer.color.ColorBrewer;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureSource;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.process.spatialstatistics.core.StringHelper;
 import org.geotools.process.spatialstatistics.styler.SSStyleBuilder;
+import org.geotools.styling.ColorMap;
+import org.geotools.styling.ColorMapEntry;
 import org.geotools.styling.Style;
+import org.geotools.styling.StyleBuilder;
+import org.geotools.styling.StyleFactory;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.ICatalog;
@@ -62,6 +71,7 @@ import org.opengis.coverage.grid.GridCoverageReader;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
+import org.opengis.filter.FilterFactory2;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
@@ -335,5 +345,57 @@ public abstract class AbstractGeoProcessingDialog extends TitleAreaDialog {
                 break;
             }
         }
+    }
+
+    protected Style buildCoverageStyle(double minValue, double maxValue, Double noData) {
+        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+        StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
+
+        @SuppressWarnings("nls")
+        String[] palettes = { "RdYlGn", "YlOrRd", "YlOrBr", "Oranges", "YlGnBu", "Spectral" };
+
+        int numClasses = 8;
+
+        double[] breaks = new double[numClasses + 1];
+        double interval = (maxValue - minValue) / numClasses;
+
+        ColorBrewer brewer = ColorBrewer.instance();
+        Random random = new Random();
+        BrewerPalette brewerPalette = brewer.getPalette(palettes[random.nextInt(palettes.length)]);
+
+        Color[] colors = brewerPalette.getColors(breaks.length);
+        // Collections.reverse(Arrays.asList(colors)); // reverse
+
+        StyleBuilder builder = new StyleBuilder();
+
+        ColorMapEntry nodataEntry = sf.createColorMapEntry();
+        nodataEntry.setQuantity(ff.literal(noData));
+        nodataEntry.setColor(builder.colorExpression(new java.awt.Color(255, 255, 255, 0)));
+        nodataEntry.setOpacity(ff.literal(0.0f));
+        nodataEntry.setLabel("No Data"); //$NON-NLS-1$
+
+        ColorMap colorMap = sf.createColorMap();
+        colorMap.setType(ColorMap.TYPE_RAMP);
+
+        if (noData < breaks[0]) {
+            colorMap.addColorMapEntry(nodataEntry);
+        }
+
+        for (int i = 0; i < breaks.length; i++) {
+            breaks[i] = minValue + (i * interval);
+
+            ColorMapEntry entry = sf.createColorMapEntry();
+            entry.setQuantity(builder.literalExpression(breaks[i]));
+            entry.setColor(builder.colorExpression(colors[i]));
+            entry.setOpacity(builder.literalExpression(colors[i].getAlpha() / 255.0));
+
+            colorMap.addColorMapEntry(entry);
+        }
+
+        if (noData > breaks[breaks.length - 1]) {
+            colorMap.addColorMapEntry(nodataEntry);
+        }
+
+        return builder.createStyle(builder.createRasterSymbolizer(colorMap, 1.0d));
     }
 }

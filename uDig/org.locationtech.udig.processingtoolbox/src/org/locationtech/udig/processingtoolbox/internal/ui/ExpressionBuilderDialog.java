@@ -266,7 +266,7 @@ public class ExpressionBuilderDialog extends Dialog {
         fieldTable.addListener(SWT.MouseDoubleClick, new Listener() {
             @Override
             public void handleEvent(Event event) {
-                String selection = "[" + fieldTable.getSelection()[0].getText() + "]";
+                String selection = fieldTable.getSelection()[0].getText();
                 updateExpression(selection);
             }
         });
@@ -369,18 +369,18 @@ public class ExpressionBuilderDialog extends Dialog {
                 if (descriptor instanceof GeometryDescriptor) {
                     this.geom_field = descriptor.getLocalName();
                     TableItem item = new TableItem(fieldTable, SWT.NULL);
-                    item.setText(descriptor.getLocalName());
+                    item.setText("[" + descriptor.getLocalName() + "]");
                     FontData fontData = item.getFont().getFontData()[0];
                     fontData.setStyle(SWT.BOLD);
                     item.setFont(new Font(item.getFont().getDevice(), fontData));
                 } else {
                     TableItem item = new TableItem(fieldTable, SWT.NULL);
-                    item.setText(descriptor.getLocalName());
+                    item.setText("[" + descriptor.getLocalName() + "]");
                 }
             }
         } else {
             TableItem item = new TableItem(fieldTable, SWT.NULL);
-            item.setText("Value");
+            item.setText("[Value]");
         }
     }
 

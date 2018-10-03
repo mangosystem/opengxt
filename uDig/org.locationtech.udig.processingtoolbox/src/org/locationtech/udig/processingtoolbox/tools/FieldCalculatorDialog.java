@@ -39,6 +39,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
@@ -116,6 +117,8 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
     private SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd_hhmmss_S");
 
     private final String space = " ";
+
+    private final Color warningColor = new Color(Display.getCurrent(), 255, 255, 200);
 
     private IMap map = null;
 
@@ -279,7 +282,8 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
         // ========================================================
         // 2. Fields & Functions
         // ========================================================
-        final int defaultWidth = 200;
+        int scale = (int) getShell().getDisplay().getDPI().x / 96;
+        final int defaultWidth = 200 * scale;
         Group grpFields = widget.createGroup(grpLayer, Messages.FieldCalculatorDialog_Fields,
                 false, 1);
         GridData gridDataField = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 1);
@@ -298,7 +302,7 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
         fieldTable.addListener(SWT.MouseDoubleClick, new Listener() {
             @Override
             public void handleEvent(Event event) {
-                String selection = "[" + fieldTable.getSelection()[0].getText() + "]";
+                String selection = fieldTable.getSelection()[0].getText();
                 updateExpression(selection);
             }
         });
@@ -314,7 +318,7 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
         valueTable = widget.createListTable(grpValues,
                 new String[] { Messages.FieldCalculatorDialog_Functions }, 1, 100);
         updateFunctions();
-        valueTable.getColumns()[0].setWidth(340);
+        valueTable.getColumns()[0].setWidth(340 * scale);
         grpValues.setText(Messages.FieldCalculatorDialog_Functions + "("
                 + valueTable.getItemCount() + ")");
 
@@ -367,11 +371,24 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
         txtGridData.heightHint = 50;
         txtExpression.setLayoutData(txtGridData);
 
+        final Color oldBackColor = txtExpression.getBackground();
         txtExpression.addModifyListener(new ModifyListener() {
             @Override
             public void modifyText(ModifyEvent e) {
-                btnClear.setEnabled(txtExpression.getText().length() > 0);
+                String expression = txtExpression.getText();
+                btnClear.setEnabled(expression.length() > 0);
                 btnTest.setEnabled(btnClear.getEnabled());
+
+                if (expression.length() == 0) {
+                    txtExpression.setBackground(oldBackColor);
+                } else {
+                    try {
+                        ECQL.toExpression(expression);
+                        txtExpression.setBackground(oldBackColor);
+                    } catch (CQLException e1) {
+                        txtExpression.setBackground(warningColor);
+                    }
+                }
             }
         });
 
@@ -390,13 +407,13 @@ public class FieldCalculatorDialog extends AbstractGeoProcessingDialog implement
             if (descriptor instanceof GeometryDescriptor) {
                 this.geom_field = descriptor.getLocalName();
                 TableItem item = new TableItem(fieldTable, SWT.NULL);
-                item.setText(descriptor.getLocalName());
+                item.setText("[" + descriptor.getLocalName() + "]");
                 FontData fontData = item.getFont().getFontData()[0];
                 fontData.setStyle(SWT.BOLD);
                 item.setFont(new Font(item.getFont().getDevice(), fontData));
             } else {
                 TableItem item = new TableItem(fieldTable, SWT.NULL);
-                item.setText(descriptor.getLocalName());
+                item.setText("[" + descriptor.getLocalName() + "]");
             }
         }
     }

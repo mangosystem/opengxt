@@ -200,8 +200,8 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
             this.trans = new GridTransformer(coverage.getGridGeometry());
 
             PlanarImage inputImage = (PlanarImage) coverage.getRenderedImage();
-            this.readIter = RectIterFactory.create(inputImage, bounds);
             this.bounds = inputImage.getBounds();
+            this.readIter = RectIterFactory.create(inputImage, bounds);
 
             currentRow = 0;
             rowCount = inputImage.getHeight();

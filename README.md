@@ -63,11 +63,11 @@ any major spatial data source using open standards.
 ### Manual & Documents
 * uDig Processing Toolbox Manual
   * [Korean v2.0 - 28MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.0.pdf)
-  * [Korean v3.x-latest - 34MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.3.latest.pdf)
+  * [Korean v3.x-latest - 35MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.3.latest.pdf)
 
 * GeoServer WPS Processes Manual
   * [Korean v1.0 - 25MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.0.pdf)
-  * [Korean v2.x-latest - 31MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.2.latest.pdf)
+  * [Korean v2.x-latest - 33MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.2.latest.pdf)
   * [English v2.x-latest - 21MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_en_v.2.latest.pdf)
 
 * GeoTools Developer Guide

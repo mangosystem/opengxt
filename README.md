@@ -13,9 +13,9 @@ any major spatial data source using open standards.
 * [uDig](http://locationtech.org/projects/technology.udig) is an open source desktop application framework, built with the Eclipse Rich Client (RCP) technology.
 
 ### License
-* GeoTools licensed under the [LGPL](http://www.gnu.org/licenses/lgpl.html). [License guide](http://docs.geotools.org/latest/userguide/welcome/license.html)
-* GeoServer licensed under the [GPL](http://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
-* uDig licensed under the [EPL](http://www.eclipse.org/legal/epl-v10.html) + [BSD](http://udig.refractions.net/files/bsd3-v10.html).
+* GeoTools process-spatialstatistics licensed under the [LGPL](http://www.gnu.org/licenses/lgpl.html). [License guide](http://docs.geotools.org/latest/userguide/welcome/license.html)
+* GeoServer gs-wps-spatialstatistics licensed under the [GPL](http://www.gnu.org/licenses/old-licenses/gpl-2.0.html).
+* uDig org.locationtech.udig.processingtoolbox licensed under the [EPL](http://www.eclipse.org/legal/epl-v10.html) + [BSD](http://udig.refractions.net/files/bsd3-v10.html).
 
 ### Download GeoTools & GeoServer WPS libraries
 * Visit [SourceForge](https://sourceforge.net/projects/mango-spatialstatistics/)

@@ -3,7 +3,6 @@ target
 *.patch
 *.class
 *.pyc
-*.txt
 nb-configuration.xml
 *.*~
 

@@ -51,7 +51,7 @@ public abstract class AbstractStatisticsProcess extends AbstractProcess {
 
     protected Geometry transformGeometry(Geometry input, CoordinateReferenceSystem targetCRS) {
         Geometry output = input;
-        Object userData = input.getUserData();
+        Object userData = input == null ? null : input.getUserData();
 
         if (userData != null && userData instanceof CoordinateReferenceSystem) {
             CoordinateReferenceSystem sourceCRS = (CoordinateReferenceSystem) userData;

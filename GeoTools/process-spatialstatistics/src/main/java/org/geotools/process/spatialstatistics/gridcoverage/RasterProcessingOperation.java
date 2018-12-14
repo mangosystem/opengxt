@@ -611,6 +611,10 @@ public abstract class RasterProcessingOperation {
     }
 
     protected Geometry transformGeometry(Geometry input, CoordinateReferenceSystem targetCRS) {
+        if (input == null) {
+            return null;
+        }
+
         Geometry output = input;
         Object userData = input.getUserData();
 

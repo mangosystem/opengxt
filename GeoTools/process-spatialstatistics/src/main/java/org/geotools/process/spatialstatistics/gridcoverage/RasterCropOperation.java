@@ -25,14 +25,24 @@ import org.geotools.coverage.processing.CoverageProcessor;
 import org.geotools.coverage.processing.operation.Crop;
 import org.geotools.factory.Hints;
 import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.ProcessException;
+import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.coverage.processing.Operation;
+import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.parameter.ParameterValueGroup;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Creates a spatial subset of a raster dataset.
@@ -77,15 +87,56 @@ public class RasterCropOperation extends RasterProcessingOperation {
 
     public GridCoverage2D execute(GridCoverage2D inputCoverage, Geometry cropShape,
             ReferencedEnvelope extent) {
-        GeneralEnvelope bounds = new GeneralEnvelope(extent);
-        cropShape = transformGeometry(cropShape, inputCoverage.getCoordinateReferenceSystem());
+        CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
 
-        // force it to a collection if necessary
+        // check geometry
         GeometryCollection roi = null;
-        if (!(cropShape instanceof GeometryCollection)) {
-            roi = cropShape.getFactory().createGeometryCollection(new Geometry[] { cropShape });
+        if (cropShape == null || cropShape.isEmpty()) {
+            roi = null;
         } else {
-            roi = (GeometryCollection) cropShape;
+            Class<?> geomBinding = cropShape.getClass();
+            if (geomBinding.isAssignableFrom(MultiPolygon.class)
+                    || geomBinding.isAssignableFrom(Polygon.class)) {
+                if (!cropShape.isValid() || !cropShape.isSimple()) {
+                    cropShape = cropShape.buffer(0);
+                    cropShape.setUserData(cropShape.getUserData());
+                }
+            }
+
+            // transform if necessary
+            cropShape = transformGeometry(cropShape, crs);
+
+            // force it to a collection if necessary
+            if (cropShape instanceof GeometryCollection) {
+                roi = (GeometryCollection) cropShape;
+            } else {
+                roi = cropShape.getFactory().createGeometryCollection(new Geometry[] { cropShape });
+            }
+        }
+
+        // check bounds
+        GeneralEnvelope bounds = null;
+        if (extent == null || extent.isEmpty() || extent.isNull()) {
+            if (roi != null) {
+                bounds = new GeneralEnvelope(new ReferencedEnvelope(roi.getEnvelopeInternal(), crs));
+            }
+        } else {
+            CoordinateReferenceSystem extCrs = extent.getCoordinateReferenceSystem();
+            if (!CRS.equalsIgnoreMetadata(crs, extCrs)) {
+                try {
+                    MathTransform transform = CRS.findMathTransform(extCrs, crs, true);
+                    Envelope env = JTS.transform(extent, transform);
+                    bounds = new GeneralEnvelope(new ReferencedEnvelope(env, crs));
+                } catch (FactoryException e) {
+                    throw new ProcessException(e);
+                } catch (MismatchedDimensionException e) {
+                    throw new ProcessException(e);
+                } catch (TransformException e) {
+                    throw new ProcessException(e);
+                }
+            } else {
+                bounds = new GeneralEnvelope(extent);
+            }
         }
 
         // perform the crops

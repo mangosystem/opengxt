@@ -41,7 +41,7 @@ import com.vividsolutions.jts.geom.Point;
 public class KMeansCluster implements Cluster {
     protected static final Logger LOGGER = Logging.getLogger(KMeansCluster.class);
 
-    static final int MAX_LOOP_COUNT = 100;
+    static final int MAX_LOOP_COUNT = 200;
 
     final Random random = new Random(System.currentTimeMillis());
 
@@ -55,6 +55,11 @@ public class KMeansCluster implements Cluster {
 
     public KMeansCluster(SimpleFeatureCollection pointFeatures) {
         loadPoints(pointFeatures, null);
+    }
+
+    public KMeansCluster(PointEvent[] points, ReferencedEnvelope extent) {
+        this.points = points;
+        this.extent = extent;
     }
 
     private PointEvent getRandomPoint() {

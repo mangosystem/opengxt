@@ -19,6 +19,8 @@ package org.geotools.process.spatialstatistics.gridcoverage;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Composite;
+import java.awt.CompositeContext;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -161,6 +163,8 @@ public class RasterDensityOperation extends RasterProcessingOperation {
         g2D.fillRect(0, 0, dmImage.getWidth(), dmImage.getHeight());
         g2D.setStroke(new BasicStroke(1.1f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f));
 
+        g2D.setComposite(BlendAddComposite.getInstance());
+
         // setup affine transform
         double x_scale = dmImage.getWidth() / Extent.getWidth();
         double y_scale = dmImage.getHeight() / Extent.getHeight();
@@ -189,11 +193,11 @@ public class RasterDensityOperation extends RasterProcessingOperation {
                 int intBits = Float.floatToIntBits(gridValue.floatValue());
                 g2D.setPaint(new Color(intBits, true));
 
-                int numGeom = geometry.getNumGeometries();
-                for (int i = 0; i < numGeom; i++) {
+                GeneralPath path = new GeneralPath();
+                for (int i = 0; i < geometry.getNumGeometries(); i++) {
                     LineString lineString = (LineString) geometry.getGeometryN(i);
 
-                    GeneralPath path = new GeneralPath();
+                    path.reset();
                     addLineStringToPath(false, lineString, path);
                     path.transform(affineTrans);
 
@@ -258,6 +262,75 @@ public class RasterDensityOperation extends RasterProcessingOperation {
 
         if (isRing && !lineString.isClosed()) {
             targetPath.closePath();
+        }
+    }
+
+    static final class BlendAddComposite implements Composite {
+
+        private final float alpha;
+
+        private BlendAddComposite() {
+            this(1.0f);
+        }
+
+        private BlendAddComposite(float alpha) {
+            this.alpha = Math.max(Math.min(alpha, 1.0f), 0.0f);
+        }
+
+        public static BlendAddComposite getInstance() {
+            return new BlendAddComposite();
+        }
+
+        @Override
+        public CompositeContext createContext(ColorModel srcColorModel, ColorModel dstColorModel,
+                RenderingHints hints) {
+
+            return new CompositeContext() {
+                @Override
+                public void dispose() {
+
+                }
+
+                @Override
+                public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
+                    int width = Math.min(src.getWidth(), dstIn.getWidth());
+                    int height = Math.min(src.getHeight(), dstIn.getHeight());
+
+                    int[] srcPixels = new int[width];
+                    int[] dstPixels = new int[width];
+
+                    for (int y = 0; y < height; y++) {
+                        src.getDataElements(0, y, width, 1, srcPixels);
+                        dstIn.getDataElements(0, y, width, 1, dstPixels);
+                        for (int x = 0; x < width; x++) {
+                            float srcVal = Float.intBitsToFloat(srcPixels[x]);
+                            float dstVal = Float.intBitsToFloat(dstPixels[x]);
+
+                            int pixel = dstPixels[x];
+                            int dr = (pixel >> 16) & 0xFF;
+                            int dg = (pixel >> 8) & 0xFF;
+                            int db = (pixel) & 0xFF;
+                            int da = (pixel >> 24) & 0xFF;
+
+                            // Add
+                            pixel = Float.floatToIntBits(srcVal + dstVal);
+                            int or = (pixel >> 16) & 0xFF;
+                            int og = (pixel >> 8) & 0xFF;
+                            int ob = (pixel) & 0xFF;
+                            int oa = (pixel >> 24) & 0xFF;
+
+                            // mixes the result with the alpha blending
+                            or = (int) (dr + (or - dr) * alpha);
+                            og = (int) (dg + (og - dg) * alpha);
+                            ob = (int) (db + (ob - db) * alpha);
+                            oa = (int) (da + (oa - da) * alpha);
+
+                            dstPixels[x] = oa << 24 | or << 16 | og << 8 | ob & 0xFF;
+                        }
+                        dstOut.setDataElements(0, y, width, 1, dstPixels);
+                    }
+                }
+            };
         }
     }
 }

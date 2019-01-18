@@ -408,7 +408,7 @@ public abstract class RasterProcessingOperation {
         Extent = this.getRasterEnvironment().getExtent();
 
         boolean boundUpdated = false;
-        if (Extent == null) {
+        if (Extent == null || Extent.isEmpty() || Extent.isNull()) {
             Extent = srcExtent;
             boundUpdated = true;
         }

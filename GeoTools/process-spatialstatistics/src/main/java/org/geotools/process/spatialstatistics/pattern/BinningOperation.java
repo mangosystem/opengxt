@@ -59,7 +59,7 @@ public abstract class BinningOperation extends GeneralOperation {
 
     protected MathTransform findMathTransform(CoordinateReferenceSystem sourceCRS,
             CoordinateReferenceSystem targetCRS, boolean lenient) {
-        if (CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
+        if (targetCRS == null || CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
             return null;
         }
 

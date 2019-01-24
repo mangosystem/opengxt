@@ -17,15 +17,15 @@
 package org.geotools.process.spatialstatistics.pattern;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.pattern.AbstractBinningVisitor.Bin;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
-import org.geotools.process.spatialstatistics.util.CoordinateTranslateFilter;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -33,7 +33,6 @@ import org.opengis.filter.expression.Expression;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 
@@ -50,13 +49,31 @@ public class RectangularBinningOperation extends BinningOperation {
 
     static final String TYPE_NAME = "RectangularBinning";
 
+    public RectangularBinningOperation() {
+
+    }
+
+    public SimpleFeatureCollection execute(SimpleFeatureCollection features, ReferencedEnvelope bbox)
+            throws IOException {
+        double width = bbox.getWidth() / 10.0;
+        double height = bbox.getHeight() / 10.0;
+        return execute(features, null, bbox, width, height);
+    }
+
     public SimpleFeatureCollection execute(SimpleFeatureCollection features,
-            ReferencedEnvelope bbox, Double width, Double height) throws IOException {
+            ReferencedEnvelope bbox, double width, double height) throws IOException {
         return execute(features, null, bbox, width, height);
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection features, Expression weight,
-            ReferencedEnvelope bbox, Double width, Double height) throws IOException {
+            ReferencedEnvelope bbox) throws IOException {
+        double width = bbox.getWidth() / 10.0;
+        double height = bbox.getHeight() / 10.0;
+        return execute(features, null, bbox, width, height);
+    }
+
+    public SimpleFeatureCollection execute(SimpleFeatureCollection features, Expression weight,
+            ReferencedEnvelope bbox, double width, double height) throws IOException {
         if (bbox == null) {
             throw new NullPointerException("bbox parameter is null");
         }
@@ -72,16 +89,16 @@ public class RectangularBinningOperation extends BinningOperation {
         ReferencedEnvelope finalBBox = new ReferencedEnvelope(targetCRS);
         finalBBox.init(bbox.getMinX(), bbox.getMinX() + (columns * width), bbox.getMinY(),
                 bbox.getMinY() + (rows * height));
-        return execute(features, weight, bbox, columns, rows);
+        return execute(features, weight, finalBBox, columns, rows);
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection features,
-            ReferencedEnvelope bbox, Integer columns, Integer rows) throws IOException {
+            ReferencedEnvelope bbox, int columns, int rows) throws IOException {
         return execute(features, null, bbox, columns, rows);
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection features, Expression weight,
-            ReferencedEnvelope bbox, Integer columns, Integer rows) throws IOException {
+            ReferencedEnvelope bbox, int columns, int rows) throws IOException {
         if (bbox == null) {
             throw new NullPointerException("bbox parameter is null");
         }
@@ -90,119 +107,46 @@ public class RectangularBinningOperation extends BinningOperation {
         CoordinateReferenceSystem sourceCRS = features.getSchema().getCoordinateReferenceSystem();
         CoordinateReferenceSystem targetCRS = bbox.getCoordinateReferenceSystem();
         MathTransform transform = findMathTransform(sourceCRS, targetCRS, true);
-        GeometryCoordinateSequenceTransformer transformer = new GeometryCoordinateSequenceTransformer();
+
+        GeometryCoordinateSequenceTransformer transformer = null;
+        if (transform != null) {
+            transformer = new GeometryCoordinateSequenceTransformer();
+            transformer.setMathTransform(transform);
+            transformer.setCoordinateReferenceSystem(targetCRS);
+        }
+
+        // calculate
+        RectangularBinningVisitor visitor = new RectangularBinningVisitor(bbox, columns, rows);
+        visitor.setOnlyValidGrid(getOnlyValidGrid());
+        visitor.visit(features, weight, transformer);
 
         // create feature type
         SimpleFeatureType schema = FeatureTypes.getDefaultType(TYPE_NAME, Polygon.class, sourceCRS);
         schema = FeatureTypes.add(schema, UID, Integer.class, 19);
         schema = FeatureTypes.add(schema, AGG_FIELD, Double.class, 38);
 
-        final double width = bbox.getWidth() / columns;
-        final double height = bbox.getHeight() / rows;
-
-        final double minX = bbox.getMinX();
-        final double minY = bbox.getMinY();
-
-        int minCol = Integer.MAX_VALUE, minRow = Integer.MAX_VALUE;
-        int maxCol = Integer.MIN_VALUE, maxRow = Integer.MIN_VALUE;
-
-        // calculate grids & values
-        Double gridValues[][] = new Double[rows][columns];
-        SimpleFeatureIterator featureIter = features.features();
-        try {
-            if (transform != null) {
-                transformer.setMathTransform(transform);
-                transformer.setCoordinateReferenceSystem(targetCRS);
-            }
-
-            while (featureIter.hasNext()) {
-                SimpleFeature feat = featureIter.next();
-                Double val = weight == null ? Double.valueOf(1.0) : weight.evaluate(feat,
-                        Double.class);
-                if (val == null) {
-                    continue;
-                }
-
-                Geometry geometry = (Geometry) feat.getDefaultGeometry();
-                if (transform != null) {
-                    // project source geometry to targetCRS
-                    geometry = transform(transformer, geometry);
-                }
-                Coordinate coordinate = geometry.getCentroid().getCoordinate();
-
-                // origin = lower left
-                int col = (int) Math.floor((coordinate.x - minX) / width);
-                int row = (int) Math.floor((coordinate.y - minY) / height);
-                if (col < 0 || row < 0 || col >= columns || row >= rows) {
-                    continue;
-                }
-
-                Double preVal = gridValues[row][col];
-                gridValues[row][col] = preVal == null ? val : preVal + val;
-
-                if (getOnlyValidGrid()) {
-                    minCol = Math.min(col, minCol);
-                    maxCol = Math.max(col, maxCol);
-                    minRow = Math.min(row, minRow);
-                    maxRow = Math.max(row, maxRow);
-                }
-            }
-        } finally {
-            featureIter.close();
-        }
-
         // write features
         IFeatureInserter featureWriter = getFeatureWriter(schema);
         try {
-            if (transform != null) {
+            if (transformer != null) {
                 transformer.setMathTransform(transform.inverse());
                 transformer.setCoordinateReferenceSystem(sourceCRS);
             }
 
-            if (getOnlyValidGrid()) {
-                maxCol++;
-                maxRow++;
-            } else {
-                minCol = 0;
-                maxCol = columns;
-                minRow = 0;
-                maxRow = rows;
-            }
+            Iterator<Bin> iter = visitor.getBins(transformer);
+            while (iter.hasNext()) {
+                Bin bin = iter.next();
 
-            ReferencedEnvelope bounds = new ReferencedEnvelope(targetCRS);
-            bounds.init(minX, minX + width, minY, minY + height);
-            Geometry rectangle = gf.toGeometry(bounds);
+                Geometry grid = bin.geometry;
+                grid.setUserData(targetCRS);
 
-            int featureID = 0;
-            double ypos = minRow * height;
-            for (int row = minRow; row < maxRow; row++) {
-                double xpos = minCol * width;
-                for (int col = minCol; col < maxCol; col++) {
-                    Double gridValue = gridValues[row][col];
-                    if (gridValue == null && getOnlyValidGrid()) {
-                        xpos += width;
-                        continue;
-                    }
+                // create feature and set geometry
+                SimpleFeature newFeature = featureWriter.buildFeature();
+                newFeature.setAttribute(UID, bin.featureID);
+                newFeature.setAttribute(AGG_FIELD, bin.value);
+                newFeature.setDefaultGeometry(grid);
 
-                    Geometry grid = (Geometry) rectangle.clone();
-                    grid.apply(new CoordinateTranslateFilter(xpos, ypos));
-                    grid.setUserData(targetCRS);
-
-                    if (transform != null) {
-                        // reproject grid geometry to sourceCRS
-                        grid = transform(transformer, grid);
-                    }
-
-                    // create feature and set geometry
-                    SimpleFeature newFeature = featureWriter.buildFeature();
-                    newFeature.setAttribute(UID, featureID);
-                    newFeature.setAttribute(AGG_FIELD, gridValue);
-                    newFeature.setDefaultGeometry(grid);
-
-                    featureWriter.write(newFeature);
-                    xpos += width;
-                }
-                ypos += height;
+                featureWriter.write(newFeature);
             }
         } catch (Exception e) {
             featureWriter.rollback(e);

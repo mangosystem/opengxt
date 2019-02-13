@@ -20,10 +20,12 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.process.impl.SingleProcessFactory;
 import org.geotools.text.Text;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.type.Name;
+import org.opengis.filter.FilterFactory2;
 import org.opengis.util.InternationalString;
 
 /**
@@ -39,6 +41,8 @@ public abstract class SpatialStatisticsProcessFactory extends SingleProcessFacto
     protected static final String NAMESPACE = "statistics";
 
     protected static final String VERSION = "1.0.0";
+
+    protected static final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
 
     static final ResourceBundle bundle;
     static {

@@ -127,12 +127,9 @@ public class OffsetFeatureCollection extends GXTSimpleFeatureCollection {
             for (Object attribute : feature.getAttributes()) {
                 if (attribute instanceof Geometry) {
                     Geometry geometry = (Geometry) attribute;
-                    if (dX > 0 || dY > 0) {
-                        Geometry offseted = (Geometry) geometry.clone();
-                        offseted.apply(new CoordinateTranslateFilter(dX.doubleValue(), dY
-                                .doubleValue()));
-                        attribute = offseted;
-                    }
+                    Geometry offseted = (Geometry) geometry.clone();
+                    offseted.apply(new CoordinateTranslateFilter(dX.doubleValue(), dY.doubleValue()));
+                    attribute = offseted;
                 }
                 builder.add(attribute);
             }

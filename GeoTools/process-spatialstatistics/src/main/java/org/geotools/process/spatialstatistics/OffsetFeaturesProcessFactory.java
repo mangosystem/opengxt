@@ -27,7 +27,10 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
+import org.opengis.filter.expression.Expression;
 import org.opengis.util.InternationalString;
 
 /**
@@ -43,7 +46,7 @@ public class OffsetFeaturesProcessFactory extends SpatialStatisticsProcessFactor
     private static final String PROCESS_NAME = "OffsetFeatures";
 
     /*
-     * OffsetFeatures(SimpleFeatureCollection inputFeatures, Double offsetX, Double offsetY): SimpleFeatureCollection
+     * OffsetFeatures(SimpleFeatureCollection inputFeatures, Expression offsetX, Expression offsetY): SimpleFeatureCollection
      */
 
     public OffsetFeaturesProcessFactory() {
@@ -72,14 +75,16 @@ public class OffsetFeaturesProcessFactory extends SpatialStatisticsProcessFactor
             getResource("OffsetFeatures.inputFeatures.description"), true, 1, 1, null, null);
 
     /** offsetX */
-    public static final Parameter<Double> offsetX = new Parameter<Double>("offsetX", Double.class,
-            getResource("OffsetFeatures.offsetX.title"),
-            getResource("OffsetFeatures.offsetX.description"), true, 0, 1, Double.valueOf(0d), null);
+    public static final Parameter<Expression> offsetX = new Parameter<Expression>("offsetX",
+            Expression.class, getResource("OffsetFeatures.offsetX.title"),
+            getResource("OffsetFeatures.offsetX.description"), true, 0, 1, ff.literal(0d), new KVP(
+                    Params.FIELD, "inputFeatures.Number"));
 
     /** offsetY */
-    public static final Parameter<Double> offsetY = new Parameter<Double>("offsetY", Double.class,
-            getResource("OffsetFeatures.offsetY.title"),
-            getResource("OffsetFeatures.offsetY.description"), true, 0, 1, Double.valueOf(0d), null);
+    public static final Parameter<Expression> offsetY = new Parameter<Expression>("offsetY",
+            Expression.class, getResource("OffsetFeatures.offsetY.title"),
+            getResource("OffsetFeatures.offsetY.description"), true, 0, 1, ff.literal(0d), new KVP(
+                    Params.FIELD, "inputFeatures.Number"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {

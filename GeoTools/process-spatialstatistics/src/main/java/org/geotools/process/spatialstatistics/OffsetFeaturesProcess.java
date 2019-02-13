@@ -23,12 +23,15 @@ import java.util.logging.Logger;
 
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.transformation.OffsetFeatureCollection;
 import org.geotools.util.logging.Logging;
+import org.opengis.filter.FilterFactory2;
+import org.opengis.filter.expression.Expression;
 import org.opengis.util.ProgressListener;
 
 /**
@@ -50,7 +53,13 @@ public class OffsetFeaturesProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            Double offsetX, Double offsetY, ProgressListener monitor) {
+            double offsetX, double offsetY, ProgressListener monitor) {
+        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+        return process(inputFeatures, ff.literal(offsetX), ff.literal(offsetY), monitor);
+    }
+
+    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+            Expression offsetX, Expression offsetY, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(OffsetFeaturesProcessFactory.inputFeatures.key, inputFeatures);
         map.put(OffsetFeaturesProcessFactory.offsetX.key, offsetX);
@@ -78,20 +87,15 @@ public class OffsetFeaturesProcess extends AbstractStatisticsProcess {
             throw new NullPointerException("inputFeatures parameter required");
         }
 
-        Double offsetX = (Double) Params.getValue(input, OffsetFeaturesProcessFactory.offsetX,
-                OffsetFeaturesProcessFactory.offsetX.sample);
+        Expression offsetX = (Expression) Params.getValue(input,
+                OffsetFeaturesProcessFactory.offsetX, OffsetFeaturesProcessFactory.offsetX.sample);
 
-        Double offsetY = (Double) Params.getValue(input, OffsetFeaturesProcessFactory.offsetY,
-                OffsetFeaturesProcessFactory.offsetY.sample);
+        Expression offsetY = (Expression) Params.getValue(input,
+                OffsetFeaturesProcessFactory.offsetY, OffsetFeaturesProcessFactory.offsetY.sample);
 
         // start process
-        SimpleFeatureCollection resultFc = null;
-        if (offsetX == 0 && offsetY == 0) {
-            resultFc = inputFeatures;
-        } else {
-            resultFc = DataUtilities.simple(new OffsetFeatureCollection(inputFeatures, offsetX,
-                    offsetY));
-        }
+        SimpleFeatureCollection resultFc = DataUtilities.simple(new OffsetFeatureCollection(
+                inputFeatures, offsetX, offsetY));
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

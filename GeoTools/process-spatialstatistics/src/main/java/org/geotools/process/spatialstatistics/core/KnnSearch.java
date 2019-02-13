@@ -16,11 +16,10 @@
  */
 package org.geotools.process.spatialstatistics.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.io.Serializable;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.util.logging.Logging;
@@ -39,6 +38,9 @@ import com.vividsolutions.jts.util.PriorityQueue;
  * @author Minpa Lee, MangoSystem
  * 
  * @source https://github.com/jiayuasu/JTSplus/blob/master/src/main/java/com/vividsolutions/jts/index/strtree/STRtree.java
+ * @source https://github.com/locationtech/jts/blob/master/modules/core/src/main/java/org/locationtech/jts/index/strtree/STRtree.java
+ * @source https://github.com/locationtech/jts/blob/master/modules/core/src/main/java/org/locationtech/jts/index/strtree/BoundablePair.java
+ * @source https://github.com/locationtech/jts/blob/master/modules/core/src/main/java/org/locationtech/jts/index/strtree/BoundablePairDistanceComparator.java
  */
 public class KnnSearch {
     protected static final Logger LOGGER = Logging.getLogger(KnnSearch.class);
@@ -64,8 +66,9 @@ public class KnnSearch {
         // initialize queue
         priQ.add(initBndPair);
 
-        List<Object> kNearestNeighbors = new ArrayList<Object>();
-        List<Double> kNearestDistances = new ArrayList<Double>();
+        java.util.PriorityQueue<BoundablePair> kNearestNeighbors = new java.util.PriorityQueue<BoundablePair>(
+                k, new BoundablePairDistanceComparator(false));
+
         while (!priQ.isEmpty() && distanceLowerBound >= 0.0) {
             // pop head of queue and expand one side of pair
             BoundablePair bndPair = (BoundablePair) priQ.poll();
@@ -76,7 +79,7 @@ public class KnnSearch {
              * also have a greater distance. So the current minDistance must be the true minimum, and we are done.
              */
 
-            if (currentDistance >= distanceLowerBound && kNearestDistances.size() >= k) {
+            if (currentDistance >= distanceLowerBound) {
                 break;
             }
             /**
@@ -84,42 +87,29 @@ public class KnnSearch {
              * be smaller, due to the test immediately prior to this).
              */
             if (bndPair.isLeaves()) {
-                if (kNearestDistances.size() > 0 && kNearestDistances.size() < k) {
+                // assert: currentDistance < minimumDistanceFound
 
-                    int position = Collections.binarySearch(kNearestDistances, currentDistance);
-                    if (position < 0) {
-                        position = -position - 1;
-                    }
-                    kNearestNeighbors.add(position,
-                            ((ItemBoundable) bndPair.getBoundable(0)).getItem());
-                    kNearestDistances.add(position, currentDistance);
-                } else if (kNearestDistances.size() >= k) {
-
-                    if (currentDistance < kNearestDistances.get(kNearestDistances.size() - 1)) {
-                        int position = Collections.binarySearch(kNearestDistances, currentDistance);
-                        if (position < 0) {
-                            position = -position - 1;
-                        }
-                        kNearestNeighbors.add(position,
-                                ((ItemBoundable) bndPair.getBoundable(0)).getItem());
-                        kNearestDistances.add(position, currentDistance);
-                        // assert kNearestNeighbors.size() > k;
-                        kNearestNeighbors.remove(kNearestNeighbors.size() - 1);
-                        kNearestDistances.remove(kNearestDistances.size() - 1);
-                    }
-                } else if (kNearestDistances.size() == 0) {
-                    kNearestNeighbors.add(((ItemBoundable) bndPair.getBoundable(0)).getItem());
-                    kNearestDistances.add(currentDistance);
+                if (kNearestNeighbors.size() < k) {
+                    kNearestNeighbors.add(bndPair);
                 } else {
-                    try {
-                        throw new Exception("Should never reach here");
-                    } catch (Exception e1) {
-                        LOGGER.log(Level.WARNING, e1.getMessage());
-                    }
-                }
 
-                distanceLowerBound = kNearestDistances.get(kNearestDistances.size() - 1);
+                    if (kNearestNeighbors.peek().getDistance() > currentDistance) {
+                        kNearestNeighbors.poll();
+                        kNearestNeighbors.add(bndPair);
+                    }
+                    /*
+                     * minDistance should be the farthest point in the K nearest neighbor queue.
+                     */
+                    distanceLowerBound = kNearestNeighbors.peek().getDistance();
+
+                }
             } else {
+                // testing - does allowing a tolerance improve speed?
+                // Ans: by only about 10% - not enough to matter
+                /*
+                 * double maxDist = bndPair.getMaximumDistance(); if (maxDist * .99 < lastComputedDistance) return; //
+                 */
+
                 /**
                  * Otherwise, expand one side of the pair, (the choice of which side to expand is heuristically determined) and insert the new
                  * expanded pairs into the queue
@@ -129,7 +119,21 @@ public class KnnSearch {
         }
         // done - return items with min distance
 
-        return kNearestNeighbors.toArray(new Object[kNearestNeighbors.size()]);
+        return getItems(kNearestNeighbors);
+    }
+
+    private static Object[] getItems(java.util.PriorityQueue<BoundablePair> kNearestNeighbors) {
+        /**
+         * Iterate the K Nearest Neighbour Queue and retrieve the item from each BoundablePair in this queue
+         */
+        Object[] items = new Object[kNearestNeighbors.size()];
+        Iterator<BoundablePair> resultIterator = kNearestNeighbors.iterator();
+        int count = 0;
+        while (resultIterator.hasNext()) {
+            items[count] = ((ItemBoundable) resultIterator.next().getBoundable(0)).getItem();
+            count++;
+        }
+        return items;
     }
 
     /**
@@ -139,10 +143,7 @@ public class KnnSearch {
      * 
      * @author Martin Davis
      * 
-     * @source https://github.com/locationtech/jts/blob/master/modules/core/src/main/java/org/locationtech/jts/index/strtree/BoundablePair.java
-     * 
      */
-    @SuppressWarnings("rawtypes")
     static final class BoundablePair implements Comparable {
         private Boundable boundable1;
 
@@ -151,6 +152,8 @@ public class KnnSearch {
         private double distance;
 
         private ItemDistance itemDistance;
+
+        // private double maxDistance = -1.0;
 
         public BoundablePair(Boundable boundable1, Boundable boundable2, ItemDistance itemDistance) {
             this.boundable1 = boundable1;
@@ -188,6 +191,29 @@ public class KnnSearch {
             return ((Envelope) boundable1.getBounds())
                     .distance(((Envelope) boundable2.getBounds()));
         }
+
+        /*
+        public double getMaximumDistance() {
+            if (maxDistance < 0.0)
+                maxDistance = maxDistance();
+            return maxDistance;
+        }
+
+        private double maxDistance() {
+            return maximumDistance((Envelope) boundable1.getBounds(),
+                    (Envelope) boundable2.getBounds());
+        }
+
+        private static double maximumDistance(Envelope env1, Envelope env2) {
+            double minx = Math.min(env1.getMinX(), env2.getMinX());
+            double miny = Math.min(env1.getMinY(), env2.getMinY());
+            double maxx = Math.max(env1.getMaxX(), env2.getMaxX());
+            double maxy = Math.max(env1.getMaxY(), env2.getMaxY());
+            Coordinate min = new Coordinate(minx, miny);
+            Coordinate max = new Coordinate(maxx, maxy);
+            return min.distance(max);
+        }
+        */
 
         /**
          * Gets the minimum possible distance between the Boundables in this pair. If the members are both items, this will be the exact distance
@@ -230,7 +256,10 @@ public class KnnSearch {
 
         /**
          * For a pair which is not a leaf (i.e. has at least one composite boundable) computes a list of new pairs from the expansion of the larger
-         * boundable.
+         * boundable with distance less than minDistance and adds them to a priority queue.
+         * 
+         * @param priQ the priority queue to add the new pairs to
+         * @param minDistance the limit on the distance between added pairs
          * 
          */
         public void expandToQueue(PriorityQueue priQ, double minDistance) {
@@ -243,29 +272,34 @@ public class KnnSearch {
              */
             if (isComp1 && isComp2) {
                 if (area(boundable1) > area(boundable2)) {
-                    expand(boundable1, boundable2, priQ, minDistance);
+                    expand(boundable1, boundable2, false, priQ, minDistance);
                     return;
                 } else {
-                    expand(boundable2, boundable1, priQ, minDistance);
+                    expand(boundable2, boundable1, true, priQ, minDistance);
                     return;
                 }
             } else if (isComp1) {
-                expand(boundable1, boundable2, priQ, minDistance);
+                expand(boundable1, boundable2, false, priQ, minDistance);
                 return;
             } else if (isComp2) {
-                expand(boundable2, boundable1, priQ, minDistance);
+                expand(boundable2, boundable1, true, priQ, minDistance);
                 return;
             }
 
             throw new IllegalArgumentException("neither boundable is composite");
         }
 
-        private void expand(Boundable bndComposite, Boundable bndOther, PriorityQueue priQ,
-                double minDistance) {
+        private void expand(Boundable bndComposite, Boundable bndOther, boolean isFlipped,
+                PriorityQueue priQ, double minDistance) {
             List children = ((AbstractNode) bndComposite).getChildBoundables();
             for (Iterator i = children.iterator(); i.hasNext();) {
                 Boundable child = (Boundable) i.next();
-                BoundablePair bp = new BoundablePair(child, bndOther, itemDistance);
+                BoundablePair bp;
+                if (isFlipped) {
+                    bp = new BoundablePair(bndOther, child, itemDistance);
+                } else {
+                    bp = new BoundablePair(child, bndOther, itemDistance);
+                }
                 // only add to queue if this pair might contain the closest points
                 // MD - it's actually faster to construct the object rather than called distance(child, bndOther)!
                 if (bp.getDistance() < minDistance) {
@@ -275,4 +309,49 @@ public class KnnSearch {
         }
     }
 
+    /**
+     * The Class BoundablePairDistanceComparator. It implements Java comparator and is used as a parameter to sort the BoundablePair list.
+     */
+    static final class BoundablePairDistanceComparator implements Comparator<BoundablePair>,
+            Serializable {
+
+        /** The normal order. */
+        boolean normalOrder;
+
+        /**
+         * Instantiates a new boundable pair distance comparator.
+         * 
+         * @param normalOrder The true means puts the least record at the head of this queue. This is the natural order. PriorityQueue peek() will get
+         *        the least element. Vice versa.
+         */
+        public BoundablePairDistanceComparator(boolean normalOrder) {
+            this.normalOrder = normalOrder;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+         */
+        public int compare(BoundablePair p1, BoundablePair p2) {
+            double distance1 = p1.getDistance();
+            double distance2 = p2.getDistance();
+            if (this.normalOrder) {
+                if (distance1 > distance2) {
+                    return 1;
+                } else if (distance1 == distance2) {
+                    return 0;
+                }
+                return -1;
+            } else {
+                if (distance1 > distance2) {
+                    return -1;
+                } else if (distance1 == distance2) {
+                    return 0;
+                }
+                return 1;
+            }
+
+        }
+    }
 }

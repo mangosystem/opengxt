@@ -542,6 +542,8 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(editTool);
         buildTool(editTool, "org.geotools.process.spatialstatistics.RepairGeometryProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.OffsetFeaturesProcessFactory");
+        buildTool(editTool, "org.geotools.process.spatialstatistics.RotateFeaturesProcessFactory");
+        buildTool(editTool, "org.geotools.process.spatialstatistics.ScaleFeaturesProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.SnapPointsToLinesProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.SimplifyProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.DensifyProcessFactory");

@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
+import java.awt.geom.AffineTransform;
 import java.util.logging.Logger;
 
 import javax.media.jai.PlanarImage;
@@ -24,8 +25,10 @@ import javax.media.jai.iterator.RectIterFactory;
 import javax.media.jai.iterator.WritableRectIter;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.factory.GeoTools;
 import org.geotools.geometry.jts.JTSFactoryFinder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.logging.Logging;
@@ -62,18 +65,26 @@ public class RasterExtractionOperation extends RasterProcessingOperation {
 
         PlanarImage inputImage = (PlanarImage) inputGc.getRenderedImage();
         this.NoData = RasterHelper.getNoDataValue(inputGc);
-        GridTransformer trans = new GridTransformer(inputGc.getGridGeometry());
+
+        GridGeometry2D gridGeometry2D = inputGc.getGridGeometry();
+        ReferencedEnvelope extent = new ReferencedEnvelope(gridGeometry2D.getEnvelope());
+        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+        double dx = Math.abs(gridToWorld.getScaleX());
+        double dy = Math.abs(gridToWorld.getScaleY());
+        GridTransformer trans = new GridTransformer(extent, dx, dy);
+        // GridTransformer trans = new GridTransformer(coverage);
 
         java.awt.Rectangle inputBounds = inputImage.getBounds();
         RectIter inputIter = RectIterFactory.create(inputImage, inputBounds);
         WritableRectIter writerIter = RectIterFactory.createWritable(outputImage,
                 outputImage.getBounds());
 
-        int row = inputBounds.y;
+        int row = 0; // inputBounds.y
         inputIter.startLines();
         writerIter.startLines();
         while (!inputIter.finishedLines() && !writerIter.finishedLines()) {
-            int column = inputBounds.x;
+            int column = 0; // inputBounds.x
             inputIter.startPixels();
             writerIter.startPixels();
             while (!inputIter.finishedPixels() && !writerIter.finishedPixels()) {

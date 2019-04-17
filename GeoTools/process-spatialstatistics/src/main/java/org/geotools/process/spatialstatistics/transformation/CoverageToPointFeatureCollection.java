@@ -16,6 +16,7 @@
  */
 package org.geotools.process.spatialstatistics.transformation;
 
+import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -26,6 +27,7 @@ import javax.media.jai.iterator.RectIter;
 import javax.media.jai.iterator.RectIterFactory;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
@@ -197,7 +199,15 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
             this.builder = new SimpleFeatureBuilder(schema);
             this.typeName = coverage.getName().toString();
             this.pixelType = RasterHelper.getTransferType(coverage);
-            this.trans = new GridTransformer(coverage.getGridGeometry());
+
+            GridGeometry2D gridGeometry2D = coverage.getGridGeometry();
+            ReferencedEnvelope extent = new ReferencedEnvelope(gridGeometry2D.getEnvelope());
+            AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+
+            double dx = Math.abs(gridToWorld.getScaleX());
+            double dy = Math.abs(gridToWorld.getScaleY());
+            this.trans = new GridTransformer(extent, dx, dy);
+            // this.trans = new GridTransformer(coverage);
 
             PlanarImage inputImage = (PlanarImage) coverage.getRenderedImage();
             this.bounds = inputImage.getBounds();
@@ -215,8 +225,8 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
 
         private void extractValues() {
             coordinates.clear();
-            int column = bounds.x;
-            int row = bounds.y + currentRow;
+            int column = 0; // bounds.x;
+            int row = currentRow; // bounds.y + currentRow;
             readIter.startPixels();
             while (!readIter.finishedPixels()) {
                 double sampleValue = readIter.getSampleDouble(bandIndex);

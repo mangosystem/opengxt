@@ -849,7 +849,9 @@ public class RasterCalculatorDialog extends AbstractGeoProcessingDialog implemen
                 this.builder = new SimpleFeatureBuilder(schema);
 
                 readIter = new RandomIter[coverages.size()];
+
                 trans = new GridTransformer[coverages.size()];
+
                 noData = new double[coverages.size()];
                 bands = new int[coverages.size()];
                 bounds = new java.awt.Rectangle[coverages.size()];
@@ -901,8 +903,6 @@ public class RasterCalculatorDialog extends AbstractGeoProcessingDialog implemen
                     bounds[covIdx] = bound;
                     rowCount = Math.min(rowCount, bound.height);
                     covIdx++;
-
-                    RasterHelper.describe(coverage);
                 }
 
                 currentRow = 0;

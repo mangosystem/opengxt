@@ -204,13 +204,18 @@ public class CoverageToGridFeatureCollection extends GXTSimpleFeatureCollection 
             this.builder = new SimpleFeatureBuilder(schema);
             this.typeName = coverage.getName().toString();
             this.pixelType = RasterHelper.getTransferType(coverage);
-            this.trans = new GridTransformer(coverage.getGridGeometry());
 
             GridGeometry2D gridGeometry2D = coverage.getGridGeometry();
-            AffineTransform gridToCRS = (AffineTransform) gridGeometry2D.getGridToCRS2D();
+            ReferencedEnvelope extent = new ReferencedEnvelope(gridGeometry2D.getEnvelope());
+            AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
 
-            width = Math.abs(gridToCRS.getScaleX()) / 2.0;
-            height = Math.abs(gridToCRS.getScaleY()) / 2.0;
+            double dx = Math.abs(gridToWorld.getScaleX());
+            double dy = Math.abs(gridToWorld.getScaleY());
+            this.trans = new GridTransformer(extent, dx, dy);
+            // this.trans = new GridTransformer(coverage);
+
+            width = dx / 2.0;
+            height = dy / 2.0;
 
             PlanarImage inputImage = (PlanarImage) coverage.getRenderedImage();
             this.readIter = RectIterFactory.create(inputImage, inputImage.getBounds());
@@ -228,8 +233,8 @@ public class CoverageToGridFeatureCollection extends GXTSimpleFeatureCollection 
 
         private void extractValues() {
             coordinates.clear();
-            int column = bounds.x;
-            int row = bounds.y + currentRow;
+            int column = 0; // bounds.x;
+            int row = currentRow; // bounds.y + currentRow;
             readIter.startPixels();
             while (!readIter.finishedPixels()) {
                 double sampleValue = readIter.getSampleDouble(bandIndex);

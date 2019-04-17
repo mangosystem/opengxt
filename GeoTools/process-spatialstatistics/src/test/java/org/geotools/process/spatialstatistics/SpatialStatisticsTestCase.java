@@ -40,7 +40,7 @@ public abstract class SpatialStatisticsTestCase extends TestCase {
         dataStore.dispose();
     }
 
-    private static URL url(final Object caller, final String path) throws FileNotFoundException {
+    protected URL url(final Object caller, final String path) throws FileNotFoundException {
         final URL url = getResource(caller, path);
         if (url == null) {
             throw new FileNotFoundException("Can not locate test-data for \"" + path + '"');

@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" output="target/classes" path="src/main/java">
-		<attributes>
-			<attribute name="optional" value="true"/>
-			<attribute name="maven.pomderived" value="true"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
 		<attributes>
 			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+	<classpathentry excluding="**" kind="src" output="target/test-classes" path="src/test/resources">
 		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
@@ -22,11 +24,144 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry excluding="**" kind="src" output="target/test-classes" path="src/test/resources">
+	<classpathentry kind="var" path="M2_REPO/javax/media/jai_core/1.1.3/jai_core-1.1.3.jar"/>
+	<classpathentry kind="var" path="M2_REPO/javax/media/jai_imageio/1.1/jai_imageio-1.1.jar"/>
+	<classpathentry kind="var" path="M2_REPO/javax/media/jai_codec/1.1.3/jai_codec-1.1.3.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-api/18.5/gt-api-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/vividsolutions/jts-core/1.14.0/jts-core-1.14.0.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-referencing/18.5/gt-referencing-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/googlecode/efficient-java-matrix-library/core/0.26/core-0.26.jar" sourcepath="M2_REPO/com/googlecode/efficient-java-matrix-library/core/0.26/core-0.26-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/commons-pool/commons-pool/1.5.4/commons-pool-1.5.4.jar" sourcepath="M2_REPO/commons-pool/commons-pool/1.5.4/commons-pool-1.5.4-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-metadata/18.5/gt-metadata-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-opengis/18.5/gt-opengis-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/net/java/dev/jsr-275/jsr-275/1.0-beta-2/jsr-275-1.0-beta-2.jar" sourcepath="M2_REPO/net/java/dev/jsr-275/jsr-275/1.0-beta-2/jsr-275-1.0-beta-2-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/jgridshift/jgridshift/1.0/jgridshift-1.0.jar"/>
+	<classpathentry kind="var" path="M2_REPO/net/sf/geographiclib/GeographicLib-Java/1.44/GeographicLib-Java-1.44.jar" sourcepath="M2_REPO/net/sf/geographiclib/GeographicLib-Java/1.44/GeographicLib-Java-1.44-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-main/18.5/gt-main-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jdom/jdom/1.1.3/jdom-1.1.3.jar" sourcepath="M2_REPO/org/jdom/jdom/1.1.3/jdom-1.1.3-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-coverage/18.5/gt-coverage-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-tiff/1.1.18/imageio-ext-tiff-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-utilities/1.1.18/imageio-ext-utilities-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-geocore/1.1.18/imageio-ext-geocore-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-streams/1.1.18/imageio-ext-streams-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/vividsolutions/jts-example/1.14.0/jts-example-1.14.0.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/vividsolutions/jts-io/1.14.0/jts-io-1.14.0.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar" sourcepath="M2_REPO/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jaitools/jt-zonalstats/1.4.0/jt-zonalstats-1.4.0.jar" sourcepath="M2_REPO/org/jaitools/jt-zonalstats/1.4.0/jt-zonalstats-1.4.0-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jaitools/jt-utils/1.4.0/jt-utils-1.4.0.jar" sourcepath="M2_REPO/org/jaitools/jt-utils/1.4.0/jt-utils-1.4.0-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/vividsolutions/jts/1.12/jts-1.12.jar"/>
+	<classpathentry kind="var" path="M2_REPO/xerces/xercesImpl/2.4.0/xercesImpl-2.4.0.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/affine/jt-affine/1.0.16/jt-affine-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/iterators/jt-iterators/1.0.16/jt-iterators-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/utilities/jt-utilities/1.0.16/jt-utilities-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/scale/jt-scale/1.0.16/jt-scale-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/vectorbin/jt-vectorbin/1.0.16/jt-vectorbin-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/translate/jt-translate/1.0.16/jt-translate-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/algebra/jt-algebra/1.0.16/jt-algebra-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/bandmerge/jt-bandmerge/1.0.16/jt-bandmerge-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/bandselect/jt-bandselect/1.0.16/jt-bandselect-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/bandcombine/jt-bandcombine/1.0.16/jt-bandcombine-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/border/jt-border/1.0.16/jt-border-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/buffer/jt-buffer/1.0.16/jt-buffer-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/crop/jt-crop/1.0.16/jt-crop-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/mosaic/jt-mosaic/1.0.16/jt-mosaic-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/lookup/jt-lookup/1.0.16/jt-lookup-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/nullop/jt-nullop/1.0.16/jt-nullop-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/rescale/jt-rescale/1.0.16/jt-rescale-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/stats/jt-stats/1.0.16/jt-stats-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/google/guava/guava/17.0/guava-17.0.jar" sourcepath="M2_REPO/com/google/guava/guava/17.0/guava-17.0-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/warp/jt-warp/1.0.16/jt-warp-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/zonal/jt-zonal/1.0.16/jt-zonal-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/binarize/jt-binarize/1.0.16/jt-binarize-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/format/jt-format/1.0.16/jt-format-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/colorconvert/jt-colorconvert/1.0.16/jt-colorconvert-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/errordiffusion/jt-errordiffusion/1.0.16/jt-errordiffusion-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/orderdither/jt-orderdither/1.0.16/jt-orderdither-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/colorindexer/jt-colorindexer/1.0.16/jt-colorindexer-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/imagefunction/jt-imagefunction/1.0.16/jt-imagefunction-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/piecewise/jt-piecewise/1.0.16/jt-piecewise-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/classifier/jt-classifier/1.0.16/jt-classifier-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/jaiext/rlookup/jt-rlookup/1.0.16/jt-rlookup-1.0.16.jar"/>
+	<classpathentry kind="var" path="M2_REPO/commons-io/commons-io/2.6/commons-io-2.6.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-process/18.5/gt-process-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-cql/18.5/gt-cql-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-grid/18.5/gt-grid-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-image/18.5/gt-image-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-jdbc/18.5/gt-jdbc-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-data/18.5/gt-data-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/commons-dbcp/commons-dbcp/1.4/commons-dbcp-1.4.jar" sourcepath="M2_REPO/commons-dbcp/commons-dbcp/1.4/commons-dbcp-1.4-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar" sourcepath="M2_REPO/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-brewer/18.5/gt-brewer-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-geotiff/18.5/gt-geotiff-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-shapefile/18.5/gt-shapefile-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/xsd/gt-xsd-gml2/18.5/gt-xsd-gml2-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/xsd/gt-xsd-core/18.5/gt-xsd-core-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/picocontainer/picocontainer/1.2/picocontainer-1.2.jar"/>
+	<classpathentry kind="var" path="M2_REPO/commons-jxpath/commons-jxpath/1.3/commons-jxpath-1.3.jar" sourcepath="M2_REPO/commons-jxpath/commons-jxpath/1.3/commons-jxpath-1.3-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/eclipse/emf/org.eclipse.emf.common/2.12.0/org.eclipse.emf.common-2.12.0.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/eclipse/emf/org.eclipse.emf.ecore/2.12.0/org.eclipse.emf.ecore-2.12.0.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/eclipse/xsd/org.eclipse.xsd/2.12.0/org.eclipse.xsd-2.12.0.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/eclipse/emf/org.eclipse.emf.ecore.xmi/2.12.0/org.eclipse.emf.ecore.xmi-2.12.0.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/xsd/gt-xsd-gml3/18.5/gt-xsd-gml3-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/xsd/gt-xsd-sld/18.5/gt-xsd-sld-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/xsd/gt-xsd-filter/18.5/gt-xsd-filter-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-arcgrid/1.1.18/imageio-ext-arcgrid-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdalarcbinarygrid/1.1.18/imageio-ext-gdalarcbinarygrid-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdalframework/1.1.18/imageio-ext-gdalframework-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdal-bindings/1.9.2/imageio-ext-gdal-bindings-1.9.2.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdalmrsid/1.1.18/imageio-ext-gdalmrsid-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdalecw/1.1.18/imageio-ext-gdalecw-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdaldted/1.1.18/imageio-ext-gdaldted-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdalkakadujp2/1.1.18/imageio-ext-gdalkakadujp2-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdalidrisi/1.1.18/imageio-ext-gdalidrisi-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdalmrsidjp2/1.1.18/imageio-ext-gdalmrsidjp2-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdalecwjp2/1.1.18/imageio-ext-gdalecwjp2-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdalehdr/1.1.18/imageio-ext-gdalehdr-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdalenvihdr/1.1.18/imageio-ext-gdalenvihdr-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdalerdasimg/1.1.18/imageio-ext-gdalerdasimg-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdalnitf/1.1.18/imageio-ext-gdalnitf-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-gdalrpftoc/1.1.18/imageio-ext-gdalrpftoc-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-imagereadmt/1.1.18/imageio-ext-imagereadmt-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-kakadu/1.1.18/imageio-ext-kakadu-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-kakadujni/5.2.6/imageio-ext-kakadujni-5.2.6.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-netcdf/1.1.18/imageio-ext-netcdf-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-log4j12/1.5.6/slf4j-log4j12-1.5.6.jar" sourcepath="M2_REPO/org/slf4j/slf4j-log4j12/1.5.6/slf4j-log4j12-1.5.6-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/slf4j/slf4j-api/1.5.6/slf4j-api-1.5.6.jar" sourcepath="M2_REPO/org/slf4j/slf4j-api/1.5.6/slf4j-api-1.5.6-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/log4j/log4j/1.2.14/log4j-1.2.14.jar" sourcepath="M2_REPO/log4j/log4j/1.2.14/log4j-1.2.14-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/opendap/opendap/2.1/opendap-2.1.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-netcdf-core/1.1.18/imageio-ext-netcdf-core-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/essi-unidata/netcdf-java/4.0.41/netcdf-java-4.0.41.jar"/>
+	<classpathentry kind="var" path="M2_REPO/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar" sourcepath="M2_REPO/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar" sourcepath="M2_REPO/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/commons-codec/commons-codec/1.2/commons-codec-1.2.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-hdf4/1.1.18/imageio-ext-hdf4-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-grib1/1.1.18/imageio-ext-grib1-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/grib/6.0.18/grib-6.0.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-png/1.1.18/imageio-ext-png-1.1.18.jar"/>
+	<classpathentry kind="var" path="M2_REPO/ar/com/hjg/pngj/2.0.1/pngj-2.0.1.jar" sourcepath="M2_REPO/ar/com/hjg/pngj/2.0.1/pngj-2.0.1-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jaitools/jt-rangelookup/1.4.0/jt-rangelookup-1.4.0.jar" sourcepath="M2_REPO/org/jaitools/jt-rangelookup/1.4.0/jt-rangelookup-1.4.0-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jaitools/jt-contour/1.4.0/jt-contour-1.4.0.jar" sourcepath="M2_REPO/org/jaitools/jt-contour/1.4.0/jt-contour-1.4.0-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jaitools/jt-attributeop/1.4.0/jt-attributeop-1.4.0.jar" sourcepath="M2_REPO/org/jaitools/jt-attributeop/1.4.0/jt-attributeop-1.4.0-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jaitools/jt-vectorize/1.4.0/jt-vectorize-1.4.0.jar" sourcepath="M2_REPO/org/jaitools/jt-vectorize/1.4.0/jt-vectorize-1.4.0-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/jaitools/jt-vectorbinarize/1.4.0/jt-vectorbinarize-1.4.0.jar" sourcepath="M2_REPO/org/jaitools/jt-vectorbinarize/1.4.0/jt-vectorbinarize-1.4.0-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/com/thoughtworks/xstream/xstream/1.4.7/xstream-1.4.7.jar" sourcepath="M2_REPO/com/thoughtworks/xstream/xstream/1.4.7/xstream-1.4.7-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/xmlpull/xmlpull/1.1.3.1/xmlpull-1.1.3.1.jar"/>
+	<classpathentry kind="var" path="M2_REPO/xpp3/xpp3_min/1.1.4c/xpp3_min-1.1.4c.jar" sourcepath="M2_REPO/xpp3/xpp3_min/1.1.4c/xpp3_min-1.1.4c-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-sample-data/18.5/gt-sample-data-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-property/18.5/gt-property-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/geotools/gt-epsg-hsql/18.5/gt-epsg-hsql-18.5.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/hsqldb/hsqldb/2.4.1/hsqldb-2.4.1.jar"/>
+	<classpathentry kind="var" path="M2_REPO/junit/junit/4.11/junit-4.11.jar" sourcepath="M2_REPO/junit/junit/4.11/junit-4.11-sources.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar" sourcepath="M2_REPO/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3-sources.jar"/>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

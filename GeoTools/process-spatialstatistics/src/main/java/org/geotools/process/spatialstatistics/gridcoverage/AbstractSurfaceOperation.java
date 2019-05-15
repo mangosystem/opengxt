@@ -49,6 +49,10 @@ public abstract class AbstractSurfaceOperation extends RasterProcessingOperation
 
     protected java.awt.Rectangle bounds;
 
+    private int maxCol;
+
+    private int maxRow;
+
     protected void initSurface(GridCoverage2D gc) {
         GridGeometry2D gridGeometry2D = gc.getGridGeometry();
         AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
@@ -65,6 +69,8 @@ public abstract class AbstractSurfaceOperation extends RasterProcessingOperation
         image = (PlanarImage) gc.getRenderedImage();
         bounds = image.getBounds();
 
+        maxCol = bounds.x + image.getWidth();
+        maxRow = bounds.y + image.getHeight();
     }
 
     protected double[][] getSubMatrix(GridCoordinates2D pos, int width, int height) {
@@ -81,23 +87,20 @@ public abstract class AbstractSurfaceOperation extends RasterProcessingOperation
 
         Raster subsetRs = image.getData(rect);
 
-        int maxCol = bounds.x + image.getWidth();
-        int maxRow = bounds.y + image.getHeight();
-
         boolean hasNAN = false;
         double[][] mx = new double[width][height];
-        for (int dy = ulPos.y, drow = 0; drow < height; dy++, drow++) {
-            for (int dx = ulPos.x, dcol = 0; dcol < width; dx++, dcol++) {
-                if (dx < 0 || dy < 0 || dx >= maxCol || dy >= maxRow) {
-                    mx[dcol][drow] = Double.NaN;
+        for (int dy = ulPos.y, row = 0; row < height; dy++, row++) {
+            for (int dx = ulPos.x, col = 0; col < width; dx++, col++) {
+                if (dx < bounds.x || dy < bounds.y || dx >= maxCol || dy >= maxRow) {
+                    mx[col][row] = Double.NaN;
                     hasNAN = true;
                 } else {
                     double ret = subsetRs.getSampleDouble(dx, dy, 0);
                     if (SSUtils.compareDouble(ret, this.srcNoData)) {
-                        mx[dcol][drow] = Double.NaN;
+                        mx[col][row] = Double.NaN;
                         hasNAN = true;
                     } else {
-                        mx[dcol][drow] = ret * zFactor;
+                        mx[col][row] = ret * zFactor;
                     }
                 }
             }

@@ -30,10 +30,9 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.process.spatialstatistics.gridcoverage.GeometryToRasterOperation;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.ProgressListener;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Converts geometry to a raster dataset.

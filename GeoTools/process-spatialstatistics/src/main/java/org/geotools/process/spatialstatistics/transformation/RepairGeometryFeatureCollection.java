@@ -29,23 +29,22 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateArrays;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryComponentFilter;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.operation.polygonize.Polygonizer;
+import org.locationtech.jts.util.Assert;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateArrays;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryComponentFilter;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.operation.polygonize.Polygonizer;
-import com.vividsolutions.jts.util.Assert;
 
 /**
  * Repair Geometry SimpleFeatureCollection Implementation
@@ -252,8 +251,8 @@ public class RepairGeometryFeatureCollection extends GXTSimpleFeatureCollection 
                 Polygon polygon = (Polygon) source;
 
                 // exterior ring
-                LineString exterior = validateRing((LineString) validateEmptyAndDuplicate(polygon
-                        .getExteriorRing()));
+                LineString exterior = validateRing(
+                        (LineString) validateEmptyAndDuplicate(polygon.getExteriorRing()));
                 if (exterior == null || exterior.isEmpty() || exterior.getLength() == 0) {
                     return null;
                 }
@@ -262,8 +261,8 @@ public class RepairGeometryFeatureCollection extends GXTSimpleFeatureCollection 
                 // interior ring
                 List<LinearRing> holes = new ArrayList<LinearRing>();
                 for (int idx = 0; idx < polygon.getNumInteriorRing(); idx++) {
-                    LineString interior = validateRing((LineString) validateEmptyAndDuplicate(polygon
-                            .getInteriorRingN(idx)));
+                    LineString interior = validateRing(
+                            (LineString) validateEmptyAndDuplicate(polygon.getInteriorRingN(idx)));
                     if (interior == null || interior.isEmpty() || interior.getLength() == 0) {
                         continue;
                     }
@@ -275,8 +274,8 @@ public class RepairGeometryFeatureCollection extends GXTSimpleFeatureCollection 
             } else if (geomBinding.isAssignableFrom(MultiLineString.class)) {
                 List<LineString> lines = new ArrayList<LineString>();
                 for (int idx = 0; idx < source.getNumGeometries(); idx++) {
-                    LineString edit = (LineString) validateEmptyAndDuplicate((LineString) source
-                            .getGeometryN(idx));
+                    LineString edit = (LineString) validateEmptyAndDuplicate(
+                            (LineString) source.getGeometryN(idx));
                     if (edit == null) {
                         continue;
                     }
@@ -326,7 +325,8 @@ public class RepairGeometryFeatureCollection extends GXTSimpleFeatureCollection 
                     coordList.add(coordinate);
                 }
 
-                return factory.createMultiPoint(CoordinateArrays.toCoordinateArray(coordList));
+                return factory
+                        .createMultiPointFromCoords(CoordinateArrays.toCoordinateArray(coordList));
             } else if (geomBinding.isAssignableFrom(Point.class)) {
                 if (isValid(source.getCoordinate())) {
                     return source;

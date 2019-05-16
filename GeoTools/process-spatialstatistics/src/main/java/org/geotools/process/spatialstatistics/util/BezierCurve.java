@@ -19,13 +19,12 @@ package org.geotools.process.spatialstatistics.util;
 import java.util.logging.Logger;
 
 import org.geotools.util.logging.Logging;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateList;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineSegment;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.linearref.LinearGeometryBuilder;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateList;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineSegment;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.linearref.LinearGeometryBuilder;
 
 /**
  * Converts LineString to Bezier Curve
@@ -142,7 +141,8 @@ public class BezierCurve {
         }
     }
 
-    private Coordinate quadraticBezier(Coordinate from, Coordinate to, Coordinate control, double t) {
+    private Coordinate quadraticBezier(Coordinate from, Coordinate to, Coordinate control,
+            double t) {
         double x = (1 - t) * (1 - t) * from.x + (2 - 2 * t) * t * control.x + t * t * to.x;
         double y = (1 - t) * (1 - t) * from.y + (2 - 2 * t) * t * control.y + t * t * to.y;
 

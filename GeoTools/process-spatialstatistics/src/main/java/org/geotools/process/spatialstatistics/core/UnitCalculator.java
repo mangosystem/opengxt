@@ -19,18 +19,19 @@ package org.geotools.process.spatialstatistics.core;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.measure.Measure;
+import javax.measure.Unit;
 import javax.measure.quantity.Area;
 import javax.measure.quantity.Length;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
 
 import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.measure.Measure;
 import org.geotools.process.spatialstatistics.enumeration.AreaUnit;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -39,8 +40,7 @@ import org.opengis.referencing.cs.CoordinateSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
+import si.uom.SI;
 
 /**
  * Utility class for unit calculation
@@ -52,7 +52,7 @@ import com.vividsolutions.jts.geom.Geometry;
 public class UnitCalculator {
     protected static final Logger LOGGER = Logging.getLogger(UnitCalculator.class);
 
-    private Unit<Length> distanceUnit = SI.METER; // default
+    private Unit<Length> distanceUnit = SI.METRE; // default
 
     private Unit<Area> areaUnit = SI.SQUARE_METRE; // default
 
@@ -73,13 +73,13 @@ public class UnitCalculator {
 
         CoordinateReferenceSystem horCRS = CRS.getHorizontalCRS(sourceCRS);
         if (horCRS instanceof GeographicCRS) {
-            this.distanceUnit = SI.METER; // default
+            this.distanceUnit = SI.METRE; // default
             this.areaUnit = SI.SQUARE_METRE; // default
             this.isGeographic = true;
         } else {
             CoordinateSystem cs = horCRS.getCoordinateSystem();
             this.distanceUnit = (Unit<Length>) cs.getAxis(0).getUnit();
-            this.areaUnit = (Unit<Area>) distanceUnit.times(distanceUnit);
+            this.areaUnit = (Unit<Area>) distanceUnit.multiply(distanceUnit);
         }
     }
 
@@ -87,7 +87,7 @@ public class UnitCalculator {
         CoordinateReferenceSystem horCRS = CRS.getHorizontalCRS(sourceCRS);
         if (isGeographic && (horCRS instanceof GeographicCRS)) {
             try {
-                this.distanceUnit = SI.METER; // default
+                this.distanceUnit = SI.METRE; // default
                 this.areaUnit = SI.SQUARE_METRE; // default
 
                 // GeographicCRS to UTM
@@ -115,7 +115,7 @@ public class UnitCalculator {
             return area;
         }
 
-        return UnitConverter.convertArea(Measure.valueOf(area, areaUnit), targetUnit);
+        return UnitConverter.convertArea(new Measure(area, areaUnit), targetUnit);
     }
 
     public double getLength(Geometry geometry, DistanceUnit targetUnit) {
@@ -124,7 +124,7 @@ public class UnitCalculator {
             return length;
         }
 
-        return UnitConverter.convertDistance(Measure.valueOf(length, distanceUnit), targetUnit);
+        return UnitConverter.convertDistance(new Measure(length, distanceUnit), targetUnit);
     }
 
     private Geometry transformGeometry(Geometry geometry) {

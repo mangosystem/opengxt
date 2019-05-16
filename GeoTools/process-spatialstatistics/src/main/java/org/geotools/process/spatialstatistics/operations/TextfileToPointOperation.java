@@ -34,6 +34,10 @@ import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.referencing.CRS;
 import org.geotools.util.Converters;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.io.WKTReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.MismatchedDimensionException;
@@ -42,11 +46,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.io.WKTReader;
-
 /**
  * Textfile to point features operation
  * 
@@ -54,7 +53,6 @@ import com.vividsolutions.jts.io.WKTReader;
  * 
  * @source $URL$
  */
-@SuppressWarnings("nls")
 public class TextfileToPointOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(TextfileToPointOperation.class);
 

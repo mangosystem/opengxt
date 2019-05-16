@@ -42,13 +42,12 @@ import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.process.spatialstatistics.gridcoverage.GridTransformer;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * CoverageToPoint SimpleFeatureCollection Implementation

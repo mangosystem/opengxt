@@ -33,9 +33,8 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterCropOperation;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.util.ProgressListener;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Interpolates a surface from points using an inverse distance weighted (IDW) technique.

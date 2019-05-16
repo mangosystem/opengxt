@@ -31,9 +31,8 @@ import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Creates a spatial subset of a raster dataset.
@@ -69,7 +68,7 @@ public class RasterClipOperation extends RasterProcessingOperation {
         GridCoverage2D clipped = null;
 
         ReferencedEnvelope gridExtent = new ReferencedEnvelope(inputCoverage.getEnvelope());
-        if (gridExtent.contains((com.vividsolutions.jts.geom.Envelope) extent)) {
+        if (gridExtent.contains((org.locationtech.jts.geom.Envelope) extent)) {
             RasterCropOperation cropOp = new RasterCropOperation();
             clipped = cropOp.execute(inputCoverage, extent);
         } else {

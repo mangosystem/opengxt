@@ -24,11 +24,10 @@ import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.util.CoordinateTranslateFilter;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * Circular Binning Visitor.
@@ -154,7 +153,7 @@ public class CircularBinningVisitor extends AbstractBinningVisitor {
                             xpos += diameter;
                             resetIndexes();
                         } else {
-                            Geometry grid = (Geometry) binTemplate.clone();
+                            Geometry grid = (Geometry) binTemplate.copy();
                             grid.apply(new CoordinateTranslateFilter(xpos, ypos));
 
                             if (transformer != null) {

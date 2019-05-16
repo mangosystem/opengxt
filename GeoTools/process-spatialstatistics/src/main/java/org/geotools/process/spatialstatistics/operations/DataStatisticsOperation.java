@@ -35,12 +35,12 @@ import org.geotools.process.spatialstatistics.gridcoverage.RasterCropOperation;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult.DataStatisticsItem;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.expression.Expression;
 
 import com.thoughtworks.xstream.annotations.XStreamImplicit;
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * DataStatisticsOperation

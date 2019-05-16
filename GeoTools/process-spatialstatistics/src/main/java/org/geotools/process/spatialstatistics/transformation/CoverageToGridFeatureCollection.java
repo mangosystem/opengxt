@@ -42,15 +42,14 @@ import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.process.spatialstatistics.gridcoverage.GridTransformer;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Polygon;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * CoverageToGrid SimpleFeatureCollection Implementation
@@ -165,8 +164,6 @@ public class CoverageToGridFeatureCollection extends GXTSimpleFeatureCollection 
 
         private RectIter readIter;
 
-        private java.awt.Rectangle bounds;
-
         private String typeName;
 
         private int currentRow = 0;
@@ -219,7 +216,6 @@ public class CoverageToGridFeatureCollection extends GXTSimpleFeatureCollection 
 
             PlanarImage inputImage = (PlanarImage) coverage.getRenderedImage();
             this.readIter = RectIterFactory.create(inputImage, inputImage.getBounds());
-            this.bounds = inputImage.getBounds();
 
             currentRow = 0;
             rowCount = inputImage.getHeight();

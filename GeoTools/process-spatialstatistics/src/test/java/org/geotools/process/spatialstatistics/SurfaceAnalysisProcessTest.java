@@ -14,8 +14,7 @@ import org.geotools.process.spatialstatistics.gridcoverage.RasterAspectOperation
 import org.geotools.process.spatialstatistics.gridcoverage.RasterClipOperation;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
 import org.junit.Test;
-
-import com.vividsolutions.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.GeometryFactory;
 
 public class SurfaceAnalysisProcessTest extends SpatialStatisticsTestCase {
 

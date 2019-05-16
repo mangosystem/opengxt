@@ -29,15 +29,14 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.Converters;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.operation.union.CascadedPolygonUnion;
+import org.locationtech.jts.shape.random.RandomPointsBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.expression.Expression;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.operation.union.CascadedPolygonUnion;
-import com.vividsolutions.jts.shape.random.RandomPointsBuilder;
 
 /**
  * Creates a random point featurecollection.
@@ -50,7 +49,7 @@ import com.vividsolutions.jts.shape.random.RandomPointsBuilder;
 public class RandomPointsOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(RandomPointsOperation.class);
 
-    private com.vividsolutions.jts.shape.random.RandomPointsBuilder builder;
+    private RandomPointsBuilder builder;
 
     private CoordinateReferenceSystem crs;
 
@@ -201,7 +200,7 @@ public class RandomPointsOperation extends GeneralOperation {
             return geometries.iterator().next();
         }
 
-        com.vividsolutions.jts.operation.union.CascadedPolygonUnion unionOp = null;
+        CascadedPolygonUnion unionOp = null;
         unionOp = new CascadedPolygonUnion(geometries);
         return unionOp.union();
     }

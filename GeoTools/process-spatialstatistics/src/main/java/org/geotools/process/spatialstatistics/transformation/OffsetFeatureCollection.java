@@ -27,12 +27,11 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.util.CoordinateTranslateFilter;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Offset Features SimpleFeatureCollection Implementation
@@ -50,7 +49,8 @@ public class OffsetFeatureCollection extends GXTSimpleFeatureCollection {
 
     private ReferencedEnvelope offsetBounds = null;
 
-    public OffsetFeatureCollection(SimpleFeatureCollection delegate, double offsetX, double offsetY) {
+    public OffsetFeatureCollection(SimpleFeatureCollection delegate, double offsetX,
+            double offsetY) {
         this(delegate, ff.literal(offsetX), ff.literal(offsetY));
 
         offsetBounds = delegate.getBounds();
@@ -127,8 +127,9 @@ public class OffsetFeatureCollection extends GXTSimpleFeatureCollection {
             for (Object attribute : feature.getAttributes()) {
                 if (attribute instanceof Geometry) {
                     Geometry geometry = (Geometry) attribute;
-                    Geometry offseted = (Geometry) geometry.clone();
-                    offseted.apply(new CoordinateTranslateFilter(dX.doubleValue(), dY.doubleValue()));
+                    Geometry offseted = geometry.copy();
+                    offseted.apply(
+                            new CoordinateTranslateFilter(dX.doubleValue(), dY.doubleValue()));
                     attribute = offseted;
                 }
                 builder.add(attribute);

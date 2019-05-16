@@ -21,13 +21,12 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.measure.Measure;
+import javax.measure.Unit;
 import javax.measure.quantity.Area;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.measure.Measure;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
@@ -37,6 +36,8 @@ import org.geotools.process.spatialstatistics.enumeration.AreaUnit;
 import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
 import org.opengis.referencing.FactoryException;
@@ -45,8 +46,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.crs.GeographicCRS;
 import org.opengis.util.ProgressListener;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
+import si.uom.SI;
 
 /**
  * Calculates area for each feature in a polygon features.
@@ -129,11 +129,11 @@ public class AreaProcess extends AbstractStatisticsProcess {
                 }
             } else {
                 Unit<?> distUnit = horCRS.getCoordinateSystem().getAxis(0).getUnit();
-                sourceUnit = (Unit<Area>) distUnit.times(distUnit);
+                sourceUnit = (Unit<Area>) distUnit.multiply(distUnit);
                 dArea = sumArea(features.subCollection(filter));
             }
 
-            dArea = UnitConverter.convertArea(Measure.valueOf(dArea, sourceUnit), targetUnit);
+            dArea = UnitConverter.convertArea(new Measure(dArea, sourceUnit), targetUnit);
         }
         // end process
 

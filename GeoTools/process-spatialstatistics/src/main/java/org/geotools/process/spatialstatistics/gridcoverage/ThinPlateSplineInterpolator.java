@@ -17,8 +17,7 @@
 package org.geotools.process.spatialstatistics.gridcoverage;
 
 import org.geotools.referencing.operation.matrix.GeneralMatrix;
-
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Implementation of 2D Thin Plate Spline interpolation.

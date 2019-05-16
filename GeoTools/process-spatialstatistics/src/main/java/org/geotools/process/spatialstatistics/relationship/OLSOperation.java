@@ -27,8 +27,8 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
 import org.ejml.interfaces.decomposition.CholeskyDecomposition;
 import org.ejml.simple.SimpleMatrix;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -133,7 +133,7 @@ public class OLSOperation extends GeneralOperation {
         int inVarCount = fieldMap.size() - 1; // duplicated fields removed
         Y = new SimpleMatrix(rowCount, 1);
         X = new SimpleMatrix(rowCount, inVarCount + 1);
-        X.set(1.0); // Sets all the elements in this matrix equal to 1
+        X.fill(1.0); // Sets all the elements in this matrix equal to 1
 
         int column = 0;
         double sumOfY = 0.0d;
@@ -213,8 +213,8 @@ public class OLSOperation extends GeneralOperation {
         AICc = -2.0 * logLik + 2.0 * k2 * (double) (n / (n - k2 - 1));
 
         // Step 2: Cholesky Decomposition
-        CholeskyDecomposition<DenseMatrix64F> chol = null;
-        chol = DecompositionFactory.chol(ZtrZ.numRows(), true);
+        CholeskyDecomposition<DMatrixRMaj> chol = null;
+        chol = DecompositionFactory_DDRM.chol(ZtrZ.numRows(), true);
         if (!chol.decompose(ZtrZ.getMatrix().copy())) {
             throw new RuntimeException("Cholesky failed!");
         }

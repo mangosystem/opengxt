@@ -30,9 +30,8 @@ import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.util.InternationalString;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * WindRoseMapProcessFactory

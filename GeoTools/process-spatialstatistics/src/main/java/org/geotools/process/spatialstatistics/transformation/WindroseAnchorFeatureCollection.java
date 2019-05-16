@@ -27,16 +27,15 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * Windrose Anchor SimpleFeatureCollection Implementation
@@ -117,7 +116,8 @@ public class WindroseAnchorFeatureCollection extends GXTSimpleFeatureCollection 
 
         private SimpleFeatureIterator iter;
 
-        public WindroseAnchorFeatureIterator(SimpleFeatureType schema, Point center, double radius) {
+        public WindroseAnchorFeatureIterator(SimpleFeatureType schema, Point center,
+                double radius) {
             this.center = center;
             this.radius = radius;
 
@@ -129,7 +129,7 @@ public class WindroseAnchorFeatureCollection extends GXTSimpleFeatureCollection 
 
             String typeName = builder.getFeatureType().getTypeName();
             int featureID = 1;
-            
+
             // create circle
             double radius_step = radius / 5;
             for (int index = 0; index < 5; index++) {

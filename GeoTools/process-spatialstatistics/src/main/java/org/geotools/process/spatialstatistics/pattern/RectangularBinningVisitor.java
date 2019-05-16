@@ -24,10 +24,9 @@ import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.util.CoordinateTranslateFilter;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Rectangular Binning Visitor.
@@ -160,7 +159,7 @@ public class RectangularBinningVisitor extends AbstractBinningVisitor {
                             xpos += width;
                             resetIndexes();
                         } else {
-                            Geometry grid = (Geometry) binTemplate.clone();
+                            Geometry grid = (Geometry) binTemplate.copy();
                             grid.apply(new CoordinateTranslateFilter(xpos, ypos));
 
                             if (transformer != null) {

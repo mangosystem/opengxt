@@ -28,16 +28,15 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.enumeration.PointLocationType;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.linearref.LengthIndexedLine;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
 /**
  * Vertices To Points SimpleFeatureCollection Implementation
@@ -171,7 +170,8 @@ public class VerticesToPointsFeatureCollection extends GXTSimpleFeatureCollectio
                         case Mid:
                             Class<?> binding = geometry.getClass();
                             Geometry linearGeom = geometry;
-                            if (Polygon.class.equals(binding) || MultiPolygon.class.equals(binding)) {
+                            if (Polygon.class.equals(binding)
+                                    || MultiPolygon.class.equals(binding)) {
                                 linearGeom = geometry.getBoundary();
                             }
                             LengthIndexedLine lil = new LengthIndexedLine(linearGeom);

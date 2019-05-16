@@ -29,9 +29,8 @@ import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.enumeration.RadialType;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.util.InternationalString;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * PolarGridsFromGeometryProcessFactory

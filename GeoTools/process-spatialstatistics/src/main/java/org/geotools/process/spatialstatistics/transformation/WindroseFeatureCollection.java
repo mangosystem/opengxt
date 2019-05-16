@@ -31,18 +31,17 @@ import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitorResult;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateList;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateList;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Windrose SimpleFeatureCollection Implementation
@@ -215,7 +214,8 @@ public class WindroseFeatureCollection extends GXTSimpleFeatureCollection {
 
                     double startDeg = (index * stepAngle) - halfStep;
                     double endDeg = ((index + 1) * stepAngle) - halfStep;
-                    feature.setDefaultGeometry(createCell(center, startDeg, endDeg, adjustedRadius));
+                    feature.setDefaultGeometry(
+                            createCell(center, startDeg, endDeg, adjustedRadius));
                 }
             } finally {
                 featureIter.close();

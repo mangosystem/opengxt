@@ -24,12 +24,11 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.collection.DecoratingSimpleFeatureCollection;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.process.gs.WrappingIterator;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * A FeatureCollection which completely delegates to another FeatureCollection.

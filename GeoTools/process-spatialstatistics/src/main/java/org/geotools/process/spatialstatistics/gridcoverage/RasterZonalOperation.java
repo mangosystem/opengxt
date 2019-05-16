@@ -40,11 +40,10 @@ import org.geotools.process.spatialstatistics.enumeration.ZonalStatisticsType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Calculates statistics on values of a raster within the zones of another features.
@@ -68,9 +67,9 @@ public class RasterZonalOperation extends RasterProcessingOperation {
 
     }
 
-    public SimpleFeatureCollection execute(SimpleFeatureCollection zoneFeatures,
-            String targetField, GridCoverage2D valueCoverage, Integer bandIndex,
-            ZonalStatisticsType statisticsType) throws IOException {
+    public SimpleFeatureCollection execute(SimpleFeatureCollection zoneFeatures, String targetField,
+            GridCoverage2D valueCoverage, Integer bandIndex, ZonalStatisticsType statisticsType)
+            throws IOException {
         this.statisticsType = statisticsType;
         this.targetField = targetField;
 
@@ -86,7 +85,7 @@ public class RasterZonalOperation extends RasterProcessingOperation {
         // test intersection
         ReferencedEnvelope gridEnv = new ReferencedEnvelope(valueCoverage.getEnvelope());
         ReferencedEnvelope featureEnv = zoneFeatures.getBounds();
-        com.vividsolutions.jts.geom.Envelope intEnv = featureEnv.intersection(gridEnv);
+        org.locationtech.jts.geom.Envelope intEnv = featureEnv.intersection(gridEnv);
         if (intEnv == null || intEnv.isNull()) {
             // return empty result
             return insertFeatures(zoneFeatures, new Hashtable<Object, StatisticsVisitor>());

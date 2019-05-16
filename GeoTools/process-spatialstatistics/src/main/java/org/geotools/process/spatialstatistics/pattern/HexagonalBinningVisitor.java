@@ -24,9 +24,8 @@ import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.util.CoordinateTranslateFilter;
 import org.geotools.util.logging.Logging;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 
 /**
  * Hexagonal Binning Visitor.
@@ -219,7 +218,7 @@ public class HexagonalBinningVisitor extends AbstractBinningVisitor {
                             xpos += xoffset;
                             resetIndexes();
                         } else {
-                            Geometry grid = (Geometry) binTemplate.clone();
+                            Geometry grid = (Geometry) binTemplate.copy();
                             grid.apply(new CoordinateTranslateFilter(xpos, ypos));
 
                             if (transformer != null) {

@@ -23,14 +23,13 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import org.geotools.util.logging.Logging;
-
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.strtree.AbstractNode;
-import com.vividsolutions.jts.index.strtree.Boundable;
-import com.vividsolutions.jts.index.strtree.ItemBoundable;
-import com.vividsolutions.jts.index.strtree.ItemDistance;
-import com.vividsolutions.jts.index.strtree.STRtree;
-import com.vividsolutions.jts.util.PriorityQueue;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.strtree.AbstractNode;
+import org.locationtech.jts.index.strtree.Boundable;
+import org.locationtech.jts.index.strtree.ItemBoundable;
+import org.locationtech.jts.index.strtree.ItemDistance;
+import org.locationtech.jts.index.strtree.STRtree;
+import org.locationtech.jts.util.PriorityQueue;
 
 /**
  * K-Nearest Neighbor Search.

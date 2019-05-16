@@ -29,14 +29,13 @@ import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RadialType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Creates a radial polar grids from geometry(centroid) or features.
@@ -198,7 +197,7 @@ public class PolarGridsOperation extends GeneralOperation {
                 if (refFeature != null) {
                     featureWriter.copyAttributes(refFeature, newFeature, false);
                 }
-                newFeature.setDefaultGeometry(current.clone());
+                newFeature.setDefaultGeometry(current.copy());
                 newFeature.setAttribute(ANGLE_FIELD, fromDeg);
                 newFeature.setAttribute(RADIUS_FIELD, radius[idx]);
 

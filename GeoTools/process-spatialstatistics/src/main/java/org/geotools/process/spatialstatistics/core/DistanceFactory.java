@@ -30,19 +30,18 @@ import org.geotools.factory.GeoTools;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.index.strtree.ItemBoundable;
+import org.locationtech.jts.index.strtree.ItemDistance;
+import org.locationtech.jts.index.strtree.STRtree;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.index.strtree.ItemBoundable;
-import com.vividsolutions.jts.index.strtree.ItemDistance;
-import com.vividsolutions.jts.index.strtree.STRtree;
 
 /**
  * Help class for distance calculation
@@ -103,18 +102,18 @@ public class DistanceFactory {
         // calculate nearest neighbor index
         double threshold = Double.MIN_VALUE;
         for (SpatialEvent source : events) {
-            SpatialEvent nearest = (SpatialEvent) spatialIndex.nearestNeighbour(new Envelope(
-                    source.coordinate), source, new ItemDistance() {
-                @Override
-                public double distance(ItemBoundable item1, ItemBoundable item2) {
-                    SpatialEvent s1 = (SpatialEvent) item1.getItem();
-                    SpatialEvent s2 = (SpatialEvent) item2.getItem();
-                    if (s1.id.equals(s2.id)) {
-                        return Double.MAX_VALUE;
-                    }
-                    return s1.distance(s2);
-                }
-            });
+            SpatialEvent nearest = (SpatialEvent) spatialIndex
+                    .nearestNeighbour(new Envelope(source.coordinate), source, new ItemDistance() {
+                        @Override
+                        public double distance(ItemBoundable item1, ItemBoundable item2) {
+                            SpatialEvent s1 = (SpatialEvent) item1.getItem();
+                            SpatialEvent s2 = (SpatialEvent) item2.getItem();
+                            if (s1.id.equals(s2.id)) {
+                                return Double.MAX_VALUE;
+                            }
+                            return s1.distance(s2);
+                        }
+                    });
             threshold = Math.max(threshold, getDistance(source, nearest));
         }
 
@@ -281,7 +280,8 @@ public class DistanceFactory {
         return null;
     }
 
-    public static List<SpatialEvent> loadEvents(SimpleFeatureCollection features, String weightField) {
+    public static List<SpatialEvent> loadEvents(SimpleFeatureCollection features,
+            String weightField) {
         List<SpatialEvent> events = new ArrayList<SpatialEvent>();
 
         FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);

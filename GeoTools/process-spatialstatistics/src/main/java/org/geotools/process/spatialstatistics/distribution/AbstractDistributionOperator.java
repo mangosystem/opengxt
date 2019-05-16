@@ -20,28 +20,27 @@ import java.util.logging.Logger;
 
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.expression.Expression;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-
 /**
- * Abstract Disribution Operator
+ * Abstract Distribution Operator
  * 
  * @author Minpa Lee, MangoSystem
  * 
  * @source $URL$
  */
-public abstract class AbstractDisributionOperator extends GeneralOperation {
-    protected static final Logger LOGGER = Logging.getLogger(AbstractDisributionOperator.class);
+public abstract class AbstractDistributionOperator extends GeneralOperation {
+    protected static final Logger LOGGER = Logging.getLogger(AbstractDistributionOperator.class);
 
     protected final String ALL = "ALL";
 

@@ -28,6 +28,8 @@ import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
@@ -35,9 +37,6 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * XYCalculation SimpleFeatureCollection Implementation
@@ -174,8 +173,8 @@ public class XYCalculationFeatureCollection extends GXTSimpleFeatureCollection {
 
             if (transformer != null) {
                 try {
-                    center.setUserData(sourceFeature.getFeatureType()
-                            .getCoordinateReferenceSystem());
+                    center.setUserData(
+                            sourceFeature.getFeatureType().getCoordinateReferenceSystem());
                     center = (Point) transformer.transform(center);
                 } catch (TransformException e) {
                     String msg = "Error occured transforming " + center.toString();

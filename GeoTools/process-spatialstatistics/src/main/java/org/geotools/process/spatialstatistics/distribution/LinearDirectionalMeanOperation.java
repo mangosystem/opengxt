@@ -28,12 +28,11 @@ import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
 
 /**
  * Identifies the mean direction, length, and geographic center for a set of lines.
@@ -42,7 +41,7 @@ import com.vividsolutions.jts.geom.LineString;
  * 
  * @source $URL$
  */
-public class LinearDirectionalMeanOperation extends AbstractDisributionOperator {
+public class LinearDirectionalMeanOperation extends AbstractDistributionOperator {
     protected static final Logger LOGGER = Logging.getLogger(LinearDirectionalMeanOperation.class);
 
     static final String TYPE_NAME = "LinearDirectionalMean";

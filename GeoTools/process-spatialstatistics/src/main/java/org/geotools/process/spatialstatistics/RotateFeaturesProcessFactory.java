@@ -30,10 +30,9 @@ import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Point;
 import org.opengis.filter.expression.Expression;
 import org.opengis.util.InternationalString;
-
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * RotateFeaturesProcessFactory

@@ -27,14 +27,13 @@ import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.expression.Expression;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * Identifies the location that minimizes overall Euclidean distance to the features in a dataset.
@@ -43,7 +42,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @source $URL$
  */
-public class MedianCenterOperation extends AbstractDisributionOperator {
+public class MedianCenterOperation extends AbstractDistributionOperator {
     protected static final Logger LOGGER = Logging.getLogger(MedianCenterOperation.class);
 
     static final String TYPE_NAME = "MedianCenter";

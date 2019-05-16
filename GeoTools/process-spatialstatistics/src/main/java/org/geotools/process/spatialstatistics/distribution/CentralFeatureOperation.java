@@ -27,14 +27,13 @@ import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * Identifies the most centrally located feature in a point, line, or polygon feature class.
@@ -43,7 +42,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @source $URL$
  */
-public class CentralFeatureOperation extends AbstractDisributionOperator {
+public class CentralFeatureOperation extends AbstractDistributionOperator {
     protected static final Logger LOGGER = Logging.getLogger(CentralFeatureOperation.class);
 
     static final String TYPE_NAME = "LinearDirectionalMean";

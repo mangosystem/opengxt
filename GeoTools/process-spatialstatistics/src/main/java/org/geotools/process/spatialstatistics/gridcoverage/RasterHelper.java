@@ -16,14 +16,11 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
-import it.geosolutions.jaiext.range.NoDataContainer;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.DataBuffer;
-import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -63,6 +60,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.InternationalString;
+
+import it.geosolutions.jaiext.range.NoDataContainer;
 
 /**
  * Help class for GridCoverage2D

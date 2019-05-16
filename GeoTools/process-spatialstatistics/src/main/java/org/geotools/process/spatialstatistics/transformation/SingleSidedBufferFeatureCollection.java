@@ -19,9 +19,8 @@ package org.geotools.process.spatialstatistics.transformation;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
+import javax.measure.Unit;
 import javax.measure.quantity.Length;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
 
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -33,15 +32,16 @@ import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.operation.buffer.BufferOp;
+import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.operation.buffer.BufferOp;
-import com.vividsolutions.jts.operation.buffer.BufferParameters;
+import si.uom.SI;
 
 /**
  * Buffers a features using a certain distance expression.
@@ -135,7 +135,7 @@ public class SingleSidedBufferFeatureCollection extends GXTSimpleFeatureCollecti
 
         private SimpleFeature next;
 
-        private Unit<Length> targetUnit = SI.METER;
+        private Unit<Length> targetUnit = SI.METRE;
 
         private String typeName;
 

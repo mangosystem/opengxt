@@ -17,8 +17,7 @@
 package org.geotools.process.spatialstatistics.distribution;
 
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
-
-import com.vividsolutions.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * CentralFeature Visitor

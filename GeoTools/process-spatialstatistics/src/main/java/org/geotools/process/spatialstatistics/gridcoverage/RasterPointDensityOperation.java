@@ -19,8 +19,7 @@ package org.geotools.process.spatialstatistics.gridcoverage;
 import java.awt.RenderingHints;
 import java.util.logging.Logger;
 
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 import javax.media.jai.BorderExtender;
 import javax.media.jai.JAI;
 import javax.media.jai.KernelJAI;
@@ -36,6 +35,8 @@ import org.jaitools.media.jai.kernel.KernelFactory;
 import org.jaitools.media.jai.kernel.KernelFactory.ValueType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.crs.GeographicCRS;
+
+import si.uom.SI;
 
 /**
  * Calculates a magnitude per unit area from point features that fall within a neighborhood around each cell.

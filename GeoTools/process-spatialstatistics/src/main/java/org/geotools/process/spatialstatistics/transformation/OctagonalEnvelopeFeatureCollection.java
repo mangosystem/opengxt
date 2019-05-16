@@ -28,12 +28,11 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.filter.function.StaticGeometry;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Polygon;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Feature To Octagonal Envelope SimpleFeatureCollection Implementation

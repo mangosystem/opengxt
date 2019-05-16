@@ -30,9 +30,8 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.RadialType;
 import org.geotools.process.spatialstatistics.operations.PolarGridsOperation;
 import org.geotools.util.logging.Logging;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.util.ProgressListener;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Creates a radial polar grids from geometry(centroid).

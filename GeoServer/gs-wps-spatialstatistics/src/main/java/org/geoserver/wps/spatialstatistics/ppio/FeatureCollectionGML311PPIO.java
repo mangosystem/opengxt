@@ -10,9 +10,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.opengis.wfs.FeatureCollectionType;
-import net.opengis.wfs.WfsFactory;
-
 import org.geoserver.feature.RetypingFeatureCollection;
 import org.geoserver.wps.ppio.XMLPPIO;
 import org.geotools.data.crs.ForceCoordinateSystemFeatureResults;
@@ -24,6 +21,7 @@ import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.CRS;
 import org.geotools.xml.Encoder;
 import org.geotools.xml.Parser;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
@@ -31,7 +29,8 @@ import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.xml.sax.ContentHandler;
 
-import com.vividsolutions.jts.geom.Geometry;
+import net.opengis.wfs.FeatureCollectionType;
+import net.opengis.wfs.WfsFactory;
 
 /**
  * A PPIO to generate good looking xml for the StatisticsFeatures process results

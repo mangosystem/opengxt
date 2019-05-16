@@ -25,12 +25,11 @@ import java.util.logging.Logger;
 import org.geotools.process.spatialstatistics.core.KnnSearch;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterRadius.SearchRadiusType;
 import org.geotools.util.logging.Logging;
-
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.index.strtree.ItemBoundable;
-import com.vividsolutions.jts.index.strtree.ItemDistance;
-import com.vividsolutions.jts.index.strtree.STRtree;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.index.strtree.ItemBoundable;
+import org.locationtech.jts.index.strtree.ItemDistance;
+import org.locationtech.jts.index.strtree.STRtree;
 
 /**
  * Implementation of Inverse Distance Weighted interpolation.

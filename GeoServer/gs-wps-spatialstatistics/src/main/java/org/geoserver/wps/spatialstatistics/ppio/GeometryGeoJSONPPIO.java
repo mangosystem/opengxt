@@ -18,8 +18,7 @@ import java.util.logging.Logger;
 import org.geoserver.wps.ppio.CDataPPIO;
 import org.geotools.geojson.geom.GeometryJSON;
 import org.geotools.util.logging.Logging;
-
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 public class GeometryGeoJSONPPIO extends CDataPPIO {
     protected static final Logger LOGGER = Logging.getLogger(GeometryGeoJSONPPIO.class);

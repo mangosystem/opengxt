@@ -476,13 +476,13 @@ public class RasterFunctionalSurface {
 
         boolean hasNAN = false;
         double[][] mx = new double[width][height];
-        for (int dy = ulPos.y, drow = 0; drow < subsetRs.getHeight(); dy++, drow++) {
-            for (int dx = ulPos.x, dcol = 0; dcol < subsetRs.getWidth(); dx++, dcol++) {
-                if (dx < 0 || dy < 0 || dx >= maxCol || dy >= maxRow) {
-                    mx[dcol][drow] = Double.NaN;
+        for (int dy = ulPos.y, row = 0; row < subsetRs.getHeight(); dy++, row++) {
+            for (int dx = ulPos.x, col = 0; col < subsetRs.getWidth(); dx++, col++) {
+                if (dx < bounds.x || dy < bounds.y || dx >= maxCol || dy >= maxRow) {
+                    mx[col][row] = Double.NaN;
                     hasNAN = true;
                 } else {
-                    mx[dcol][drow] = subsetRs.getSampleDouble(dx, dy, 0) * zFactor;
+                    mx[col][row] = subsetRs.getSampleDouble(dx, dy, 0) * zFactor;
                 }
             }
         }

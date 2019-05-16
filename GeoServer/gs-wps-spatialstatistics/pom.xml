@@ -28,6 +28,8 @@
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
     <gt.version>14.5</gt.version>
+    <allow.test.skip>true</allow.test.skip>
+    <allow.test.failure.ignore>true</allow.test.failure.ignore>
   </properties>
   
   <repositories>

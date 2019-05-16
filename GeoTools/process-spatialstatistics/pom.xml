@@ -34,6 +34,8 @@
     <imageio.ext.version>1.1.13</imageio.ext.version>
     <jaiext.version>1.0.9</jaiext.version>
     <jt.version>1.4.0</jt.version>
+    <allow.test.skip>true</allow.test.skip>
+    <allow.test.failure.ignore>true</allow.test.failure.ignore>
   </properties>
   
   <repositories>

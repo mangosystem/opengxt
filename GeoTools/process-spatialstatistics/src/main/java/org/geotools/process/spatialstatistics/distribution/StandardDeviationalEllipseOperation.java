@@ -44,7 +44,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * 
  * @source $URL$
  */
-public class StandardDeviationalEllipseOperation extends AbstractDisributionOperator {
+public class StandardDeviationalEllipseOperation extends AbstractDistributionOperator {
     protected static final Logger LOGGER = Logging
             .getLogger(StandardDeviationalEllipseOperation.class);
 

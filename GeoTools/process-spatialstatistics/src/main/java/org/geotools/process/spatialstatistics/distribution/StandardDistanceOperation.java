@@ -43,7 +43,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * 
  * @source $URL$
  */
-public class StandardDistanceOperation extends AbstractDisributionOperator {
+public class StandardDistanceOperation extends AbstractDistributionOperator {
     protected static final Logger LOGGER = Logging.getLogger(StandardDistanceOperation.class);
 
     static final String TYPE_NAME = "StandardDistance";

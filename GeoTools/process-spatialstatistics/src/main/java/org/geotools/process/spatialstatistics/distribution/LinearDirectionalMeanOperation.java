@@ -42,7 +42,7 @@ import com.vividsolutions.jts.geom.LineString;
  * 
  * @source $URL$
  */
-public class LinearDirectionalMeanOperation extends AbstractDisributionOperator {
+public class LinearDirectionalMeanOperation extends AbstractDistributionOperator {
     protected static final Logger LOGGER = Logging.getLogger(LinearDirectionalMeanOperation.class);
 
     static final String TYPE_NAME = "LinearDirectionalMean";

@@ -42,7 +42,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @source $URL$
  */
-public class MeanCenterOperation extends AbstractDisributionOperator {
+public class MeanCenterOperation extends AbstractDistributionOperator {
     protected static final Logger LOGGER = Logging.getLogger(MeanCenterOperation.class);
 
     static final String TYPE_NAME = "MeanCenter";

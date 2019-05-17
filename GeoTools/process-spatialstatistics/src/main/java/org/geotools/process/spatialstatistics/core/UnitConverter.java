@@ -132,7 +132,7 @@ public class UnitConverter {
             converter = sourceUnit.getConverterTo(USCustomary.SQUARE_FOOT);
             break;
         case SquareKilometers:
-            Unit<Area> sqKilos = (Unit<Area>) SI.SQUARE_METRE.multiply(SI.SQUARE_METRE);
+            Unit<Area> sqKilos = (Unit<Area>) SI.SQUARE_METRE.multiply(1000000);
             converter = sourceUnit.getConverterTo(sqKilos);
             break;
         case SquareMeters:

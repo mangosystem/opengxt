@@ -43,7 +43,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @source $URL$
  */
-public class MedianCenterOperation extends AbstractDisributionOperator {
+public class MedianCenterOperation extends AbstractDistributionOperator {
     protected static final Logger LOGGER = Logging.getLogger(MedianCenterOperation.class);
 
     static final String TYPE_NAME = "MedianCenter";

@@ -40,8 +40,8 @@ import com.vividsolutions.jts.geom.Polygon;
  * 
  * @source $URL$
  */
-public abstract class AbstractDisributionOperator extends GeneralOperation {
-    protected static final Logger LOGGER = Logging.getLogger(AbstractDisributionOperator.class);
+public abstract class AbstractDistributionOperator extends GeneralOperation {
+    protected static final Logger LOGGER = Logging.getLogger(AbstractDistributionOperator.class);
 
     protected final String ALL = "ALL";
 

@@ -43,7 +43,7 @@ import com.vividsolutions.jts.geom.Point;
  * 
  * @source $URL$
  */
-public class CentralFeatureOperation extends AbstractDisributionOperator {
+public class CentralFeatureOperation extends AbstractDistributionOperator {
     protected static final Logger LOGGER = Logging.getLogger(CentralFeatureOperation.class);
 
     static final String TYPE_NAME = "LinearDirectionalMean";

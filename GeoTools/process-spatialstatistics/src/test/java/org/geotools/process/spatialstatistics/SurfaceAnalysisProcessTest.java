@@ -7,12 +7,12 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.grid.io.GridCoverage2DReader;
 import org.geotools.coverage.grid.io.GridFormatFinder;
-import org.geotools.factory.GeoTools;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterAspectOperation;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterClipOperation;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
+import org.geotools.util.factory.GeoTools;
 import org.junit.Test;
 import org.locationtech.jts.geom.GeometryFactory;
 

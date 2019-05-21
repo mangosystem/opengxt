@@ -26,11 +26,11 @@ import javax.media.jai.iterator.WritableRectIter;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridGeometry2D;
-import org.geotools.factory.GeoTools;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
+import org.geotools.util.factory.GeoTools;
 import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
 import org.locationtech.jts.geom.Coordinate;

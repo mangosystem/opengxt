@@ -27,11 +27,11 @@ import javax.media.jai.iterator.RectIterFactory;
 import javax.media.jai.iterator.WritableRectIter;
 
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.metadata.i18n.ErrorKeys;
+import org.geotools.metadata.i18n.Errors;
 import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
-import org.geotools.resources.i18n.ErrorKeys;
-import org.geotools.resources.i18n.Errors;
 import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
 

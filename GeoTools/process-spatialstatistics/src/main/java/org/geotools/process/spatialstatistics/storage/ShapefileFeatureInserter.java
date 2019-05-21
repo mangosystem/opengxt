@@ -62,7 +62,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  * 
  * @source $URL$
  */
-@SuppressWarnings("nls")
 public class ShapefileFeatureInserter implements IFeatureInserter {
     protected static final Logger LOGGER = Logging.getLogger(ShapefileFeatureInserter.class);
 

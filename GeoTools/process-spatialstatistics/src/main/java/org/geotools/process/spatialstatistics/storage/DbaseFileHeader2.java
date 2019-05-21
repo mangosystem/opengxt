@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 
 import org.geotools.data.shapefile.dbf.DbaseFileException;
 import org.geotools.data.shapefile.dbf.DbaseFileHeader;
-import org.geotools.resources.NIOUtilities;
+import org.geotools.util.NIOUtilities;
 
 /**
  * Class to represent the header of a Dbase III file. Creation date: (5/15/2001 5:15:30 PM)
@@ -45,7 +45,6 @@ import org.geotools.resources.NIOUtilities;
  * 
  * @source $URL$
  */
-@SuppressWarnings("nls")
 public class DbaseFileHeader2 extends DbaseFileHeader {
     // Constant for the size of a record
     private static final int FILE_DESCRIPTOR_SIZE = 32;

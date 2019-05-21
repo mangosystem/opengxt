@@ -16,10 +16,10 @@
  */
 package org.geotools.process.spatialstatistics.util;
 
-import org.geotools.factory.Hints;
 import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.util.Converter;
 import org.geotools.util.ConverterFactory;
+import org.geotools.util.factory.Hints;
 import org.opengis.filter.expression.Expression;
 
 /**

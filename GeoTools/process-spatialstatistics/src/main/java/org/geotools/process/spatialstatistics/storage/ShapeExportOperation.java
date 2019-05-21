@@ -59,7 +59,6 @@ import org.opengis.referencing.operation.TransformException;
  * 
  * @source $URL$
  */
-@SuppressWarnings("nls")
 public class ShapeExportOperation {
     protected static final Logger LOGGER = Logging.getLogger(ShapeExportOperation.class);
 

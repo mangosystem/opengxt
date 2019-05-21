@@ -19,8 +19,9 @@ import org.geotools.data.store.ReprojectingFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.CRS;
-import org.geotools.xml.Encoder;
-import org.geotools.xml.Parser;
+import org.geotools.xsd.Configuration;
+import org.geotools.xsd.Encoder;
+import org.geotools.xsd.Parser;
 import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -41,7 +42,7 @@ import net.opengis.wfs.WfsFactory;
  */
 public class FeatureCollectionGML311PPIO extends XMLPPIO {
 
-    private org.geotools.xml.Configuration configuration;
+    private Configuration configuration;
 
     protected FeatureCollectionGML311PPIO() {
         super(FeatureCollectionType.class, FeatureCollection.class, "text/xml; subtype=gml/3.1.1",

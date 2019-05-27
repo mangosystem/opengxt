@@ -172,7 +172,7 @@ public class RasterFunctionalSurface {
         from.z = this.getElevation(from);
 
         if (SSUtils.compareDouble(from.z, noData)) {
-            ros.add(new Coordinate(to.x, to.y, 0));
+            ros.add(new Coordinate(to.x, to.y, INVISIBLE));
             return segment.getFactory().createLineString(CoordinateArrays.toCoordinateArray(ros));
         }
 
@@ -189,7 +189,7 @@ public class RasterFunctionalSurface {
         int yCellCount = (int) ((to.y - from.y) / cellSizeY);
         int maxCellCount = Math.max(Math.abs(xCellCount), Math.abs(yCellCount));
         if (maxCellCount == 0) {
-            ros.add(new Coordinate(to.x, to.y, 0));
+            ros.add(new Coordinate(to.x, to.y, VISIBLE));
             return segment.getFactory().createLineString(CoordinateArrays.toCoordinateArray(ros));
         }
 
@@ -253,7 +253,8 @@ public class RasterFunctionalSurface {
         }
 
         if (ros.size() < 2) {
-            return null;
+            ros.add(new Coordinate(to.x, to.y, INVISIBLE));
+            return segment.getFactory().createLineString(CoordinateArrays.toCoordinateArray(ros));
         }
 
         Coordinate[] coordinates = CoordinateArrays.toCoordinateArray(ros);

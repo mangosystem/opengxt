@@ -16,10 +16,9 @@
  */
 package org.geotools.process.spatialstatistics;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,12 +38,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.ProgressListener;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.operation.linemerge.LineMerger;
 
 /**
  * Determines the visibility, based on the elevation, of all the points in a straight line on a surface between observer and target points.
@@ -148,51 +144,20 @@ public class RasterLinearLOSProcess extends AbstractStatisticsProcess {
 
         if (los != null) {
             int serialID = 0;
-            int previsible = -1;
-            List<Geometry> segments = new ArrayList<Geometry>();
-            GeometryFactory gf = los.getFactory();
-            for (int idx = 0; idx < los.getNumGeometries(); idx++) {
-                Coordinate[] coordinates = los.getCoordinates();
-                for (int i = 0; i < coordinates.length - 1; i++) {
-                    int visible = (int) coordinates[i + 1].z;
-                    if (i == 0) {
-                        previsible = visible;
-                        segments.clear();
-                    }
 
-                    LineSegment seg = new LineSegment(coordinates[i], coordinates[i + 1]);
-                    Geometry lineseg = seg.toGeometry(los.getFactory());
-
-                    if (visible == previsible) {
-                        segments.add(lineseg);
-                    } else {
-                        LineMerger lineMerger = new LineMerger();
-                        lineMerger.add(segments);
-                        Geometry mergeMls = gf.createMultiLineString(GeometryFactory
-                                .toLineStringArray(lineMerger.getMergedLineStrings()));
-
-                        String fid = featureType.getTypeName() + "." + (++serialID);
-                        SimpleFeature newFeature = builder.buildFeature(fid);
-                        newFeature.setDefaultGeometry(mergeMls);
-                        newFeature.setAttribute(VALUE_FIELD, visible);
-                        resultSfc.add(newFeature);
-
-                        segments.clear();
-                        previsible = visible;
-                        segments.add(lineseg);
-                    }
-                }
-
-                if (segments.size() > 0) {
-                    LineMerger lineMerger = new LineMerger();
-                    lineMerger.add(segments);
-                    Geometry mergeMls = gf.createMultiLineString(GeometryFactory
-                            .toLineStringArray(lineMerger.getMergedLineStrings()));
+            Map<Integer, Geometry> map = process.mergeLineOfSight(los);
+            for (Entry<Integer, Geometry> entry : map.entrySet()) {
+                int visible = entry.getKey();
+                Geometry lines = entry.getValue();
+                for (int idx = 0; idx < lines.getNumGeometries(); idx++) {
+                    LineString line = (LineString) lines.getGeometryN(idx);
+                    Geometry multiLine = line.getFactory().createMultiLineString(
+                            new LineString[] { line });
 
                     String fid = featureType.getTypeName() + "." + (++serialID);
                     SimpleFeature newFeature = builder.buildFeature(fid);
-                    newFeature.setDefaultGeometry(mergeMls);
-                    newFeature.setAttribute(VALUE_FIELD, previsible);
+                    newFeature.setDefaultGeometry(multiLine);
+                    newFeature.setAttribute(VALUE_FIELD, visible);
                     resultSfc.add(newFeature);
                 }
             }

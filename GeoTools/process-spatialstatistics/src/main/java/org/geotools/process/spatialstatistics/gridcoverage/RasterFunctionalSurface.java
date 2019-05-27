@@ -20,7 +20,10 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,8 +48,10 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateArrays;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.operation.linemerge.LineMerger;
 
 /**
  * Quantify and visualize a terrain landform represented by a digital elevation model.
@@ -101,6 +106,45 @@ public class RasterFunctionalSurface {
         bounds = image.getBounds();
     }
 
+    public Map<Integer, Geometry> mergeLineOfSight(LineString lineString) {
+        Map<Integer, Geometry> map = new HashMap<Integer, Geometry>();
+
+        LineMerger vm = new LineMerger();
+        LineMerger ivm = new LineMerger();
+
+        GeometryFactory gf = lineString.getFactory();
+
+        Coordinate[] coordinates = lineString.getCoordinates();
+        for (int i = 0; i < coordinates.length - 1; i++) {
+            int visible = (int) coordinates[i].z;
+            LineSegment lineSeg = new LineSegment(coordinates[i], coordinates[i + 1]);
+            LineString line = lineSeg.toGeometry(gf);
+
+            if (visible == 1) {
+                vm.add(line);
+            } else {
+                ivm.add(line);
+            }
+        }
+
+        @SuppressWarnings("rawtypes")
+        Collection lineStrings = vm.getMergedLineStrings();
+        if (lineStrings.size() > 0) {
+            Geometry lines = gf.createMultiLineString(GeometryFactory
+                    .toLineStringArray(lineStrings));
+            map.put(Integer.valueOf(1), lines);
+        }
+
+        lineStrings = ivm.getMergedLineStrings();
+        if (lineStrings.size() > 0) {
+            Geometry lines = gf.createMultiLineString(GeometryFactory
+                    .toLineStringArray(lineStrings));
+            map.put(Integer.valueOf(0), lines);
+        }
+
+        return map;
+    }
+
     public LineString getLineOfSight(Coordinate observer, Coordinate target, double observerOffset,
             boolean useCurvature) {
         return getLineOfSight(gf.createLineString(new Coordinate[] { observer, target }),
@@ -129,7 +173,7 @@ public class RasterFunctionalSurface {
         from.z = this.getElevation(from);
 
         if (SSUtils.compareDouble(from.z, noData)) {
-            ros.add(new Coordinate(to.x, to.y, 0));
+            ros.add(new Coordinate(to.x, to.y, INVISIBLE));
             return segment.getFactory().createLineString(CoordinateArrays.toCoordinateArray(ros));
         }
 
@@ -146,7 +190,7 @@ public class RasterFunctionalSurface {
         int yCellCount = (int) ((to.y - from.y) / cellSizeY);
         int maxCellCount = Math.max(Math.abs(xCellCount), Math.abs(yCellCount));
         if (maxCellCount == 0) {
-            ros.add(new Coordinate(to.x, to.y, 0));
+            ros.add(new Coordinate(to.x, to.y, VISIBLE));
             return segment.getFactory().createLineString(CoordinateArrays.toCoordinateArray(ros));
         }
 
@@ -210,7 +254,8 @@ public class RasterFunctionalSurface {
         }
 
         if (ros.size() < 2) {
-            return null;
+            ros.add(new Coordinate(to.x, to.y, INVISIBLE));
+            return segment.getFactory().createLineString(CoordinateArrays.toCoordinateArray(ros));
         }
 
         Coordinate[] coordinates = CoordinateArrays.toCoordinateArray(ros);

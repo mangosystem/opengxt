@@ -17,8 +17,8 @@
 package org.geotools.process.spatialstatistics.gridcoverage;
 
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import javax.measure.converter.UnitConverter;
@@ -41,10 +41,7 @@ import org.opengis.referencing.crs.GeographicCRS;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.operation.linemerge.LineMerger;
 
 /**
  * Finds the highest or lowest points for a polygon geometry.
@@ -118,59 +115,26 @@ public class RadialLOSOperation extends GeneralOperation {
                 to.setOrdinate(1, dp.getY());
             }
 
-            Geometry los = process.getLineOfSight(center, to, observerOffset, useCurvature,
+            LineString los = process.getLineOfSight(center, to, observerOffset, useCurvature,
                     useRefraction, refractionFactor);
             if (los == null) {
                 continue;
             }
 
-            int previsible = -1;
-            List<Geometry> segments = new ArrayList<Geometry>();
-            GeometryFactory gf = los.getFactory();
-            for (int idx = 0; idx < los.getNumGeometries(); idx++) {
-                Coordinate[] coordinates = los.getCoordinates();
-                for (int i = 0; i < coordinates.length - 1; i++) {
-                    int visible = (int) coordinates[i + 1].z;
-                    if (i == 0) {
-                        previsible = visible;
-                        segments.clear();
-                    }
-
-                    LineSegment seg = new LineSegment(coordinates[i], coordinates[i + 1]);
-                    Geometry lineseg = seg.toGeometry(los.getFactory());
-
-                    if (visible == previsible) {
-                        segments.add(lineseg);
-                    } else {
-                        LineMerger lineMerger = new LineMerger();
-                        lineMerger.add(segments);
-                        Geometry mergeMls = gf.createMultiLineString(GeometryFactory
-                                .toLineStringArray(lineMerger.getMergedLineStrings()));
-
-                        String fid = featureType.getTypeName() + "." + (++serialID);
-                        SimpleFeature newFeature = builder.buildFeature(fid);
-                        newFeature.setDefaultGeometry(mergeMls);
-                        newFeature.setAttribute(ANGLE_FIELD, Math.round(angle * (180.0 / Math.PI)));
-                        newFeature.setAttribute(VALUE_FIELD, visible);
-                        features.add(newFeature);
-
-                        segments.clear();
-                        previsible = visible;
-                        segments.add(lineseg);
-                    }
-                }
-
-                if (segments.size() > 0) {
-                    LineMerger lineMerger = new LineMerger();
-                    lineMerger.add(segments);
-                    Geometry mergeMls = gf.createMultiLineString(GeometryFactory
-                            .toLineStringArray(lineMerger.getMergedLineStrings()));
+            Map<Integer, Geometry> map = process.mergeLineOfSight(los);
+            for (Entry<Integer, Geometry> entry : map.entrySet()) {
+                int visible = entry.getKey();
+                Geometry lines = entry.getValue();
+                for (int idx = 0; idx < lines.getNumGeometries(); idx++) {
+                    LineString line = (LineString) lines.getGeometryN(idx);
+                    Geometry multiLine = line.getFactory().createMultiLineString(
+                            new LineString[] { line });
 
                     String fid = featureType.getTypeName() + "." + (++serialID);
                     SimpleFeature newFeature = builder.buildFeature(fid);
-                    newFeature.setDefaultGeometry(mergeMls);
+                    newFeature.setDefaultGeometry(multiLine);
                     newFeature.setAttribute(ANGLE_FIELD, Math.round(angle * (180.0 / Math.PI)));
-                    newFeature.setAttribute(VALUE_FIELD, previsible);
+                    newFeature.setAttribute(VALUE_FIELD, visible);
                     features.add(newFeature);
                 }
             }

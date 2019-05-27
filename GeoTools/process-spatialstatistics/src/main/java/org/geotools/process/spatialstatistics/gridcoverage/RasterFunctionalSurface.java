@@ -20,7 +20,10 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,8 +44,10 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateArrays;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineSegment;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
@@ -98,6 +103,45 @@ public class RasterFunctionalSurface {
 
         image = (PlanarImage) srcCoverage.getRenderedImage();
         bounds = image.getBounds();
+    }
+
+    public Map<Integer, Geometry> mergeLineOfSight(LineString lineString) {
+        Map<Integer, Geometry> map = new HashMap<Integer, Geometry>();
+
+        LineMerger vm = new LineMerger();
+        LineMerger ivm = new LineMerger();
+
+        GeometryFactory gf = lineString.getFactory();
+
+        Coordinate[] coordinates = lineString.getCoordinates();
+        for (int i = 0; i < coordinates.length - 1; i++) {
+            int visible = (int) coordinates[i].z;
+            LineSegment lineSeg = new LineSegment(coordinates[i], coordinates[i + 1]);
+            LineString line = lineSeg.toGeometry(gf);
+
+            if (visible == 1) {
+                vm.add(line);
+            } else {
+                ivm.add(line);
+            }
+        }
+
+        @SuppressWarnings("rawtypes")
+        Collection lineStrings = vm.getMergedLineStrings();
+        if (lineStrings.size() > 0) {
+            Geometry lines = gf.createMultiLineString(GeometryFactory
+                    .toLineStringArray(lineStrings));
+            map.put(Integer.valueOf(1), lines);
+        }
+
+        lineStrings = ivm.getMergedLineStrings();
+        if (lineStrings.size() > 0) {
+            Geometry lines = gf.createMultiLineString(GeometryFactory
+                    .toLineStringArray(lineStrings));
+            map.put(Integer.valueOf(0), lines);
+        }
+
+        return map;
     }
 
     public LineString getLineOfSight(Coordinate observer, Coordinate target, double observerOffset,

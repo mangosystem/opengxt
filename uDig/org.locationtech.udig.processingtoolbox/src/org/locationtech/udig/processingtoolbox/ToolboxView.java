@@ -546,6 +546,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(editTool, "org.geotools.process.spatialstatistics.ScaleFeaturesProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.SnapPointsToLinesProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.SimplifyProcessFactory");
+        buildTool(editTool, "org.geotools.process.spatialstatistics.SimplifyPolygonProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.DensifyProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.FlipLineProcessFactory");
         buildTool(editTool, "org.geotools.process.spatialstatistics.ExtendLineProcessFactory");
@@ -663,6 +664,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterTRIProcessFactory");
         buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterRoughnessProcessFactory");
         buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterCurvatureProcessFactory");
+        buildTool(surfaceTool, "org.geotools.process.spatialstatistics.RasterFlowDirectionProcessFactory");
         
         // Zonal Tools
         TreeParent zonalTool = new TreeParent(Messages.ToolboxView_RasterZonal, null, null);

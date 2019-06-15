@@ -19,6 +19,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.DialogSettings;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -44,13 +46,14 @@ import org.eclipse.ui.part.ViewPart;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.Processors;
-import org.geotools.process.spatialstatistics.RasterToGridPolygonProcessFactory;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialog;
 import org.locationtech.udig.processingtoolbox.internal.ui.SettingsDialog;
 import org.locationtech.udig.processingtoolbox.tools.AmoebaWizard;
 import org.locationtech.udig.processingtoolbox.tools.AmoebaWizardDialog;
+import org.locationtech.udig.processingtoolbox.tools.BatchReprojectFeaturesDialog;
+import org.locationtech.udig.processingtoolbox.tools.BatchReprojectRastersDialog;
 import org.locationtech.udig.processingtoolbox.tools.BoxPlotDialog;
 import org.locationtech.udig.processingtoolbox.tools.BubbleChartDialog;
 import org.locationtech.udig.processingtoolbox.tools.ExcelToPointDialog;
@@ -102,22 +105,35 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
     private String envIcon = "icons/applications-system-3.png"; //$NON-NLS-1$
 
     private static String workspace = null;
+    
+    private static final String WORKSPACE = "WORKSPACE"; //$NON-NLS-1$
+
+    private static IDialogSettings settings;
 
     public ToolboxView() {
-        // nothing to do
+        // load connection settings
+        // uDig Workspace/.metadata/.plugins/this_plugin/dialog_settings.xml
+        IDialogSettings defaultSettings = ToolboxPlugin.getDefault().getDialogSettings();
+        settings = DialogSettings.getOrCreateSection(defaultSettings, WORKSPACE);
     }
 
     public static String getWorkspace() {
         if (ToolboxView.workspace == null) {
-            String userhome = System.getProperty("user.home"); //$NON-NLS-1$
-            String separator = System.getProperty("file.separator"); //$NON-NLS-1$
-            File file = new File(userhome + separator + "gxt"); //$NON-NLS-1$
-
-            if (file.exists() && file.isDirectory()) {
-                ToolboxView.workspace = file.getPath();
+            String[] arrayParams = settings.getArray(WORKSPACE);
+            if (arrayParams != null) {
+                ToolboxView.workspace = arrayParams[0];
             } else {
-                if (file.mkdir()) {
-                    ToolboxView.workspace = file.getPath();
+                // default workspace
+                String userhome = System.getProperty("user.home"); //$NON-NLS-1$
+                String separator = System.getProperty("file.separator"); //$NON-NLS-1$
+                File file = new File(userhome + separator + "gxt"); //$NON-NLS-1$
+
+                if (file.exists() && file.isDirectory()) {
+                    ToolboxView.setWorkspace(file.getPath());
+                } else {
+                    if (file.mkdir()) {
+                        ToolboxView.setWorkspace(file.getPath());
+                    }
                 }
             }
         }
@@ -125,6 +141,14 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
     }
 
     public static void setWorkspace(String workspace) {
+        String[] arrayParams = settings.getArray(WORKSPACE);
+        if (arrayParams == null) {
+            arrayParams = new String[1];
+        }
+        
+        arrayParams[0] = workspace;
+        settings.put(WORKSPACE, arrayParams);
+        
         ToolboxView.workspace = workspace;
     }
 
@@ -252,6 +276,10 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                     dialog = new AmoebaWizardDialog(shell, new AmoebaWizard(map));
                                 } else if (nodeName.equalsIgnoreCase("RasterCalculatorDialog")) {
                                     dialog = new RasterCalculatorDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("BatchReprojectFeaturesDialog")) {
+                                    dialog = new BatchReprojectFeaturesDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("BatchReprojectRastersDialog")) {
+                                    dialog = new BatchReprojectRastersDialog(shell, map);
                                 }
                             } else {
                                 dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
@@ -579,6 +607,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(utilTool, "org.geotools.process.spatialstatistics.FlowMapProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.MergeFeaturesProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.ReprojectProcessFactory");
+        buildTool(utilTool, Messages.BatchReprojectFeaturesDialog_title, "BatchReprojectFeaturesDialog");
     }
 
     @SuppressWarnings("nls")
@@ -676,6 +705,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         generalTool.addChild(utilTool);
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterForceCRSProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterReprojectProcessFactory");
+        buildTool(utilTool, Messages.BatchReprojectRastersDialog_title, "BatchReprojectRastersDialog");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterResampleProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterFlipProcessFactory");
         buildTool(utilTool, "org.geotools.process.spatialstatistics.RasterMirrorProcessFactory");

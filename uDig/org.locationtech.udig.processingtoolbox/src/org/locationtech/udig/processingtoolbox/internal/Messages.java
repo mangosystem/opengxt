@@ -70,6 +70,19 @@ public class Messages extends NLS {
     public static String Feature_FeatureType;
     public static String Raster;
     
+    public static String BatchReprojectFeaturesDialog_title;
+    public static String BatchReprojectFeaturesDialog_description;
+    public static String BatchReprojectFeaturesDialog_SelectLayers;
+    public static String BatchReprojectFeaturesDialog_Name;
+    public static String BatchReprojectFeaturesDialog_Type;
+    public static String BatchReprojectFeaturesDialog_CRS;
+    public static String BatchReprojectFeaturesDialog_OutputCRS;
+    public static String BatchReprojectFeaturesDialog_Warning;
+    public static String BatchReprojectFeaturesDialog_Overwrite;
+
+    public static String BatchReprojectRastersDialog_title;
+    public static String BatchReprojectRastersDialog_description;
+    
     public static String BoundingBoxViewer_CurrentMapExtent;
     public static String BoundingBoxViewer_CurrentMapFullExtent;
     public static String BoundingBoxViewer_LayerExtent;

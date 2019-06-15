@@ -239,8 +239,8 @@ public abstract class AbstractGeoProcessingDialog extends TitleAreaDialog {
     protected void fillRasterLayers(IMap map, Combo combo) {
         combo.removeAll();
         for (ILayer layer : map.getMapLayers()) {
-            if (layer.hasResource(GridCoverageReader.class)
-                    || layer.getGeoResource().canResolve(GridCoverageReader.class)) {
+            if (layer.getName() != null && (layer.hasResource(GridCoverageReader.class)
+                    || layer.getGeoResource().canResolve(GridCoverageReader.class))) {
                 // must be one band!
                 GridCoverage2D coverage = MapUtils.getGridCoverage(layer);
                 int numBands = coverage.getNumSampleDimensions();

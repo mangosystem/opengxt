@@ -46,7 +46,7 @@ public class SettingsDialog extends Dialog {
 
     private Button btnOpen, chkLog, chkSel, chkStyle, chkAddLayer, chkMandatoryParameter;
 
-    private Text txtCrs;
+    private Text txtWorkspace;
 
     public SettingsDialog(Shell parentShell) {
         super(parentShell);
@@ -87,7 +87,7 @@ public class SettingsDialog extends Dialog {
 
         // 1.1 workspace
         widget.createLabel(generalComposite, Messages.ToolboxView_workspace, null, 1);
-        txtCrs = widget.createText(generalComposite, ToolboxView.getWorkspace(), 2, false);
+        txtWorkspace = widget.createText(generalComposite, ToolboxView.getWorkspace(), 2, false);
         btnOpen = widget.createButton(generalComposite, "...", null, 1); //$NON-NLS-1$
         btnOpen.addSelectionListener(selectionListener);
 
@@ -160,7 +160,7 @@ public class SettingsDialog extends Dialog {
                 dirDialog.setFilterPath(ToolboxView.getWorkspace());
                 if (dirDialog.open() != null) {
                     ToolboxView.setWorkspace(dirDialog.getFilterPath());
-                    txtCrs.setText(ToolboxView.getWorkspace());
+                    txtWorkspace.setText(ToolboxView.getWorkspace());
                 }
             }
         }

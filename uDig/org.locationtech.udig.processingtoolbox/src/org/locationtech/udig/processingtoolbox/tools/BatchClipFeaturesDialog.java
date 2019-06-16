@@ -17,30 +17,22 @@ import java.util.logging.Logger;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.process.spatialstatistics.operations.ClipWithFeaturesOperation;
 import org.geotools.process.spatialstatistics.storage.ShapeExportOperation;
-import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
 import org.locationtech.udig.processingtoolbox.ToolboxView;
@@ -49,35 +41,32 @@ import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget;
 import org.locationtech.udig.processingtoolbox.internal.ui.OutputDataWidget.FileDataType;
 import org.locationtech.udig.processingtoolbox.internal.ui.TableSelectionWidget;
 import org.locationtech.udig.processingtoolbox.styler.MapUtils;
+import org.locationtech.udig.processingtoolbox.styler.MapUtils.VectorLayerType;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.IMap;
-import org.locationtech.udig.ui.CRSChooserDialog;
-import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
- * Reproject the coordinate system of a set of input features to a common coordinate system.
+ * Extracts multiple input features that overlay the clip features.
  * 
  * @author MapPlus
  */
-public class BatchReprojectFeaturesDialog extends AbstractGeoProcessingDialog implements
+public class BatchClipFeaturesDialog extends AbstractGeoProcessingDialog implements
         IRunnableWithProgress {
-    protected static final Logger LOGGER = Logging.getLogger(BatchReprojectFeaturesDialog.class);
+    protected static final Logger LOGGER = Logging.getLogger(BatchClipFeaturesDialog.class);
 
     private Table inputTable;
 
-    private CoordinateReferenceSystem targetCRS = null;
+    private Combo cboLayer;
 
-    private Text txtCrs;
-
-    public BatchReprojectFeaturesDialog(Shell parentShell, IMap map) {
+    public BatchClipFeaturesDialog(Shell parentShell, IMap map) {
         super(parentShell, map);
 
         setShellStyle(SWT.CLOSE | SWT.MIN | SWT.TITLE | SWT.BORDER | SWT.APPLICATION_MODAL
                 | SWT.RESIZE);
 
-        this.windowTitle = Messages.BatchReprojectFeaturesDialog_title;
-        this.windowDesc = Messages.BatchReprojectFeaturesDialog_description;
+        this.windowTitle = Messages.BatchClipFeaturesDialog_title;
+        this.windowDesc = Messages.BatchClipFeaturesDialog_description;
         this.windowSize = ToolboxPlugin.rescaleSize(parentShell, 650, 500);
     }
 
@@ -86,97 +75,29 @@ public class BatchReprojectFeaturesDialog extends AbstractGeoProcessingDialog im
         Composite area = (Composite) super.createDialogArea(parent);
 
         Composite container = new Composite(area, SWT.BORDER);
-        container.setLayout(new GridLayout(3, false));
+        container.setLayout(new GridLayout(2, false));
         container.setLayoutData(new GridData(GridData.FILL_BOTH));
 
         Image image = ToolboxPlugin.getImageDescriptor("icons/public_co.gif").createImage(); //$NON-NLS-1$
 
         Group group = uiBuilder.createGroup(container,
-                Messages.BatchReprojectFeaturesDialog_SelectLayers, false, 3);
+                Messages.BatchReprojectFeaturesDialog_SelectLayers, false, 2);
         inputTable = uiBuilder.createTable(group, new String[] {
                 Messages.BatchReprojectFeaturesDialog_Name,
                 Messages.BatchReprojectFeaturesDialog_Type,
-                Messages.BatchReprojectFeaturesDialog_CRS }, 3);
+                Messages.BatchReprojectFeaturesDialog_CRS }, 2);
 
         TableSelectionWidget tblSelection = new TableSelectionWidget(inputTable);
-        tblSelection.create(group, SWT.NONE, 3, 1);
+        tblSelection.create(group, SWT.NONE, 2, 1);
 
-        uiBuilder.createLabel(container, Messages.BatchReprojectFeaturesDialog_OutputCRS, EMPTY,
-                image, 1);
-        txtCrs = uiBuilder.createText(container, null, 1);
-
-        final Button btnCRS = uiBuilder.createButton(container, null, null, 1);
-        Image helpImage = ToolboxPlugin.getImageDescriptor("icons/help.gif").createImage(); //$NON-NLS-1$
-        btnCRS.setImage(helpImage);
-        btnCRS.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent event) {
-                // create popup menu
-                Shell shell = parent.getShell();
-                Menu popupMenu = new Menu(shell, SWT.POP_UP);
-
-                // 1. CRS from current map
-                MenuItem mapMenuItem = new MenuItem(popupMenu, SWT.PUSH);
-                mapMenuItem.setText(Messages.CrsViewer_MapCRS);
-                mapMenuItem.addSelectionListener(new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent event) {
-                        CoordinateReferenceSystem selectedCrs = map.getViewportModel().getCRS();
-                        updateCRS(selectedCrs);
-                    }
-                });
-
-                // 2. CRS from layers
-                MenuItem layerMenuItem = new MenuItem(popupMenu, SWT.CASCADE);
-                layerMenuItem.setText(Messages.CrsViewer_LayerCRS);
-                Menu subMenu = new Menu(shell, SWT.DROP_DOWN);
-                layerMenuItem.setMenu(subMenu);
-
-                for (ILayer layer : map.getMapLayers()) {
-                    if (layer.getName() == null) {
-                        continue;
-                    }
-                    MenuItem mnuLayer = new MenuItem(subMenu, SWT.PUSH);
-                    mnuLayer.setText(layer.getName());
-                    mnuLayer.setData(layer);
-                    mnuLayer.addSelectionListener(new SelectionAdapter() {
-                        @Override
-                        public void widgetSelected(SelectionEvent event) {
-                            ILayer layer = (ILayer) event.widget.getData();
-                            CoordinateReferenceSystem selectedCrs = layer.getCRS();
-                            updateCRS(selectedCrs);
-                        }
-                    });
-                }
-
-                // 3. CRS Chooser Dialog
-                MenuItem crsMenuItem = new MenuItem(popupMenu, SWT.PUSH);
-                crsMenuItem.setText(Messages.CrsViewer_CRSDialog);
-                crsMenuItem.addSelectionListener(new SelectionAdapter() {
-                    @Override
-                    public void widgetSelected(SelectionEvent event) {
-                        CoordinateReferenceSystem crs = null;
-                        CRSChooserDialog dialog = new CRSChooserDialog(parent.getShell(), crs);
-                        if (dialog.open() == Window.OK) {
-                            CoordinateReferenceSystem selectedCrs = dialog.getResult();
-                            updateCRS(selectedCrs);
-                        }
-                    }
-                });
-
-                // 4. location of popup menu
-                Control ctrl = (Control) event.widget;
-                Point loc = ctrl.getLocation();
-                Rectangle rect = ctrl.getBounds();
-
-                Point pos = new Point(loc.x - 1, loc.y + rect.height);
-                popupMenu.setLocation(shell.getDisplay().map(ctrl.getParent(), null, pos));
-                popupMenu.setVisible(true);
-            }
-        });
+        // Layer
+        uiBuilder.createLabel(container, Messages.BatchClipFeaturesDialog_ClipLayer, EMPTY, image,
+                2);
+        cboLayer = uiBuilder.createCombo(container, 2, true);
+        fillLayers(map, cboLayer, VectorLayerType.POLYGON);
 
         locationView = new OutputDataWidget(FileDataType.FOLDER, SWT.OPEN);
-        locationView.create(container, SWT.BORDER, 3, 1);
+        locationView.create(container, SWT.BORDER, 1, 1);
         locationView.setFolder(ToolboxView.getWorkspace());
 
         // load layers
@@ -184,17 +105,6 @@ public class BatchReprojectFeaturesDialog extends AbstractGeoProcessingDialog im
 
         area.pack(true);
         return area;
-    }
-
-    private void updateCRS(CoordinateReferenceSystem selectedCrs) {
-        try {
-            targetCRS = selectedCrs;
-            if (selectedCrs != null) {
-                txtCrs.setText(CRS.lookupIdentifier(selectedCrs, true));
-            }
-        } catch (FactoryException e) {
-            txtCrs.setText(EMPTY);
-        }
     }
 
     private void loadlayers(Table table) {
@@ -213,8 +123,8 @@ public class BatchReprojectFeaturesDialog extends AbstractGeoProcessingDialog im
 
     @Override
     protected void okPressed() {
-        if (!existCheckedItem(inputTable) || txtCrs.getText().length() == 0 || targetCRS == null) {
-            openInformation(getShell(), Messages.BatchReprojectFeaturesDialog_Warning);
+        if (!existCheckedItem(inputTable) || cboLayer.getText().length() == 0) {
+            openInformation(getShell(), Messages.BatchClipFeaturesDialog_Warning);
             return;
         }
 
@@ -242,14 +152,16 @@ public class BatchReprojectFeaturesDialog extends AbstractGeoProcessingDialog im
             ShapeExportOperation export = new ShapeExportOperation();
             export.setOutputDataStore(locationView.getDataStore());
 
+            SimpleFeatureCollection clipFeatures = MapUtils.getFeatures(map, cboLayer.getText());
+
+            ClipWithFeaturesOperation clipper = new ClipWithFeaturesOperation();
             for (TableItem item : inputTable.getItems()) {
                 monitor.subTask(item.getText());
                 if (item.getChecked()) {
                     ILayer layer = (ILayer) item.getData();
                     SimpleFeatureCollection features = MapUtils.getFeatures(layer);
 
-                    export.setOutputTypeName(layer.getName());
-
+                    SimpleFeatureCollection clipped = null;
                     File file = new File(folder, layer.getName() + ".shp"); //$NON-NLS-1$
                     if (file.exists()) {
                         if (MessageDialog.openQuestion(
@@ -258,14 +170,19 @@ public class BatchReprojectFeaturesDialog extends AbstractGeoProcessingDialog im
                                 MessageFormat.format(Messages.General_OverwriteLayer,
                                         layer.getName()))) {
                             if (MapUtils.confirmSpatialFile(file)) {
-                                export.execute(features, targetCRS);
+                                clipped = clipper.execute(features, clipFeatures);
                             } else {
                                 openInformation(getShell(), Messages.General_Error);
                             }
                         }
                     } else {
-                        export.execute(features, targetCRS);
-                        ToolboxPlugin.log(file.getAbsolutePath());
+                        clipped = clipper.execute(features, clipFeatures);
+                    }
+
+                    if (clipped != null) {
+                        export.setOutputTypeName(layer.getName());
+                        export.execute(clipFeatures);
+                        ToolboxPlugin.log(file);
                     }
                 }
                 monitor.worked(increment);

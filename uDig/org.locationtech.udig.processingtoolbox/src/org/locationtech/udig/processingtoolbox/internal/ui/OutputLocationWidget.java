@@ -102,7 +102,9 @@ public class OutputLocationWidget extends AbstractToolboxWidget {
     }
 
     public void setOutputName(String name) {
-        File file = getUniqueName(ToolboxView.getWorkspace(), name);
+        String folder = ToolboxView.getRetainLastSaveLocation() ? ToolboxView.getLastSaveLocation()
+                : ToolboxView.getWorkspace();
+        File file = getUniqueName(folder, name);
         txtPath.setText(file.getPath());
     }
 
@@ -179,9 +181,15 @@ public class OutputLocationWidget extends AbstractToolboxWidget {
         } else {
             // default location
             if (fileDataType == FileDataType.FOLDER) {
-                txtPath.setText(ToolboxView.getWorkspace());
+                if (ToolboxView.getRetainLastSaveLocation()) {
+                    txtPath.setText(ToolboxView.getLastSaveLocation());
+                } else {
+                    txtPath.setText(ToolboxView.getWorkspace());
+                }
             } else {
-                File file = new File(ToolboxView.getWorkspace(), "result" + fileExtension);
+                String folder = ToolboxView.getRetainLastSaveLocation() ? ToolboxView.getLastSaveLocation()
+                        : ToolboxView.getWorkspace();
+                File file = new File(folder, "result" + fileExtension);
                 txtPath.setText(file.getPath());
             }
         }
@@ -202,6 +210,7 @@ public class OutputLocationWidget extends AbstractToolboxWidget {
                     String selectedDir = dirDialog.open();
                     if (selectedDir != null) {
                         txtPath.setText(selectedDir);
+                        ToolboxView.setLastSaveLocation(selectedDir);
                     }
                 } else {
                     FileDialog fileDialog = new FileDialog(parent.getShell(), fileDialogStyle);
@@ -211,6 +220,7 @@ public class OutputLocationWidget extends AbstractToolboxWidget {
                     String selectedFile = fileDialog.open();
                     if (selectedFile != null) {
                         txtPath.setText(selectedFile);
+                        ToolboxView.setLastSaveLocation(new File(selectedFile).getParent());
                     }
                 }
             }

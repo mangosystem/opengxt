@@ -44,7 +44,7 @@ import org.locationtech.udig.processingtoolbox.internal.Messages;
 public class SettingsDialog extends Dialog {
     protected static final Logger LOGGER = Logging.getLogger(SettingsDialog.class);
 
-    private Button btnOpen, chkLog, chkSel, chkStyle, chkAddLayer, chkMandatoryParameter;
+    private Button btnOpen, chkLog, chkSel, chkStyle, chkAddLayer, chkMandatoryParameter, chkLastLocation;
 
     private Text txtWorkspace;
 
@@ -121,6 +121,12 @@ public class SettingsDialog extends Dialog {
         chkMandatoryParameter.setSelection(ToolboxView.getMandatoryParameterOnly());
         chkMandatoryParameter.addSelectionListener(selectionListener);
 
+        // 1.7 retain last save location
+        chkLastLocation = widget.createCheckbox(generalComposite,
+                Messages.SettingsDialog_RetainLastLocation, null, 4);
+        chkLastLocation.setSelection(ToolboxView.getRetainLastSaveLocation());
+        chkLastLocation.addSelectionListener(selectionListener);
+
         tabItemGeneral.setControl(generalComposite);
 
         // 2. advanced tab
@@ -154,6 +160,8 @@ public class SettingsDialog extends Dialog {
                 ToolboxView.setAddLayerAutomatically(chkAddLayer.getSelection());
             } else if (widget.equals(chkMandatoryParameter)) {
                 ToolboxView.setMandatoryParameterOnly(chkMandatoryParameter.getSelection());
+            } else if (widget.equals(chkLastLocation)) {
+                ToolboxView.setRetainLastSaveLocation(chkLastLocation.getSelection());
             } else if (widget.equals(btnOpen)) {
                 final Shell shell = Display.getCurrent().getActiveShell();
                 DirectoryDialog dirDialog = new DirectoryDialog(shell);

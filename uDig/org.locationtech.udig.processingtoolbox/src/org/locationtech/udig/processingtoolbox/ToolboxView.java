@@ -52,6 +52,8 @@ import org.locationtech.udig.processingtoolbox.internal.ui.ProcessExecutionDialo
 import org.locationtech.udig.processingtoolbox.internal.ui.SettingsDialog;
 import org.locationtech.udig.processingtoolbox.tools.AmoebaWizard;
 import org.locationtech.udig.processingtoolbox.tools.AmoebaWizardDialog;
+import org.locationtech.udig.processingtoolbox.tools.BatchClipFeaturesDialog;
+import org.locationtech.udig.processingtoolbox.tools.BatchClipRastersDialog;
 import org.locationtech.udig.processingtoolbox.tools.BatchReprojectFeaturesDialog;
 import org.locationtech.udig.processingtoolbox.tools.BatchReprojectRastersDialog;
 import org.locationtech.udig.processingtoolbox.tools.BoxPlotDialog;
@@ -97,6 +99,10 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
     private static Boolean addLayerAutomatically = Boolean.TRUE;
 
     private static Boolean mandatoryParameterOnly = Boolean.FALSE;
+    
+    private static Boolean retainLastSaveLocation = Boolean.FALSE;
+    
+    private static String lastSaveLocation;
 
     private TreeViewer viewer;
 
@@ -106,7 +112,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
 
     private static String workspace = null;
     
-    private static final String WORKSPACE = "WORKSPACE"; //$NON-NLS-1$
+    private static final String ENV_SETTING = "ENV_SETTING"; //$NON-NLS-1$
 
     private static IDialogSettings settings;
 
@@ -114,42 +120,60 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         // load connection settings
         // uDig Workspace/.metadata/.plugins/this_plugin/dialog_settings.xml
         IDialogSettings defaultSettings = ToolboxPlugin.getDefault().getDialogSettings();
-        settings = DialogSettings.getOrCreateSection(defaultSettings, WORKSPACE);
+        settings = DialogSettings.getOrCreateSection(defaultSettings, ENV_SETTING);
+
+        String[] params = settings.getArray(ENV_SETTING);
+        if (params != null) {
+            File folder = new File(params[0]);
+            if (folder.exists()) {
+                ToolboxView.setWorkspace(params[0]);
+            } else {
+                setDefaultWorkspace();
+            }
+            
+            ToolboxView.setShowLog(Boolean.parseBoolean(params[1]));
+            ToolboxView.setSelectedOnly(Boolean.parseBoolean(params[2]));
+            ToolboxView.setUseDefaultStyle(Boolean.parseBoolean(params[3]));
+            ToolboxView.setAddLayerAutomatically(Boolean.parseBoolean(params[4]));
+            ToolboxView.setMandatoryParameterOnly(Boolean.parseBoolean(params[5]));
+            ToolboxView.setRetainLastSaveLocation(Boolean.parseBoolean(params[6]));
+        } else {
+            setDefaultWorkspace();
+        }
     }
 
     public static String getWorkspace() {
         if (ToolboxView.workspace == null) {
-            String[] arrayParams = settings.getArray(WORKSPACE);
-            if (arrayParams != null) {
-                ToolboxView.workspace = arrayParams[0];
-            } else {
-                // default workspace
-                String userhome = System.getProperty("user.home"); //$NON-NLS-1$
-                String separator = System.getProperty("file.separator"); //$NON-NLS-1$
-                File file = new File(userhome + separator + "gxt"); //$NON-NLS-1$
+            setDefaultWorkspace();
+        }
+        
+        if (retainLastSaveLocation) {
+            return ToolboxView.lastSaveLocation;
+        } else {
+            return ToolboxView.workspace;
+        }
+    }
 
-                if (file.exists() && file.isDirectory()) {
-                    ToolboxView.setWorkspace(file.getPath());
-                } else {
-                    if (file.mkdir()) {
-                        ToolboxView.setWorkspace(file.getPath());
-                    }
-                }
+    private static void setDefaultWorkspace() {
+        // default workspace
+        String userhome = System.getProperty("user.home"); //$NON-NLS-1$
+        String separator = System.getProperty("file.separator"); //$NON-NLS-1$
+        File file = new File(userhome + separator + "gxt"); //$NON-NLS-1$
+
+        if (file.exists() && file.isDirectory()) {
+            ToolboxView.setWorkspace(file.getPath());
+        } else {
+            if (file.mkdir()) {
+                ToolboxView.setWorkspace(file.getPath());
             }
         }
-        return ToolboxView.workspace;
     }
 
     public static void setWorkspace(String workspace) {
-        String[] arrayParams = settings.getArray(WORKSPACE);
-        if (arrayParams == null) {
-            arrayParams = new String[1];
-        }
-        
-        arrayParams[0] = workspace;
-        settings.put(WORKSPACE, arrayParams);
-        
         ToolboxView.workspace = workspace;
+        if (lastSaveLocation == null || lastSaveLocation.isEmpty()) {
+            lastSaveLocation = workspace;
+        }
     }
 
     public static Boolean getShowLog() {
@@ -200,8 +224,40 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         ToolboxView.mandatoryParameterOnly = mandatoryParameterOnly;
     }
 
+    public static Boolean getRetainLastSaveLocation() {
+        return retainLastSaveLocation;
+    }
+
+    public static void setRetainLastSaveLocation(Boolean retainLastSaveLocation) {
+        ToolboxView.retainLastSaveLocation = retainLastSaveLocation;
+    }
+
+    public static String getLastSaveLocation() {
+        return lastSaveLocation;
+    }
+
+    public static void setLastSaveLocation(String lastSaveLocation) {
+        ToolboxView.lastSaveLocation = lastSaveLocation;
+    }
+
     @Override
     public void dispose() {
+        // save settings
+        String[] params = settings.getArray(ENV_SETTING);
+        if (params == null) {
+            params = new String[7];
+        }
+        
+        params[0] = ToolboxView.getWorkspace();
+        params[1] = Boolean.toString(ToolboxView.getShowLog());
+        params[2] = Boolean.toString(ToolboxView.getSelectedOnly());
+        params[3] = Boolean.toString(ToolboxView.getUseDefaultStyle());
+        params[4] = Boolean.toString(ToolboxView.getAddLayerAutomatically());
+        params[5] = Boolean.toString(ToolboxView.getMandatoryParameterOnly());
+        params[6] = Boolean.toString(ToolboxView.getRetainLastSaveLocation());
+        
+        settings.put(ENV_SETTING, params);
+        
         viewer = null;
         super.dispose();
     }
@@ -280,6 +336,10 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
                                     dialog = new BatchReprojectFeaturesDialog(shell, map);
                                 } else if (nodeName.equalsIgnoreCase("BatchReprojectRastersDialog")) {
                                     dialog = new BatchReprojectRastersDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("BatchClipFeaturesDialog")) {
+                                    dialog = new BatchClipFeaturesDialog(shell, map);
+                                } else if (nodeName.equalsIgnoreCase("BatchClipRastersDialog")) {
+                                    dialog = new BatchClipRastersDialog(shell, map);
                                 }
                             } else {
                                 dialog = new ProcessExecutionDialog(shell, map, node.getFactory(),
@@ -549,6 +609,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(extractTool, "org.geotools.process.spatialstatistics.SelectFeaturesProcessFactory");
         buildTool(extractTool, "org.geotools.process.spatialstatistics.ClipWithGeometryProcessFactory");
         buildTool(extractTool, "org.geotools.process.spatialstatistics.ClipWithFeaturesProcessFactory");
+        buildTool(extractTool, Messages.BatchClipFeaturesDialog_title, "BatchClipFeaturesDialog");
 
         // Overlay
         TreeParent overlayTool = new TreeParent(Messages.ToolboxView_Overlays, null, null);
@@ -646,6 +707,7 @@ public class ToolboxView extends ViewPart implements ISetSelectionTarget {
         buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByGeometryProcessFactory");
         buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByCircleProcessFactory");
         buildTool(extractionTool, "org.geotools.process.spatialstatistics.RasterClipByFeaturesProcessFactory");
+        buildTool(extractionTool, Messages.BatchClipRastersDialog_title, "BatchClipRastersDialog");
 
         // Conditional Tool
         TreeParent conditionalTool = new TreeParent(Messages.ToolboxView_Conditional, null, null);

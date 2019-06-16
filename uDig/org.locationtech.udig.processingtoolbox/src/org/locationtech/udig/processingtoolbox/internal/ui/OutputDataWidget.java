@@ -29,6 +29,7 @@ import org.geotools.data.DataStore;
 import org.geotools.process.spatialstatistics.storage.DataStoreFactory;
 import org.geotools.util.logging.Logging;
 import org.locationtech.udig.processingtoolbox.ToolboxPlugin;
+import org.locationtech.udig.processingtoolbox.ToolboxView;
 import org.locationtech.udig.processingtoolbox.internal.Messages;
 
 /**
@@ -142,6 +143,7 @@ public class OutputDataWidget extends AbstractToolboxWidget {
                     String selectedDir = dirDialog.open();
                     if (selectedDir != null) {
                         txtPath.setText(selectedDir);
+                        ToolboxView.setLastSaveLocation(selectedDir);
                     }
                 } else {
                     FileDialog fileDialog = new FileDialog(parent.getShell(), openType);
@@ -152,6 +154,7 @@ public class OutputDataWidget extends AbstractToolboxWidget {
                     String selectedFile = fileDialog.open();
                     if (selectedFile != null) {
                         txtPath.setText(selectedFile);
+                        ToolboxView.setLastSaveLocation(new File(selectedFile).getParent());
                     }
                 }
             }

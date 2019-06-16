@@ -70,6 +70,14 @@ public class Messages extends NLS {
     public static String Feature_FeatureType;
     public static String Raster;
     
+    public static String BatchClipFeaturesDialog_title;
+    public static String BatchClipFeaturesDialog_description;
+    public static String BatchClipFeaturesDialog_ClipLayer;
+    public static String BatchClipFeaturesDialog_Warning;
+    
+    public static String BatchClipRastersDialog_title;
+    public static String BatchClipRastersDialog_description;
+    
     public static String BatchReprojectFeaturesDialog_title;
     public static String BatchReprojectFeaturesDialog_description;
     public static String BatchReprojectFeaturesDialog_SelectLayers;
@@ -78,7 +86,6 @@ public class Messages extends NLS {
     public static String BatchReprojectFeaturesDialog_CRS;
     public static String BatchReprojectFeaturesDialog_OutputCRS;
     public static String BatchReprojectFeaturesDialog_Warning;
-    public static String BatchReprojectFeaturesDialog_Overwrite;
 
     public static String BatchReprojectRastersDialog_title;
     public static String BatchReprojectRastersDialog_description;
@@ -158,7 +165,9 @@ public class Messages extends NLS {
     public static String General_Error;
     public static String General_ErrorOccurred;
     public static String General_Completed;
-    public static String General_Name; 
+    public static String General_Name;
+    public static String General_OverwriteLayer;
+    public static String General_OverwriteError;
     
     public static String GeometryPickerDialog_title;
     public static String GeometryPickerDialog_Layer;
@@ -301,7 +310,8 @@ public class Messages extends NLS {
     public static String SettingsDialog_OnlySelectedFeatures;
     public static String SettingsDialog_SetDefaultStyle;
     public static String SettingsDialog_AddLayerAuto;
-    public static String SettingsDialog_MandatoryParameter;    
+    public static String SettingsDialog_MandatoryParameter;  
+    public static String SettingsDialog_RetainLastLocation;  
     
     public static String SpatialWeightsMatrixDialog_title;
     public static String SpatialWeightsMatrixDialog_description;

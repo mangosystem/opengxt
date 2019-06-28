@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.measure.quantity.Length;
+import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -32,6 +33,7 @@ import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.enumeration.SpatialJoinType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
+import org.geotools.process.spatialstatistics.util.GeodeticBuilder;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
@@ -40,10 +42,12 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.index.strtree.ItemBoundable;
 import com.vividsolutions.jts.index.strtree.ItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
+import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 /**
  * SpatialJoin : One by One
@@ -54,6 +58,8 @@ import com.vividsolutions.jts.index.strtree.STRtree;
  */
 public class SpatialJoinOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(SpatialJoinOperation.class);
+
+    private GeodeticBuilder geodetic;
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
             SimpleFeatureCollection joinFeatures, SpatialJoinType joinType) throws IOException {
@@ -95,11 +101,20 @@ public class SpatialJoinOperation extends GeneralOperation {
             joinFeatures = new ReprojectFeatureCollection(joinFeatures, crsS, crsT, true);
         }
 
+        boolean isGeographicCRS = UnitConverter.isGeographicCRS(crsT);
+        if (isGeographicCRS) {
+            geodetic = new GeodeticBuilder(crsT);
+        }
+        Unit<Length> targetUnit = UnitConverter.getLengthUnit(crsT);
+
         // convert distance unit
         double maxRadius = searchRadius;
         if (radiusUnit != DistanceUnit.Default) {
-            Unit<Length> targetUnit = UnitConverter.getLengthUnit(crsT);
-            maxRadius = UnitConverter.convertDistance(searchRadius, radiusUnit, targetUnit);
+            if (isGeographicCRS) {
+                maxRadius = UnitConverter.convertDistance(searchRadius, radiusUnit, SI.METER);
+            } else {
+                maxRadius = UnitConverter.convertDistance(searchRadius, radiusUnit, targetUnit);
+            }
         }
 
         STRtree spatialIndex = loadFeatures(joinFeatures);
@@ -129,7 +144,16 @@ public class SpatialJoinOperation extends GeneralOperation {
 
                 if (maxRadius > 0) {
                     Geometry target = (Geometry) joinFeature.getDefaultGeometry();
-                    if (maxRadius < source.distance(target)) {
+
+                    double distance = Double.MAX_VALUE;
+                    if (radiusUnit != DistanceUnit.Default && isGeographicCRS) {
+                        Coordinate[] points = DistanceOp.nearestPoints(source, target);
+                        distance = geodetic.getDistance(points[0], points[1]);
+                    } else {
+                        distance = source.distance(target);
+                    }
+
+                    if (maxRadius < distance) {
                         joinFeature = null;
                     }
                 }

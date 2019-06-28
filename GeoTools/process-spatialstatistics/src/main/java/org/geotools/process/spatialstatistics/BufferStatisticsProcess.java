@@ -27,6 +27,7 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.operations.PointStatisticsOperation;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
@@ -53,10 +54,19 @@ public class BufferStatisticsProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
-            SimpleFeatureCollection pointFeatures, String countField, String statisticsFields,
-            ProgressListener monitor) {
+            Double distance, SimpleFeatureCollection pointFeatures, String countField,
+            String statisticsFields, ProgressListener monitor) {
+        return process(inputFeatures, distance, DistanceUnit.Default, pointFeatures, countField,
+                statisticsFields, monitor);
+    }
+
+    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+            Double distance, DistanceUnit distanceUnit, SimpleFeatureCollection pointFeatures,
+            String countField, String statisticsFields, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(BufferStatisticsProcessFactory.inputFeatures.key, inputFeatures);
+        map.put(BufferStatisticsProcessFactory.distance.key, distance);
+        map.put(BufferStatisticsProcessFactory.distanceUnit.key, distanceUnit);
         map.put(BufferStatisticsProcessFactory.pointFeatures.key, pointFeatures);
         map.put(BufferStatisticsProcessFactory.countField.key, countField);
         map.put(BufferStatisticsProcessFactory.statisticsFields.key, statisticsFields);
@@ -93,6 +103,10 @@ public class BufferStatisticsProcess extends AbstractStatisticsProcess {
             throw new NullPointerException("inputFeatures and pointFeatures parameters required");
         }
 
+        DistanceUnit distanceUnit = (DistanceUnit) Params.getValue(input,
+                BufferStatisticsProcessFactory.distanceUnit,
+                BufferStatisticsProcessFactory.distanceUnit.sample);
+
         if (distance == 0) {
             Class<?> geomBinding = inputFeatures.getSchema().getGeometryDescriptor().getType()
                     .getBinding();
@@ -107,6 +121,7 @@ public class BufferStatisticsProcess extends AbstractStatisticsProcess {
         try {
             PointStatisticsOperation operation = new PointStatisticsOperation();
             operation.setBufferDistance(distance);
+            operation.setDistanceUnit(distanceUnit);
             resultFc = operation
                     .execute(inputFeatures, countField, statisticsFields, pointFeatures);
         } catch (IOException e) {

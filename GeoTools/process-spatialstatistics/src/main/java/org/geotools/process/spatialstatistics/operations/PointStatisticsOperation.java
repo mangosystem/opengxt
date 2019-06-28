@@ -24,6 +24,10 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.measure.quantity.Length;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
+
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.DataUtils;
@@ -32,8 +36,11 @@ import org.geotools.process.spatialstatistics.core.StatisticsField;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitorResult;
 import org.geotools.process.spatialstatistics.core.SummaryFieldBuilder;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
+import org.geotools.process.spatialstatistics.util.GeodeticBuilder;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
@@ -58,6 +65,10 @@ public class PointStatisticsOperation extends GeneralOperation {
 
     private double bufferDistance = 0.0d;
 
+    private DistanceUnit distanceUnit = DistanceUnit.Default;
+
+    private GeodeticBuilder geodetic;
+
     private int quadrantSegments = 12; // JTS default = 8
 
     public double getBufferDistance() {
@@ -77,6 +88,14 @@ public class PointStatisticsOperation extends GeneralOperation {
             quadrantSegments = 2;
         }
         this.quadrantSegments = quadrantSegments;
+    }
+
+    public DistanceUnit getDistanceUnit() {
+        return distanceUnit;
+    }
+
+    public void setDistanceUnit(DistanceUnit distanceUnit) {
+        this.distanceUnit = distanceUnit;
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection polygons, String cntField,
@@ -125,6 +144,22 @@ public class PointStatisticsOperation extends GeneralOperation {
             LOGGER.log(Level.WARNING, "reprojecting features");
         }
 
+        boolean isGeographicCRS = UnitConverter.isGeographicCRS(crsT);
+        if (isGeographicCRS) {
+            geodetic = new GeodeticBuilder(crsT);
+            geodetic.setQuadrantSegments(quadrantSegments);
+        }
+
+        double radius = bufferDistance;
+        if (distanceUnit != DistanceUnit.Default) {
+            Unit<Length> targetUnit = UnitConverter.getLengthUnit(crsT);
+            if (isGeographicCRS) {
+                radius = UnitConverter.convertDistance(radius, distanceUnit, SI.METER);
+            } else {
+                radius = UnitConverter.convertDistance(radius, distanceUnit, targetUnit);
+            }
+        }
+
         // use SpatialIndexFeatureCollection
         points = DataUtils.toSpatialIndexFeatureCollection(points);
 
@@ -142,8 +177,12 @@ public class PointStatisticsOperation extends GeneralOperation {
                 }
 
                 MultipleStatVisitor visitor = new MultipleStatVisitor(points.getSchema());
-                if (bufferDistance > 0) {
-                    geometry = geometry.buffer(bufferDistance, quadrantSegments);
+                if (radius > 0) {
+                    if (distanceUnit != DistanceUnit.Default && isGeographicCRS) {
+                        geometry = geodetic.buffer(geometry, radius);
+                    } else {
+                        geometry = geometry.buffer(radius, quadrantSegments);
+                    }
                 }
 
                 Filter filter = getIntersectsFilter(the_geom, geometry);

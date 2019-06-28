@@ -52,12 +52,20 @@ public class PointsToLineProcess extends AbstractStatisticsProcess {
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
             String lineField, String sortField, Boolean useBezierCurve, Boolean closeLine,
             ProgressListener monitor) {
+        return process(inputFeatures, lineField, sortField, useBezierCurve, closeLine,
+                Boolean.FALSE, monitor);
+    }
+
+    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+            String lineField, String sortField, Boolean useBezierCurve, Boolean closeLine,
+            Boolean geodesicLine, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(PointsToLineProcessFactory.inputFeatures.key, inputFeatures);
         map.put(PointsToLineProcessFactory.lineField.key, lineField);
         map.put(PointsToLineProcessFactory.sortField.key, sortField);
         map.put(PointsToLineProcessFactory.useBezierCurve.key, useBezierCurve);
         map.put(PointsToLineProcessFactory.closeLine.key, closeLine);
+        map.put(PointsToLineProcessFactory.geodesicLine.key, geodesicLine);
 
         Process process = new PointsToLineProcess(null);
         Map<String, Object> resultMap;
@@ -85,6 +93,9 @@ public class PointsToLineProcess extends AbstractStatisticsProcess {
                 PointsToLineProcessFactory.useBezierCurve.sample);
         Boolean closeLine = (Boolean) Params.getValue(input, PointsToLineProcessFactory.closeLine,
                 PointsToLineProcessFactory.closeLine.sample);
+        Boolean geodesicLine = (Boolean) Params.getValue(input,
+                PointsToLineProcessFactory.geodesicLine,
+                PointsToLineProcessFactory.geodesicLine.sample);
         if (inputFeatures == null) {
             throw new NullPointerException("inputFeatures parameter required");
         }
@@ -95,6 +106,7 @@ public class PointsToLineProcess extends AbstractStatisticsProcess {
             PointsToLineOperation operation = new PointsToLineOperation();
             operation.setUseBezierCurve(useBezierCurve);
             operation.setCloseLine(closeLine);
+            operation.setGeodesicLine(geodesicLine);
             resultFc = operation.execute(inputFeatures, lineField, sortField, closeLine);
         } catch (IOException e) {
             throw new ProcessException(e);

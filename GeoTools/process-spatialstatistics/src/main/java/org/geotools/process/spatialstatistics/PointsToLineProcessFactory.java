@@ -45,8 +45,8 @@ public class PointsToLineProcessFactory extends SpatialStatisticsProcessFactory 
     private static final String PROCESS_NAME = "PointsToLine";
 
     /*
-     * PointsToLine(SimpleFeatureCollection inputFeatures, String lineField, String sortField, Boolean useBezierCurve, Boolean closeLine):
-     * SimpleFeatureCollection
+     * PointsToLine(SimpleFeatureCollection inputFeatures, String lineField, String sortField, Boolean useBezierCurve, Boolean closeLine, Boolean
+     * geodesicLine): SimpleFeatureCollection
      */
 
     public PointsToLineProcessFactory() {
@@ -98,6 +98,11 @@ public class PointsToLineProcessFactory extends SpatialStatisticsProcessFactory 
             Boolean.class, getResource("PointsToLine.closeLine.title"),
             getResource("PointsToLine.closeLine.description"), false, 0, 1, Boolean.FALSE, null);
 
+    /** geodesicLine */
+    public static final Parameter<Boolean> geodesicLine = new Parameter<Boolean>("geodesicLine",
+            Boolean.class, getResource("PointsToLine.geodesicLine.title"),
+            getResource("PointsToLine.geodesicLine.description"), false, 0, 1, Boolean.FALSE, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
@@ -106,6 +111,7 @@ public class PointsToLineProcessFactory extends SpatialStatisticsProcessFactory 
         parameterInfo.put(sortField.key, sortField);
         parameterInfo.put(useBezierCurve.key, useBezierCurve);
         parameterInfo.put(closeLine.key, closeLine);
+        parameterInfo.put(geodesicLine.key, geodesicLine);
         return parameterInfo;
     }
 

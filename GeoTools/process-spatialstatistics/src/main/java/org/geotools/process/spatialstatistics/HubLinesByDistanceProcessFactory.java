@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -47,7 +48,7 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
 
     /*
      * HubLinesByDistance(SimpleFeatureCollection hubFeatures, String hubIdField, SimpleFeatureCollection spokeFeatures, Boolean preserveAttributes,
-     * Boolean useCentroid, Boolean useBezierCurve, Double maximumDistance): SimpleFeatureCollection
+     * Boolean useCentroid, Boolean useBezierCurve, Double maximumDistance, DistanceUnit distanceUnit): SimpleFeatureCollection
      */
 
     public HubLinesByDistanceProcessFactory() {
@@ -114,6 +115,13 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
             getResource("HubLinesByDistance.maximumDistance.description"), false, 0, 1,
             Double.valueOf(0d), null);
 
+    /** distanceUnit */
+    public static final Parameter<DistanceUnit> distanceUnit = new Parameter<DistanceUnit>(
+            "distanceUnit", DistanceUnit.class,
+            getResource("HubLinesByDistance.distanceUnit.title"),
+            getResource("HubLinesByDistance.distanceUnit.description"), false, 0, 1,
+            DistanceUnit.Default, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
@@ -124,6 +132,7 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
         parameterInfo.put(useCentroid.key, useCentroid);
         parameterInfo.put(useBezierCurve.key, useBezierCurve);
         parameterInfo.put(maximumDistance.key, maximumDistance);
+        parameterInfo.put(distanceUnit.key, distanceUnit);
         return parameterInfo;
     }
 

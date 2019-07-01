@@ -153,6 +153,11 @@ public class UnitConverter {
         return converter.convert(measure.doubleValue());
     }
 
+    public static boolean isGeographicCRS(CoordinateReferenceSystem crs) {
+        CoordinateReferenceSystem horCRS = CRS.getHorizontalCRS(crs);
+        return horCRS instanceof GeographicCRS;
+    }
+
     @SuppressWarnings("unchecked")
     public static Unit<Length> getLengthUnit(CoordinateReferenceSystem crs) {
         CoordinateReferenceSystem horCRS = CRS.getHorizontalCRS(crs);

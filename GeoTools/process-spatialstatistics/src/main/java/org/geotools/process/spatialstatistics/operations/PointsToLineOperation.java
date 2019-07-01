@@ -23,12 +23,15 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.util.BezierCurve;
+import org.geotools.process.spatialstatistics.util.GeodeticBuilder;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.CoordinateList;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Polygon;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -58,6 +61,10 @@ public class PointsToLineOperation extends GeneralOperation {
 
     private BezierCurve bezierCurve = null;
 
+    private boolean geodesicLine = false;
+
+    private GeodeticBuilder geodetic = null;
+
     public boolean isCloseLine() {
         return closeLine;
     }
@@ -72,6 +79,14 @@ public class PointsToLineOperation extends GeneralOperation {
 
     public void setUseBezierCurve(boolean useBezierCurve) {
         this.useBezierCurve = useBezierCurve;
+    }
+
+    public boolean isGeodesicLine() {
+        return geodesicLine;
+    }
+
+    public void setGeodesicLine(boolean geodesicLine) {
+        this.geodesicLine = geodesicLine;
     }
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures, String lineField,
@@ -103,6 +118,10 @@ public class PointsToLineOperation extends GeneralOperation {
                 LineString.class, crs);
         if (closeLine) {
             featureType = FeatureTypes.getDefaultType(typeName, geomName, Polygon.class, crs);
+        }
+
+        if (geodesicLine && UnitConverter.isGeographicCRS(crs)) {
+            geodetic = new GeodeticBuilder(crs);
         }
 
         boolean hasLineField = lineField != null && lineField.length() > 0;
@@ -178,21 +197,29 @@ public class PointsToLineOperation extends GeneralOperation {
 
         if (coordinates.size() > 1) {
             // create feature and set geometry
+            if (closeLine) {
+                if (!coordinates.get(0).equals(coordinates.get(coordinates.size() - 1))) {
+                    coordinates.add(coordinates.get(0), false);
+                }
+            }
+
             LineString line = gf.createLineString(coordinates.toCoordinateArray());
-            if (useBezierCurve) {
+            if (useBezierCurve && false == geodesicLine) {
                 line = bezierCurve.create(line);
             }
 
             Geometry geometry = line;
+            if (geodesicLine && geodetic != null) {
+                geometry = geodetic.toGeodesicLine(line);
+            }
+
             if (geometry == null || geometry.isEmpty()) {
                 return;
             }
 
             if (closeLine) {
-                coordinates.clear();
-                coordinates.add(line.getCoordinates(), false);
-                coordinates.add(coordinates.get(0), false);
-                geometry = gf.createPolygon(coordinates.toCoordinateArray());
+                LinearRing ring = gf.createLinearRing(coordinates.toCoordinateArray());
+                geometry = gf.createPolygon(ring);
             }
 
             SimpleFeature newFeature = featureWriter.buildFeature();

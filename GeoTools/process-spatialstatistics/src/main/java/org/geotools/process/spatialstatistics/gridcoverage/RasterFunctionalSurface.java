@@ -37,6 +37,8 @@ import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.SlopeType;
+import org.geotools.referencing.CRS;
+import org.geotools.referencing.GeodeticCalculator;
 import org.geotools.util.factory.GeoTools;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.densify.Densifier;
@@ -50,6 +52,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.operation.linemerge.LineMerger;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.crs.GeographicCRS;
 import org.opengis.referencing.operation.TransformException;
 
 /**
@@ -85,6 +88,10 @@ public class RasterFunctionalSurface {
     private double _8DX = cellSizeX * 8;
 
     private double _8DY = cellSizeY * 8;
+    
+    private boolean isGeographic = false;
+    
+    private GeodeticCalculator calculator = null;
 
     private GeometryFactory gf = JTSFactoryFinder.getGeometryFactory(GeoTools.getDefaultHints());
 
@@ -101,8 +108,15 @@ public class RasterFunctionalSurface {
 
         this.noData = RasterHelper.getNoDataValue(srcCoverage);
 
-        image = (PlanarImage) srcCoverage.getRenderedImage();
-        bounds = image.getBounds();
+        this.image = (PlanarImage) srcCoverage.getRenderedImage();
+        this.bounds = image.getBounds();
+        
+        CoordinateReferenceSystem crs = srcCoverage.getCoordinateReferenceSystem();
+        CoordinateReferenceSystem hor = CRS.getHorizontalCRS(crs);
+        this.isGeographic = hor instanceof GeographicCRS;
+        if (this.isGeographic) {
+            this.calculator = new GeodeticCalculator(crs);
+        }
     }
 
     public Map<Integer, Geometry> mergeLineOfSight(LineString lineString) {
@@ -167,6 +181,10 @@ public class RasterFunctionalSurface {
         Coordinate from = segment.getStartPoint().getCoordinate();
         Coordinate to = segment.getEndPoint().getCoordinate();
 
+        if (isGeographic) {
+            calculator.setStartingGeographicPoint(from.x, from.y);
+        }
+
         // Source point always sees itself
         ros.add(new Coordinate(from.x, from.y, 1));
         from.z = this.getElevation(from);
@@ -213,7 +231,7 @@ public class RasterFunctionalSurface {
 
             if (useCurvature) {
                 // Curvature and atmospheric refraction corrections
-                // Z = Z0 + D2(R - 1) ÷ d
+                // Z = Z0 + D^2(R - 1) ÷ d
                 // where:
                 // Z—corrected elevation after factoring the impact of atmospheric refraction.
                 // Z0—surface elevation of the observed location.
@@ -226,9 +244,9 @@ public class RasterFunctionalSurface {
 
                 final double D = from.distance(current);
                 if (useRefraction) {
-                    current.z = current.z + (D * 2) * (refractionFactor - 1) / 12740000.0;
+                    current.z = current.z + (D * D) * (refractionFactor - 1) / 12740000.0;
                 } else {
-                    current.z = current.z + (D * 2) * (0.13 - 1) / 12740000.0;
+                    current.z = current.z + (D * D) * (0.13 - 1) / 12740000.0;
                 }
             }
 

@@ -30,10 +30,10 @@ import org.geotools.coverage.processing.Operations;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.core.SSUtils;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.enumeration.ResampleType;
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.referencing.CRS;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.coverage.grid.GridEnvelope;
 import org.opengis.referencing.FactoryException;
@@ -55,27 +55,25 @@ public class RasterReprojectOperation extends GeneralOperation {
         return execute(inputCoverage, targetCRS, ResampleType.NEAREST);
     }
 
-    public GridCoverage2D execute(GridCoverage2D inputCoverage,
-            CoordinateReferenceSystem targetCRS, ResampleType resamplingType)
-            throws ProcessException {
+    public GridCoverage2D execute(GridCoverage2D inputCoverage, CoordinateReferenceSystem targetCRS,
+            ResampleType resamplingType) throws ProcessException {
         return execute(inputCoverage, targetCRS, resamplingType, 0.0);
     }
 
-    public GridCoverage2D execute(GridCoverage2D inputCoverage,
-            CoordinateReferenceSystem targetCRS, ResampleType resamplingType, double cellSize)
-            throws ProcessException {
+    public GridCoverage2D execute(GridCoverage2D inputCoverage, CoordinateReferenceSystem targetCRS,
+            ResampleType resamplingType, double cellSize) throws ProcessException {
         return execute(inputCoverage, targetCRS, resamplingType, cellSize, cellSize);
     }
 
-    public GridCoverage2D execute(GridCoverage2D inputCoverage,
-            CoordinateReferenceSystem targetCRS, ResampleType resamplingType, double cellSizeX,
-            double cellSizeY) throws ProcessException {
+    public GridCoverage2D execute(GridCoverage2D inputCoverage, CoordinateReferenceSystem targetCRS,
+            ResampleType resamplingType, double cellSizeX, double cellSizeY)
+            throws ProcessException {
         return execute(inputCoverage, targetCRS, resamplingType, cellSizeX, cellSizeY, null);
     }
 
-    public GridCoverage2D execute(GridCoverage2D inputCoverage,
-            CoordinateReferenceSystem targetCRS, ResampleType resamplingType, double cellSizeX,
-            double cellSizeY, CoordinateReferenceSystem forcedCRS) throws ProcessException {
+    public GridCoverage2D execute(GridCoverage2D inputCoverage, CoordinateReferenceSystem targetCRS,
+            ResampleType resamplingType, double cellSizeX, double cellSizeY,
+            CoordinateReferenceSystem forcedCRS) throws ProcessException {
         if (targetCRS == null) {
             throw new ProcessException("targetCRS is null!");
         }
@@ -100,8 +98,9 @@ public class RasterReprojectOperation extends GeneralOperation {
             cellSizeY = Math.abs(gridToWorld.getScaleY());
 
             // check Geographic CRS
-            CoordinateReferenceSystem sCRS = inputCoverage.getCoordinateReferenceSystem();
-            if (sCRS instanceof DefaultGeographicCRS) {
+            boolean sourceIsGeo = UnitConverter.isGeographicCRS(sourceCRS);
+            boolean targetIsGeo = UnitConverter.isGeographicCRS(targetCRS);
+            if (!CRS.equalsIgnoreMetadata(sourceCRS, targetCRS) && (sourceIsGeo || targetIsGeo)) {
                 ReferencedEnvelope extent = null;
                 try {
                     ReferencedEnvelope bounds = new ReferencedEnvelope(inputCoverage.getEnvelope());

@@ -32,6 +32,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
+import org.geotools.process.spatialstatistics.util.GeodeticBuilder;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateList;
@@ -43,6 +44,9 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
 import si.uom.SI;
 
@@ -150,6 +154,10 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
 
         private String typeName;
 
+        private boolean isGeographicCRS = false;
+
+        private GeodeticBuilder geodetic;
+
         public WedgeBufferFeatureIterator(SimpleFeatureIterator delegate, SimpleFeatureType schema,
                 Expression azimuth, Expression wedgeAngle, Expression innerRadius,
                 Expression outerRadius, DistanceUnit distanceUnit) {
@@ -164,6 +172,13 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
 
             this.builder = new SimpleFeatureBuilder(schema);
             this.typeName = schema.getTypeName();
+
+            CoordinateReferenceSystem crs = schema.getCoordinateReferenceSystem();
+            this.isGeographicCRS = UnitConverter.isGeographicCRS(crs);
+            if (isGeographicCRS) {
+                geodetic = new GeodeticBuilder(crs);
+                geodetic.setQuadrantSegments(SEG);
+            }
         }
 
         public void close() {
@@ -199,8 +214,16 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
                     continue;
                 }
 
-                double inner = UnitConverter.convertDistance(innerRadius, distanceUnit, targetUnit);
-                double outer = UnitConverter.convertDistance(outerRadius, distanceUnit, targetUnit);
+                double inner = 0d;
+                double outer = 0d;
+
+                if (isGeographicCRS) {
+                    inner = UnitConverter.convertDistance(innerRadius, distanceUnit, SI.METRE);
+                    outer = UnitConverter.convertDistance(outerRadius, distanceUnit, SI.METRE);
+                } else {
+                    inner = UnitConverter.convertDistance(innerRadius, distanceUnit, targetUnit);
+                    outer = UnitConverter.convertDistance(outerRadius, distanceUnit, targetUnit);
+                }
 
                 Geometry geometry = (Geometry) source.getDefaultGeometry();
                 Point centroid = geometry.getCentroid();
@@ -244,30 +267,51 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
             double maxRadius = Math.max(outerRadius, innerRadius);
 
             if (wedgeAngle >= 360) {
-                Geometry buffered = centroid.buffer(maxRadius, SEG);
-                if (minRadius > 0) {
-                    buffered = buffered.difference(centroid.buffer(minRadius, SEG));
+                Geometry buffered = null;
+                if (isGeographicCRS) {
+                    try {
+                        buffered = geodetic.buffer(centroid, maxRadius);
+                        if (minRadius > 0 && minRadius != maxRadius) {
+                            buffered = buffered.difference(geodetic.buffer(centroid, minRadius));
+                        }
+                    } catch (FactoryException e) {
+                        LOGGER.log(Level.FINER, e.getMessage(), e);
+                    } catch (TransformException e) {
+                        LOGGER.log(Level.FINER, e.getMessage(), e);
+                    }
+                } else {
+                    buffered = centroid.buffer(maxRadius, SEG);
+                    if (minRadius > 0 && minRadius != maxRadius) {
+                        buffered = buffered.difference(centroid.buffer(minRadius, SEG));
+                    }
                 }
                 return buffered;
             }
-
-            // make azimuth 0 north and positive clockwise (compass direction)
-            azimuth = -1.0 * azimuth + 90;
-            double fromAzimuth = azimuth - wedgeAngle * 0.5;
-            double toAzimuth = azimuth + wedgeAngle * 0.5;
-            return createWedgeBuffer(centroid.getCoordinate(), fromAzimuth, toAzimuth, minRadius,
+            return createWedgeBuffer(centroid.getCoordinate(), azimuth, wedgeAngle, minRadius,
                     maxRadius);
         }
 
-        private Geometry createWedgeBuffer(Coordinate centroid, double fromAzimuth,
-                double toAzimuth, double minRadius, double maxRadius) {
+        private Geometry createWedgeBuffer(Coordinate centroid, double azimuth, double wedgeAngle,
+                double minRadius, double maxRadius) {
             CoordinateList coords = new CoordinateList();
-            double increment = Math.abs(toAzimuth - fromAzimuth) / SEG;
+
+            // make azimuth 0 north and positive clockwise (compass direction)
+            double degree = 90 - azimuth;
+            double fromDegree = degree - wedgeAngle * 0.5;
+            double toDegree = degree + wedgeAngle * 0.5;
+            double increment = Math.abs(toDegree - fromDegree) / SEG;
 
             if (minRadius > 0) {
                 for (int i = SEG; i >= 0; i--) {
-                    double radian = Math.toRadians(fromAzimuth + (i * increment));
-                    coords.add(createPoint(centroid, radian, minRadius), false);
+                    Coordinate coordinate = null;
+                    double deg = fromDegree + (i * increment);
+                    if (isGeographicCRS) {
+                        coordinate = geodetic.getDestination(centroid, 90 - deg, minRadius);
+                    } else {
+                        double radian = Math.toRadians(deg);
+                        coordinate = createPoint(centroid, radian, minRadius);
+                    }
+                    coords.add(coordinate, false);
                 }
             } else {
                 coords.add(centroid, false);
@@ -275,8 +319,15 @@ public class WedgeBufferFeatureCollection extends GXTSimpleFeatureCollection {
 
             // outer
             for (int i = 0; i <= SEG; i++) {
-                double radian = Math.toRadians(fromAzimuth + (i * increment));
-                coords.add(createPoint(centroid, radian, maxRadius), false);
+                Coordinate coordinate = null;
+                double deg = fromDegree + (i * increment);
+                if (isGeographicCRS) {
+                    coordinate = geodetic.getDestination(centroid, 90 - deg, maxRadius);
+                } else {
+                    double radian = Math.toRadians(deg);
+                    coordinate = createPoint(centroid, radian, maxRadius);
+                }
+                coords.add(coordinate, false);
             }
 
             // close ring

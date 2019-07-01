@@ -18,6 +18,7 @@ package org.geotools.process.spatialstatistics.operations;
 
 import java.util.logging.Logger;
 
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.util.BezierCurve;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Coordinate;
@@ -43,6 +44,8 @@ public abstract class AbstractHubLinesOperation extends GeneralOperation {
     protected static final String TYPE_NAME = "HubLines";
 
     protected double maximumDistance = Double.MAX_VALUE;
+
+    protected DistanceUnit distanceUnit = DistanceUnit.Default;
 
     protected boolean preserveAttributes = true;
 
@@ -87,6 +90,14 @@ public abstract class AbstractHubLinesOperation extends GeneralOperation {
         return maximumDistance;
     }
 
+    public DistanceUnit getDistanceUnit() {
+        return distanceUnit;
+    }
+
+    public void setDistanceUnit(DistanceUnit distanceUnit) {
+        this.distanceUnit = distanceUnit;
+    }
+
     protected LineString getShortestLine(Geometry from, Geometry to, boolean centroid) {
         Geometry start = from;
         Geometry end = to;
@@ -103,7 +114,7 @@ public abstract class AbstractHubLinesOperation extends GeneralOperation {
 
         Coordinate[] coordinates = DistanceOp.nearestPoints(start, end);
         LineString shortestLine = from.getFactory().createLineString(coordinates);
-        
+
         if (useBezierCurve) {
             shortestLine = new BezierCurve().create(shortestLine);
         }

@@ -27,6 +27,7 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.operations.HubLinesByDistanceOperation;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
@@ -53,6 +54,14 @@ public class HubLinesByDistanceProcess extends AbstractStatisticsProcess {
             String hubIdField, SimpleFeatureCollection spokeFeatures, boolean preserveAttributes,
             boolean useCentroid, boolean useBezierCurve, double maximumDistance,
             ProgressListener monitor) {
+        return process(hubFeatures, hubIdField, spokeFeatures, preserveAttributes, useCentroid,
+                useBezierCurve, maximumDistance, DistanceUnit.Default, monitor);
+    }
+
+    public static SimpleFeatureCollection process(SimpleFeatureCollection hubFeatures,
+            String hubIdField, SimpleFeatureCollection spokeFeatures, boolean preserveAttributes,
+            boolean useCentroid, boolean useBezierCurve, double maximumDistance,
+            DistanceUnit distanceUnit, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(HubLinesByDistanceProcessFactory.hubFeatures.key, hubFeatures);
         map.put(HubLinesByDistanceProcessFactory.hubIdField.key, hubIdField);
@@ -61,6 +70,7 @@ public class HubLinesByDistanceProcess extends AbstractStatisticsProcess {
         map.put(HubLinesByDistanceProcessFactory.useCentroid.key, useCentroid);
         map.put(HubLinesByDistanceProcessFactory.useBezierCurve.key, useBezierCurve);
         map.put(HubLinesByDistanceProcessFactory.maximumDistance.key, maximumDistance);
+        map.put(HubLinesByDistanceProcessFactory.distanceUnit.key, distanceUnit);
 
         Process process = new HubLinesByDistanceProcess(null);
         Map<String, Object> resultMap;
@@ -100,6 +110,9 @@ public class HubLinesByDistanceProcess extends AbstractStatisticsProcess {
         Double maximumDistance = (Double) Params.getValue(input,
                 HubLinesByDistanceProcessFactory.maximumDistance,
                 HubLinesByDistanceProcessFactory.maximumDistance.sample);
+        DistanceUnit distanceUnit = (DistanceUnit) Params.getValue(input,
+                HubLinesByDistanceProcessFactory.distanceUnit,
+                HubLinesByDistanceProcessFactory.distanceUnit.sample);
 
         // start process
         SimpleFeatureCollection resultFc = null;
@@ -107,7 +120,7 @@ public class HubLinesByDistanceProcess extends AbstractStatisticsProcess {
             HubLinesByDistanceOperation operation = new HubLinesByDistanceOperation();
             operation.setUseBezierCurve(useBezierCurve);
             resultFc = operation.execute(hubFeatures, hubIdField, spokeFeatures, useCentroid,
-                    preserveAttributes, maximumDistance);
+                    preserveAttributes, maximumDistance, distanceUnit);
         } catch (IOException e) {
             throw new ProcessException(e);
         }

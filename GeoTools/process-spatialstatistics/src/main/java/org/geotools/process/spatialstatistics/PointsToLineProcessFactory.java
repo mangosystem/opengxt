@@ -45,8 +45,8 @@ public class PointsToLineProcessFactory extends SpatialStatisticsProcessFactory 
     private static final String PROCESS_NAME = "PointsToLine";
 
     /*
-     * PointsToLine(SimpleFeatureCollection inputFeatures, String lineField, String sortField, Boolean useBezierCurve, Boolean closeLine):
-     * SimpleFeatureCollection
+     * PointsToLine(SimpleFeatureCollection inputFeatures, String lineField, String sortField, Boolean useBezierCurve, Boolean closeLine, Boolean
+     * geodesicLine): SimpleFeatureCollection
      */
 
     public PointsToLineProcessFactory() {
@@ -72,24 +72,24 @@ public class PointsToLineProcessFactory extends SpatialStatisticsProcessFactory 
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
             getResource("PointsToLine.inputFeatures.title"),
-            getResource("PointsToLine.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, Params.Point));
+            getResource("PointsToLine.inputFeatures.description"), true, 1, 1, null,
+            new KVP(Params.FEATURES, Params.Point));
 
     /** lineField */
     public static final Parameter<String> lineField = new Parameter<String>("lineField",
             String.class, getResource("PointsToLine.lineField.title"),
-            getResource("PointsToLine.lineField.description"), false, 0, 1, null, new KVP(
-                    Params.FIELD, "inputFeatures.All"));
+            getResource("PointsToLine.lineField.description"), false, 0, 1, null,
+            new KVP(Params.FIELD, "inputFeatures.All"));
 
     /** sortField */
     public static final Parameter<String> sortField = new Parameter<String>("sortField",
             String.class, getResource("PointsToLine.sortField.title"),
-            getResource("PointsToLine.sortField.description"), false, 0, 1, null, new KVP(
-                    Params.FIELD, "inputFeatures.All"));
+            getResource("PointsToLine.sortField.description"), false, 0, 1, null,
+            new KVP(Params.FIELD, "inputFeatures.All"));
 
     /** useBezierCurve */
-    public static final Parameter<Boolean> useBezierCurve = new Parameter<Boolean>(
-            "useBezierCurve", Boolean.class, getResource("PointsToLine.useBezierCurve.title"),
+    public static final Parameter<Boolean> useBezierCurve = new Parameter<Boolean>("useBezierCurve",
+            Boolean.class, getResource("PointsToLine.useBezierCurve.title"),
             getResource("PointsToLine.useBezierCurve.description"), false, 0, 1, Boolean.FALSE,
             null);
 
@@ -97,6 +97,11 @@ public class PointsToLineProcessFactory extends SpatialStatisticsProcessFactory 
     public static final Parameter<Boolean> closeLine = new Parameter<Boolean>("closeLine",
             Boolean.class, getResource("PointsToLine.closeLine.title"),
             getResource("PointsToLine.closeLine.description"), false, 0, 1, Boolean.FALSE, null);
+
+    /** geodesicLine */
+    public static final Parameter<Boolean> geodesicLine = new Parameter<Boolean>("geodesicLine",
+            Boolean.class, getResource("PointsToLine.geodesicLine.title"),
+            getResource("PointsToLine.geodesicLine.description"), false, 0, 1, Boolean.FALSE, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -106,6 +111,7 @@ public class PointsToLineProcessFactory extends SpatialStatisticsProcessFactory 
         parameterInfo.put(sortField.key, sortField);
         parameterInfo.put(useBezierCurve.key, useBezierCurve);
         parameterInfo.put(closeLine.key, closeLine);
+        parameterInfo.put(geodesicLine.key, geodesicLine);
         return parameterInfo;
     }
 

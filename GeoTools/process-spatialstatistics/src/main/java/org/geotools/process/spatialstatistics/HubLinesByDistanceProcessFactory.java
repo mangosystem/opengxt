@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -47,7 +48,7 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
 
     /*
      * HubLinesByDistance(SimpleFeatureCollection hubFeatures, String hubIdField, SimpleFeatureCollection spokeFeatures, Boolean preserveAttributes,
-     * Boolean useCentroid, Boolean useBezierCurve, Double maximumDistance): SimpleFeatureCollection
+     * Boolean useCentroid, Boolean useBezierCurve, Double maximumDistance, DistanceUnit distanceUnit): SimpleFeatureCollection
      */
 
     public HubLinesByDistanceProcessFactory() {
@@ -78,8 +79,8 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
     /** hubIdField */
     public static final Parameter<String> hubIdField = new Parameter<String>("hubIdField",
             String.class, getResource("HubLinesByDistance.hubIdField.title"),
-            getResource("HubLinesByDistance.hubIdField.description"), false, 0, 1, null, new KVP(
-                    Params.FIELD, "hubFeatures.All"));
+            getResource("HubLinesByDistance.hubIdField.description"), false, 0, 1, null,
+            new KVP(Params.FIELD, "hubFeatures.All"));
 
     /** spokeFeatures */
     public static final Parameter<SimpleFeatureCollection> spokeFeatures = new Parameter<SimpleFeatureCollection>(
@@ -101,18 +102,23 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
             null);
 
     /** useBezierCurve */
-    public static final Parameter<Boolean> useBezierCurve = new Parameter<Boolean>(
-            "useBezierCurve", Boolean.class,
-            getResource("HubLinesByDistance.useBezierCurve.title"),
+    public static final Parameter<Boolean> useBezierCurve = new Parameter<Boolean>("useBezierCurve",
+            Boolean.class, getResource("HubLinesByDistance.useBezierCurve.title"),
             getResource("HubLinesByDistance.useBezierCurve.description"), false, 0, 1,
             Boolean.FALSE, null);
 
     /** maximumDistance */
-    public static final Parameter<Double> maximumDistance = new Parameter<Double>(
-            "maximumDistance", Double.class,
-            getResource("HubLinesByDistance.maximumDistance.title"),
+    public static final Parameter<Double> maximumDistance = new Parameter<Double>("maximumDistance",
+            Double.class, getResource("HubLinesByDistance.maximumDistance.title"),
             getResource("HubLinesByDistance.maximumDistance.description"), false, 0, 1,
             Double.valueOf(0d), null);
+
+    /** distanceUnit */
+    public static final Parameter<DistanceUnit> distanceUnit = new Parameter<DistanceUnit>(
+            "distanceUnit", DistanceUnit.class,
+            getResource("HubLinesByDistance.distanceUnit.title"),
+            getResource("HubLinesByDistance.distanceUnit.description"), false, 0, 1,
+            DistanceUnit.Default, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -124,13 +130,13 @@ public class HubLinesByDistanceProcessFactory extends SpatialStatisticsProcessFa
         parameterInfo.put(useCentroid.key, useCentroid);
         parameterInfo.put(useBezierCurve.key, useBezierCurve);
         parameterInfo.put(maximumDistance.key, maximumDistance);
+        parameterInfo.put(distanceUnit.key, distanceUnit);
         return parameterInfo;
     }
 
     /** result */
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
-            "result", SimpleFeatureCollection.class,
-            getResource("HubLinesByDistance.result.title"),
+            "result", SimpleFeatureCollection.class, getResource("HubLinesByDistance.result.title"),
             getResource("HubLinesByDistance.result.description"), true, 1, 1, null, null);
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();

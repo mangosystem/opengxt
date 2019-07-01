@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -45,8 +46,8 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
     private static final String PROCESS_NAME = "BufferPointStatistics";
 
     /*
-     * BufferPointStatistics(SimpleFeatureCollection inputFeatures, Double distance, SimpleFeatureCollection pointFeatures, String countField, String
-     * statisticsFields): SimpleFeatureCollection
+     * BufferPointStatistics(SimpleFeatureCollection inputFeatures, Double distance, DistanceUnit distanceUnit, SimpleFeatureCollection pointFeatures,
+     * String countField, String statisticsFields): SimpleFeatureCollection
      */
 
     public BufferStatisticsProcessFactory() {
@@ -75,10 +76,17 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
             getResource("BufferPointStatistics.inputFeatures.description"), true, 1, 1, null, null);
 
     /** distance */
-    public static final Parameter<Double> distance = new Parameter<Double>("distance",
-            Double.class, getResource("BufferPointStatistics.distance.title"),
+    public static final Parameter<Double> distance = new Parameter<Double>("distance", Double.class,
+            getResource("BufferPointStatistics.distance.title"),
             getResource("BufferPointStatistics.distance.description"), true, 1, 1,
             Double.valueOf(0.0d), null);
+
+    /** distanceUnit */
+    public static final Parameter<DistanceUnit> distanceUnit = new Parameter<DistanceUnit>(
+            "distanceUnit", DistanceUnit.class,
+            getResource("BufferPointStatistics.distanceUnit.title"),
+            getResource("BufferPointStatistics.distanceUnit.description"), false, 0, 1,
+            DistanceUnit.Default, null);
 
     /** pointFeatures */
     public static final Parameter<SimpleFeatureCollection> pointFeatures = new Parameter<SimpleFeatureCollection>(
@@ -90,7 +98,8 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
     /** countField */
     public static final Parameter<String> countField = new Parameter<String>("countField",
             String.class, getResource("BufferPointStatistics.countField.title"),
-            getResource("BufferPointStatistics.countField.description"), false, 0, 1, "count", null);
+            getResource("BufferPointStatistics.countField.description"), false, 0, 1, "count",
+            null);
 
     /** statisticsFields */
     public static final Parameter<String> statisticsFields = new Parameter<String>(
@@ -104,6 +113,7 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(inputFeatures.key, inputFeatures);
         parameterInfo.put(distance.key, distance);
+        parameterInfo.put(distanceUnit.key, distanceUnit);
         parameterInfo.put(pointFeatures.key, pointFeatures);
         parameterInfo.put(countField.key, countField);
         parameterInfo.put(statisticsFields.key, statisticsFields);
@@ -114,8 +124,8 @@ public class BufferStatisticsProcessFactory extends SpatialStatisticsProcessFact
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
             "result", SimpleFeatureCollection.class,
             getResource("BufferPointStatistics.result.title"),
-            getResource("BufferPointStatistics.result.description"), true, 1, 1, null, new KVP(
-                    Params.STYLES, "EqualInterval.countField"));
+            getResource("BufferPointStatistics.result.description"), true, 1, 1, null,
+            new KVP(Params.STYLES, "EqualInterval.countField"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

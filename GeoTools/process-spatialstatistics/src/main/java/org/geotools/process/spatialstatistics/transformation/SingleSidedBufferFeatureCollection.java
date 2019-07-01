@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics.transformation;
 
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.measure.Unit;
@@ -31,6 +32,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
+import org.geotools.process.spatialstatistics.util.GeodeticBuilder;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
@@ -40,6 +42,9 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
 import si.uom.SI;
 
@@ -74,13 +79,13 @@ public class SingleSidedBufferFeatureCollection extends GXTSimpleFeatureCollecti
         this(delegate, ff.literal(distance), distanceUnit, quadrantSegments);
     }
 
-    public SingleSidedBufferFeatureCollection(SimpleFeatureCollection delegate,
-            Expression distance, int quadrantSegments) {
+    public SingleSidedBufferFeatureCollection(SimpleFeatureCollection delegate, Expression distance,
+            int quadrantSegments) {
         this(delegate, distance, DistanceUnit.Default, quadrantSegments);
     }
 
-    public SingleSidedBufferFeatureCollection(SimpleFeatureCollection delegate,
-            Expression distance, DistanceUnit distanceUnit, int quadrantSegments) {
+    public SingleSidedBufferFeatureCollection(SimpleFeatureCollection delegate, Expression distance,
+            DistanceUnit distanceUnit, int quadrantSegments) {
         super(delegate);
 
         if (quadrantSegments <= 0) {
@@ -137,6 +142,10 @@ public class SingleSidedBufferFeatureCollection extends GXTSimpleFeatureCollecti
 
         private Unit<Length> targetUnit = SI.METRE;
 
+        private boolean isGeographicCRS = false;
+
+        private GeodeticBuilder geodetic;
+
         private String typeName;
 
         public BufferExpressionFeatureIterator(SimpleFeatureIterator delegate,
@@ -149,7 +158,17 @@ public class SingleSidedBufferFeatureCollection extends GXTSimpleFeatureCollecti
 
             this.distance = distance;
             this.distanceUnit = distanceUnit;
-            this.targetUnit = UnitConverter.getLengthUnit(schema.getCoordinateReferenceSystem());
+
+            CoordinateReferenceSystem crs = schema.getCoordinateReferenceSystem();
+            if (distanceUnit != DistanceUnit.Default) {
+                this.targetUnit = UnitConverter.getLengthUnit(crs);
+            }
+            this.isGeographicCRS = UnitConverter.isGeographicCRS(crs);
+            if (isGeographicCRS) {
+                geodetic = new GeodeticBuilder(crs);
+                geodetic.setQuadrantSegments(quadrantSegments);
+                geodetic.setBufferParameters(bufParams);
+            }
 
             this.builder = new SimpleFeatureBuilder(schema);
             this.typeName = schema.getTypeName();
@@ -171,10 +190,29 @@ public class SingleSidedBufferFeatureCollection extends GXTSimpleFeatureCollecti
 
                     // envelope to polygon geometry
                     Geometry geometry = (Geometry) source.getDefaultGeometry();
+                    Geometry buffered = geometry;
 
-                    double converted = UnitConverter
-                            .convertDistance(eval, distanceUnit, targetUnit);
-                    next.setDefaultGeometry(BufferOp.bufferOp(geometry, converted, bufParams));
+                    double converted = eval;
+                    if (distanceUnit != DistanceUnit.Default) {
+                        if (isGeographicCRS) {
+                            converted = UnitConverter.convertDistance(eval, distanceUnit, SI.METRE);
+                            try {
+                                buffered = geodetic.buffer(geometry, converted);
+                            } catch (FactoryException e) {
+                                LOGGER.log(Level.FINER, e.getMessage(), e);
+                            } catch (TransformException e) {
+                                LOGGER.log(Level.FINER, e.getMessage(), e);
+                            }
+                        } else {
+                            converted = UnitConverter.convertDistance(eval, distanceUnit,
+                                    targetUnit);
+                            buffered = BufferOp.bufferOp(geometry, converted, bufParams);
+                        }
+                    } else {
+                        buffered = BufferOp.bufferOp(geometry, converted, bufParams);
+                    }
+
+                    next.setDefaultGeometry(buffered);
                     next.setAttribute(BUFFER_FIELD, eval);
 
                     builder.reset();

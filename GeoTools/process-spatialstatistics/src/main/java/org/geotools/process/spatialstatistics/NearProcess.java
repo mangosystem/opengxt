@@ -27,6 +27,7 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.operations.NearOperation;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.ProgressListener;
@@ -51,12 +52,13 @@ public class NearProcess extends AbstractStatisticsProcess {
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
             SimpleFeatureCollection nearFeatures, String nearIdField, double maximumDistance,
-            ProgressListener monitor) {
+            DistanceUnit distanceUnit, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(NearProcessFactory.inputFeatures.key, inputFeatures);
         map.put(NearProcessFactory.nearFeatures.key, nearFeatures);
         map.put(NearProcessFactory.nearIdField.key, nearIdField);
         map.put(NearProcessFactory.maximumDistance.key, maximumDistance);
+        map.put(NearProcessFactory.distanceUnit.key, distanceUnit);
 
         Process process = new NearProcess(null);
         Map<String, Object> resultMap;
@@ -83,14 +85,18 @@ public class NearProcess extends AbstractStatisticsProcess {
             throw new NullPointerException("nearFeatures, inputFeatures parameters required");
         }
 
-        Double maximumDistance = (Double) Params.getValue(input,
-                NearProcessFactory.maximumDistance, NearProcessFactory.maximumDistance.sample);
+        Double maximumDistance = (Double) Params.getValue(input, NearProcessFactory.maximumDistance,
+                NearProcessFactory.maximumDistance.sample);
+
+        DistanceUnit distanceUnit = (DistanceUnit) Params.getValue(input,
+                NearProcessFactory.distanceUnit, NearProcessFactory.distanceUnit.sample);
 
         // start process
         SimpleFeatureCollection resultFc = null;
         try {
             NearOperation operation = new NearOperation();
-            resultFc = operation.execute(inputFeatures, nearFeatures, nearIdField, maximumDistance);
+            resultFc = operation.execute(inputFeatures, nearFeatures, nearIdField, maximumDistance,
+                    distanceUnit);
         } catch (IOException e) {
             throw new ProcessException(e);
         }

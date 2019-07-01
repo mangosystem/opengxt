@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -45,8 +46,8 @@ public class NearProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "Near";
 
     /*
-     * Near(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection nearFeatures, String nearIdField, double maximumDistance):
-     * SimpleFeatureCollection
+     * Near(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection nearFeatures, String nearIdField, Double maximumDistance, DistanceUnit
+     * distanceUnit): SimpleFeatureCollection
      */
 
     public NearProcessFactory() {
@@ -70,9 +71,8 @@ public class NearProcessFactory extends SpatialStatisticsProcessFactory {
 
     /** inputFeatures */
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
-            "inputFeatures", SimpleFeatureCollection.class,
-            getResource("Near.inputFeatures.title"), getResource("Near.inputFeatures.description"),
-            true, 1, 1, null, null);
+            "inputFeatures", SimpleFeatureCollection.class, getResource("Near.inputFeatures.title"),
+            getResource("Near.inputFeatures.description"), true, 1, 1, null, null);
 
     /** nearFeatures */
     public static final Parameter<SimpleFeatureCollection> nearFeatures = new Parameter<SimpleFeatureCollection>(
@@ -82,13 +82,18 @@ public class NearProcessFactory extends SpatialStatisticsProcessFactory {
     /** nearIdField */
     public static final Parameter<String> nearIdField = new Parameter<String>("nearIdField",
             String.class, getResource("Near.nearIdField.title"),
-            getResource("Near.nearIdField.description"), false, 0, 1, null, new KVP(Params.FIELD,
-                    "nearFeatures.All"));
+            getResource("Near.nearIdField.description"), false, 0, 1, null,
+            new KVP(Params.FIELD, "nearFeatures.All"));
 
     /** maximumDistance */
-    public static final Parameter<Double> maximumDistance = new Parameter<Double>(
-            "maximumDistance", Double.class, getResource("Near.maximumDistance.title"),
+    public static final Parameter<Double> maximumDistance = new Parameter<Double>("maximumDistance",
+            Double.class, getResource("Near.maximumDistance.title"),
             getResource("Near.maximumDistance.description"), false, 0, 1, Double.valueOf(0d), null);
+
+    /** distanceUnit */
+    public static final Parameter<DistanceUnit> distanceUnit = new Parameter<DistanceUnit>(
+            "distanceUnit", DistanceUnit.class, getResource("Near.distanceUnit.title"),
+            getResource("Near.distanceUnit.description"), false, 0, 1, DistanceUnit.Default, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -97,6 +102,7 @@ public class NearProcessFactory extends SpatialStatisticsProcessFactory {
         parameterInfo.put(nearFeatures.key, nearFeatures);
         parameterInfo.put(nearIdField.key, nearIdField);
         parameterInfo.put(maximumDistance.key, maximumDistance);
+        parameterInfo.put(distanceUnit.key, distanceUnit);
         return parameterInfo;
     }
 

@@ -28,6 +28,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -45,7 +46,7 @@ public class NearProcessFactory extends SpatialStatisticsProcessFactory {
     private static final String PROCESS_NAME = "Near";
 
     /*
-     * Near(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection nearFeatures, String nearIdField, double maximumDistance):
+     * Near(SimpleFeatureCollection inputFeatures, SimpleFeatureCollection nearFeatures, String nearIdField, Double maximumDistance, DistanceUnit distanceUnit):
      * SimpleFeatureCollection
      */
 
@@ -90,6 +91,12 @@ public class NearProcessFactory extends SpatialStatisticsProcessFactory {
             "maximumDistance", Double.class, getResource("Near.maximumDistance.title"),
             getResource("Near.maximumDistance.description"), false, 0, 1, Double.valueOf(0d), null);
 
+    /** distanceUnit */
+    public static final Parameter<DistanceUnit> distanceUnit = new Parameter<DistanceUnit>(
+            "distanceUnit", DistanceUnit.class, getResource("Near.distanceUnit.title"),
+            getResource("Near.distanceUnit.description"), false, 0, 1,
+            DistanceUnit.Default, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
@@ -97,6 +104,7 @@ public class NearProcessFactory extends SpatialStatisticsProcessFactory {
         parameterInfo.put(nearFeatures.key, nearFeatures);
         parameterInfo.put(nearIdField.key, nearIdField);
         parameterInfo.put(maximumDistance.key, maximumDistance);
+        parameterInfo.put(distanceUnit.key, distanceUnit);
         return parameterInfo;
     }
 

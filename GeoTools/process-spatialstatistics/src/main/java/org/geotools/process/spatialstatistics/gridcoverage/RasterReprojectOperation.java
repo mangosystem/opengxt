@@ -30,6 +30,7 @@ import org.geotools.coverage.processing.Operations;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.core.SSUtils;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.enumeration.ResampleType;
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.referencing.CRS;
@@ -100,8 +101,9 @@ public class RasterReprojectOperation extends GeneralOperation {
             cellSizeY = Math.abs(gridToWorld.getScaleY());
 
             // check Geographic CRS
-            CoordinateReferenceSystem sCRS = inputCoverage.getCoordinateReferenceSystem();
-            if (sCRS instanceof DefaultGeographicCRS) {
+            boolean sourceIsGeo = UnitConverter.isGeographicCRS(sourceCRS);
+            boolean targetIsGeo = UnitConverter.isGeographicCRS(targetCRS);
+            if (!CRS.equalsIgnoreMetadata(sourceCRS, targetCRS) && (sourceIsGeo || targetIsGeo)) {
                 ReferencedEnvelope extent = null;
                 try {
                     ReferencedEnvelope bounds = new ReferencedEnvelope(inputCoverage.getEnvelope());

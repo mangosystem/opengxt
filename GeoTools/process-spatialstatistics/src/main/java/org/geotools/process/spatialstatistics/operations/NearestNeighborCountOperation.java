@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.measure.quantity.Length;
+import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -32,16 +33,19 @@ import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
+import org.geotools.process.spatialstatistics.util.GeodeticBuilder;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.index.strtree.ItemBoundable;
 import com.vividsolutions.jts.index.strtree.ItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
+import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 /**
  * Calculates count between the input features and the closest feature in another features.
@@ -57,6 +61,12 @@ public class NearestNeighborCountOperation extends GeneralOperation {
     private static final String COUNT_FIELD = "count";
 
     private double searchRadius = Double.MAX_VALUE;
+
+    private DistanceUnit radiusUnit = DistanceUnit.Default;
+
+    private boolean isGeographicCRS = false;
+
+    private GeodeticBuilder deodetic;
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
             String countField, SimpleFeatureCollection nearFeatures) throws IOException {
@@ -85,17 +95,27 @@ public class NearestNeighborCountOperation extends GeneralOperation {
             LOGGER.log(Level.WARNING, "reprojecting features");
         }
 
+        this.radiusUnit = radiusUnit;
+        this.isGeographicCRS = UnitConverter.isGeographicCRS(crsT);
+        if (isGeographicCRS) {
+            deodetic = new GeodeticBuilder(crsT);
+        }
+        Unit<Length> targetUnit = UnitConverter.getLengthUnit(crsT);
+
         if (Double.isNaN(searchRadius) || Double.isInfinite(searchRadius) || searchRadius <= 0
                 || searchRadius == Double.MAX_VALUE) {
             this.searchRadius = Double.MAX_VALUE;
         } else {
             // convert distance unit
-            if (radiusUnit == DistanceUnit.Default) {
-                this.searchRadius = searchRadius;
-            } else {
-                Unit<Length> targetUnit = UnitConverter.getLengthUnit(crsT);
-                this.searchRadius = UnitConverter.convertDistance(searchRadius, radiusUnit,
-                        targetUnit);
+            this.searchRadius = searchRadius;
+            if (radiusUnit != DistanceUnit.Default) {
+                if (isGeographicCRS) {
+                    this.searchRadius = UnitConverter.convertDistance(searchRadius, radiusUnit,
+                            SI.METER);
+                } else {
+                    this.searchRadius = UnitConverter.convertDistance(searchRadius, radiusUnit,
+                            targetUnit);
+                }
             }
         }
 
@@ -157,6 +177,13 @@ public class NearestNeighborCountOperation extends GeneralOperation {
                         });
 
                 double nearestDistance = geometry.distance(nearest.location);
+                if (radiusUnit != DistanceUnit.Default) {
+                    if (isGeographicCRS) {
+                        Coordinate[] points = DistanceOp.nearestPoints(geometry, nearest.location);
+                        nearestDistance = deodetic.getDistance(points[0], points[1]);
+                    }
+                }
+
                 if (nearestDistance > searchRadius) {
                     continue;
                 }

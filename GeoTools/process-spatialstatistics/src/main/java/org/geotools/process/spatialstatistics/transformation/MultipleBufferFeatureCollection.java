@@ -18,9 +18,11 @@ package org.geotools.process.spatialstatistics.transformation;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.measure.quantity.Length;
+import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -31,10 +33,14 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
+import org.geotools.process.spatialstatistics.util.GeodeticBuilder;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
@@ -70,17 +76,26 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
         this.schema = FeatureTypes.build(delegate.getSchema(), typeName, Polygon.class);
         this.schema = FeatureTypes.add(schema, bufferField, Double.class, 19);
 
+        CoordinateReferenceSystem crs = schema.getCoordinateReferenceSystem();
+
         // apply distance unit
         Arrays.sort(distances);
         if (distanceUnit == DistanceUnit.Default) {
             this.distances = distances;
         } else {
-            Unit<Length> targetUnit = UnitConverter.getLengthUnit(schema
-                    .getCoordinateReferenceSystem());
             double[] converted = distances.clone();
-            for (int i = 0; i < converted.length; i++) {
-                converted[i] = UnitConverter
-                        .convertDistance(converted[i], distanceUnit, targetUnit);
+
+            Unit<Length> targetUnit = UnitConverter.getLengthUnit(crs);
+            if (UnitConverter.isGeographicCRS(crs)) {
+                for (int i = 0; i < converted.length; i++) {
+                    converted[i] = UnitConverter.convertDistance(converted[i], distanceUnit,
+                            SI.METER);
+                }
+            } else {
+                for (int i = 0; i < converted.length; i++) {
+                    converted[i] = UnitConverter.convertDistance(converted[i], distanceUnit,
+                            targetUnit);
+                }
             }
             this.distances = converted;
         }
@@ -136,6 +151,12 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
 
         private String typeName;
 
+        private boolean isGeographicCRS = false;
+
+        private GeodeticBuilder geodetic;
+
+        private int quadrantSegments = 24;
+
         public BufferedFeatureIterator(SimpleFeatureIterator delegate, SimpleFeatureType schema,
                 double[] distances, Boolean outsideOnly) {
             this.delegate = delegate;
@@ -145,6 +166,13 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
             this.outsideOnly = outsideOnly;
             this.builder = new SimpleFeatureBuilder(schema);
             this.typeName = schema.getTypeName();
+
+            CoordinateReferenceSystem crs = schema.getCoordinateReferenceSystem();
+            this.isGeographicCRS = UnitConverter.isGeographicCRS(crs);
+            if (isGeographicCRS) {
+                geodetic = new GeodeticBuilder(crs);
+                geodetic.setQuadrantSegments(quadrantSegments);
+            }
         }
 
         public void close() {
@@ -160,15 +188,32 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
 
                 // buffer geometry
                 Geometry orig = (Geometry) origFeature.getDefaultGeometry();
-                Geometry buff = orig.buffer(distances[bufferIndex], 24);
-                if (outsideOnly && bufferIndex > 0) {
-                    buff = buff.difference(orig.buffer(distances[bufferIndex - 1], 24));
+
+                Geometry buffered = orig;
+                if (isGeographicCRS) {
+                    try {
+                        buffered = geodetic.buffer(orig, distances[bufferIndex]);
+                        if (outsideOnly && bufferIndex > 0) {
+                            buffered = buffered.difference(geodetic.buffer(orig,
+                                    distances[bufferIndex - 1]));
+                        }
+                    } catch (FactoryException e) {
+                        LOGGER.log(Level.FINER, e.getMessage(), e);
+                    } catch (TransformException e) {
+                        LOGGER.log(Level.FINER, e.getMessage(), e);
+                    }
+                } else {
+                    buffered = orig.buffer(distances[bufferIndex], quadrantSegments);
+                    if (outsideOnly && bufferIndex > 0) {
+                        buffered = buffered.difference(orig.buffer(distances[bufferIndex - 1],
+                                quadrantSegments));
+                    }
                 }
 
                 // create feature
                 nextFeature = builder.buildFeature(buildID(typeName, ++featureID));
                 transferAttribute(origFeature, nextFeature);
-                nextFeature.setDefaultGeometry(buff);
+                nextFeature.setDefaultGeometry(buffered);
                 nextFeature.setAttribute(bufferField, distances[bufferIndex]);
 
                 builder.reset();

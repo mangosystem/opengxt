@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.measure.Measure;
 import javax.measure.quantity.Length;
+import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -30,6 +32,7 @@ import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
+import org.geotools.process.spatialstatistics.util.GeodeticBuilder;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
@@ -37,10 +40,12 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.index.strtree.ItemBoundable;
 import com.vividsolutions.jts.index.strtree.ItemDistance;
 import com.vividsolutions.jts.index.strtree.STRtree;
+import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 /**
  * Calculates distance and additional proximity information between the input features and the closest feature in another features.
@@ -54,6 +59,8 @@ public class NearOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(NearOperation.class);
 
     protected static final String DIST_FIELD = "dist";
+
+    private GeodeticBuilder geodetic;
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection inputFeatures,
             SimpleFeatureCollection nearFeatures, String nearIdField) throws IOException {
@@ -93,12 +100,23 @@ public class NearOperation extends GeneralOperation {
             LOGGER.log(Level.WARNING, "reprojecting features");
         }
 
+        boolean isGeographicCRS = UnitConverter.isGeographicCRS(crsT);
+        if (isGeographicCRS) {
+            geodetic = new GeodeticBuilder(crsT);
+        }
+        Unit<Length> targetUnit = UnitConverter.getLengthUnit(crsT);
+
         double maxDistance = maximumDistance == 0 ? Double.MAX_VALUE : maximumDistance;
         if (maximumDistance > 0 && maximumDistance != Double.MAX_VALUE
                 && distanceUnit != DistanceUnit.Default) {
             // convert distance unit
-            Unit<Length> targetUnit = UnitConverter.getLengthUnit(crsT);
-            maxDistance = UnitConverter.convertDistance(maximumDistance, distanceUnit, targetUnit);
+            if (isGeographicCRS) {
+                maxDistance = UnitConverter
+                        .convertDistance(maximumDistance, distanceUnit, SI.METER);
+            } else {
+                maxDistance = UnitConverter.convertDistance(maximumDistance, distanceUnit,
+                        targetUnit);
+            }
         }
 
         STRtree spatialIndex = loadNearFeatures(nearFeatures, nearIdField);
@@ -123,6 +141,21 @@ public class NearOperation extends GeneralOperation {
                         });
 
                 double minumumDistance = source.location.distance(nearest.location);
+                double distance = minumumDistance;
+                if (distanceUnit != DistanceUnit.Default) {
+                    if (isGeographicCRS) {
+                        Coordinate[] points = DistanceOp.nearestPoints(geometry, nearest.location);
+                        minumumDistance = geodetic.getDistance(points[0], points[1]);
+
+                        // meter to distance unit
+                        distance = UnitConverter.convertDistance(
+                                Measure.valueOf(minumumDistance, SI.METER), distanceUnit);
+                    } else {
+                        // convert to distance unit
+                        distance = UnitConverter.convertDistance(
+                                Measure.valueOf(distance, targetUnit), distanceUnit);
+                    }
+                }
 
                 // create & insert feature
                 SimpleFeature newFeature = featureWriter.buildFeature();
@@ -137,7 +170,7 @@ public class NearOperation extends GeneralOperation {
                     if (hasID) {
                         newFeature.setAttribute(nearIdField, nearest.id);
                     }
-                    newFeature.setAttribute(DIST_FIELD, minumumDistance);
+                    newFeature.setAttribute(DIST_FIELD, distance);
                 }
 
                 featureWriter.write(newFeature);

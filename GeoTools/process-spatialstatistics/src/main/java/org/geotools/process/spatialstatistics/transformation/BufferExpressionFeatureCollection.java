@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics.transformation;
 
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.measure.quantity.Length;
@@ -32,11 +33,15 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
+import org.geotools.process.spatialstatistics.util.GeodeticBuilder;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.expression.Expression;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
@@ -58,7 +63,7 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
 
     private DistanceUnit distanceUnit = DistanceUnit.Default;
 
-    private int quadrantSegments = 8;
+    private int quadrantSegments = 24;
 
     private SimpleFeatureType schema;
 
@@ -82,7 +87,7 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
         super(delegate);
 
         if (quadrantSegments <= 0) {
-            quadrantSegments = 8;
+            quadrantSegments = 24;
         }
 
         this.distance = distance;
@@ -135,6 +140,10 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
 
         private Unit<Length> targetUnit = SI.METER;
 
+        private boolean isGeographicCRS = false;
+
+        private GeodeticBuilder geodetic;
+
         private String typeName;
 
         public BufferExpressionFeatureIterator(SimpleFeatureIterator delegate,
@@ -144,9 +153,15 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
 
             this.distance = distance;
             this.distanceUnit = distanceUnit;
+
+            CoordinateReferenceSystem crs = schema.getCoordinateReferenceSystem();
             if (distanceUnit != DistanceUnit.Default) {
-                this.targetUnit = UnitConverter
-                        .getLengthUnit(schema.getCoordinateReferenceSystem());
+                this.targetUnit = UnitConverter.getLengthUnit(crs);
+            }
+            this.isGeographicCRS = UnitConverter.isGeographicCRS(crs);
+            if (isGeographicCRS) {
+                geodetic = new GeodeticBuilder(crs);
+                geodetic.setQuadrantSegments(quadrantSegments);
             }
 
             this.quadrantSegments = quadrantSegments;
@@ -170,12 +185,29 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
 
                     // buffer
                     Geometry geometry = (Geometry) source.getDefaultGeometry();
+                    Geometry buffered = geometry;
 
                     double converted = eval;
                     if (distanceUnit != DistanceUnit.Default) {
-                        converted = UnitConverter.convertDistance(eval, distanceUnit, targetUnit);
+                        if (isGeographicCRS) {
+                            converted = UnitConverter.convertDistance(eval, distanceUnit, SI.METER);
+                            try {
+                                buffered = geodetic.buffer(geometry, converted);
+                            } catch (FactoryException e) {
+                                LOGGER.log(Level.FINER, e.getMessage(), e);
+                            } catch (TransformException e) {
+                                LOGGER.log(Level.FINER, e.getMessage(), e);
+                            }
+                        } else {
+                            converted = UnitConverter.convertDistance(eval, distanceUnit,
+                                    targetUnit);
+                            buffered = geometry.buffer(converted, quadrantSegments);
+                        }
+                    } else {
+                        buffered = geometry.buffer(converted, quadrantSegments);
                     }
-                    next.setDefaultGeometry(geometry.buffer(converted, quadrantSegments));
+
+                    next.setDefaultGeometry(buffered);
                     next.setAttribute(BUFFER_FIELD, eval);
 
                     builder.reset();

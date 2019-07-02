@@ -20,11 +20,18 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.measure.quantity.Length;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
+
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.transformation.ReprojectFeatureCollection;
+import org.geotools.process.spatialstatistics.util.GeodeticBuilder;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
@@ -56,12 +63,24 @@ import com.vividsolutions.jts.linearref.LengthIndexedLine;
 public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
     protected static final Logger LOGGER = Logging.getLogger(HubLinesByDistanceOperation.class);
 
+    private boolean isGeographicCRS = false;
+
+    private GeodeticBuilder geodetic;
+
     public SimpleFeatureCollection execute(SimpleFeatureCollection hubFeatures, String hubIdField,
             SimpleFeatureCollection spokeFeatures, boolean useCentroid, boolean preserveAttributes,
             double maximumDistance) throws IOException {
+        return execute(hubFeatures, hubIdField, spokeFeatures, useCentroid, preserveAttributes,
+                maximumDistance, DistanceUnit.Default);
+    }
+
+    public SimpleFeatureCollection execute(SimpleFeatureCollection hubFeatures, String hubIdField,
+            SimpleFeatureCollection spokeFeatures, boolean useCentroid, boolean preserveAttributes,
+            double maximumDistance, DistanceUnit distanceUnit) throws IOException {
 
         this.setPreserveAttributes(preserveAttributes);
         this.setMaximumDistance(maximumDistance);
+        this.setDistanceUnit(distanceUnit);
         this.setUseCentroid(useCentroid);
 
         return execute(hubFeatures, hubIdField, spokeFeatures);
@@ -95,6 +114,21 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
             LOGGER.log(Level.WARNING, "reprojecting features");
         }
 
+        isGeographicCRS = UnitConverter.isGeographicCRS(crsT);
+        Unit<Length> targetUnit = UnitConverter.getLengthUnit(crsT);
+
+        double convertedDistance = maximumDistance;
+        if (distanceUnit != DistanceUnit.Default) {
+            if (isGeographicCRS) {
+                geodetic = new GeodeticBuilder(crsT);
+                convertedDistance = UnitConverter.convertDistance(convertedDistance, distanceUnit,
+                        SI.METER);
+            } else {
+                convertedDistance = UnitConverter.convertDistance(convertedDistance, distanceUnit,
+                        targetUnit);
+            }
+        }
+
         // build spatial index
         STRtree spatialIndex = loadHubs(hubFeatures, hubIdField);
 
@@ -123,9 +157,24 @@ public class HubLinesByDistanceOperation extends AbstractHubLinesOperation {
                         });
 
                 // create line: direction = hub --> spoke
-                Geometry hubLine = getShortestLine(nearest.location, spokeGeom, false);
+                LineString hubLine = getShortestLine(nearest.location, spokeGeom, false);
+
+                // Geodetic
                 double distance = hubLine.getLength();
-                if (distance == 0 || this.maximumDistance < distance) {
+                if (isGeographicCRS && distanceUnit != DistanceUnit.Default) {
+                    // latlon to meter
+                    distance = geodetic.getDistance(hubLine.getStartPoint(), hubLine.getEndPoint());
+
+                    // meter to distance unit
+                    distance = UnitConverter.convertDistance(distance, DistanceUnit.Meters,
+                            targetUnit);
+                }
+
+                if (distance == 0) {
+                    continue;
+                }
+
+                if (convertedDistance > 0 && convertedDistance < distance) {
                     continue;
                 }
 

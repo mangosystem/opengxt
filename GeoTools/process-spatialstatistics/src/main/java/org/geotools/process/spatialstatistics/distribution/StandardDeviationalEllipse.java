@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.factory.GeoTools;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.process.spatialstatistics.core.SSUtils;
-import org.geotools.util.factory.GeoTools;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateArrays;

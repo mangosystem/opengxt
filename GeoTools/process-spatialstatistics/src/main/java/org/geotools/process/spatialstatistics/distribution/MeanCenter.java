@@ -16,8 +16,8 @@
  */
 package org.geotools.process.spatialstatistics.distribution;
 
+import org.geotools.factory.GeoTools;
 import org.geotools.geometry.jts.JTSFactoryFinder;
-import org.geotools.util.factory.GeoTools;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;

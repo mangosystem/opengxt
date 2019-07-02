@@ -19,10 +19,10 @@ package org.geotools.process.spatialstatistics.distribution;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.geotools.factory.GeoTools;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.DistanceMethod;
-import org.geotools.util.factory.GeoTools;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;

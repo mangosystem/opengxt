@@ -26,8 +26,8 @@ import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.metadata.i18n.Vocabulary;
-import org.geotools.metadata.i18n.VocabularyKeys;
+import org.geotools.resources.i18n.Vocabulary;
+import org.geotools.resources.i18n.VocabularyKeys;
 import org.geotools.util.logging.Logging;
 
 /**

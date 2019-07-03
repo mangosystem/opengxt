@@ -24,6 +24,7 @@ allows users to share and edit geospatial data. Designed for interoperability, i
   * Download gt-process-spatialstatistics-xx.x.jar file
   
 * GeoServer
+  * Download GeoServer-Extension-OpenGxT-x.xx.x.zip
   * Uzip and copy these two files to the WEB-INF/lib directory of the GeoServer installation.
   * Restart GeoServer
 

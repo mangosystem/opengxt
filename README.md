@@ -1,4 +1,4 @@
-## Spatial Tools for GeoTools, GeoServer WPS, uDig
+## OpenGXT - Spatial Analysis
 
 ### Overview
 The goal of this project is to provide a spatial statistics tools for Geotools, Geoserver WPS, uDig Statistics Toolbox
@@ -25,7 +25,7 @@ allows users to share and edit geospatial data. Designed for interoperability, i
   
 * GeoServer
   * Download GeoServer-Extension-OpenGxT-x.xx.x.zip
-  * Uzip and copy these two files to the WEB-INF/lib directory of the GeoServer installation.
+  * Unzip and copy these two files to the WEB-INF/lib directory of the GeoServer installation.
   * Restart GeoServer
 
 ### uDig Processing Toolbox Plugin Installation

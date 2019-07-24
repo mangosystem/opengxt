@@ -24,5 +24,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/gt-process-spatialstatistics"/>
+  <classpathentry kind="src" path="src/main/resources" including="**/*" excluding="**/*.java"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

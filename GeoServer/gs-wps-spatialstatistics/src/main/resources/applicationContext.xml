@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
+
+    <bean id="openGXTPage" class="org.geoserver.web.MenuPageInfo">
+        <property name="id" value="openGXTPage" />
+        <property name="titleKey" value="OpenGXTPage.page.title" />
+        <property name="descriptionKey" value="OpenGXTPage.page.description" />
+        <property name="componentClass" value="org.geoserver.wps.spatialstatistics.web.OpenGXTPage" />
+    <property name="category" ref="aboutStatusCategory" />
+    <property name="icon" value="information.png" />
+    <property name="order" value="100" />
+    </bean>
+
     <!-- The PPIO that need to be registered into SPI because of their dependencies -->
 
     <!-- custom class support -->

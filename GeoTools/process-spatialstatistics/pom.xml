@@ -18,6 +18,7 @@
   <name>Process Spatialstatistics</name>
   <description>Processes for spatial statistics.</description>
   <version>21-SNAPSHOT</version>
+  <url>https://github.com/MapPlus/spatial_statistics_for_geotools_udig</url>
   
   <licenses>
     <license>
@@ -503,6 +504,25 @@
     </dependency>
   </dependencies>
   <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <index>true</index>
+            <manifest>
+              <addClasspath>false</addClasspath>
+            </manifest>
+            <manifestEntries>
+              <Specification-Title>OpenGXT</Specification-Title>
+              <Specification-Version>${project.version}</Specification-Version>
+              <Specification-Vendor>${pom.url}</Specification-Vendor>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+    
     <pluginManagement>
       <plugins>
         <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->

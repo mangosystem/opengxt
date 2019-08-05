@@ -44,6 +44,7 @@ allows users to share and edit geospatial data. Designed for interoperability, i
 * uDig Processing Toolbox Manual
   * [Korean v2.0 - 28MB](https://github.com/mapplus/opengxt-udig-plugin/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.0.pdf)
   * [Korean v3.x-latest - 35MB](https://github.com/mapplus/opengxt-udig-plugin/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.3.latest.pdf)
+  * [2018 OSGeo UN Committee Educational Challenge - Training Material for UN Open GIS Spiral 3](https://wiki.osgeo.org/wiki/Training_Material_for_UN_Open_GIS_Spiral_3)
 
 * Presentation
   * [SlideShare](https://www.slideshare.net/mapplus)

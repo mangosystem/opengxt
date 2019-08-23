@@ -160,7 +160,7 @@ public class FishnetOperation extends GeneralOperation {
                     if (boundsSource != null) {
                         Filter filter = getIntersectsFilter(the_geom, cellGeom);
                         if (boundaryInside) {
-                            filter = ff.within(ff.property(the_geom), ff.literal(cellGeom));
+                            filter = ff.contains(ff.property(the_geom), ff.literal(cellGeom));
                         }
                         if (boundsSource.subCollection(filter).isEmpty()) {
                             xpos += width;

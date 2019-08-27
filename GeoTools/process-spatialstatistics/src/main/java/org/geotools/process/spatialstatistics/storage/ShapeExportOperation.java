@@ -189,9 +189,14 @@ public class ShapeExportOperation {
                     continue;
                 }
 
+                // create feature and set geometry
+                SimpleFeature newFeature = featureWriter.buildFeature();
+                featureWriter.copyAttributes(feature, newFeature, true);
+                
                 if (transform != null) {
                     try {
                         geometry = JTS.transform(geometry, transform);
+                        newFeature.setDefaultGeometry(geometry);
                     } catch (MismatchedDimensionException e) {
                         LOGGER.log(Level.FINER, e.getMessage(), e);
                     } catch (TransformException e) {
@@ -199,9 +204,6 @@ public class ShapeExportOperation {
                     }
                 }
 
-                // create feature and set geometry
-                SimpleFeature newFeature = featureWriter.buildFeature();
-                featureWriter.copyAttributes(feature, newFeature, true);
                 featureWriter.write(newFeature);
             }
         } catch (Exception e) {

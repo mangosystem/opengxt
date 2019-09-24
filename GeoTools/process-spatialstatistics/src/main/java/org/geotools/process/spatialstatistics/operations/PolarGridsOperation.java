@@ -17,25 +17,32 @@
 package org.geotools.process.spatialstatistics.operations;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
+
+import javax.measure.Unit;
+import javax.measure.quantity.Length;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.SSUtils;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.enumeration.RadialType;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
+import org.geotools.process.spatialstatistics.util.GeodeticBuilder;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateList;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+import si.uom.SI;
 
 /**
  * Creates a radial polar grids from geometry(centroid) or features.
@@ -51,7 +58,7 @@ public class PolarGridsOperation extends GeneralOperation {
 
     static final int DEFAULT_SIDES = 8;
 
-    static final int DEFAULT_SEGS = 8;
+    static final int DEFAULT_SEGS = 24;
 
     static final String ANGLE_FIELD = "angle";
 
@@ -64,6 +71,10 @@ public class PolarGridsOperation extends GeneralOperation {
     private RadialType radialType = RadialType.Polar;
 
     private boolean outsideOnly = true;
+
+    private boolean isGeographicCRS = false;
+
+    private GeodeticBuilder geodetic;
 
     public RadialType getRadialType() {
         return radialType;
@@ -93,6 +104,11 @@ public class PolarGridsOperation extends GeneralOperation {
 
     public SimpleFeatureCollection execute(SimpleFeatureCollection features, double[] radius,
             int sides, RadialType radialType) throws IOException {
+        return execute(features, radius, DistanceUnit.Default, DEFAULT_SIDES, RadialType.Polar);
+    }
+
+    public SimpleFeatureCollection execute(SimpleFeatureCollection features, double[] radius,
+            DistanceUnit radiusUnit, int sides, RadialType radialType) throws IOException {
         this.radialType = radialType;
         this.is8Sides = sides == 8;
 
@@ -105,6 +121,25 @@ public class PolarGridsOperation extends GeneralOperation {
         featureType = FeatureTypes.add(featureType, RADIUS_FIELD, Double.class, 38);
         if (sides == 8) {
             featureType = FeatureTypes.add(featureType, AZIMUTH_FIELD, String.class, 5);
+        }
+
+        CoordinateReferenceSystem crs = inputSchema.getCoordinateReferenceSystem();
+        if (crs != null) {
+            isGeographicCRS = UnitConverter.isGeographicCRS(crs);
+            Unit<Length> targetUnit = UnitConverter.getLengthUnit(crs);
+
+            if (isGeographicCRS) {
+                geodetic = new GeodeticBuilder(crs);
+                geodetic.setQuadrantSegments(DEFAULT_SEGS);
+                for (int idx = 0; idx < radius.length; idx++) {
+                    radius[idx] = UnitConverter.convertDistance(radius[idx], radiusUnit, SI.METRE);
+                }
+            } else {
+                for (int idx = 0; idx < radius.length; idx++) {
+                    radius[idx] = UnitConverter.convertDistance(radius[idx], radiusUnit,
+                            targetUnit);
+                }
+            }
         }
 
         // prepare transactional feature store
@@ -139,6 +174,12 @@ public class PolarGridsOperation extends GeneralOperation {
 
     public SimpleFeatureCollection execute(Geometry center, double[] radius, int sides,
             RadialType radialType) throws IOException {
+        return execute(center, null, radius, DistanceUnit.Default, DEFAULT_SIDES, RadialType.Polar);
+    }
+
+    public SimpleFeatureCollection execute(Geometry center, CoordinateReferenceSystem forcedCRS,
+            double[] radius, DistanceUnit radiusUnit, int sides, RadialType radialType)
+            throws IOException {
         this.radialType = radialType;
         this.is8Sides = sides == 8;
 
@@ -150,6 +191,28 @@ public class PolarGridsOperation extends GeneralOperation {
         if (center.getUserData() != null
                 && center.getUserData() instanceof CoordinateReferenceSystem) {
             crs = (CoordinateReferenceSystem) center.getUserData();
+        }
+
+        if (forcedCRS != null) {
+            crs = forcedCRS;
+        }
+
+        if (crs != null) {
+            isGeographicCRS = UnitConverter.isGeographicCRS(crs);
+            Unit<Length> targetUnit = UnitConverter.getLengthUnit(crs);
+
+            if (isGeographicCRS) {
+                geodetic = new GeodeticBuilder(crs);
+                geodetic.setQuadrantSegments(DEFAULT_SEGS);
+                for (int idx = 0; idx < radius.length; idx++) {
+                    radius[idx] = UnitConverter.convertDistance(radius[idx], radiusUnit, SI.METRE);
+                }
+            } else {
+                for (int idx = 0; idx < radius.length; idx++) {
+                    radius[idx] = UnitConverter.convertDistance(radius[idx], radiusUnit,
+                            targetUnit);
+                }
+            }
         }
 
         SimpleFeatureType featureType = FeatureTypes.getDefaultType(TYPE_NAME, Polygon.class, crs);
@@ -214,70 +277,89 @@ public class PolarGridsOperation extends GeneralOperation {
             double fromRadius, double toRadius) {
         final double step = Math.abs(toDeg - fromDeg) / (double) DEFAULT_SEGS;
 
-        List<Coordinate> coordinates = new ArrayList<Coordinate>();
-        double radian;
+        CoordinateList coordinates = new CoordinateList();
 
         // first interior rings
         for (int index = 0; index <= DEFAULT_SEGS; index++) {
+            double deg = fromDeg + (index * step);
+
             if (index == 0) {
-                radian = SSUtils.convert2Radians(fromDeg);
+                deg = fromDeg;
             } else if (index == DEFAULT_SEGS) {
-                radian = SSUtils.convert2Radians(toDeg);
-            } else {
-                radian = SSUtils.convert2Radians(fromDeg + (index * step));
+                deg = toDeg;
             }
-            coordinates.add(createCoordinate(source, radian, fromRadius));
+
+            Coordinate coordinate = null;
+            if (isGeographicCRS) {
+                coordinate = geodetic.getDestination(source, 90 - deg, fromRadius);
+            } else {
+                double radian = SSUtils.convert2Radians(deg);
+                coordinate = createCoordinate(source, radian, fromRadius);
+            }
+
+            coordinates.add(coordinate, false);
         }
 
         // second outer rings
         for (int index = DEFAULT_SEGS; index >= 0; index--) {
+            double deg = fromDeg + (index * step);
+
             if (index == 0) {
-                radian = SSUtils.convert2Radians(fromDeg);
+                deg = fromDeg;
             } else if (index == DEFAULT_SEGS) {
-                radian = SSUtils.convert2Radians(toDeg);
-            } else {
-                radian = SSUtils.convert2Radians(fromDeg + (index * step));
+                deg = toDeg;
             }
-            coordinates.add(createCoordinate(source, radian, toRadius));
+
+            Coordinate coordinate = null;
+            if (isGeographicCRS) {
+                coordinate = geodetic.getDestination(source, 90 - deg, toRadius);
+            } else {
+                double radian = SSUtils.convert2Radians(deg);
+                coordinate = createCoordinate(source, radian, toRadius);
+            }
+
+            coordinates.add(coordinate, false);
         }
 
         // close rings
-        coordinates.add(coordinates.get(0));
+        coordinates.add(coordinates.get(0), true);
 
         // create polygon
-        Coordinate[] coords = new Coordinate[coordinates.size()];
-        coordinates.toArray(coords);
-
-        return gf.createPolygon(gf.createLinearRing(coords), null);
+        return gf.createPolygon(coordinates.toCoordinateArray());
     }
 
     private Geometry createCircularArc(Coordinate source, double fromDeg, double toDeg,
             double radius) {
         final double step = Math.abs(toDeg - fromDeg) / (double) DEFAULT_SEGS;
 
-        List<Coordinate> coordinates = new ArrayList<Coordinate>();
-        coordinates.add(source);
+        CoordinateList coordinates = new CoordinateList();
+        coordinates.add(source, false);
 
-        double radian;
         for (int index = DEFAULT_SEGS; index >= 0; index--) {
+            double deg = fromDeg + (index * step);
+
             if (index == 0) {
-                radian = SSUtils.convert2Radians(fromDeg);
+                deg = fromDeg;
             } else if (index == DEFAULT_SEGS) {
-                radian = SSUtils.convert2Radians(toDeg);
-            } else {
-                radian = SSUtils.convert2Radians(fromDeg + (index * step));
+                deg = toDeg;
             }
-            coordinates.add(createCoordinate(source, radian, radius));
+
+            Coordinate coordinate = null;
+            if (isGeographicCRS) {
+                coordinate = geodetic.getDestination(source, 90 - deg, radius);
+            } else {
+                double radian = SSUtils.convert2Radians(deg);
+                coordinate = createCoordinate(source, radian, radius);
+            }
+
+            coordinates.add(coordinate, false);
         }
 
         // close rings
-        coordinates.add(coordinates.get(0));
+        coordinates.add(coordinates.get(0), true);
 
         // create polygon
-        Coordinate[] coords = new Coordinate[coordinates.size()];
-        coordinates.toArray(coords);
-
-        return gf.createPolygon(gf.createLinearRing(coords), null);
+        return gf.createPolygon(coordinates.toCoordinateArray());
     }
 
     private Coordinate createCoordinate(Coordinate source, double radian, double radius) {

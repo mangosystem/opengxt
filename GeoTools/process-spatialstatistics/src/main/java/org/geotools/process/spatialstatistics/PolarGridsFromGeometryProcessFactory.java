@@ -27,9 +27,11 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.enumeration.RadialType;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Geometry;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.InternationalString;
 
 /**
@@ -46,7 +48,8 @@ public class PolarGridsFromGeometryProcessFactory extends SpatialStatisticsProce
     private static final String PROCESS_NAME = "PolarGridsFromGeometry";
 
     /*
-     * PolarGridsFromGeometry(Geometry origin, String radius, RadialType radialType, Integer sides): SimpleFeatureCollection
+     * PolarGridsFromGeometry(Geometry origin, CoordinateReferenceSystem forcedCRS, String radius, DistanceUnit radiusUnit, RadialType radialType,
+     * Integer sides): SimpleFeatureCollection
      */
 
     public PolarGridsFromGeometryProcessFactory() {
@@ -73,10 +76,23 @@ public class PolarGridsFromGeometryProcessFactory extends SpatialStatisticsProce
             Geometry.class, getResource("PolarGridsFromGeometry.origin.title"),
             getResource("PolarGridsFromGeometry.origin.description"), true, 1, 1, null, null);
 
+    /** forcedCRS */
+    public static final Parameter<CoordinateReferenceSystem> forcedCRS = new Parameter<CoordinateReferenceSystem>(
+            "forcedCRS", CoordinateReferenceSystem.class,
+            getResource("PolarGridsFromGeometry.forcedCRS.title"),
+            getResource("PolarGridsFromGeometry.forcedCRS.description"), false, 0, 1, null, null);
+
     /** radius */
     public static final Parameter<String> radius = new Parameter<String>("radius", String.class,
             getResource("PolarGridsFromGeometry.radius.title"),
             getResource("PolarGridsFromGeometry.radius.description"), true, 1, 1, null, null);
+
+    /** radiusUnit */
+    public static final Parameter<DistanceUnit> radiusUnit = new Parameter<DistanceUnit>(
+            "radiusUnit", DistanceUnit.class,
+            getResource("PolarGridsFromGeometry.radiusUnit.title"),
+            getResource("PolarGridsFromGeometry.radiusUnit.description"), false, 0, 1,
+            DistanceUnit.Default, null);
 
     /** radialType */
     public static final Parameter<RadialType> radialType = new Parameter<RadialType>("radialType",
@@ -94,7 +110,9 @@ public class PolarGridsFromGeometryProcessFactory extends SpatialStatisticsProce
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(origin.key, origin);
+        parameterInfo.put(forcedCRS.key, forcedCRS);
         parameterInfo.put(radius.key, radius);
+        parameterInfo.put(radiusUnit.key, radiusUnit);
         parameterInfo.put(radialType.key, radialType);
         parameterInfo.put(sides.key, sides);
         return parameterInfo;

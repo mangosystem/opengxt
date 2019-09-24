@@ -27,6 +27,7 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.enumeration.RadialType;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
@@ -45,7 +46,7 @@ public class PolarGridsFromFeaturesProcessFactory extends SpatialStatisticsProce
     private static final String PROCESS_NAME = "PolarGridsFromFeatures";
 
     /*
-     * PolarGridsFromFeatures(SimpleFeatureCollection origin, String radius, RadialType radialType, Integer sides): SimpleFeatureCollection
+     * PolarGridsFromFeatures(SimpleFeatureCollection origin, String radius, DistanceUnit radiusUnit, RadialType radialType, Integer sides): SimpleFeatureCollection
      */
 
     public PolarGridsFromFeaturesProcessFactory() {
@@ -78,6 +79,12 @@ public class PolarGridsFromFeaturesProcessFactory extends SpatialStatisticsProce
             getResource("PolarGridsFromFeatures.radius.title"),
             getResource("PolarGridsFromFeatures.radius.description"), true, 1, 1, null, null);
 
+    /** radiusUnit */
+    public static final Parameter<DistanceUnit> radiusUnit = new Parameter<DistanceUnit>(
+            "radiusUnit", DistanceUnit.class, getResource("PolarGridsFromFeatures.radiusUnit.title"),
+            getResource("PolarGridsFromFeatures.radiusUnit.description"), false, 0, 1,
+            DistanceUnit.Default, null);
+
     /** radialType */
     public static final Parameter<RadialType> radialType = new Parameter<RadialType>("radialType",
             RadialType.class, getResource("PolarGridsFromFeatures.radialType.title"),
@@ -95,6 +102,7 @@ public class PolarGridsFromFeaturesProcessFactory extends SpatialStatisticsProce
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
         parameterInfo.put(origin.key, origin);
         parameterInfo.put(radius.key, radius);
+        parameterInfo.put(radiusUnit.key, radiusUnit);
         parameterInfo.put(radialType.key, radialType);
         parameterInfo.put(sides.key, sides);
         return parameterInfo;

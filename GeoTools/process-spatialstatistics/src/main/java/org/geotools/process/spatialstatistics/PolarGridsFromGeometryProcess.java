@@ -27,10 +27,12 @@ import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.enumeration.RadialType;
 import org.geotools.process.spatialstatistics.operations.PolarGridsOperation;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Geometry;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.util.ProgressListener;
 
 /**
@@ -53,9 +55,17 @@ public class PolarGridsFromGeometryProcess extends AbstractStatisticsProcess {
 
     public static SimpleFeatureCollection process(Geometry origin, String radius,
             RadialType radialType, Integer sides, ProgressListener monitor) {
+        return process(origin, null, radius, DistanceUnit.Default, radialType, sides, monitor);
+    }
+
+    public static SimpleFeatureCollection process(Geometry origin,
+            CoordinateReferenceSystem forcedCRS, String radius, DistanceUnit radiusUnit,
+            RadialType radialType, Integer sides, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(PolarGridsFromGeometryProcessFactory.origin.key, origin);
+        map.put(PolarGridsFromGeometryProcessFactory.forcedCRS.key, forcedCRS);
         map.put(PolarGridsFromGeometryProcessFactory.radius.key, radius);
+        map.put(PolarGridsFromGeometryProcessFactory.radiusUnit.key, radiusUnit);
         map.put(PolarGridsFromGeometryProcessFactory.radialType.key, radialType);
         map.put(PolarGridsFromGeometryProcessFactory.sides.key, sides);
 
@@ -77,16 +87,21 @@ public class PolarGridsFromGeometryProcess extends AbstractStatisticsProcess {
             throws ProcessException {
         Geometry origin = (Geometry) Params.getValue(input,
                 PolarGridsFromGeometryProcessFactory.origin, null);
-        String radius = (String) Params.getValue(input,
-                PolarGridsFromGeometryProcessFactory.radius, null);
+        String radius = (String) Params.getValue(input, PolarGridsFromGeometryProcessFactory.radius,
+                null);
         if (origin == null || radius == null || radius.length() == 0) {
             throw new NullPointerException("origin, radius parameters required");
         }
+        CoordinateReferenceSystem forcedCRS = (CoordinateReferenceSystem) Params.getValue(input,
+                PolarGridsFromGeometryProcessFactory.forcedCRS, null);
+        DistanceUnit radiusUnit = (DistanceUnit) Params.getValue(input,
+                PolarGridsFromGeometryProcessFactory.radiusUnit,
+                PolarGridsFromGeometryProcessFactory.radiusUnit.sample);
+
         RadialType radialType = (RadialType) Params.getValue(input,
                 PolarGridsFromGeometryProcessFactory.radialType,
                 PolarGridsFromGeometryProcessFactory.radialType.sample);
-        Integer sides = (Integer) Params.getValue(input,
-                PolarGridsFromGeometryProcessFactory.sides,
+        Integer sides = (Integer) Params.getValue(input, PolarGridsFromGeometryProcessFactory.sides,
                 PolarGridsFromGeometryProcessFactory.sides.sample);
 
         // start process
@@ -103,7 +118,8 @@ public class PolarGridsFromGeometryProcess extends AbstractStatisticsProcess {
         SimpleFeatureCollection resultFc = null;
         try {
             PolarGridsOperation operation = new PolarGridsOperation();
-            resultFc = operation.execute(origin, bufferRadius, sides, radialType);
+            resultFc = operation.execute(origin, forcedCRS, bufferRadius, radiusUnit, sides,
+                    radialType);
         } catch (IOException e) {
             throw new ProcessException(e);
         }

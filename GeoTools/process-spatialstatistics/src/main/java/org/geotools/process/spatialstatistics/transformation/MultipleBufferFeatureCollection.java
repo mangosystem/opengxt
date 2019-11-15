@@ -80,6 +80,14 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
 
         // apply distance unit
         Arrays.sort(distances);
+        
+        List<Double> reversedDist = Doubles.asList(distances);
+        Collections.reverse(reversedDist);
+        
+        for (int i = 0; i < reversedDist.size(); i++) {
+            distances[i] = reversedDist.get(i);
+        }
+        
         if (distanceUnit == DistanceUnit.Default) {
             this.distances = distances;
         } else {

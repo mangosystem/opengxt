@@ -507,6 +507,7 @@
     <plugins>
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
+        <version>3.1.0</version>
         <configuration>
           <archive>
             <index>true</index>
@@ -516,7 +517,7 @@
             <manifestEntries>
               <Specification-Title>OpenGXT</Specification-Title>
               <Specification-Version>${project.version}</Specification-Version>
-              <Specification-Vendor>${pom.url}</Specification-Vendor>
+              <Specification-Vendor>${project.url}</Specification-Vendor>
             </manifestEntries>
           </archive>
         </configuration>

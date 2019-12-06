@@ -89,9 +89,9 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
         }
 
         if (distanceUnit == DistanceUnit.Default) {
-            this.distances = distances;
+            this.distances = reverseDistances;
         } else {
-            double[] converted = distances.clone();
+            double[] converted = reverseDistances.clone();
 
             Unit<Length> targetUnit = UnitConverter.getLengthUnit(crs);
             if (UnitConverter.isGeographicCRS(crs)) {

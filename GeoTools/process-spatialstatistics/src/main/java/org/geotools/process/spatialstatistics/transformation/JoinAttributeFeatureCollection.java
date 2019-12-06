@@ -21,12 +21,14 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
+import org.geotools.data.DataUtilities;
 import org.geotools.data.Join;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.feature.collection.SubFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
@@ -44,8 +46,6 @@ import org.opengis.filter.Filter;
  */
 public class JoinAttributeFeatureCollection extends GXTSimpleFeatureCollection {
     protected static final Logger LOGGER = Logging.getLogger(JoinAttributeFeatureCollection.class);
-
-    // TODO : GeoTools v.8.x use Join Query?
 
     private SimpleFeatureType schema;
 
@@ -153,6 +153,15 @@ public class JoinAttributeFeatureCollection extends GXTSimpleFeatureCollection {
     }
 
     @Override
+    public ReferencedEnvelope getBounds() {
+        return DataUtilities.bounds(features());
+    }
+
+    public int size() {
+        return DataUtilities.count(features());
+    }
+
+    @Override
     public SimpleFeatureIterator features() {
         return new AttributeJoinFeatureIterator(delegate.features(), getSchema(), primaryKey,
                 joinFeatures, foreignKey, joinType, joinFields);
@@ -199,53 +208,52 @@ public class JoinAttributeFeatureCollection extends GXTSimpleFeatureCollection {
         }
 
         public boolean hasNext() {
-            nextFeature = null;
-            boolean hasNext = originIter.hasNext();
-            if (!hasNext) {
-                return false;
-            }
+            while (nextFeature == null && originIter.hasNext()) {
+                SimpleFeature origin = originIter.next();
+                for (AttributeDescriptor ad : origin.getFeatureType().getAttributeDescriptors()) {
+                    Object value = origin.getAttribute(ad.getLocalName());
+                    builder.set(ad.getLocalName(), value);
+                }
 
-            SimpleFeature origin = originIter.next();
-            for (AttributeDescriptor ad : origin.getFeatureType().getAttributeDescriptors()) {
-                Object value = origin.getAttribute(ad.getLocalName());
-                builder.set(ad.getLocalName(), value);
-            }
-
-            boolean hasJoin = false;
-            Object keyValue = origin.getAttribute(primaryKey);
-            Filter filter = ff.equal(ff.property(foreignKey), ff.literal(keyValue), true);
-            SimpleFeatureIterator destIter = joinFeatures.subCollection(filter).features();
-            try {
-                while (destIter.hasNext()) {
-                    SimpleFeature dest = destIter.next();
-                    for (Entry<String, String> entry : joinFields.entrySet()) {
-                        Object value = dest.getAttribute(entry.getKey());
-                        builder.set(entry.getValue(), value);
+                boolean hasJoin = false;
+                Object keyValue = origin.getAttribute(primaryKey);
+                Filter filter = ff.equal(ff.property(foreignKey), ff.literal(keyValue), true);
+                SimpleFeatureIterator destIter = joinFeatures.subCollection(filter).features();
+                try {
+                    while (destIter.hasNext()) {
+                        SimpleFeature dest = destIter.next();
+                        for (Entry<String, String> entry : joinFields.entrySet()) {
+                            Object value = dest.getAttribute(entry.getKey());
+                            builder.set(entry.getValue(), value);
+                        }
+                        hasJoin = true;
+                        nextFeature = builder.buildFeature(buildID(typeName, counter++));
+                        builder.reset();
+                        break; // one to one
                     }
-                    hasJoin = true;
+                } finally {
+                    destIter.close();
+                }
+
+                if (joinType == Join.Type.INNER && !hasJoin) {
+                    return hasNext();
+                } else if (joinType == Join.Type.OUTER && !hasJoin) {
                     nextFeature = builder.buildFeature(buildID(typeName, counter++));
                     builder.reset();
-                    break; // one to one
                 }
-            } finally {
-                destIter.close();
             }
 
-            if (joinType == Join.Type.INNER && !hasJoin) {
-                return hasNext();
-            } else if (joinType == Join.Type.OUTER && !hasJoin) {
-                nextFeature = builder.buildFeature(buildID(typeName, counter++));
-                builder.reset();
-            }
-
-            return true;
+            return nextFeature != null;
         }
 
         public SimpleFeature next() throws NoSuchElementException {
             if (!hasNext()) {
                 throw new NoSuchElementException("hasNext() returned false!");
             }
-            return nextFeature;
+
+            SimpleFeature result = nextFeature;
+            nextFeature = null;
+            return result;
         }
     }
 }

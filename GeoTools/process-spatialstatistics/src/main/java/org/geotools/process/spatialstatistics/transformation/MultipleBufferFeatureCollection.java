@@ -80,6 +80,14 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
 
         // apply distance unit
         Arrays.sort(distances);
+
+        // reverse distances for inside ring
+        int arrLen = distances.length;
+        double[] reverseDistances = new double[arrLen];
+        for (int i = 0; i < arrLen; i++) {
+            reverseDistances[i] = distances[(arrLen - 1) - i];
+        }
+
         if (distanceUnit == DistanceUnit.Default) {
             this.distances = distances;
         } else {

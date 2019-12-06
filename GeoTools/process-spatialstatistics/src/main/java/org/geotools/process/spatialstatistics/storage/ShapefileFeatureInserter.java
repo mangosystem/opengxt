@@ -63,7 +63,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  * 
  * @source $URL$
  */
-@SuppressWarnings("nls")
 public class ShapefileFeatureInserter implements IFeatureInserter {
     protected static final Logger LOGGER = Logging.getLogger(ShapefileFeatureInserter.class);
 

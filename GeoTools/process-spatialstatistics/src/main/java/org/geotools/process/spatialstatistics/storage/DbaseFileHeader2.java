@@ -45,7 +45,6 @@ import org.geotools.resources.NIOUtilities;
  * 
  * @source $URL$
  */
-@SuppressWarnings("nls")
 public class DbaseFileHeader2 extends DbaseFileHeader {
     // Constant for the size of a record
     private static final int FILE_DESCRIPTOR_SIZE = 32;

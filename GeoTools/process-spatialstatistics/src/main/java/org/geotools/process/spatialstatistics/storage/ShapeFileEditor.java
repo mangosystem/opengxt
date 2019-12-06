@@ -36,7 +36,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.DataStore;
-import org.geotools.data.DataUtilities;
 import org.geotools.data.directory.DirectoryDataStore;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.dbf.DbaseFileException;
@@ -44,6 +43,7 @@ import org.geotools.data.shapefile.dbf.DbaseFileHeader;
 import org.geotools.data.shapefile.dbf.DbaseFileReader;
 import org.geotools.data.shapefile.dbf.DbaseFileWriter;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
+import org.geotools.util.URLs;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeatureType;
 
@@ -189,8 +189,8 @@ public class ShapeFileEditor extends AbstractEditor {
         return false;
     }
 
-    public boolean removeField(File dbfSource, File dbfDest, String[] fields) throws IOException,
-            DbaseFileException {
+    public boolean removeField(File dbfSource, File dbfDest, String[] fields)
+            throws IOException, DbaseFileException {
         DbaseFileReader reader = getReader(dbfSource);
         DbaseFileHeader writerHeader = modifyDbaseHeader(reader.getHeader(), fields);
 
@@ -208,9 +208,9 @@ public class ShapeFileEditor extends AbstractEditor {
 
         try {
             if (dataStore instanceof DirectoryDataStore) {
-                folder = DataUtilities.urlToFile(uri.toURL()).getPath();
+                folder = URLs.urlToFile(uri.toURL()).getPath();
             } else if (dataStore instanceof ShapefileDataStore) {
-                folder = DataUtilities.urlToFile(uri.toURL()).getParent();
+                folder = URLs.urlToFile(uri.toURL()).getParent();
             }
         } catch (MalformedURLException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
@@ -259,7 +259,8 @@ public class ShapeFileEditor extends AbstractEditor {
             writerHeader.addColumn(fieldName, 'D', length, 0);
         } else if (binding == Boolean.class) {
             writerHeader.addColumn(fieldName, 'L', 1, 0);
-        } else if (CharSequence.class.isAssignableFrom(binding) || binding == java.util.UUID.class) {
+        } else if (CharSequence.class.isAssignableFrom(binding)
+                || binding == java.util.UUID.class) {
             writerHeader.addColumn(fieldName, 'C', Math.min(254, length), 0);
         } else {
             LOGGER.warning("Unable to write : " + binding.getName());

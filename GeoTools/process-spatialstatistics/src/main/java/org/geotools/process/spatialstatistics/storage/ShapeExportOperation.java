@@ -25,7 +25,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.DataStore;
-import org.geotools.data.DataUtilities;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.Query;
 import org.geotools.data.memory.MemoryDataStore;
@@ -38,6 +37,7 @@ import org.geotools.feature.AttributeTypeBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.geotools.util.URLs;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -116,7 +116,7 @@ public class ShapeExportOperation {
     private IFeatureInserter getFeatureWriter(SimpleFeatureType schema) throws IOException {
         if (DataStoreFactory.isShapefileDataStore(getOutputDataStore())) {
             URI uri = getOutputDataStore().getInfo().getSource();
-            String folder = DataUtilities.urlToFile(uri.toURL()).getPath();
+            String folder = URLs.urlToFile(uri.toURL()).getPath();
             return new ShapefileFeatureInserter(folder, schema);
         }
 

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -146,7 +147,19 @@ public class ExtendLineOperation extends GeneralOperation {
         // post process
         LineString[] lsArray = GeometryFactory.toLineStringArray(lineStrings);
         MultiLineString multi = factory.createMultiLineString(lsArray);
-        List<Point> intersections = extractPoints(part.intersection(multi));
+
+        Geometry intersection = null;
+        try {
+            intersection = part.intersection(multi);
+        } catch (Exception e) {
+            LOGGER.log(Level.INFO, e.getMessage());
+        }
+
+        if (intersection == null) {
+            return input;
+        }
+
+        List<Point> intersections = extractPoints(intersection);
 
         final double[] minDist = { Double.MAX_VALUE, Double.MAX_VALUE };
         final Point[] minPoint = { null, null };

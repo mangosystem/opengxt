@@ -62,7 +62,7 @@ public class OLSOperation extends GeneralOperation {
 
     private double SST, SSE, SSR, MSR, MSE, STDERR, F, sigF;
 
-    private double meanY, R, R2, R2adjusted, AIC, AICc;
+    private double meanY, R, R2, R2adjusted, logLik, AIC, AICc;
 
     private int n, k, dof1, dof2;
 
@@ -145,9 +145,7 @@ public class OLSOperation extends GeneralOperation {
                     sumOfY += data[row];
                 }
             } else {
-                for (int row = 0; row < rowCount; row++) {
-                    X.set(row, column, data[row]);
-                }
+                X.setColumn(column, 0, data);
             }
             column++;
         }
@@ -166,14 +164,7 @@ public class OLSOperation extends GeneralOperation {
     private OLSResult analyze() throws IOException {
         // Step 1: Computes linear regression via Ordinary Least Squares
         // create Z matrix
-        SimpleMatrix Z = new SimpleMatrix(n, k + 2);
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < k; j++) {
-                Z.set(i, j + 1, X.get(i, j + 1));
-            }
-            Z.set(i, 0, 1);
-            Z.set(i, k + 1, Y.get(i, 0));
-        }
+        SimpleMatrix Z = X.concatColumns(Y);
 
         SimpleMatrix ZtrZ = Z.transpose().mult(Z);
         SimpleMatrix ss = Y.minus(meanY);
@@ -206,7 +197,7 @@ public class OLSOperation extends GeneralOperation {
         sigF = Math.abs(SSUtils.fProb(F, dof1, dof2, StatEnum.LEFT));
 
         // AIC / AICc
-        double logLik = -(n / 2.0) * (1.0 + Math.log(2.0 * Math.PI)) - (n / 2.0)
+        logLik = -(n / 2.0) * (1.0 + Math.log(2.0 * Math.PI)) - (n / 2.0)
                 * Math.log(SSE / n);
         double k2 = k + 2;
         AIC = -2.0 * logLik + 2.0 * k2;
@@ -429,6 +420,7 @@ public class OLSOperation extends GeneralOperation {
         System.out.println("R-Squared = " + format.format(R2));
         System.out.println("Adjusted R-Squared = " + format.format(R2adjusted));
         System.out.println("Standard Error = " + format.format(STDERR));
+        System.out.println("Log Likelihood = " + format.format(logLik));
         System.out.println("Akaike's Information Criterion (AIC) = " + format.format(AIC));
         System.out.println("Corrected Akaike's Information Criterion (AICc) = " + format.format(AICc));
 

@@ -56,14 +56,16 @@ public class MultiWindRoseMapProcessFactory extends SpatialStatisticsProcessFact
 //  SimpleFeatureCollection centerFeatures, double searchRadius, String valueField, int roseCnt
 
     /** inputFeatures */
-    public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
-            "inputFeatures", SimpleFeatureCollection.class, Text.text("Input Point Layers"),
-            Text.text("Input Vector Layers"), true, 1, Integer.MAX_VALUE, null, null);
+	public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
+			"inputFeatures", SimpleFeatureCollection.class, 
+			getResource("MultiWindRoseMap.inputFeatures.title"),
+			getResource("MultiWindRoseMap.inputFeatures.description"), true, 1, Integer.MAX_VALUE, null, null);
 
-    /** weightField */
-    public static final Parameter<String[]> weightFields = new Parameter<String[]>(
-            "weightField", String[].class, Text.text("Fields to apply the weight(Point Layer)"),
-            Text.text("Comma separated fields to apply the weight"), false, 0, 1, null, null);
+	/** weightField */
+	public static final Parameter<String[]> weightFields = new Parameter<String[]>(
+			"weightField", String[].class,
+			getResource("MultiWindRoseMap.weightFields.title"),
+			getResource("MultiWindRoseMap.weightFields.description"), false, 0, 1, null, null);
     
 //    /** inputFeatures */
 //    public static final Parameter<SimpleFeatureCollection> inputFeatures2 = new Parameter<SimpleFeatureCollection>(
@@ -87,20 +89,24 @@ public class MultiWindRoseMapProcessFactory extends SpatialStatisticsProcessFact
     
     /** centerFeatures */
     public static final Parameter<SimpleFeatureCollection> centerFeatures = new Parameter<SimpleFeatureCollection>(
-            "centerFeatures", SimpleFeatureCollection.class, Text.text("Centroid of rose"),
-            Text.text("Centroid of rose"), false, 0, 1, null, null);
+            "centerFeatures", SimpleFeatureCollection.class, 
+            getResource("MultiWindRoseMap.centerFeatures.title"),
+            getResource("MultiWindRoseMap.centerFeatures.description"), false, 0, 1, null, null);
     public static final Parameter<Geometry> centerPoint = new Parameter<Geometry>(
-            "centerPoint", Geometry.class, Text.text("Centroid of rose"),
-            Text.text("Centroid of rose"), false, 0, 1, null, null);
+            "centerPoint", Geometry.class, 
+            getResource("MultiWindRoseMap.centerPoint.title"),
+            getResource("MultiWindRoseMap.centerPoint.description"), false, 0, 1, null, null);
 
     /** searchRadius */
     public static final Parameter<Double> searchRadius = new Parameter<Double>(
-            "searchRadius", Double.class, Text.text("search radius"),
-            Text.text("search radius (centerFeatures are Point)"), false, 0, 1, null, null);
+            "searchRadius", Double.class, 
+            getResource("MultiWindRoseMap.searchRadius.title"),
+            getResource("MultiWindRoseMap.searchRadius.description"), false, 0, 1, null, null);
     
     /** roseCount */
     public static final Parameter<Integer> roseCount = new Parameter<Integer>("roseCount", Integer.class,
-            Text.text("Number of rose petals"), Text.text("Number of rose petals"), true, 0, 1, 16, null);
+    		getResource("MultiWindRoseMap.roseCount.title"), 
+    		getResource("MultiWindRoseMap.roseCount.description"), true, 0, 1, 16, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -118,16 +124,18 @@ public class MultiWindRoseMapProcessFactory extends SpatialStatisticsProcessFact
         return parameterInfo;
     }
 
-    public static final Parameter<SimpleFeatureCollection> mult_rose = new Parameter<SimpleFeatureCollection>(
-            "multi_wind_rose", SimpleFeatureCollection.class, Text.text("multi_wind_rose"),
-            Text.text("Result multi wind rose SimpleFeatureCollection"));
+    public static final Parameter<SimpleFeatureCollection> result = new Parameter<SimpleFeatureCollection>(
+            "multi_wind_rose", SimpleFeatureCollection.class, 
+            getResource("MultiWindRoseMap.result.title"),
+            getResource("MultiWindRoseMap.result.description"));
     public static final Parameter<SimpleFeatureCollection> mult_rose_anchor = new Parameter<SimpleFeatureCollection>(
-            "multi_wind_rose_anchor", SimpleFeatureCollection.class, Text.text("multi_wind_rose_anchor"),
-            Text.text("Result multi wind rose SimpleFeatureCollection"));
+            "multi_wind_rose_anchor", SimpleFeatureCollection.class, 
+            getResource("MultiWindRoseMap.anchor.title"),
+            getResource("MultiWindRoseMap.anchor.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {
-        resultInfo.put(mult_rose.key, mult_rose);
+        resultInfo.put(result.key, result);
         resultInfo.put(mult_rose_anchor.key, mult_rose_anchor);
     }
 

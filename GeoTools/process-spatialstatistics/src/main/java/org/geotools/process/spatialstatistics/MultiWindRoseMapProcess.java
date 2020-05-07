@@ -90,7 +90,7 @@ public class MultiWindRoseMapProcess extends AbstractStatisticsProcess {
 		try {
 			resultMap = process.execute(map, monitor);
 
-			return (SimpleFeatureCollection) resultMap.get(MultiWindRoseMapProcessFactory.mult_rose.key);
+			return (SimpleFeatureCollection) resultMap.get(MultiWindRoseMapProcessFactory.result.key);
 		} catch (ProcessException e) {
 			e.printStackTrace();
 			LOGGER.log(Level.FINER, e.getMessage(), e);
@@ -168,8 +168,8 @@ public class MultiWindRoseMapProcess extends AbstractStatisticsProcess {
 			monitor.progress(90.0f);
 
 			Map<String, Object> resultMap = new HashMap<String, Object>();
-			resultMap.put(MultiWindRoseMapProcessFactory.mult_rose.key, resultFc);
-			resultMap.put(MultiWindRoseMapProcessFactory.mult_rose_anchor.key, anchorFc);
+			resultMap.put(MultiWindRoseMapProcessFactory.result.key, resultFc);
+			resultMap.put(MultiWindRoseMapProcessFactory.anchor.key, anchorFc);
 			// resultMap.put(VA_RingMapFactory.ring_anchor.key, anchorFc);
 			monitor.complete(); // same as 100.0f
 

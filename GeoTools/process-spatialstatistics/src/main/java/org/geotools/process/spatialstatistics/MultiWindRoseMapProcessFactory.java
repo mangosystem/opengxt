@@ -128,7 +128,7 @@ public class MultiWindRoseMapProcessFactory extends SpatialStatisticsProcessFact
             "multi_wind_rose", SimpleFeatureCollection.class, 
             getResource("MultiWindRoseMap.result.title"),
             getResource("MultiWindRoseMap.result.description"));
-    public static final Parameter<SimpleFeatureCollection> mult_rose_anchor = new Parameter<SimpleFeatureCollection>(
+    public static final Parameter<SimpleFeatureCollection> anchor = new Parameter<SimpleFeatureCollection>(
             "multi_wind_rose_anchor", SimpleFeatureCollection.class, 
             getResource("MultiWindRoseMap.anchor.title"),
             getResource("MultiWindRoseMap.anchor.description"));
@@ -136,7 +136,7 @@ public class MultiWindRoseMapProcessFactory extends SpatialStatisticsProcessFact
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {
         resultInfo.put(result.key, result);
-        resultInfo.put(mult_rose_anchor.key, mult_rose_anchor);
+        resultInfo.put(anchor.key, anchor);
     }
 
     @Override

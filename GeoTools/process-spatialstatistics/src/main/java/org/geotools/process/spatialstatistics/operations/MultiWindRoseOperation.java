@@ -773,7 +773,7 @@ public class MultiWindRoseOperation extends GeneralOperation {
 		double radian = 0.0;
 		List<Coordinate> outer_ring = new ArrayList<Coordinate>();
 		Coordinate first = null;
-		if (from_radius == 0) {
+		if (from_radius == 0) {  
 			outer_ring.add(centroid);
 		} else {
 			for (int index = 0; index < 36 + 1; index = index + 1) {

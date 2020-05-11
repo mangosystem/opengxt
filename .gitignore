@@ -3,6 +3,9 @@ target
 *.patch
 *.class
 *.pyc
+*.project
+*.classpath
+*.prefs
 nb-configuration.xml
 *.*~
 

@@ -27,7 +27,6 @@ import org.geotools.data.Parameter;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
-import org.geotools.text.Text;
 import org.geotools.util.logging.Logging;
 import org.opengis.util.InternationalString;
 
@@ -147,18 +146,18 @@ public class MultiWindRoseMapProcessFactory extends SpatialStatisticsProcessFact
     }
 
     @Override
-    protected Process create() {
+    public Process create() {
         return new MultiWindRoseMapProcess(this);
     }
-
+    
     @Override
     public InternationalString getTitle() {
-        return Text.text(PROCESS_NAME);
+        return getResource("MultiWindRoseMap.title");
     }
 
     @Override
     protected InternationalString getDescription() {
-        return Text.text("Creates a multi wind rose.");
+        return getResource("MultiWindRoseMap.description");
     }
 
 }

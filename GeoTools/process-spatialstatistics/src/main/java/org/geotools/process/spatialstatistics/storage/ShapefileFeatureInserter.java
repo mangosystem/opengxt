@@ -396,7 +396,9 @@ public class ShapefileFeatureInserter implements IFeatureInserter {
             }
 
             if (Geometry.class.isAssignableFrom(binding)) {
-                shapeType = JTSUtilities.getShapeType(binding);
+                // shapeType = JTSUtilities.getShapeType(binding);
+                // JTS 1.7
+                shapeType = JTSUtilities.getShapeType(featureType.getGeometryDescriptor());
                 handler = shapeType.getShapeHandler(new GeometryFactory());
             } else {
                 int fieldLen = FeatureTypes.getFieldLength(descriptor);

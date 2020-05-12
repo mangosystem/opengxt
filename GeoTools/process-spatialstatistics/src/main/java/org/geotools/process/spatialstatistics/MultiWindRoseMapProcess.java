@@ -145,7 +145,12 @@ public class MultiWindRoseMapProcess extends AbstractStatisticsProcess {
             try {
                 SimpleFeatureSource sfc = null;
                 Collection<SimpleFeatureCollection> tgInputFeatures = inputFeatures;
-                String[] tgWeightField = weightFiels.split(",");
+                String[] tgWeightField = null;
+                try {
+                    tgWeightField = weightFiels.split(",");
+                } catch (Exception e) {
+
+                }
                 MultiWindRoseOperation process = new MultiWindRoseOperation();
                 if (centerFeatures.size() > 0) {
                     sfc = process.execute(tgInputFeatures, tgWeightField, centerFeatures,

@@ -63,7 +63,7 @@ public class MultiWindRoseMapProcessFactory extends SpatialStatisticsProcessFact
             null, null);
 
     /** weightField */
-    public static final Parameter<String> weightFields = new Parameter<String>("weightField",
+    public static final Parameter<String> weightFields = new Parameter<String>("weightFields",
             String.class, getResource("MultiWindRoseMap.weightFields.title"),
             getResource("MultiWindRoseMap.weightFields.description"), false, 0, 1, null, null);
 
@@ -124,12 +124,12 @@ public class MultiWindRoseMapProcessFactory extends SpatialStatisticsProcessFact
     }
 
     public static final Parameter<SimpleFeatureCollection> result = new Parameter<SimpleFeatureCollection>(
-            "multi_wind_rose", SimpleFeatureCollection.class,
+            "wind_rose", SimpleFeatureCollection.class,
             getResource("MultiWindRoseMap.result.title"),
             getResource("MultiWindRoseMap.result.description"));
 
     public static final Parameter<SimpleFeatureCollection> anchor = new Parameter<SimpleFeatureCollection>(
-            "multi_wind_rose_anchor", SimpleFeatureCollection.class,
+            "wind_rose_anchor", SimpleFeatureCollection.class,
             getResource("MultiWindRoseMap.anchor.title"),
             getResource("MultiWindRoseMap.anchor.description"));
 

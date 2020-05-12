@@ -62,8 +62,8 @@ public class MultiWindRoseMapProcessFactory extends SpatialStatisticsProcessFact
 			getResource("MultiWindRoseMap.inputFeatures.description"), true, 1, Integer.MAX_VALUE, null, null);
 
 	/** weightField */
-	public static final Parameter<String[]> weightFields = new Parameter<String[]>(
-			"weightField", String[].class,
+	public static final Parameter<String> weightFields = new Parameter<String>(
+			"weightField", String.class,
 			getResource("MultiWindRoseMap.weightFields.title"),
 			getResource("MultiWindRoseMap.weightFields.description"), false, 0, 1, null, null);
     
@@ -152,12 +152,12 @@ public class MultiWindRoseMapProcessFactory extends SpatialStatisticsProcessFact
 
     @Override
     public InternationalString getTitle() {
-        return Text.text(PROCESS_NAME);
+        return getResource("MultiWindRoseMap.title");
     }
 
     @Override
     protected InternationalString getDescription() {
-        return Text.text("Creates a multi wind rose.");
+        return getResource("MultiWindRoseMap.description");
     }
 
 }

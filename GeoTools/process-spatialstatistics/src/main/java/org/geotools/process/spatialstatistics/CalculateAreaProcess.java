@@ -47,7 +47,7 @@ public class CalculateAreaProcess extends AbstractStatisticsProcess {
         super(factory);
     }
 
-    public ProcessFactory getFactory() {
+    public ProcessFactory getFactory() { 
         return factory;
     }
 

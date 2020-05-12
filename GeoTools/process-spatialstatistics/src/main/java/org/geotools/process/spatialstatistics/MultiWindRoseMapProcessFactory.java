@@ -152,12 +152,12 @@ public class MultiWindRoseMapProcessFactory extends SpatialStatisticsProcessFact
 
     @Override
     public InternationalString getTitle() {
-        return Text.text(PROCESS_NAME);
+        return getResource("MultiWindRoseMap.title");
     }
 
     @Override
     protected InternationalString getDescription() {
-        return Text.text("Creates a multi wind rose.");
+        return getResource("MultiWindRoseMap.description");
     }
 
 }

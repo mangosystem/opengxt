@@ -258,16 +258,17 @@ public class ShapefileFeatureInserter implements IFeatureInserter {
             dbfHeader.writeHeader(dbfChannel);
         }
 
-        writePrj(sourceCRS);
+        if (shpWriter != null) {
+            shpWriter.close();
+            shpWriter = null;
+        }
 
-        shpWriter.close();
-        dbfWriter.close();
-
-        shpWriter = null;
-        dbfWriter = null;
+        if (dbfWriter != null) {
+            dbfWriter.close();
+            dbfWriter = null;
+        }
 
         StorageFile.replaceOriginals(storageFiles.values().toArray(new StorageFile[0]));
-
         storageFiles.clear();
 
         isSuccess = true;
@@ -347,6 +348,8 @@ public class ShapefileFeatureInserter implements IFeatureInserter {
         dbfWriter = new DbaseFileWriter(dbfHeader, dbfChannel, dbfCharset, dbfTimeZone);
 
         shpWriter.writeHeaders(new Envelope(), shapeType, numberOfFeatures, shapefileLength);
+
+        writePrj(sourceCRS);
     }
 
     private void writePrj(CoordinateReferenceSystem crs) throws IOException {
@@ -355,7 +358,8 @@ public class ShapefileFeatureInserter implements IFeatureInserter {
             return;
         }
 
-        FileWriter prjWriter = new FileWriter(storageFiles.get(ShpFileType.PRJ).getFile());
+        File prjFile = storageFiles.get(ShpFileType.PRJ).getFile();
+        FileWriter prjWriter = new FileWriter(prjFile);
         try {
             String wkt = crs.toWKT().replaceAll("\n", "").replaceAll("  ", "");
             prjWriter.write(wkt);
@@ -364,8 +368,8 @@ public class ShapefileFeatureInserter implements IFeatureInserter {
         }
     }
 
-    private DbaseFileHeader2 createDbaseHeader(SimpleFeatureType featureType) throws IOException,
-            DbaseFileException {
+    private DbaseFileHeader2 createDbaseHeader(SimpleFeatureType featureType)
+            throws IOException, DbaseFileException {
         DbaseFileHeader2 header = new DbaseFileHeader2();
 
         final int attributeCount = featureType.getAttributeCount();
@@ -397,8 +401,23 @@ public class ShapefileFeatureInserter implements IFeatureInserter {
 
             if (Geometry.class.isAssignableFrom(binding)) {
                 // shapeType = JTSUtilities.getShapeType(binding);
-                // JTS 1.7
+
+                // JTS 1.7 ~
                 shapeType = JTSUtilities.getShapeType(featureType.getGeometryDescriptor());
+
+                // TODO support M, Z geometry
+                // drop MZ
+                if (shapeType == ShapeType.POINTM || shapeType == ShapeType.POINTZ) {
+                    shapeType = ShapeType.POINT;
+                } else if (shapeType == ShapeType.ARCM || shapeType == ShapeType.ARCZ) {
+                    shapeType = ShapeType.ARC;
+                } else if (shapeType == ShapeType.POLYGONM || shapeType == ShapeType.POLYGONZ) {
+                    shapeType = ShapeType.POLYGON;
+                } else if (shapeType == ShapeType.MULTIPOINTM
+                        || shapeType == ShapeType.MULTIPOINTZ) {
+                    shapeType = ShapeType.MULTIPOINT;
+                }
+
                 handler = shapeType.getShapeHandler(new GeometryFactory());
             } else {
                 int fieldLen = FeatureTypes.getFieldLength(descriptor);

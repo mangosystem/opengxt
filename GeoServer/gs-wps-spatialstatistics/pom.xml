@@ -341,6 +341,26 @@
     </testResources>
     
     <plugins>
+      <!-- ======================================================= -->
+      <!--     Compilation.                                        -->
+      <!-- ======================================================= -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.0</version>
+        <configuration>
+          <source>1.8</source>  <!-- The -source argument for the Java compiler. -->
+          <target>1.8</target>  <!-- The -target argument for the Java compiler. -->
+          <debug>true</debug>   <!-- Whether to include debugging information.   -->
+          <encoding>UTF-8</encoding> <!-- The -encoding argument for the Java compiler. -->
+          <fork>${fork.javac}</fork>
+          <maxmem>${javac.maxHeapSize}</maxmem>
+        </configuration>
+      </plugin>
+    
+      <!-- ======================================================= -->
+      <!--     JAR packaging.                                      -->
+      <!-- ======================================================= -->
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.1.0</version>
@@ -351,22 +371,35 @@
               <addClasspath>false</addClasspath>
             </manifest>
             <manifestEntries>
-              <Specification-Title>OpenGXT</Specification-Title>
+              <Specification-Title>OpenGXT-GeoServer</Specification-Title>
               <Specification-Version>${project.version}</Specification-Version>
               <Specification-Vendor>${project.url}</Specification-Vendor>
             </manifestEntries>
           </archive>
         </configuration>
       </plugin>
-     <!-- resources -->
-     <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-resources-plugin</artifactId>
-       <version>2.6</version>
-       <configuration>
-         <encoding>UTF-8</encoding>
-       </configuration>
-     </plugin>
+      
+      <!-- ======================================================= -->
+      <!--     Source packaging.                                   -->
+      <!-- ======================================================= -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
+        <inherited>true</inherited>
+        <configuration>
+          <attach>true</attach>
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      
     </plugins>
   
     <extensions>

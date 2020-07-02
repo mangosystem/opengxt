@@ -34,7 +34,6 @@ import org.geotools.feature.type.AttributeDescriptorImpl;
 import org.geotools.feature.type.AttributeTypeImpl;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.storage.NamePolicy;
 import org.geotools.referencing.CRS;
@@ -72,960 +71,1039 @@ import org.opengis.referencing.operation.MathTransform;
  * 
  */
 public class MultiWindRoseOperation extends GeneralOperation {
-	protected static final Logger LOGGER = Logging.getLogger(MultiWindRoseOperation.class);
+    protected static final Logger LOGGER = Logging.getLogger(MultiWindRoseOperation.class);
 
-	private NamePolicy namePolicy = NamePolicy.NORMAL;
-	private String[] directions = new String[] { "E", "ENE", "NE", "NNE", "N", "NNW", "NW", "WNW", "W", "WSW", "SW",
-			"SSW", "S", "SSE", "SE", "ESE" };
+    private NamePolicy namePolicy = NamePolicy.NORMAL;
 
-	public void setNamePolicy(NamePolicy namePolicy) {
-		this.namePolicy = namePolicy;
-	}
+    private String[] directions = new String[] { "E", "ENE", "NE", "NNE", "N", "NNW", "NW", "WNW",
+            "W", "WSW", "SW", "SSW", "S", "SSE", "SE", "ESE" };
 
-	public NamePolicy getNamePolicy() {
-		return namePolicy;
-	}
+    public void setNamePolicy(NamePolicy namePolicy) {
+        this.namePolicy = namePolicy;
+    }
 
-	private GeometryFactory fGf = JTSFactoryFinder.getGeometryFactory(null);
+    public NamePolicy getNamePolicy() {
+        return namePolicy;
+    }
 
-	private SimpleFeatureSource anchor;
+    private GeometryFactory fGf = JTSFactoryFinder.getGeometryFactory(null);
 
-	static FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
+    private SimpleFeatureSource anchor;
 
-	public SimpleFeatureSource execute(Collection<SimpleFeatureCollection> inputFeatureses, String[] weightFields,
-			SimpleFeatureCollection centerFeatures, Double searchRadius, int roseCnt) throws IOException {
-		String valueField = "rose_val";
-		int idx = 0;
+    static FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
 
-		SimpleFeatureCollection[] tmpInputFeatures = new SimpleFeatureCollection[inputFeatureses.size()];
-		tmpInputFeatures = inputFeatureses.toArray(tmpInputFeatures);
-		List<String> tmpFieldList = new ArrayList<String>();
-		List<Class<?>> tmpClassList = new ArrayList<Class<?>>();
-		for (idx = 0; idx < tmpInputFeatures.length; idx++) {
-			if (tmpInputFeatures[idx] == null) {
-				tmpFieldList.add(null);
-				tmpFieldList.add(null);
-				tmpFieldList.add(null);
-				tmpFieldList.add(null);
-				tmpFieldList.add(null);
-				tmpFieldList.add(null);
-				tmpFieldList.add(null);
-				tmpClassList.add(null);
-				tmpClassList.add(null);
-				tmpClassList.add(null);
-				tmpClassList.add(null);
-				tmpClassList.add(null);
-				tmpClassList.add(null);
-				tmpClassList.add(null);
-				continue;
-			}
-			tmpFieldList.add(valueField + idx);
-			tmpFieldList.add("rose_cnt" + idx);
-			tmpFieldList.add("rose_min" + idx);
-			tmpFieldList.add("rose_max" + idx);
-			tmpFieldList.add("rose_mean" + idx);
-			tmpFieldList.add("rose_mdn" + idx);
-			tmpFieldList.add("rose_stdev" + idx);
-			tmpClassList.add(Double.class);
-			tmpClassList.add(Integer.class);
-			tmpClassList.add(Double.class);
-			tmpClassList.add(Double.class);
-			tmpClassList.add(Double.class);
-			tmpClassList.add(Double.class);
-			tmpClassList.add(Double.class);
-		}
-		tmpFieldList.add("from_d");
-		tmpFieldList.add("to_d");
-		tmpFieldList.add(valueField + "_x");
-		tmpFieldList.add(valueField + "_y");
-		tmpFieldList.add(valueField + "_radius");
-		tmpClassList.add(Double.class);
-		tmpClassList.add(Double.class);
-		tmpClassList.add(Double.class);
-		tmpClassList.add(Double.class);
-		tmpClassList.add(Double.class);
+    public SimpleFeatureSource execute(Collection<SimpleFeatureCollection> inputFeatureses,
+            String[] weightFields, SimpleFeatureCollection centerFeatures, Double searchRadius,
+            int roseCnt) throws IOException {
+        String valueField = "val";
+        int idx = 0;
 
-		String[] tmpFields = new String[tmpFieldList.size()];
-		tmpFields = tmpFieldList.toArray(tmpFields);
+        SimpleFeatureCollection[] tmpInputFeatures = new SimpleFeatureCollection[inputFeatureses
+                .size()];
+        tmpInputFeatures = inputFeatureses.toArray(tmpInputFeatures);
+        List<String> tmpFieldList = new ArrayList<String>();
+        List<Class<?>> tmpClassList = new ArrayList<Class<?>>();
 
-		Class<?>[] tmpClasses = new Class<?>[tmpClassList.size()];
-		tmpClasses = tmpClassList.toArray(tmpClasses);
+        for (idx = 0; idx < tmpInputFeatures.length; idx++) {
+            if (tmpInputFeatures[idx] == null) {
+                tmpFieldList.add(null);
+                tmpFieldList.add(null);
+                tmpFieldList.add(null);
+                tmpFieldList.add(null);
+                tmpFieldList.add(null);
+                tmpFieldList.add(null);
+                tmpFieldList.add(null);
 
-		String[] roseFields = new String[] { valueField, "rose_cnt", "rose_min", "rose_max", "rose_mean", "rose_mdn",
-				"rose_stdev", "rose_tg" };
-		Class<?>[] roseClasses = new Class[] { Double.class, Integer.class, Double.class, Double.class, Double.class,
-				Double.class, Double.class, String.class };
-		String[] anchorFields = new String[] { "distance", "direction", "degree" };
-		Class<?>[] anchorClasses = new Class[] { Double.class, String.class, Double.class };
+                tmpClassList.add(null);
+                tmpClassList.add(null);
+                tmpClassList.add(null);
+                tmpClassList.add(null);
+                tmpClassList.add(null);
+                tmpClassList.add(null);
+                tmpClassList.add(null);
+                continue;
+            }
+            tmpFieldList.add(valueField + idx);
+            tmpFieldList.add("cnt" + idx);
+            tmpFieldList.add("min" + idx);
+            tmpFieldList.add("max" + idx);
+            tmpFieldList.add("mean" + idx);
+            tmpFieldList.add("mdn" + idx);
+            tmpFieldList.add("stdev" + idx);
 
-		final SimpleFeatureType centerSchema = centerFeatures.getSchema();
-		// SimpleFeatureType featureType = buildShcema(centerSchema,
-		// centerSchema.getCoordinateReferenceSystem(), getOutputTypeName(),
-		// new String[] { valueField }, new Class[] { Double.class });
+            tmpClassList.add(Double.class);
+            tmpClassList.add(Integer.class);
+            tmpClassList.add(Double.class);
+            tmpClassList.add(Double.class);
+            tmpClassList.add(Double.class);
+            tmpClassList.add(Double.class);
+            tmpClassList.add(Double.class);
+        }
+        tmpFieldList.add("from_d");
+        tmpFieldList.add("to_d");
+        tmpFieldList.add(valueField + "_x");
+        tmpFieldList.add(valueField + "_y");
+        tmpFieldList.add(valueField + "_rad");
 
-		SimpleFeatureType targetType = copyShcema(centerSchema, centerSchema.getCoordinateReferenceSystem(),
-				"counting_rose", Polygon.class, tmpFields, tmpClasses);
-		SimpleFeatureType roseType = copyShcema(centerSchema, centerSchema.getCoordinateReferenceSystem(), "multi_rose",
-				Polygon.class, roseFields, roseClasses);
-		SimpleFeatureType anchorType = copyShcema(centerSchema, centerSchema.getCoordinateReferenceSystem(),
-				"wind_rose_anchor", LineString.class, anchorFields, anchorClasses);
-		IFeatureInserter countingWriter = getFeatureWriter(targetType);
-		IFeatureInserter roseWriter = getFeatureWriter(roseType);
-		IFeatureInserter anchorWriter = getFeatureWriter(anchorType);
+        tmpClassList.add(Double.class);
+        tmpClassList.add(Double.class);
+        tmpClassList.add(Double.class);
+        tmpClassList.add(Double.class);
+        tmpClassList.add(Double.class);
 
-		SimpleFeatureIterator csfi = centerFeatures.features();
-		try {
-			double maxVal = 0;
-			double minVal = 0;
-			double radius = 0;
-			while (csfi.hasNext()) {
-				SimpleFeature csf = csfi.next();
-				Geometry center = (Geometry) csf.getDefaultGeometry();
-				ReferencedEnvelope env = null;
-				Coordinate centerCoords = null;
-				Envelope jtsEnv = null;
-				if (center instanceof Polygon || center instanceof MultiPolygon) {
-					jtsEnv = center.getEnvelopeInternal();
-					centerCoords = center.getCentroid().getCoordinate();
-				} else {
-					centerCoords = center.getCentroid().getCoordinate();
-					center = center.buffer(searchRadius);
-					jtsEnv = center.getEnvelopeInternal();
-				}
+        String[] tmpFields = new String[tmpFieldList.size()];
+        tmpFields = tmpFieldList.toArray(tmpFields);
 
-				env = new ReferencedEnvelope(jtsEnv.getMinX(), jtsEnv.getMaxX(), jtsEnv.getMinY(), jtsEnv.getMaxY(),
-						centerFeatures.getSchema().getCoordinateReferenceSystem());
+        Class<?>[] tmpClasses = new Class<?>[tmpClassList.size()];
+        tmpClasses = tmpClassList.toArray(tmpClasses);
 
-				double maxx = env.getMaximum(0);
-				double minx = env.getMinimum(0);
-				double maxy = env.getMaximum(1);
-				double miny = env.getMinimum(1);
+        String[] roseFields = new String[] { valueField, "cnt", "min", "max", "mean", "mdn",
+                "stdev", "rose_tg" };
+        Class<?>[] roseClasses = new Class[] { Double.class, Integer.class, Double.class,
+                Double.class, Double.class, Double.class, Double.class, String.class };
+        String[] anchorFields = new String[] { "distance", "direction", "degree" };
+        Class<?>[] anchorClasses = new Class[] { Double.class, String.class, Double.class };
 
-				// Envelope env = inputFeatures.getBounds();
-				radius = Math.max(radius, Math.min((maxx - minx), (maxy - miny)) / 2);
-				double countingRadius = searchRadius;
+        final SimpleFeatureType centerSchema = centerFeatures.getSchema();
+        // SimpleFeatureType featureType = buildShcema(centerSchema,
+        // centerSchema.getCoordinateReferenceSystem(), getOutputTypeName(),
+        // new String[] { valueField }, new Class[] { Double.class });
 
-				double stepAngle = 360.0 / roseCnt;
-				double halfStep = stepAngle / 2.0;
+        SimpleFeatureType targetType = copyShcema(centerSchema,
+                centerSchema.getCoordinateReferenceSystem(), "counting_rose", Polygon.class,
+                tmpFields, tmpClasses);
+        SimpleFeatureType roseType = copyShcema(centerSchema,
+                centerSchema.getCoordinateReferenceSystem(), "wind_rose", Polygon.class, roseFields,
+                roseClasses);
+        SimpleFeatureType anchorType = copyShcema(centerSchema,
+                centerSchema.getCoordinateReferenceSystem(), "wind_rose_anchor", LineString.class,
+                anchorFields, anchorClasses);
+        IFeatureInserter countingWriter = getFeatureWriter(targetType);
+        IFeatureInserter roseWriter = getFeatureWriter(roseType);
+        IFeatureInserter anchorWriter = getFeatureWriter(anchorType);
 
-				for (int colIdx = 0; colIdx < roseCnt; colIdx++) {
-					// final SimpleFeature feature = featureIter.next();
-					double fromDeg = halfStep + (colIdx * stepAngle);
-					double toDeg = halfStep + ((colIdx + 1) * stepAngle);
-					double defaultRadius = countingRadius;
+        SimpleFeatureIterator csfi = centerFeatures.features();
+        try {
+            double maxVal = 0;
+            double minVal = 0;
+            double radius = 0;
+            while (csfi.hasNext()) {
+                SimpleFeature csf = csfi.next();
+                Geometry center = (Geometry) csf.getDefaultGeometry();
+                ReferencedEnvelope env = null;
+                Coordinate centerCoords = null;
+                Envelope jtsEnv = null;
+                if (center instanceof Polygon || center instanceof MultiPolygon) {
+                    jtsEnv = center.getEnvelopeInternal();
+                    centerCoords = center.getCentroid().getCoordinate();
+                } else {
+                    centerCoords = center.getCentroid().getCoordinate();
+                    center = center.buffer(searchRadius);
+                    jtsEnv = center.getEnvelopeInternal();
+                }
 
-					idx = 0;
-					Double fval = 0.;
-					SimpleFeature newFeature = countingWriter.buildFeature();
-					Polygon cell = createRingCell(fGf, centerCoords, fromDeg, toDeg, defaultRadius);
-					for (idx = 0; idx < tmpInputFeatures.length; idx++) {
-						if (tmpInputFeatures[idx] == null) {
-							continue;
-						}
-						PropertyName pn = ff
-								.property(tmpInputFeatures[idx].getSchema().getGeometryDescriptor().getName());
-						Filter f = ff.intersects(pn, ff.literal(cell));
+                env = new ReferencedEnvelope(jtsEnv.getMinX(), jtsEnv.getMaxX(), jtsEnv.getMinY(),
+                        jtsEnv.getMaxY(),
+                        centerFeatures.getSchema().getCoordinateReferenceSystem());
 
-						PropertyName pn1 = ff
-								.property(tmpInputFeatures[idx].getSchema().getGeometryDescriptor().getName());
-						Intersects intersects = ff.intersects(pn1, ff.literal(center));
+                double maxx = env.getMaximum(0);
+                double minx = env.getMinimum(0);
+                double maxy = env.getMaximum(1);
+                double miny = env.getMinimum(1);
 
-						And and = ff.and(f, intersects);
-						SimpleFeatureCollection subCollection = tmpInputFeatures[idx].subCollection(and);
-						SimpleFeatureIterator featureIter = null;
+                // Envelope env = inputFeatures.getBounds();
+                radius = Math.max(radius, Math.min((maxx - minx), (maxy - miny)) / 2);
+                double countingRadius = searchRadius;
 
-						double curVal = 0;
-						int cnt = 0;
-						Double min = null;
-						Double max = null;
-						List<Double> vlist = new ArrayList<Double>();
-						try {
-							featureIter = subCollection.features();
-							while (featureIter.hasNext()) {
-								SimpleFeature sf = featureIter.next();
-								if (weightFields[idx] != null && !weightFields[idx].trim().equalsIgnoreCase("")) {
-									double v = Double.parseDouble("" + sf.getAttribute(weightFields[idx]));
-									vlist.add(v);
-									min = (min == null) ? v : Math.min(min, v);
-									max = (max == null) ? v : Math.max(max, v);
-									curVal = curVal + v;
-								} else {
-									min = 1.;
-									max = 1.;
-									vlist.add(1.0);
-									curVal++;
-								}
-								cnt++;
-							}
-							int fieldIdx = idx * 7;
-							newFeature.setAttribute(tmpFields[fieldIdx], curVal);
-							newFeature.setAttribute(tmpFields[fieldIdx + 1], cnt);
-							newFeature.setAttribute(tmpFields[fieldIdx + 2], min);
-							newFeature.setAttribute(tmpFields[fieldIdx + 3], max);
-							newFeature.setAttribute(tmpFields[fieldIdx + 4], getMean(vlist));
-							newFeature.setAttribute(tmpFields[fieldIdx + 5], getMedian(vlist));
-							newFeature.setAttribute(tmpFields[fieldIdx + 6], getStdev(vlist, getMean(vlist)));
-							// System.out.println(idx +"/"+curVal);
-							fval = fval + curVal;
+                double stepAngle = 360.0 / roseCnt;
+                double halfStep = stepAngle / 2.0;
 
-						} catch (Exception e) {
-							e.printStackTrace();
-						} finally {
-							featureIter.close();
-						}
-					}
+                for (int colIdx = 0; colIdx < roseCnt; colIdx++) {
+                    // final SimpleFeature feature = featureIter.next();
+                    double fromDeg = halfStep + (colIdx * stepAngle);
+                    double toDeg = halfStep + ((colIdx + 1) * stepAngle);
+                    double defaultRadius = countingRadius;
 
-					maxVal = Math.max(maxVal, fval);
-					minVal = Math.max(minVal, fval);
-					copyAttribute(csf, newFeature);
-					newFeature.setDefaultGeometry(cell);
-					// newFeature.setAttribute(valueField, fval);
-					newFeature.setAttribute(valueField + "_x", centerCoords.x);
-					newFeature.setAttribute(valueField + "_y", centerCoords.y);
-					newFeature.setAttribute("from_d", fromDeg);
-					newFeature.setAttribute("to_d", toDeg);
-					newFeature.setAttribute(valueField + "_radius", radius);
-					countingWriter.write(newFeature);
+                    idx = 0;
+                    Double fval = 0.;
+                    SimpleFeature newFeature = countingWriter.buildFeature();
+                    Polygon cell = createRingCell(fGf, centerCoords, fromDeg, toDeg, defaultRadius);
+                    for (idx = 0; idx < tmpInputFeatures.length; idx++) {
+                        if (tmpInputFeatures[idx] == null) {
+                            continue;
+                        }
+                        PropertyName pn = ff.property(tmpInputFeatures[idx].getSchema()
+                                .getGeometryDescriptor().getName());
+                        Filter f = ff.intersects(pn, ff.literal(cell));
 
-				}
-			}
-			csfi.close();
-			countingWriter.close();
+                        PropertyName pn1 = ff.property(tmpInputFeatures[idx].getSchema()
+                                .getGeometryDescriptor().getName());
+                        Intersects intersects = ff.intersects(pn1, ff.literal(center));
 
-			SimpleFeatureIterator countFeatureIt = countingWriter.getFeatureSource().getFeatures().features();
-			while (countFeatureIt.hasNext()) {
-				SimpleFeature sf = countFeatureIt.next();
-				double sumVal = 0;
-				Double[] curVals = new Double[tmpInputFeatures.length];
-				idx = 0;
-				for (int idx2 = 0; idx2 < tmpInputFeatures.length; idx2++) {
-					int fieldIdx = idx2 * 7;
-					if (tmpInputFeatures[idx2] == null) {
-						curVals[idx2] = null;
-						continue;
-					}
-					double o = (Double) sf.getAttribute(tmpFields[fieldIdx]);
-					curVals[idx2] = o;
-					sumVal = sumVal + o;
-				}
-				double x = (Double) sf.getAttribute(valueField + "_x");
-				double y = (Double) sf.getAttribute(valueField + "_y");
-				CoordinateSequence cs = new CoordinateArraySequence(new Coordinate[] { new Coordinate(x, y) });
-				Point center = new Point(cs, fGf);
+                        And and = ff.and(f, intersects);
+                        SimpleFeatureCollection subCollection = tmpInputFeatures[idx]
+                                .subCollection(and);
+                        SimpleFeatureIterator featureIter = null;
 
-				// double radius = (Double) sf.getAttribute(valueField +"_radius");
-				double roseRadius = sumVal / maxVal * radius;
+                        double curVal = 0;
+                        int cnt = 0;
+                        Double min = null;
+                        Double max = null;
+                        List<Double> vlist = new ArrayList<Double>();
+                        try {
+                            featureIter = subCollection.features();
+                            while (featureIter.hasNext()) {
+                                SimpleFeature sf = featureIter.next();
+                                if (weightFields != null && weightFields[idx] != null
+                                        && !weightFields[idx].trim().equalsIgnoreCase("")) {
+                                    double v = 0.0;
+                                    try {
+                                        v = Double.parseDouble(
+                                                "" + sf.getAttribute(weightFields[idx]));
+                                    } catch (Exception e) {
 
-				double fromDeg = (Double) sf.getAttribute("from_d");
-				double toDeg = (Double) sf.getAttribute("to_d");
+                                    }
+                                    vlist.add(v);
+                                    min = (min == null) ? v : Math.min(min, v);
+                                    max = (max == null) ? v : Math.max(max, v);
+                                    curVal = curVal + v;
+                                } else {
+                                    min = 1.;
+                                    max = 1.;
+                                    vlist.add(1.0);
+                                    curVal++;
+                                }
+                                cnt++;
+                            }
+                            if (cnt == 0) {
+                                continue;
+                            }
+                            int fieldIdx = idx * 7;
+                            newFeature.setAttribute(tmpFields[fieldIdx], curVal);
+                            newFeature.setAttribute(tmpFields[fieldIdx + 1], cnt);
+                            newFeature.setAttribute(tmpFields[fieldIdx + 2], min);
+                            newFeature.setAttribute(tmpFields[fieldIdx + 3], max);
+                            newFeature.setAttribute(tmpFields[fieldIdx + 4], getMean(vlist));
+                            newFeature.setAttribute(tmpFields[fieldIdx + 5], getMedian(vlist));
+                            newFeature.setAttribute(tmpFields[fieldIdx + 6],
+                                    getStdev(vlist, getMean(vlist)));
+                            // System.out.println(idx +"/"+curVal);
+                            fval = fval + curVal;
 
-				double defaultRadius = 0;
-				idx = 0;
-				for (int i = 0; i < tmpInputFeatures.length; i++) {
-					if (idx >= curVals.length || curVals[idx] == null) {
-						idx++;
-						continue;
-					}
-					double fromRadius = defaultRadius;
-					double toRadius = 0;
-					SimpleFeature newFeature = roseWriter.buildFeature();
-					copyAttribute(sf, newFeature);
-					if (sumVal != 0) {
-						toRadius = curVals[idx] / sumVal * roseRadius;
-						// System.out.println(curVals[idx] + "/" + sumVal + "/" + roseRadius + "/"
-						// + fromRadius + "/" + toRadius);
-						defaultRadius = fromRadius + toRadius;
-						Polygon cell = createRingCell(fGf, center.getCoordinate(), fromDeg, toDeg, fromRadius,
-								fromRadius + toRadius);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            featureIter.close();
+                        }
+                    }
 
-						newFeature.setDefaultGeometry(cell);
-						newFeature.setAttribute(valueField, curVals[idx]);
-					} else {
-						toRadius = 0;
-						newFeature.setAttribute(valueField, curVals[idx]);
-					}
+                    maxVal = Math.max(maxVal, fval);
+                    minVal = Math.max(minVal, fval);
+                    copyAttribute(csf, newFeature);
+                    newFeature.setDefaultGeometry(cell);
+                    // newFeature.setAttribute(valueField, fval);
+                    newFeature.setAttribute(valueField + "_x", centerCoords.x);
+                    newFeature.setAttribute(valueField + "_y", centerCoords.y);
+                    newFeature.setAttribute("from_d", fromDeg);
+                    newFeature.setAttribute("to_d", toDeg);
+                    newFeature.setAttribute(valueField + "_rad", radius);
+                    countingWriter.write(newFeature);
 
-					newFeature.setAttribute("rose_cnt", sf.getAttribute("rose_cnt" + idx));
-					newFeature.setAttribute("rose_min", sf.getAttribute("rose_min" + idx));
-					newFeature.setAttribute("rose_max", sf.getAttribute("rose_max" + idx));
-					newFeature.setAttribute("rose_mean", sf.getAttribute("rose_mean" + idx));
-					newFeature.setAttribute("rose_mdn", sf.getAttribute("rose_mdn" + idx));
-					newFeature.setAttribute("rose_stdev", sf.getAttribute("rose_stdev" + idx));
-					newFeature.setAttribute("rose_tg", tmpInputFeatures[idx].getSchema().getName().getLocalPart());
-					roseWriter.write(newFeature);
-					idx++;
-				}
+                }
+            }
+            csfi.close();
+            countingWriter.close();
 
-				for (double start = radius / 5.; start <= radius; start = start + (radius) / 5.) {
-					LineString line = createRingDistance(fGf, center.getCoordinate(), start);
-					SimpleFeature newFeature = anchorWriter.buildFeature();
-					newFeature.setAttribute("distance", start);
-					newFeature.setDefaultGeometry(line);
-					copyAttribute(sf, newFeature);
-					anchorWriter.write(newFeature);
-				}
-				LineString maxLine = createRingDistance(fGf, center.getCoordinate(), radius);
-				SimpleFeature maxFeature = anchorWriter.buildFeature();
-				maxFeature.setDefaultGeometry(maxLine);
-				maxFeature.setAttribute("distance", radius);
-				copyAttribute(sf, maxFeature);
-				anchorWriter.write(maxFeature);
-				int dirIdx = 0;
-				for (double start = 0; start < 360; start = start + 22.5) {
-					LineString line = createRingDirection(fGf, center.getCoordinate(), radius, start);
-					SimpleFeature newFeature = anchorWriter.buildFeature();
-					newFeature.setDefaultGeometry(line);
-					newFeature.setAttribute("direction", directions[dirIdx]);
-					newFeature.setAttribute("degree", start);
-					copyAttribute(sf, newFeature);
-					anchorWriter.write(newFeature);
-					dirIdx++;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			roseWriter.rollback();
-			anchorWriter.rollback();
-		} finally {
-			csfi.close();
-			roseWriter.close();
-			anchorWriter.close();
-		}
-		anchor = anchorWriter.getFeatureSource();
-		return roseWriter.getFeatureSource();
-	}
+            SimpleFeatureIterator countFeatureIt = countingWriter.getFeatureSource().getFeatures()
+                    .features();
+            while (countFeatureIt.hasNext()) {
+                SimpleFeature sf = countFeatureIt.next();
+                double sumVal = 0;
+                Double[] curVals = new Double[tmpInputFeatures.length];
+                idx = 0;
+                for (int idx2 = 0; idx2 < tmpInputFeatures.length; idx2++) {
+                    int fieldIdx = idx2 * 7;
+                    if (tmpInputFeatures[idx2] == null) {
+                        curVals[idx2] = null;
+                        continue;
+                    }
+                    double o = 0.0;
+                    try {
+                        o = (Double) sf.getAttribute(tmpFields[fieldIdx]);
+                    } catch (Exception e) {
 
-	public SimpleFeatureSource execute(Collection<SimpleFeatureCollection> inputFeatureses, String[] weightFields,
-			Geometry centerPoint, Double searchRadius, int roseCnt) throws IOException {
-		String valueField = "rose_val";
-		int idx = 0;
+                    }
+                    curVals[idx2] = o;
+                    sumVal = sumVal + o;
+                }
+                double x = (Double) sf.getAttribute(valueField + "_x");
+                double y = (Double) sf.getAttribute(valueField + "_y");
+                CoordinateSequence cs = new CoordinateArraySequence(
+                        new Coordinate[] { new Coordinate(x, y) });
+                Point center = new Point(cs, fGf);
 
-		SimpleFeatureCollection[] tmpInputFeatures = new SimpleFeatureCollection[inputFeatureses.size()];
-		tmpInputFeatures = inputFeatureses.toArray(tmpInputFeatures);
-		List<String> tmpFieldList = new ArrayList<String>();
-		List<Class<?>> tmpClassList = new ArrayList<Class<?>>();
-		for (idx = 0; idx < tmpInputFeatures.length; idx++) {
-			if (tmpInputFeatures[idx] == null) {
-				tmpFieldList.add(null);
-				tmpFieldList.add(null);
-				tmpFieldList.add(null);
-				tmpFieldList.add(null);
-				tmpFieldList.add(null);
-				tmpFieldList.add(null);
-				tmpFieldList.add(null);
-				tmpClassList.add(null);
-				tmpClassList.add(null);
-				tmpClassList.add(null);
-				tmpClassList.add(null);
-				tmpClassList.add(null);
-				tmpClassList.add(null);
-				tmpClassList.add(null);
-				continue;
-			}
-			tmpFieldList.add(valueField + idx);
-			tmpFieldList.add("rose_cnt" + idx);
-			tmpFieldList.add("rose_min" + idx);
-			tmpFieldList.add("rose_max" + idx);
-			tmpFieldList.add("rose_mean" + idx);
-			tmpFieldList.add("rose_mdn" + idx);
-			tmpFieldList.add("rose_stdev" + idx);
-			tmpClassList.add(Double.class);
-			tmpClassList.add(Integer.class);
-			tmpClassList.add(Double.class);
-			tmpClassList.add(Double.class);
-			tmpClassList.add(Double.class);
-			tmpClassList.add(Double.class);
-			tmpClassList.add(Double.class);
-		}
-		tmpFieldList.add("from_d");
-		tmpFieldList.add("to_d");
-		tmpFieldList.add(valueField + "_x");
-		tmpFieldList.add(valueField + "_y");
-		tmpFieldList.add(valueField + "_radius");
-		tmpClassList.add(Double.class);
-		tmpClassList.add(Double.class);
-		tmpClassList.add(Double.class);
-		tmpClassList.add(Double.class);
-		tmpClassList.add(Double.class);
+                // double radius = (Double) sf.getAttribute(valueField +"_radius");
+                double roseRadius = sumVal / maxVal * radius;
 
-		String[] tmpFields = new String[tmpFieldList.size()];
-		tmpFields = tmpFieldList.toArray(tmpFields);
+                double fromDeg = (Double) sf.getAttribute("from_d");
+                double toDeg = (Double) sf.getAttribute("to_d");
 
-		Class<?>[] tmpClasses = new Class<?>[tmpClassList.size()];
-		tmpClasses = tmpClassList.toArray(tmpClasses);
+                double defaultRadius = 0;
+                idx = 0;
+                for (int i = 0; i < tmpInputFeatures.length; i++) {
+                    if (idx >= curVals.length || curVals[idx] == null) {
+                        idx++;
+                        continue;
+                    }
+                    double fromRadius = defaultRadius;
+                    double toRadius = 0;
+                    SimpleFeature newFeature = roseWriter.buildFeature();
+                    copyAttribute(sf, newFeature);
+                    if (sumVal != 0) {
+                        toRadius = curVals[idx] / sumVal * roseRadius;
+                        // System.out.println(curVals[idx] + "/" + sumVal + "/" + roseRadius + "/"
+                        // + fromRadius + "/" + toRadius);
+                        defaultRadius = fromRadius + toRadius;
+                        Polygon cell = createRingCell(fGf, center.getCoordinate(), fromDeg, toDeg,
+                                fromRadius, fromRadius + toRadius);
 
-		String[] roseFields = new String[] { valueField, "rose_cnt", "rose_min", "rose_max", "rose_mean", "rose_mdn",
-				"rose_stdev", "rose_tg" };
-		Class<?>[] roseClasses = new Class[] { Double.class, Integer.class, Double.class, Double.class, Double.class,
-				Double.class, Double.class, String.class };
-		String[] anchorFields = new String[] { "distance", "direction", "degree" };
-		Class<?>[] anchorClasses = new Class[] { Double.class, String.class, Double.class };
+                        newFeature.setDefaultGeometry(cell);
+                        newFeature.setAttribute(valueField, curVals[idx]);
+                    } else {
+                        continue;
+                        // toRadius = 0;
+                        // newFeature.setAttribute(valueField, curVals[idx]);
+                    }
 
-//        final SimpleFeatureType centerSchema = centerFeatures.getSchema();
-		// SimpleFeatureType featureType = buildShcema(centerSchema,
-		// centerSchema.getCoordinateReferenceSystem(), getOutputTypeName(),
-		// new String[] { valueField }, new Class[] { Double.class });
+                    newFeature.setAttribute("cnt", sf.getAttribute("cnt" + idx));
+                    newFeature.setAttribute("min", sf.getAttribute("min" + idx));
+                    newFeature.setAttribute("max", sf.getAttribute("max" + idx));
+                    newFeature.setAttribute("mean", sf.getAttribute("mean" + idx));
+                    newFeature.setAttribute("mdn", sf.getAttribute("mdn" + idx));
+                    newFeature.setAttribute("stdev", sf.getAttribute("stdev" + idx));
+                    newFeature.setAttribute("rose_tg",
+                            tmpInputFeatures[idx].getSchema().getName().getLocalPart());
+                    roseWriter.write(newFeature);
+                    idx++;
+                }
 
-		final SimpleFeatureType centerSchema = FeatureTypes.getDefaultType("windrose", Polygon.class,
-				tmpInputFeatures[0].getSchema().getCoordinateReferenceSystem());
-		SimpleFeatureType targetType = copyShcema(centerSchema, centerSchema.getCoordinateReferenceSystem(),
-				"counting_rose", Polygon.class, tmpFields, tmpClasses);
-		SimpleFeatureType roseType = copyShcema(centerSchema, centerSchema.getCoordinateReferenceSystem(), "multi_rose",
-				Polygon.class, roseFields, roseClasses);
-		SimpleFeatureType anchorType = copyShcema(centerSchema, centerSchema.getCoordinateReferenceSystem(),
-				"wind_rose_anchor", LineString.class, anchorFields, anchorClasses);
-		IFeatureInserter countingWriter = getFeatureWriter(targetType);
-		IFeatureInserter roseWriter = getFeatureWriter(roseType);
-		IFeatureInserter anchorWriter = getFeatureWriter(anchorType);
+                for (double start = radius / 5.; start <= radius; start = start + (radius) / 5.) {
+                    LineString line = createRingDistance(fGf, center.getCoordinate(), start);
+                    SimpleFeature newFeature = anchorWriter.buildFeature();
+                    newFeature.setAttribute("distance", start);
+                    newFeature.setDefaultGeometry(line);
+                    copyAttribute(sf, newFeature);
+                    anchorWriter.write(newFeature);
+                }
+                LineString maxLine = createRingDistance(fGf, center.getCoordinate(), radius);
+                SimpleFeature maxFeature = anchorWriter.buildFeature();
+                maxFeature.setDefaultGeometry(maxLine);
+                maxFeature.setAttribute("distance", radius);
+                copyAttribute(sf, maxFeature);
+                anchorWriter.write(maxFeature);
+                int dirIdx = 0;
+                for (double start = 0; start < 360; start = start + 22.5) {
+                    LineString line = createRingDirection(fGf, center.getCoordinate(), radius,
+                            start);
+                    SimpleFeature newFeature = anchorWriter.buildFeature();
+                    newFeature.setDefaultGeometry(line);
+                    newFeature.setAttribute("direction", directions[dirIdx]);
+                    newFeature.setAttribute("degree", start);
+                    copyAttribute(sf, newFeature);
+                    anchorWriter.write(newFeature);
+                    dirIdx++;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            roseWriter.rollback();
+            anchorWriter.rollback();
+        } finally {
+            csfi.close();
+            roseWriter.close();
+            anchorWriter.close();
+        }
+        anchor = anchorWriter.getFeatureSource();
+        return roseWriter.getFeatureSource();
+    }
 
-		try {
-			double maxVal = 0;
-			double minVal = 0;
-			double radius = 0;
-			{
-				Geometry center = centerPoint;
-				ReferencedEnvelope env = null;
-				Coordinate centerCoords = null;
-				Envelope jtsEnv = null;
-				if (center instanceof Polygon || center instanceof MultiPolygon) {
-					jtsEnv = center.getEnvelopeInternal();
-					centerCoords = center.getCentroid().getCoordinate();
-				} else {
-					centerCoords = center.getCentroid().getCoordinate();
-					center = center.buffer(searchRadius);
-					jtsEnv = center.getEnvelopeInternal();
-				}
+    public SimpleFeatureSource execute(Collection<SimpleFeatureCollection> inputFeatureses,
+            String[] weightFields, Geometry centerPoint, Double searchRadius, int roseCnt)
+            throws IOException {
+        String valueField = "val";
+        int idx = 0;
 
-				env = new ReferencedEnvelope(jtsEnv.getMinX(), jtsEnv.getMaxX(), jtsEnv.getMinY(), jtsEnv.getMaxY(),
-						tmpInputFeatures[0].getSchema().getCoordinateReferenceSystem());
+        SimpleFeatureCollection[] tmpInputFeatures = new SimpleFeatureCollection[inputFeatureses
+                .size()];
+        tmpInputFeatures = inputFeatureses.toArray(tmpInputFeatures);
+        List<String> tmpFieldList = new ArrayList<String>();
+        List<Class<?>> tmpClassList = new ArrayList<Class<?>>();
 
-				double maxx = env.getMaximum(0);
-				double minx = env.getMinimum(0);
-				double maxy = env.getMaximum(1);
-				double miny = env.getMinimum(1);
+        for (idx = 0; idx < tmpInputFeatures.length; idx++) {
+            if (tmpInputFeatures[idx] == null) {
+                tmpFieldList.add(null);
+                tmpFieldList.add(null);
+                tmpFieldList.add(null);
+                tmpFieldList.add(null);
+                tmpFieldList.add(null);
+                tmpFieldList.add(null);
+                tmpFieldList.add(null);
 
-				// Envelope env = inputFeatures.getBounds();
-				radius = Math.max(radius, Math.min((maxx - minx), (maxy - miny)) / 2);
-				double countingRadius = searchRadius;
+                tmpClassList.add(null);
+                tmpClassList.add(null);
+                tmpClassList.add(null);
+                tmpClassList.add(null);
+                tmpClassList.add(null);
+                tmpClassList.add(null);
+                tmpClassList.add(null);
+                continue;
+            }
+            tmpFieldList.add(valueField + idx);
+            tmpFieldList.add("cnt" + idx);
+            tmpFieldList.add("min" + idx);
+            tmpFieldList.add("max" + idx);
+            tmpFieldList.add("mean" + idx);
+            tmpFieldList.add("mdn" + idx);
+            tmpFieldList.add("stdev" + idx);
 
-				double stepAngle = 360.0 / roseCnt;
-				double halfStep = stepAngle / 2.0;
+            tmpClassList.add(Double.class);
+            tmpClassList.add(Integer.class);
+            tmpClassList.add(Double.class);
+            tmpClassList.add(Double.class);
+            tmpClassList.add(Double.class);
+            tmpClassList.add(Double.class);
+            tmpClassList.add(Double.class);
+        }
+        tmpFieldList.add("from_d");
+        tmpFieldList.add("to_d");
+        tmpFieldList.add(valueField + "_x");
+        tmpFieldList.add(valueField + "_y");
+        tmpFieldList.add(valueField + "_rad");
 
-				for (int colIdx = 0; colIdx < roseCnt; colIdx++) {
-					// final SimpleFeature feature = featureIter.next();
-					double fromDeg = halfStep + (colIdx * stepAngle);
-					double toDeg = halfStep + ((colIdx + 1) * stepAngle);
-					double defaultRadius = countingRadius;
+        tmpClassList.add(Double.class);
+        tmpClassList.add(Double.class);
+        tmpClassList.add(Double.class);
+        tmpClassList.add(Double.class);
+        tmpClassList.add(Double.class);
 
-					idx = 0;
-					Double fval = 0.;
-					SimpleFeature newFeature = countingWriter.buildFeature();
-					Polygon cell = createRingCell(fGf, centerCoords, fromDeg, toDeg, defaultRadius);
-					for (idx = 0; idx < tmpInputFeatures.length; idx++) {
-						if (tmpInputFeatures[idx] == null) {
-							continue;
-						}
-						PropertyName pn = ff
-								.property(tmpInputFeatures[idx].getSchema().getGeometryDescriptor().getName());
-						Filter f = ff.intersects(pn, ff.literal(cell));
+        String[] tmpFields = new String[tmpFieldList.size()];
+        tmpFields = tmpFieldList.toArray(tmpFields);
 
-						PropertyName pn1 = ff
-								.property(tmpInputFeatures[idx].getSchema().getGeometryDescriptor().getName());
-						Intersects intersects = ff.intersects(pn1, ff.literal(center));
+        Class<?>[] tmpClasses = new Class<?>[tmpClassList.size()];
+        tmpClasses = tmpClassList.toArray(tmpClasses);
 
-						And and = ff.and(f, intersects);
-						SimpleFeatureCollection subCollection = tmpInputFeatures[idx].subCollection(and);
-						SimpleFeatureIterator featureIter = null;
+        String[] roseFields = new String[] { valueField, "cnt", "min", "max", "mean", "mdn",
+                "stdev", "rose_tg" };
+        Class<?>[] roseClasses = new Class[] { Double.class, Integer.class, Double.class,
+                Double.class, Double.class, Double.class, Double.class, String.class };
+        String[] anchorFields = new String[] { "distance", "direction", "degree" };
+        Class<?>[] anchorClasses = new Class[] { Double.class, String.class, Double.class };
 
-						double curVal = 0;
-						int cnt = 0;
-						Double min = null;
-						Double max = null;
-						List<Double> vlist = new ArrayList<Double>();
-						try {
-							featureIter = subCollection.features();
-							while (featureIter.hasNext()) {
-								SimpleFeature sf = featureIter.next();
-								if (weightFields[idx] != null && !weightFields[idx].trim().equalsIgnoreCase("")) {
-									double v = Double.parseDouble("" + sf.getAttribute(weightFields[idx]));
-									vlist.add(v);
-									min = (min == null) ? v : Math.min(min, v);
-									max = (max == null) ? v : Math.max(max, v);
-									curVal = curVal + v;
-								} else {
-									min = 1.;
-									max = 1.;
-									vlist.add(1.0);
-									curVal++;
-								}
-								cnt++;
-							}
-							int fieldIdx = idx * 7;
-							newFeature.setAttribute(tmpFields[fieldIdx], curVal);
-							newFeature.setAttribute(tmpFields[fieldIdx + 1], cnt);
-							newFeature.setAttribute(tmpFields[fieldIdx + 2], min);
-							newFeature.setAttribute(tmpFields[fieldIdx + 3], max);
-							newFeature.setAttribute(tmpFields[fieldIdx + 4], getMean(vlist));
-							newFeature.setAttribute(tmpFields[fieldIdx + 5], getMedian(vlist));
-							newFeature.setAttribute(tmpFields[fieldIdx + 6], getStdev(vlist, getMean(vlist)));
-							// System.out.println(idx +"/"+curVal);
-							fval = fval + curVal;
+        SimpleFeatureType tmpSchema = inputFeatureses.iterator().next().getSchema();
 
-						} catch (Exception e) {
-							e.printStackTrace();
-						} finally {
-							featureIter.close();
-						}
-					}
+        final SimpleFeatureType centerSchema = tmpSchema;
+        // SimpleFeatureType featureType = buildShcema(centerSchema,
+        // centerSchema.getCoordinateReferenceSystem(), getOutputTypeName(),
+        // new String[] { valueField }, new Class[] { Double.class });
 
-					maxVal = Math.max(maxVal, fval);
-					minVal = Math.max(minVal, fval);
+        SimpleFeatureType targetType = copyShcema(centerSchema,
+                centerSchema.getCoordinateReferenceSystem(), "counting_rose", Polygon.class,
+                tmpFields, tmpClasses);
+        SimpleFeatureType roseType = copyShcema(centerSchema,
+                centerSchema.getCoordinateReferenceSystem(), "wind_rose", Polygon.class, roseFields,
+                roseClasses);
+        SimpleFeatureType anchorType = copyShcema(centerSchema,
+                centerSchema.getCoordinateReferenceSystem(), "wind_rose_anchor", LineString.class,
+                anchorFields, anchorClasses);
+        IFeatureInserter countingWriter = getFeatureWriter(targetType);
+        IFeatureInserter roseWriter = getFeatureWriter(roseType);
+        IFeatureInserter anchorWriter = getFeatureWriter(anchorType);
+
+        // SimpleFeatureIterator csfi = centerFeatures.features();
+        try {
+            double maxVal = 0;
+            double minVal = 0;
+            double radius = 0;
+            // while (csfi.hasNext()) {
+            {
+                // SimpleFeature csf = csfi.next();
+                Geometry center = centerPoint;
+                ReferencedEnvelope env = null;
+                Coordinate centerCoords = null;
+                Envelope jtsEnv = null;
+                if (center instanceof Polygon || center instanceof MultiPolygon) {
+                    jtsEnv = center.getEnvelopeInternal();
+                    centerCoords = center.getCentroid().getCoordinate();
+                } else {
+                    centerCoords = center.getCentroid().getCoordinate();
+                    center = center.buffer(searchRadius);
+                    jtsEnv = center.getEnvelopeInternal();
+                }
+
+                env = new ReferencedEnvelope(jtsEnv.getMinX(), jtsEnv.getMaxX(), jtsEnv.getMinY(),
+                        jtsEnv.getMaxY(), centerSchema.getCoordinateReferenceSystem());
+
+                double maxx = env.getMaximum(0);
+                double minx = env.getMinimum(0);
+                double maxy = env.getMaximum(1);
+                double miny = env.getMinimum(1);
+
+                // Envelope env = inputFeatures.getBounds();
+                radius = Math.max(radius, Math.min((maxx - minx), (maxy - miny)) / 2);
+                double countingRadius = searchRadius;
+
+                double stepAngle = 360.0 / roseCnt;
+                double halfStep = stepAngle / 2.0;
+
+                for (int colIdx = 0; colIdx < roseCnt; colIdx++) {
+                    // final SimpleFeature feature = featureIter.next();
+                    double fromDeg = halfStep + (colIdx * stepAngle);
+                    double toDeg = halfStep + ((colIdx + 1) * stepAngle);
+                    double defaultRadius = countingRadius;
+
+                    idx = 0;
+                    Double fval = 0.;
+                    SimpleFeature newFeature = countingWriter.buildFeature();
+                    Polygon cell = createRingCell(fGf, centerCoords, fromDeg, toDeg, defaultRadius);
+                    for (idx = 0; idx < tmpInputFeatures.length; idx++) {
+                        if (tmpInputFeatures[idx] == null) {
+                            continue;
+                        }
+                        PropertyName pn = ff.property(tmpInputFeatures[idx].getSchema()
+                                .getGeometryDescriptor().getName());
+                        Filter f = ff.intersects(pn, ff.literal(cell));
+
+                        PropertyName pn1 = ff.property(tmpInputFeatures[idx].getSchema()
+                                .getGeometryDescriptor().getName());
+                        Intersects intersects = ff.intersects(pn1, ff.literal(center));
+
+                        And and = ff.and(f, intersects);
+                        SimpleFeatureCollection subCollection = tmpInputFeatures[idx]
+                                .subCollection(and);
+                        SimpleFeatureIterator featureIter = null;
+
+                        double curVal = 0;
+                        int cnt = 0;
+                        Double min = null;
+                        Double max = null;
+                        List<Double> vlist = new ArrayList<Double>();
+                        try {
+                            featureIter = subCollection.features();
+                            while (featureIter.hasNext()) {
+                                SimpleFeature sf = featureIter.next();
+                                if (weightFields != null && weightFields[idx] != null
+                                        && !weightFields[idx].trim().equalsIgnoreCase("")) {
+                                    double v = 0.0;
+                                    try {
+                                        v = Double.parseDouble(
+                                                "" + sf.getAttribute(weightFields[idx]));
+                                    } catch (Exception e) {
+
+                                    }
+                                    vlist.add(v);
+                                    min = (min == null) ? v : Math.min(min, v);
+                                    max = (max == null) ? v : Math.max(max, v);
+                                    curVal = curVal + v;
+                                } else {
+                                    min = 1.;
+                                    max = 1.;
+                                    vlist.add(1.0);
+                                    curVal++;
+                                }
+                                cnt++;
+                            }
+                            if (cnt == 0) {
+                                continue;
+                            }
+                            int fieldIdx = idx * 7;
+                            newFeature.setAttribute(tmpFields[fieldIdx], curVal);
+                            newFeature.setAttribute(tmpFields[fieldIdx + 1], cnt);
+                            newFeature.setAttribute(tmpFields[fieldIdx + 2], min);
+                            newFeature.setAttribute(tmpFields[fieldIdx + 3], max);
+                            newFeature.setAttribute(tmpFields[fieldIdx + 4], getMean(vlist));
+                            newFeature.setAttribute(tmpFields[fieldIdx + 5], getMedian(vlist));
+                            newFeature.setAttribute(tmpFields[fieldIdx + 6],
+                                    getStdev(vlist, getMean(vlist)));
+                            // System.out.println(idx +"/"+curVal);
+                            fval = fval + curVal;
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            featureIter.close();
+                        }
+                    }
+
+                    maxVal = Math.max(maxVal, fval);
+                    minVal = Math.max(minVal, fval);
 //                    copyAttribute(csf, newFeature);
-					newFeature.setDefaultGeometry(cell);
-					// newFeature.setAttribute(valueField, fval);
-					newFeature.setAttribute(valueField + "_x", centerCoords.x);
-					newFeature.setAttribute(valueField + "_y", centerCoords.y);
-					newFeature.setAttribute("from_d", fromDeg);
-					newFeature.setAttribute("to_d", toDeg);
-					newFeature.setAttribute(valueField + "_radius", radius);
-					countingWriter.write(newFeature);
+                    newFeature.setDefaultGeometry(cell);
+                    // newFeature.setAttribute(valueField, fval);
+                    newFeature.setAttribute(valueField + "_x", centerCoords.x);
+                    newFeature.setAttribute(valueField + "_y", centerCoords.y);
+                    newFeature.setAttribute("from_d", fromDeg);
+                    newFeature.setAttribute("to_d", toDeg);
+                    newFeature.setAttribute(valueField + "_rad", radius);
+                    countingWriter.write(newFeature);
 
-				}
-			}
+                }
+            }
+            // }
+            // csfi.close();
+            countingWriter.close();
+
+            SimpleFeatureIterator countFeatureIt = countingWriter.getFeatureSource().getFeatures()
+                    .features();
+            while (countFeatureIt.hasNext()) {
+                SimpleFeature sf = countFeatureIt.next();
+                double sumVal = 0;
+                Double[] curVals = new Double[tmpInputFeatures.length];
+                idx = 0;
+                for (int idx2 = 0; idx2 < tmpInputFeatures.length; idx2++) {
+                    int fieldIdx = idx2 * 7;
+                    if (tmpInputFeatures[idx2] == null) {
+                        curVals[idx2] = null;
+                        continue;
+                    }
+                    double o = 0.0;
+                    try {
+                        o = (Double) sf.getAttribute(tmpFields[fieldIdx]);
+                    } catch (Exception e) {
+
+                    }
+                    curVals[idx2] = o;
+                    sumVal = sumVal + o;
+                }
+                double x = (Double) sf.getAttribute(valueField + "_x");
+                double y = (Double) sf.getAttribute(valueField + "_y");
+                CoordinateSequence cs = new CoordinateArraySequence(
+                        new Coordinate[] { new Coordinate(x, y) });
+                Point center = new Point(cs, fGf);
+
+                // double radius = (Double) sf.getAttribute(valueField +"_radius");
+                double roseRadius = sumVal / maxVal * radius;
+
+                double fromDeg = (Double) sf.getAttribute("from_d");
+                double toDeg = (Double) sf.getAttribute("to_d");
+
+                double defaultRadius = 0;
+                idx = 0;
+                for (int i = 0; i < tmpInputFeatures.length; i++) {
+                    if (idx >= curVals.length || curVals[idx] == null) {
+                        idx++;
+                        continue;
+                    }
+                    double fromRadius = defaultRadius;
+                    double toRadius = 0;
+                    SimpleFeature newFeature = roseWriter.buildFeature();
+                    copyAttribute(sf, newFeature);
+                    if (sumVal != 0) {
+                        toRadius = curVals[idx] / sumVal * roseRadius;
+                        // System.out.println(curVals[idx] + "/" + sumVal + "/" + roseRadius + "/"
+                        // + fromRadius + "/" + toRadius);
+                        defaultRadius = fromRadius + toRadius;
+                        Polygon cell = createRingCell(fGf, center.getCoordinate(), fromDeg, toDeg,
+                                fromRadius, fromRadius + toRadius);
+
+                        newFeature.setDefaultGeometry(cell);
+                        newFeature.setAttribute(valueField, curVals[idx]);
+                    } else {
+                        continue;
+                        // toRadius = 0;
+                        // newFeature.setAttribute(valueField, curVals[idx]);
+                    }
+
+                    newFeature.setAttribute("cnt", sf.getAttribute("cnt" + idx));
+                    newFeature.setAttribute("min", sf.getAttribute("min" + idx));
+                    newFeature.setAttribute("max", sf.getAttribute("max" + idx));
+                    newFeature.setAttribute("mean", sf.getAttribute("mean" + idx));
+                    newFeature.setAttribute("mdn", sf.getAttribute("mdn" + idx));
+                    newFeature.setAttribute("stdev", sf.getAttribute("stdev" + idx));
+                    newFeature.setAttribute("rose_tg",
+                            tmpInputFeatures[idx].getSchema().getName().getLocalPart());
+                    roseWriter.write(newFeature);
+                    idx++;
+                }
+
+                for (double start = radius / 5.; start <= radius; start = start + (radius) / 5.) {
+                    LineString line = createRingDistance(fGf, center.getCoordinate(), start);
+                    SimpleFeature newFeature = anchorWriter.buildFeature();
+                    newFeature.setAttribute("distance", start);
+                    newFeature.setDefaultGeometry(line);
+                    copyAttribute(sf, newFeature);
+                    anchorWriter.write(newFeature);
+                }
+                LineString maxLine = createRingDistance(fGf, center.getCoordinate(), radius);
+                SimpleFeature maxFeature = anchorWriter.buildFeature();
+                maxFeature.setDefaultGeometry(maxLine);
+                maxFeature.setAttribute("distance", radius);
+                copyAttribute(sf, maxFeature);
+                anchorWriter.write(maxFeature);
+                int dirIdx = 0;
+                for (double start = 0; start < 360; start = start + 22.5) {
+                    LineString line = createRingDirection(fGf, center.getCoordinate(), radius,
+                            start);
+                    SimpleFeature newFeature = anchorWriter.buildFeature();
+                    newFeature.setDefaultGeometry(line);
+                    newFeature.setAttribute("direction", directions[dirIdx]);
+                    newFeature.setAttribute("degree", start);
+                    copyAttribute(sf, newFeature);
+                    anchorWriter.write(newFeature);
+                    dirIdx++;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            roseWriter.rollback();
+            anchorWriter.rollback();
+        } finally {
 //            csfi.close();
-			countingWriter.close();
+            roseWriter.close();
+            anchorWriter.close();
+        }
+        anchor = anchorWriter.getFeatureSource();
+        return roseWriter.getFeatureSource();
+    }
 
-			//////////////////////////////////////////////////////////////////////////////////////
-			//////////////////////////////////////////////////////////////////////////////////////
+    public LineString createRingDistance(GeometryFactory gf, Coordinate centroid, double toRadius) {
+        double step = 5.;
+        double radian = 0.0;
+        List<Coordinate> outer_ring = new ArrayList<Coordinate>();
+        Coordinate first = null;
+        for (int index = 0; index < 72; index = index + 1) {
+            radian = toRadians(0 + ((double) index * step));
+            outer_ring.add(createCoordinate(centroid, radian, toRadius));
+            if (first == null) {
+                first = createCoordinate(centroid, radian, toRadius);
+            }
+        }
+        outer_ring.add(first);
+        Coordinate[] coords = outer_ring.toArray(new Coordinate[outer_ring.size()]);
+        LineString ring = gf.createLineString(coords);
+        return ring;
+    }
 
-			SimpleFeatureIterator countFeatureIt = countingWriter.getFeatureSource().getFeatures().features();
-			while (countFeatureIt.hasNext()) {
-				SimpleFeature sf = countFeatureIt.next();
-				double sumVal = 0;
-				Double[] curVals = new Double[tmpInputFeatures.length];
-				idx = 0;
-				for (int idx2 = 0; idx2 < tmpInputFeatures.length; idx2++) {
-					int fieldIdx = idx2 * 7;
-					if (tmpInputFeatures[idx2] == null) {
-						curVals[idx2] = null;
-						continue;
-					}
-					double o = (Double) sf.getAttribute(tmpFields[fieldIdx]);
-					curVals[idx2] = o;
-					sumVal = sumVal + o;
-				}
-				double x = (Double) sf.getAttribute(valueField + "_x");
-				double y = (Double) sf.getAttribute(valueField + "_y");
-				CoordinateSequence cs = new CoordinateArraySequence(new Coordinate[] { new Coordinate(x, y) });
-				Point center = new Point(cs, fGf);
+    public LineString createRingDirection(GeometryFactory gf, Coordinate centroid, double toRadius,
+            double step) {
+        double radian = 0.0;
+        List<Coordinate> outer_ring = new ArrayList<Coordinate>();
+        outer_ring.add(centroid);
+        radian = toRadians(step);
+        outer_ring.add(createCoordinate(centroid, radian, toRadius));
+        Coordinate[] coords = outer_ring.toArray(new Coordinate[outer_ring.size()]);
+        LineString ring = gf.createLineString(coords);
+        return ring;
+    }
 
-				// double radius = (Double) sf.getAttribute(valueField +"_radius");
-				double roseRadius = sumVal / maxVal * radius;
+    private void copyAttribute(SimpleFeature csf, SimpleFeature newFeature) {
+        List<AttributeDescriptor> attDescs = csf.getFeatureType().getAttributeDescriptors();
+        for (AttributeDescriptor descriptor : attDescs) {
+            if (descriptor instanceof GeometryDescriptor) {
 
-				double fromDeg = (Double) sf.getAttribute("from_d");
-				double toDeg = (Double) sf.getAttribute("to_d");
+            } else {
+                String localname = descriptor.getLocalName().toString();
+                if (localname.equalsIgnoreCase("shape_leng")
+                        || localname.equalsIgnoreCase("shape_area")) {
+                    continue;
+                } else {
+                    try {
+                        newFeature.setAttribute(localname, csf.getAttribute(localname));
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        }
 
-				double defaultRadius = 0;
-				idx = 0;
-				for (int i = 0; i < tmpInputFeatures.length; i++) {
-					if (idx >= curVals.length || curVals[idx] == null) {
-						idx++;
-						continue;
-					}
-					double fromRadius = defaultRadius;
-					double toRadius = 0;
-					SimpleFeature newFeature = roseWriter.buildFeature();
-					copyAttribute(sf, newFeature);
-					if (sumVal != 0) {
-						toRadius = curVals[idx] / sumVal * roseRadius;
-						// System.out.println(curVals[idx] + "/" + sumVal + "/" + roseRadius + "/"
-						// + fromRadius + "/" + toRadius);
-						defaultRadius = fromRadius + toRadius;
-						Polygon cell = createRingCell(fGf, center.getCoordinate(), fromDeg, toDeg, fromRadius,
-								fromRadius + toRadius);
+    }
 
-						newFeature.setDefaultGeometry(cell);
-						newFeature.setAttribute(valueField, curVals[idx]);
-					} else {
-						toRadius = 0;
-						newFeature.setAttribute(valueField, curVals[idx]);
-					}
+    public Polygon createRingCell(GeometryFactory gf, Coordinate centroid, double from_deg,
+            double to_deg, double to_radius) {
+        double step = Math.abs(to_deg - from_deg) / 36.;
+        double radian = 0.0;
+        List<Coordinate> outer_ring = new ArrayList<Coordinate>();
+        outer_ring.add(centroid);
+        for (int index = 0; index < 36; index = index + 1) {
+            radian = toRadians(from_deg + ((double) index * step));
+            outer_ring.add(createCoordinate(centroid, radian, to_radius));
+        }
 
-					newFeature.setAttribute("rose_cnt", sf.getAttribute("rose_cnt" + idx));
-					newFeature.setAttribute("rose_min", sf.getAttribute("rose_min" + idx));
-					newFeature.setAttribute("rose_max", sf.getAttribute("rose_max" + idx));
-					newFeature.setAttribute("rose_mean", sf.getAttribute("rose_mean" + idx));
-					newFeature.setAttribute("rose_mdn", sf.getAttribute("rose_mdn" + idx));
-					newFeature.setAttribute("rose_stdev", sf.getAttribute("rose_stdev" + idx));
-					newFeature.setAttribute("rose_tg", tmpInputFeatures[idx].getSchema().getName().getLocalPart());
-					roseWriter.write(newFeature);
-					idx++;
-				}
+        outer_ring.add(centroid);
+        Coordinate[] coords = outer_ring.toArray(new Coordinate[outer_ring.size()]);
+        Polygon ring = gf.createPolygon(gf.createLinearRing(coords), null);
+        return ring;
+    }
 
-				for (double start = radius / 5.; start <= radius; start = start + (radius) / 5.) {
-					LineString line = createRingDistance(fGf, center.getCoordinate(), start);
-					SimpleFeature newFeature = anchorWriter.buildFeature();
-					newFeature.setAttribute("distance", start);
-					newFeature.setDefaultGeometry(line);
-					copyAttribute(sf, newFeature);
-					anchorWriter.write(newFeature);
-				}
-				LineString maxLine = createRingDistance(fGf, center.getCoordinate(), radius);
-				SimpleFeature maxFeature = anchorWriter.buildFeature();
-				maxFeature.setDefaultGeometry(maxLine);
-				maxFeature.setAttribute("distance", radius);
-				copyAttribute(sf, maxFeature);
-				anchorWriter.write(maxFeature);
-				int dirIdx = 0;
-				for (double start = 0; start < 360; start = start + 22.5) {
-					LineString line = createRingDirection(fGf, center.getCoordinate(), radius, start);
-					SimpleFeature newFeature = anchorWriter.buildFeature();
-					newFeature.setDefaultGeometry(line);
-					newFeature.setAttribute("direction", directions[dirIdx]);
-					newFeature.setAttribute("degree", start);
-					copyAttribute(sf, newFeature);
-					anchorWriter.write(newFeature);
-					dirIdx++;
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			roseWriter.rollback();
-			anchorWriter.rollback();
-		} finally {
-//			csfi.close();
-			roseWriter.close();
-			anchorWriter.close();
-		}
-		anchor = anchorWriter.getFeatureSource();
-		return roseWriter.getFeatureSource();
-	}
+    public Polygon createRingCell(GeometryFactory gf, Coordinate centroid, double from_deg,
+            double to_deg, double from_radius, double to_radius) {
+        double step = Math.abs(to_deg - from_deg) / 36.;
+        double radian = 0.0;
+        List<Coordinate> outer_ring = new ArrayList<Coordinate>();
+        Coordinate first = null;
+        if (from_radius == 0) {
+            outer_ring.add(centroid);
+        } else {
+            for (int index = 0; index < 36 + 1; index = index + 1) {
+                radian = toRadians(from_deg + ((double) index * step));
+                outer_ring.add(createCoordinate(centroid, radian, from_radius));
+                if (first == null) {
+                    first = createCoordinate(centroid, radian, from_radius);
+                }
+            }
+        }
 
-	public LineString createRingDistance(GeometryFactory gf, Coordinate centroid, double toRadius) {
-		double step = 5.;
-		double radian = 0.0;
-		List<Coordinate> outer_ring = new ArrayList<Coordinate>();
-		Coordinate first = null;
-		for (int index = 0; index < 72; index = index + 1) {
-			radian = toRadians(0 + ((double) index * step));
-			outer_ring.add(createCoordinate(centroid, radian, toRadius));
-			if (first == null) {
-				first = createCoordinate(centroid, radian, toRadius);
-			}
-		}
-		outer_ring.add(first);
-		Coordinate[] coords = outer_ring.toArray(new Coordinate[outer_ring.size()]);
-		LineString ring = gf.createLineString(coords);
-		return ring;
-	}
+        for (int index = 36; index > -1; index = index - 1) {
+            radian = toRadians(from_deg + (index * step));
+            outer_ring.add(createCoordinate(centroid, radian, to_radius));
+        }
 
-	public LineString createRingDirection(GeometryFactory gf, Coordinate centroid, double toRadius, double step) {
-		double radian = 0.0;
-		List<Coordinate> outer_ring = new ArrayList<Coordinate>();
-		outer_ring.add(centroid);
-		radian = toRadians(step);
-		outer_ring.add(createCoordinate(centroid, radian, toRadius));
-		Coordinate[] coords = outer_ring.toArray(new Coordinate[outer_ring.size()]);
-		LineString ring = gf.createLineString(coords);
-		return ring;
-	}
+        if (from_radius != 0) {
+            outer_ring.add(first);
+        } else {
+            outer_ring.add(centroid);
+        }
+        Coordinate[] coords = outer_ring.toArray(new Coordinate[outer_ring.size()]);
+        Polygon ring = gf.createPolygon(gf.createLinearRing(coords), null);
+        return ring;
+    }
 
-	private void copyAttribute(SimpleFeature csf, SimpleFeature newFeature) {
-		List<AttributeDescriptor> attDescs = csf.getFeatureType().getAttributeDescriptors();
-		for (AttributeDescriptor descriptor : attDescs) {
-			if (descriptor instanceof GeometryDescriptor) {
+    private Coordinate createCoordinate(Coordinate source, double radian, double radius) {
+        double dx = Math.cos(radian) * radius;
+        double dy = Math.sin(radian) * radius;
+        return new Coordinate(source.x + dx, source.y + dy);
+    }
 
-			} else {
-				String localname = descriptor.getLocalName().toString();
-				if (localname.equalsIgnoreCase("shape_leng") || localname.equalsIgnoreCase("shape_area")) {
-					continue;
-				} else {
-					try {
-						newFeature.setAttribute(localname, csf.getAttribute(localname));
-					} catch (Exception e) {
-					}
-				}
-			}
-		}
+    @SuppressWarnings("unused")
+    private double toDegree(double radians) {
+        return radians * (180.0 / Math.PI);
+    }
 
-	}
+    private double toRadians(double degree) {
+        return Math.PI / 180.0 * degree;
+    }
 
-	public Polygon createRingCell(GeometryFactory gf, Coordinate centroid, double from_deg, double to_deg,
-			double to_radius) {
-		double step = Math.abs(to_deg - from_deg) / 36.;
-		double radian = 0.0;
-		List<Coordinate> outer_ring = new ArrayList<Coordinate>();
-		outer_ring.add(centroid);
-		for (int index = 0; index < 36; index = index + 1) {
-			radian = toRadians(from_deg + ((double) index * step));
-			outer_ring.add(createCoordinate(centroid, radian, to_radius));
-		}
+    @SuppressWarnings({ "unused", "rawtypes" })
+    private SimpleFeatureType buildShcema(SimpleFeatureType featureType,
+            CoordinateReferenceSystem crs, String typeName, String[] attNames, Class[] bindings) {
+        SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
+        sftBuilder.setName(getName(typeName));
+        sftBuilder.setCRS(crs);
 
-		outer_ring.add(centroid);
-		Coordinate[] coords = outer_ring.toArray(new Coordinate[outer_ring.size()]);
-		Polygon ring = gf.createPolygon(gf.createLinearRing(coords), null);
-		return ring;
-	}
+        AttributeTypeBuilder attBuilder = new AttributeTypeBuilder();
+        List<AttributeDescriptor> attDescs = featureType.getAttributeDescriptors();
+        for (AttributeDescriptor descriptor : attDescs) {
+            if (descriptor instanceof GeometryDescriptor) {
+                final GeometryDescriptor geomDesc = (GeometryDescriptor) descriptor;
+                final Class<?> geomBinding = Polygon.class;
+                sftBuilder.add(getName(geomDesc.getLocalName()), geomBinding, crs);
+            }
+        }
 
-	public Polygon createRingCell(GeometryFactory gf, Coordinate centroid, double from_deg, double to_deg,
-			double from_radius, double to_radius) {
-		double step = Math.abs(to_deg - from_deg) / 36.;
-		double radian = 0.0;
-		List<Coordinate> outer_ring = new ArrayList<Coordinate>();
-		Coordinate first = null;
-		if (from_radius == 0) {  
-			outer_ring.add(centroid);
-		} else {
-			for (int index = 0; index < 36 + 1; index = index + 1) {
-				radian = toRadians(from_deg + ((double) index * step));
-				outer_ring.add(createCoordinate(centroid, radian, from_radius));
-				if (first == null) {
-					first = createCoordinate(centroid, radian, from_radius);
-				}
-			}
-		}
+        if (attNames != null) {
+            for (int idx = 0; idx < attNames.length; idx++) {
+                String attName = attNames[idx];
+                if (attName == null) {
+                    continue;
+                }
+                Class binding = bindings[idx];
+                final String localName = getName(attName);
+                AttributeType attType = new AttributeTypeImpl(new NameImpl(localName), binding,
+                        false, false, null, null, null);
+                AttributeDescriptor attDesc = new AttributeDescriptorImpl(attType,
+                        new NameImpl(localName), 0, 1, true, null);
+                sftBuilder.add(attBuilder.buildDescriptor(localName, attDesc.getType()));
+            }
+        }
+        return sftBuilder.buildFeatureType();
+    }
 
-		for (int index = 36; index > -1; index = index - 1) {
-			radian = toRadians(from_deg + (index * step));
-			outer_ring.add(createCoordinate(centroid, radian, to_radius));
-		}
+    @SuppressWarnings("rawtypes")
+    private SimpleFeatureType copyShcema(SimpleFeatureType featureType,
+            CoordinateReferenceSystem crs, String typeName, Class<?> geomBinding, String[] attNames,
+            Class[] bindings) {
+        SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
+        sftBuilder.setName(getName(typeName));
+        sftBuilder.setCRS(crs);
 
-		if (from_radius != 0) {
-			outer_ring.add(first);
-		} else {
-			outer_ring.add(centroid);
-		}
-		Coordinate[] coords = outer_ring.toArray(new Coordinate[outer_ring.size()]);
-		Polygon ring = gf.createPolygon(gf.createLinearRing(coords), null);
-		return ring;
-	}
+        AttributeTypeBuilder attBuilder = new AttributeTypeBuilder();
+        List<AttributeDescriptor> attDescs = featureType.getAttributeDescriptors();
+        for (AttributeDescriptor descriptor : attDescs) {
+            if (descriptor instanceof GeometryDescriptor) {
+                final GeometryDescriptor geomDesc = (GeometryDescriptor) descriptor;
+                sftBuilder.add(getName(geomDesc.getLocalName()), geomBinding, crs);
+            } else {
+                final String localName = getName(descriptor.getLocalName());
+                if (localName.equalsIgnoreCase("shape_leng")
+                        || localName.equalsIgnoreCase("shape_area")) {
+                    continue;
+                } else {
+                    sftBuilder.add(attBuilder.buildDescriptor(localName, descriptor.getType()));
+                }
+            }
+        }
 
-	private Coordinate createCoordinate(Coordinate source, double radian, double radius) {
-		double dx = Math.cos(radian) * radius;
-		double dy = Math.sin(radian) * radius;
-		return new Coordinate(source.x + dx, source.y + dy);
-	}
+        if (attNames != null) {
+            for (int idx = 0; idx < attNames.length; idx++) {
+                String attName = attNames[idx];
+                if (attName == null) {
+                    continue;
+                }
+                Class binding = bindings[idx];
+                final String localName = getName(attName);
+                AttributeType attType = new AttributeTypeImpl(new NameImpl(localName), binding,
+                        false, false, null, null, null);
+                AttributeDescriptor attDesc = new AttributeDescriptorImpl(attType,
+                        new NameImpl(localName), 0, 1, true, null);
+                sftBuilder.add(attBuilder.buildDescriptor(localName, attDesc.getType()));
+            }
+        }
+        return sftBuilder.buildFeatureType();
+    }
 
-	private double toDegree(double radians) {
-		return radians * (180.0 / Math.PI);
-	}
+    @SuppressWarnings("unused")
+    private SimpleFeatureType buildLineShcema(SimpleFeatureType featureType,
+            CoordinateReferenceSystem crs, String typeName) {
+        SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
+        sftBuilder.setName(getName(typeName));
+        sftBuilder.setCRS(crs);
 
-	private double toRadians(double degree) {
-		return Math.PI / 180.0 * degree;
-	}
+        AttributeTypeBuilder attBuilder = new AttributeTypeBuilder();
+        List<AttributeDescriptor> attDescs = featureType.getAttributeDescriptors();
+        for (AttributeDescriptor descriptor : attDescs) {
+            if (descriptor instanceof GeometryDescriptor) {
+                final GeometryDescriptor geomDesc = (GeometryDescriptor) descriptor;
+                sftBuilder.add(getName(geomDesc.getLocalName()), LineString.class, crs);
+            } else {
+                final String localName = getName(descriptor.getLocalName());
+                if (localName.equalsIgnoreCase("shape_leng")
+                        || localName.equalsIgnoreCase("shape_area")) {
+                    continue;
+                } else {
+                    sftBuilder.add(attBuilder.buildDescriptor(localName, descriptor.getType()));
+                }
+            }
+        }
 
-	private SimpleFeatureType buildShcema(SimpleFeatureType featureType, CoordinateReferenceSystem crs, String typeName,
-			String[] attNames, Class[] bindings) {
-		SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
-		sftBuilder.setName(getName(typeName));
-		sftBuilder.setCRS(crs);
+        return sftBuilder.buildFeatureType();
+    }
 
-		AttributeTypeBuilder attBuilder = new AttributeTypeBuilder();
-		List<AttributeDescriptor> attDescs = featureType.getAttributeDescriptors();
-		for (AttributeDescriptor descriptor : attDescs) {
-			if (descriptor instanceof GeometryDescriptor) {
-				final GeometryDescriptor geomDesc = (GeometryDescriptor) descriptor;
-				final Class<?> geomBinding = Polygon.class;
-				sftBuilder.add(getName(geomDesc.getLocalName()), geomBinding, crs);
-			}
-		}
+    private String getName(String srcName) {
+        switch (namePolicy) {
+        case NORMAL:
+            return srcName;
+        case UPPERCASE:
+            return srcName.toUpperCase();
+        case LOWERCASE:
+            return srcName.toLowerCase();
+        }
+        return srcName;
+    }
 
-		if (attNames != null) {
-			for (int idx = 0; idx < attNames.length; idx++) {
-				String attName = attNames[idx];
-				if (attName == null) {
-					continue;
-				}
-				Class binding = bindings[idx];
-				final String localName = getName(attName);
-				AttributeType attType = new AttributeTypeImpl(new NameImpl(localName), binding, false, false, null,
-						null, null);
-				AttributeDescriptor attDesc = new AttributeDescriptorImpl(attType, new NameImpl(localName), 0, 1, true,
-						null);
-				sftBuilder.add(attBuilder.buildDescriptor(localName, attDesc.getType()));
-			}
-		}
-		return sftBuilder.buildFeatureType();
-	}
+    @SuppressWarnings({ "unused", "rawtypes" })
+    private SimpleFeatureType buildShcema(SimpleFeatureType featureType,
+            CoordinateReferenceSystem crs, Class geomBinding, String typeName, String[] attNames,
+            Class[] bindings) {
+        SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
+        sftBuilder.setName(getName(typeName));
+        sftBuilder.setCRS(crs);
 
-	private SimpleFeatureType copyShcema(SimpleFeatureType featureType, CoordinateReferenceSystem crs, String typeName,
-			Class<?> geomBinding, String[] attNames, Class[] bindings) {
-		SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
-		sftBuilder.setName(getName(typeName));
-		sftBuilder.setCRS(crs);
+        AttributeTypeBuilder attBuilder = new AttributeTypeBuilder();
+        List<AttributeDescriptor> attDescs = featureType.getAttributeDescriptors();
+        for (AttributeDescriptor descriptor : attDescs) {
+            if (descriptor instanceof GeometryDescriptor) {
+                final GeometryDescriptor geomDesc = (GeometryDescriptor) descriptor;
+                // final Class<?> geomBinding = Polygon.class;
+                sftBuilder.add(getName(geomDesc.getLocalName()), geomBinding, crs);
+            }
+        }
 
-		AttributeTypeBuilder attBuilder = new AttributeTypeBuilder();
-		List<AttributeDescriptor> attDescs = featureType.getAttributeDescriptors();
-		for (AttributeDescriptor descriptor : attDescs) {
-			if (descriptor instanceof GeometryDescriptor) {
-				final GeometryDescriptor geomDesc = (GeometryDescriptor) descriptor;
-				sftBuilder.add(getName(geomDesc.getLocalName()), geomBinding, crs);
-			} else {
-				final String localName = getName(descriptor.getLocalName());
-				if (localName.equalsIgnoreCase("shape_leng") || localName.equalsIgnoreCase("shape_area")) {
-					continue;
-				} else {
-					sftBuilder.add(attBuilder.buildDescriptor(localName, descriptor.getType()));
-				}
-			}
-		}
+        if (attNames != null) {
+            for (int idx = 0; idx < attNames.length; idx++) {
+                String attName = attNames[idx];
+                if (attName == null) {
+                    continue;
+                }
+                Class binding = bindings[idx];
+                final String localName = getName(attName);
+                AttributeType attType = new AttributeTypeImpl(new NameImpl(localName), binding,
+                        false, false, null, null, null);
+                AttributeDescriptor attDesc = new AttributeDescriptorImpl(attType,
+                        new NameImpl(localName), 0, 1, true, null);
+                sftBuilder.add(attBuilder.buildDescriptor(localName, attDesc.getType()));
+            }
+        }
+        return sftBuilder.buildFeatureType();
+    }
 
-		if (attNames != null) {
-			for (int idx = 0; idx < attNames.length; idx++) {
-				String attName = attNames[idx];
-				if (attName == null) {
-					continue;
-				}
-				Class binding = bindings[idx];
-				final String localName = getName(attName);
-				AttributeType attType = new AttributeTypeImpl(new NameImpl(localName), binding, false, false, null,
-						null, null);
-				AttributeDescriptor attDesc = new AttributeDescriptorImpl(attType, new NameImpl(localName), 0, 1, true,
-						null);
-				sftBuilder.add(attBuilder.buildDescriptor(localName, attDesc.getType()));
-			}
-		}
-		return sftBuilder.buildFeatureType();
-	}
+    @SuppressWarnings("unused")
+    private MathTransform getMathTransform(CoordinateReferenceSystem sourceCRS,
+            CoordinateReferenceSystem targetCRS) {
+        if (sourceCRS == null || targetCRS == null) {
+            LOGGER.log(Level.WARNING,
+                    "Input CoordinateReferenceSystem is Unknown Coordinate System!");
+            return null;
+        }
 
-	private SimpleFeatureType buildLineShcema(SimpleFeatureType featureType, CoordinateReferenceSystem crs,
-			String typeName) {
-		SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
-		sftBuilder.setName(getName(typeName));
-		sftBuilder.setCRS(crs);
+        if (CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
+            LOGGER.log(Level.WARNING, "Input and Output Coordinate Reference Systems are equal!");
+            return null;
+        }
 
-		AttributeTypeBuilder attBuilder = new AttributeTypeBuilder();
-		List<AttributeDescriptor> attDescs = featureType.getAttributeDescriptors();
-		for (AttributeDescriptor descriptor : attDescs) {
-			if (descriptor instanceof GeometryDescriptor) {
-				final GeometryDescriptor geomDesc = (GeometryDescriptor) descriptor;
-				sftBuilder.add(getName(geomDesc.getLocalName()), LineString.class, crs);
-			} else {
-				final String localName = getName(descriptor.getLocalName());
-				if (localName.equalsIgnoreCase("shape_leng") || localName.equalsIgnoreCase("shape_area")) {
-					continue;
-				} else {
-					sftBuilder.add(attBuilder.buildDescriptor(localName, descriptor.getType()));
-				}
-			}
-		}
+        MathTransform transform = null;
+        try {
+            transform = CRS.findMathTransform(sourceCRS, targetCRS, false);
+        } catch (FactoryException e1) {
+            LOGGER.log(Level.WARNING, e1.getMessage(), 1);
+        }
 
-		return sftBuilder.buildFeatureType();
-	}
+        return transform;
+    }
 
-	private String getName(String srcName) {
-		switch (namePolicy) {
-		case NORMAL:
-			return srcName;
-		case UPPERCASE:
-			return srcName.toUpperCase();
-		case LOWERCASE:
-			return srcName.toLowerCase();
-		}
-		return srcName;
-	}
+    public static void main(String[] args) {
+    }
 
-	private SimpleFeatureType buildShcema(SimpleFeatureType featureType, CoordinateReferenceSystem crs,
-			Class geomBinding, String typeName, String[] attNames, Class[] bindings) {
-		SimpleFeatureTypeBuilder sftBuilder = new SimpleFeatureTypeBuilder();
-		sftBuilder.setName(getName(typeName));
-		sftBuilder.setCRS(crs);
+    public SimpleFeatureSource getAnchor() {
+        return anchor;
+    }
 
-		AttributeTypeBuilder attBuilder = new AttributeTypeBuilder();
-		List<AttributeDescriptor> attDescs = featureType.getAttributeDescriptors();
-		for (AttributeDescriptor descriptor : attDescs) {
-			if (descriptor instanceof GeometryDescriptor) {
-				final GeometryDescriptor geomDesc = (GeometryDescriptor) descriptor;
-				// final Class<?> geomBinding = Polygon.class;
-				sftBuilder.add(getName(geomDesc.getLocalName()), geomBinding, crs);
-			}
-		}
+    public void setAnchor(SimpleFeatureSource anchor) {
+        this.anchor = anchor;
+    }
 
-		if (attNames != null) {
-			for (int idx = 0; idx < attNames.length; idx++) {
-				String attName = attNames[idx];
-				if (attName == null) {
-					continue;
-				}
-				Class binding = bindings[idx];
-				final String localName = getName(attName);
-				AttributeType attType = new AttributeTypeImpl(new NameImpl(localName), binding, false, false, null,
-						null, null);
-				AttributeDescriptor attDesc = new AttributeDescriptorImpl(attType, new NameImpl(localName), 0, 1, true,
-						null);
-				sftBuilder.add(attBuilder.buildDescriptor(localName, attDesc.getType()));
-			}
-		}
-		return sftBuilder.buildFeatureType();
-	}
+    public Double getMean(List<Double> list) {
+        double sum = 0;
+        if (list == null || list.size() == 0) {
+            return null;
+        }
+        for (Double d : list) {
+            sum += d;
+        }
+        return sum / (double) list.size();
+    }
 
-	private MathTransform getMathTransform(CoordinateReferenceSystem sourceCRS, CoordinateReferenceSystem targetCRS) {
-		if (sourceCRS == null || targetCRS == null) {
-			LOGGER.log(Level.WARNING, "Input CoordinateReferenceSystem is Unknown Coordinate System!");
-			return null;
-		}
+    public Double getMedian(List<Double> list) {
+        int rest = list.size() % 2;
+        int mid = list.size() / 2;
+        if (list.size() == 1) {
+            return list.get(0);
+        }
+        if (list.size() == 0) {
+            return null;
+        }
+        if (rest == 1) {
+            return list.get(mid);
+        } else {
+            return (list.get(mid - 1) + list.get(mid)) / 2.;
+        }
+    }
 
-		if (CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
-			LOGGER.log(Level.WARNING, "Input and Output Coordinate Reference Systems are equal!");
-			return null;
-		}
-
-		MathTransform transform = null;
-		try {
-			transform = CRS.findMathTransform(sourceCRS, targetCRS, false);
-		} catch (FactoryException e1) {
-			LOGGER.log(Level.WARNING, e1.getMessage(), 1);
-		}
-
-		return transform;
-	}
-
-	public static void main(String[] args) {
-	}
-
-	public SimpleFeatureSource getAnchor() {
-		return anchor;
-	}
-
-	public void setAnchor(SimpleFeatureSource anchor) {
-		this.anchor = anchor;
-	}
-
-	public Double getMean(List<Double> list) {
-		double sum = 0;
-		if (list == null || list.size() == 0) {
-			return null;
-		}
-		for (Double d : list) {
-			sum += d;
-		}
-		return sum / (double) list.size();
-	}
-
-	public Double getMedian(List<Double> list) {
-		int rest = list.size() % 2;
-		int mid = list.size() / 2;
-		if (list.size() == 1) {
-			return list.get(0);
-		}
-		if (list.size() == 0) {
-			return null;
-		}
-		if (rest == 1) {
-			return list.get(mid);
-		} else {
-			return (list.get(mid - 1) + list.get(mid)) / 2.;
-		}
-	}
-
-	public Double getStdev(List<Double> list, double mean) {
-		double sum = 0;
-		if (list.size() == 0) {
-			return null;
-		}
-		for (Double d : list) {
-			sum += Math.pow(d - mean, 2);
-		}
-		return Math.sqrt(sum / (double) list.size());
-	}
+    public Double getStdev(List<Double> list, double mean) {
+        double sum = 0;
+        if (list.size() == 0) {
+            return null;
+        }
+        for (Double d : list) {
+            sum += Math.pow(d - mean, 2);
+        }
+        return Math.sqrt(sum / (double) list.size());
+    }
 }

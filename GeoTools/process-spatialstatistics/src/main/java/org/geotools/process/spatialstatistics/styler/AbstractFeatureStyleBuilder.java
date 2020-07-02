@@ -113,7 +113,7 @@ public abstract class AbstractFeatureStyleBuilder {
         this.outlineColor = outlineColor;
     }
 
-    protected RangedClassifier getClassifier(SimpleFeatureCollection inputFeatures,
+    public RangedClassifier getClassifier(SimpleFeatureCollection inputFeatures,
             String propertyName, String methodName, int numClass) {
         // ClassificationFunction : JenksNaturalBreaksFunction, EqualIntervalFunction,
         // StandardDeviationFunction, QuantileFunction, UniqueIntervalFunction, CategorizeFunction
@@ -161,7 +161,7 @@ public abstract class AbstractFeatureStyleBuilder {
         return functionName;
     }
 
-    protected double[] getClassBreaks(RangedClassifier classifier) {
+    public double[] getClassBreaks(RangedClassifier classifier) {
         double[] classBreaks = new double[classifier.getSize() + 1];
 
         for (int slot = 0; slot < classifier.getSize(); slot++) {

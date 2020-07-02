@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.media.jai.JAI;
-import javax.media.jai.OperationDescriptor;
 import javax.media.jai.ParameterBlockJAI;
 import javax.media.jai.RenderedOp;
 
@@ -94,8 +93,8 @@ public class RasterToPolygonOperation extends GeneralOperation {
 
         // prepare feature type
         CoordinateReferenceSystem crs = inputGc.getCoordinateReferenceSystem();
-        SimpleFeatureType featureType = FeatureTypes.getDefaultType("RasterToVector",
-                Polygon.class, crs);
+        SimpleFeatureType featureType = FeatureTypes.getDefaultType("RasterToVector", Polygon.class,
+                crs);
 
         RasterPixelType pixelType = RasterHelper.getTransferType(inputGc);
         switch (pixelType) {
@@ -120,9 +119,6 @@ public class RasterToPolygonOperation extends GeneralOperation {
                     mt.getTranslateY());
 
             // perform jai operation
-            Object o = JAI.getDefaultInstance().getOperationRegistry()
-                    .getDescriptor(OperationDescriptor.class, "Vectorize");
-            System.out.println(o);
             final ParameterBlockJAI pb = new ParameterBlockJAI("Vectorize");
             pb.setSource("source0", inputGc.getRenderedImage());
             pb.setParameter("band", Integer.valueOf(bandIndex));

@@ -19,9 +19,15 @@ package org.geotools.process.spatialstatistics.styler;
 import java.awt.Color;
 import java.util.logging.Logger;
 
+import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.filter.function.RangedClassifier;
+import org.geotools.process.spatialstatistics.clsssifier.DataClassify;
+import org.geotools.process.spatialstatistics.clsssifier.EqualIntervalClassify;
+import org.geotools.process.spatialstatistics.clsssifier.NaturalBreaksClassify;
+import org.geotools.process.spatialstatistics.clsssifier.QuantileClassify;
+import org.geotools.process.spatialstatistics.clsssifier.StandardDeviationClassify;
 import org.geotools.process.spatialstatistics.core.StringHelper;
 import org.geotools.styling.StyleFactory;
 import org.geotools.util.logging.Logging;
@@ -114,23 +120,37 @@ public abstract class AbstractFeatureStyleBuilder {
     }
 
     public RangedClassifier getClassifier(SimpleFeatureCollection inputFeatures,
-            String propertyName, String methodName, int numClass) {
+            String propertyName, String methodName, int numClasses) {
         // ClassificationFunction : JenksNaturalBreaksFunction, EqualIntervalFunction,
         // StandardDeviationFunction, QuantileFunction, UniqueIntervalFunction, CategorizeFunction
 
-        String functionName = getFunctionName(methodName);
-        Function function = ff.function(functionName, ff.property(propertyName),
-                ff.literal(numClass));
-        return (RangedClassifier) function.evaluate(inputFeatures);
+        // String functionName = getFunctionName(methodName);
+        // Function function = ff.function(functionName, ff.property(propertyName), ff.literal(numClass));
+        // return (RangedClassifier) function.evaluate(inputFeatures);
+
+        DataClassify classifier = getDataClassifier(methodName);
+        Double[] classBreaks = classifier.classify(inputFeatures, propertyName, numClasses);
+
+        final int size = classBreaks.length - 1;
+
+        Comparable<?>[] localMin = new Comparable[size];
+        Comparable<?>[] localMax = new Comparable[size];
+
+        for (int i = 0; i < size; i++) {
+            localMin[i] = classBreaks[i];
+            localMax[i] = classBreaks[i + 1];
+        }
+
+        return new RangedClassifier(localMin, localMax);
     }
 
-    protected RangedClassifier getClassifier(SimpleFeatureCollection inputFeatures,
-            String propertyName, String normalProeprtyName, String methodName, int numClass) {
+    public RangedClassifier getClassifier(SimpleFeatureCollection inputFeatures,
+            String propertyName, String normalPropertyName, String methodName, int numClass) {
         // ClassificationFunction : JenksNaturalBreaksFunction, EqualIntervalFunction,
         // StandardDeviationFunction, QuantileFunction, UniqueIntervalFunction, CategorizeFunction
 
         String functionName = getFunctionName(methodName);
-        Divide divide = ff.divide(ff.property(propertyName), ff.property(normalProeprtyName));
+        Divide divide = ff.divide(ff.property(propertyName), ff.property(normalPropertyName));
         Function function = ff.function(functionName, divide, ff.literal(numClass));
 
         return (RangedClassifier) function.evaluate(inputFeatures);
@@ -159,6 +179,41 @@ public abstract class AbstractFeatureStyleBuilder {
         }
 
         return functionName;
+    }
+
+    public RangedClassifier getClassifier(GridCoverage2D coverage, int bandIndex, String methodName,
+            int numClasses) {
+        DataClassify classifier = getDataClassifier(methodName);
+        Double[] classBreaks = classifier.classify(coverage, bandIndex, numClasses);
+
+        final int size = classBreaks.length - 1;
+
+        Comparable<?>[] localMin = new Comparable[size];
+        Comparable<?>[] localMax = new Comparable[size];
+
+        for (int i = 0; i < size; i++) {
+            localMin[i] = classBreaks[i];
+            localMax[i] = classBreaks[i + 1];
+        }
+
+        return new RangedClassifier(localMin, localMax);
+    }
+
+    private DataClassify getDataClassifier(String methodName) {
+        DataClassify classifier = new NaturalBreaksClassify();
+
+        methodName = methodName.toUpperCase();
+        if (methodName.startsWith("NA") || methodName.startsWith("JENK")) {
+            classifier = new NaturalBreaksClassify();
+        } else if (methodName.startsWith("QU")) {
+            classifier = new QuantileClassify();
+        } else if (methodName.startsWith("EQ")) {
+            classifier = new EqualIntervalClassify();
+        } else if (methodName.startsWith("ST")) {
+            classifier = new StandardDeviationClassify();
+        }
+
+        return classifier;
     }
 
     public double[] getClassBreaks(RangedClassifier classifier) {

@@ -29,6 +29,8 @@ import org.geotools.process.ProcessException;
 import org.geotools.process.ProcessFactory;
 import org.geotools.process.RenderingProcess;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.BufferEndCapStyle;
+import org.geotools.process.spatialstatistics.enumeration.BufferJoinStyle;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.transformation.BufferExpressionFeatureCollection;
 import org.geotools.util.factory.Hints;
@@ -65,11 +67,20 @@ public class BufferExpressionProcess extends AbstractStatisticsProcess implement
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
             Expression distance, DistanceUnit distanceUnit, Integer quadrantSegments,
             ProgressListener monitor) {
+        return BufferExpressionProcess.process(inputFeatures, distance, distanceUnit,
+                quadrantSegments, BufferEndCapStyle.Round, BufferJoinStyle.Round, monitor);
+    }
+
+    public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
+            Expression distance, DistanceUnit distanceUnit, Integer quadrantSegments,
+            BufferEndCapStyle endCapStyle, BufferJoinStyle joinStyle, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(BufferExpressionProcessFactory.inputFeatures.key, inputFeatures);
         map.put(BufferExpressionProcessFactory.distance.key, distance);
         map.put(BufferExpressionProcessFactory.distanceUnit.key, distanceUnit);
         map.put(BufferExpressionProcessFactory.quadrantSegments.key, quadrantSegments);
+        map.put(BufferExpressionProcessFactory.endCapStyle.key, endCapStyle);
+        map.put(BufferExpressionProcessFactory.joinStyle.key, joinStyle);
 
         Process process = new BufferExpressionProcess(null);
         Map<String, Object> resultMap;
@@ -92,6 +103,9 @@ public class BufferExpressionProcess extends AbstractStatisticsProcess implement
 
         Expression distance = (Expression) Params.getValue(input,
                 BufferExpressionProcessFactory.distance, null);
+        if (inputFeatures == null || distance == null) {
+            throw new NullPointerException("All parameters required");
+        }
 
         DistanceUnit distanceUnit = (DistanceUnit) Params.getValue(input,
                 BufferExpressionProcessFactory.distanceUnit,
@@ -100,14 +114,19 @@ public class BufferExpressionProcess extends AbstractStatisticsProcess implement
         Integer quadrantSegments = (Integer) Params.getValue(input,
                 BufferExpressionProcessFactory.quadrantSegments,
                 BufferExpressionProcessFactory.quadrantSegments.sample);
-        if (inputFeatures == null || distance == null) {
-            throw new NullPointerException("All parameters required");
-        }
+
+        BufferEndCapStyle endCapStyle = (BufferEndCapStyle) Params.getValue(input,
+                BufferExpressionProcessFactory.endCapStyle,
+                BufferExpressionProcessFactory.endCapStyle.sample);
+
+        BufferJoinStyle joinStyle = (BufferJoinStyle) Params.getValue(input,
+                BufferExpressionProcessFactory.joinStyle,
+                BufferExpressionProcessFactory.joinStyle.sample);
 
         // start process
         SimpleFeatureCollection resultFc = DataUtilities
-                .simple(new BufferExpressionFeatureCollection(inputFeatures, distance,
-                        distanceUnit, quadrantSegments));
+                .simple(new BufferExpressionFeatureCollection(inputFeatures, distance, distanceUnit,
+                        quadrantSegments, endCapStyle, joinStyle));
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

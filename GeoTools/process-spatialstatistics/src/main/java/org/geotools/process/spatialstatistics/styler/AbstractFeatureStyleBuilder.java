@@ -24,10 +24,6 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.filter.function.RangedClassifier;
 import org.geotools.process.spatialstatistics.clsssifier.DataClassify;
-import org.geotools.process.spatialstatistics.clsssifier.EqualIntervalClassify;
-import org.geotools.process.spatialstatistics.clsssifier.NaturalBreaksClassify;
-import org.geotools.process.spatialstatistics.clsssifier.QuantileClassify;
-import org.geotools.process.spatialstatistics.clsssifier.StandardDeviationClassify;
 import org.geotools.process.spatialstatistics.core.StringHelper;
 import org.geotools.styling.StyleFactory;
 import org.geotools.util.logging.Logging;
@@ -128,7 +124,7 @@ public abstract class AbstractFeatureStyleBuilder {
         // Function function = ff.function(functionName, ff.property(propertyName), ff.literal(numClass));
         // return (RangedClassifier) function.evaluate(inputFeatures);
 
-        DataClassify classifier = getDataClassifier(methodName);
+        DataClassify classifier = DataClassify.getDataClassifier(methodName);
         Double[] classBreaks = classifier.classify(inputFeatures, propertyName, numClasses);
 
         final int size = classBreaks.length - 1;
@@ -183,7 +179,7 @@ public abstract class AbstractFeatureStyleBuilder {
 
     public RangedClassifier getClassifier(GridCoverage2D coverage, int bandIndex, String methodName,
             int numClasses) {
-        DataClassify classifier = getDataClassifier(methodName);
+        DataClassify classifier = DataClassify.getDataClassifier(methodName);
         Double[] classBreaks = classifier.classify(coverage, bandIndex, numClasses);
 
         final int size = classBreaks.length - 1;
@@ -197,23 +193,6 @@ public abstract class AbstractFeatureStyleBuilder {
         }
 
         return new RangedClassifier(localMin, localMax);
-    }
-
-    private DataClassify getDataClassifier(String methodName) {
-        DataClassify classifier = new NaturalBreaksClassify();
-
-        methodName = methodName.toUpperCase();
-        if (methodName.startsWith("NA") || methodName.startsWith("JENK")) {
-            classifier = new NaturalBreaksClassify();
-        } else if (methodName.startsWith("QU")) {
-            classifier = new QuantileClassify();
-        } else if (methodName.startsWith("EQ")) {
-            classifier = new EqualIntervalClassify();
-        } else if (methodName.startsWith("ST")) {
-            classifier = new StandardDeviationClassify();
-        }
-
-        return classifier;
     }
 
     public double[] getClassBreaks(RangedClassifier classifier) {

@@ -26,13 +26,11 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.AttributeTypeBuilder;
 import org.geotools.feature.NameImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.feature.type.AttributeDescriptorImpl;
 import org.geotools.feature.type.AttributeTypeImpl;
-import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.process.spatialstatistics.storage.NamePolicy;
@@ -55,7 +53,6 @@ import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.And;
 import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.PropertyName;
 import org.opengis.filter.spatial.Intersects;
 import org.opengis.referencing.FactoryException;
@@ -86,11 +83,7 @@ public class MultiWindRoseOperation extends GeneralOperation {
         return namePolicy;
     }
 
-    private GeometryFactory fGf = JTSFactoryFinder.getGeometryFactory(null);
-
     private SimpleFeatureSource anchor;
-
-    static FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
 
     public SimpleFeatureSource execute(Collection<SimpleFeatureCollection> inputFeatureses,
             String[] weightFields, SimpleFeatureCollection centerFeatures, Double searchRadius,
@@ -227,7 +220,7 @@ public class MultiWindRoseOperation extends GeneralOperation {
                     idx = 0;
                     Double fval = 0.;
                     SimpleFeature newFeature = countingWriter.buildFeature();
-                    Polygon cell = createRingCell(fGf, centerCoords, fromDeg, toDeg, defaultRadius);
+                    Polygon cell = createRingCell(gf, centerCoords, fromDeg, toDeg, defaultRadius);
                     for (idx = 0; idx < tmpInputFeatures.length; idx++) {
                         if (tmpInputFeatures[idx] == null) {
                             continue;
@@ -340,7 +333,7 @@ public class MultiWindRoseOperation extends GeneralOperation {
                 double y = (Double) sf.getAttribute(valueField + "_y");
                 CoordinateSequence cs = new CoordinateArraySequence(
                         new Coordinate[] { new Coordinate(x, y) });
-                Point center = new Point(cs, fGf);
+                Point center = new Point(cs, gf);
 
                 // double radius = (Double) sf.getAttribute(valueField +"_radius");
                 double roseRadius = sumVal / maxVal * radius;
@@ -364,7 +357,7 @@ public class MultiWindRoseOperation extends GeneralOperation {
                         // System.out.println(curVals[idx] + "/" + sumVal + "/" + roseRadius + "/"
                         // + fromRadius + "/" + toRadius);
                         defaultRadius = fromRadius + toRadius;
-                        Polygon cell = createRingCell(fGf, center.getCoordinate(), fromDeg, toDeg,
+                        Polygon cell = createRingCell(gf, center.getCoordinate(), fromDeg, toDeg,
                                 fromRadius, fromRadius + toRadius);
 
                         newFeature.setDefaultGeometry(cell);
@@ -388,14 +381,14 @@ public class MultiWindRoseOperation extends GeneralOperation {
                 }
 
                 for (double start = radius / 5.; start <= radius; start = start + (radius) / 5.) {
-                    LineString line = createRingDistance(fGf, center.getCoordinate(), start);
+                    LineString line = createRingDistance(gf, center.getCoordinate(), start);
                     SimpleFeature newFeature = anchorWriter.buildFeature();
                     newFeature.setAttribute("distance", start);
                     newFeature.setDefaultGeometry(line);
                     copyAttribute(sf, newFeature);
                     anchorWriter.write(newFeature);
                 }
-                LineString maxLine = createRingDistance(fGf, center.getCoordinate(), radius);
+                LineString maxLine = createRingDistance(gf, center.getCoordinate(), radius);
                 SimpleFeature maxFeature = anchorWriter.buildFeature();
                 maxFeature.setDefaultGeometry(maxLine);
                 maxFeature.setAttribute("distance", radius);
@@ -403,7 +396,7 @@ public class MultiWindRoseOperation extends GeneralOperation {
                 anchorWriter.write(maxFeature);
                 int dirIdx = 0;
                 for (double start = 0; start < 360; start = start + 22.5) {
-                    LineString line = createRingDirection(fGf, center.getCoordinate(), radius,
+                    LineString line = createRingDirection(gf, center.getCoordinate(), radius,
                             start);
                     SimpleFeature newFeature = anchorWriter.buildFeature();
                     newFeature.setDefaultGeometry(line);
@@ -564,7 +557,7 @@ public class MultiWindRoseOperation extends GeneralOperation {
                     idx = 0;
                     Double fval = 0.;
                     SimpleFeature newFeature = countingWriter.buildFeature();
-                    Polygon cell = createRingCell(fGf, centerCoords, fromDeg, toDeg, defaultRadius);
+                    Polygon cell = createRingCell(gf, centerCoords, fromDeg, toDeg, defaultRadius);
                     for (idx = 0; idx < tmpInputFeatures.length; idx++) {
                         if (tmpInputFeatures[idx] == null) {
                             continue;
@@ -678,7 +671,7 @@ public class MultiWindRoseOperation extends GeneralOperation {
                 double y = (Double) sf.getAttribute(valueField + "_y");
                 CoordinateSequence cs = new CoordinateArraySequence(
                         new Coordinate[] { new Coordinate(x, y) });
-                Point center = new Point(cs, fGf);
+                Point center = new Point(cs, gf);
 
                 // double radius = (Double) sf.getAttribute(valueField +"_radius");
                 double roseRadius = sumVal / maxVal * radius;
@@ -702,7 +695,7 @@ public class MultiWindRoseOperation extends GeneralOperation {
                         // System.out.println(curVals[idx] + "/" + sumVal + "/" + roseRadius + "/"
                         // + fromRadius + "/" + toRadius);
                         defaultRadius = fromRadius + toRadius;
-                        Polygon cell = createRingCell(fGf, center.getCoordinate(), fromDeg, toDeg,
+                        Polygon cell = createRingCell(gf, center.getCoordinate(), fromDeg, toDeg,
                                 fromRadius, fromRadius + toRadius);
 
                         newFeature.setDefaultGeometry(cell);
@@ -726,14 +719,14 @@ public class MultiWindRoseOperation extends GeneralOperation {
                 }
 
                 for (double start = radius / 5.; start <= radius; start = start + (radius) / 5.) {
-                    LineString line = createRingDistance(fGf, center.getCoordinate(), start);
+                    LineString line = createRingDistance(gf, center.getCoordinate(), start);
                     SimpleFeature newFeature = anchorWriter.buildFeature();
                     newFeature.setAttribute("distance", start);
                     newFeature.setDefaultGeometry(line);
                     copyAttribute(sf, newFeature);
                     anchorWriter.write(newFeature);
                 }
-                LineString maxLine = createRingDistance(fGf, center.getCoordinate(), radius);
+                LineString maxLine = createRingDistance(gf, center.getCoordinate(), radius);
                 SimpleFeature maxFeature = anchorWriter.buildFeature();
                 maxFeature.setDefaultGeometry(maxLine);
                 maxFeature.setAttribute("distance", radius);
@@ -741,7 +734,7 @@ public class MultiWindRoseOperation extends GeneralOperation {
                 anchorWriter.write(maxFeature);
                 int dirIdx = 0;
                 for (double start = 0; start < 360; start = start + 22.5) {
-                    LineString line = createRingDirection(fGf, center.getCoordinate(), radius,
+                    LineString line = createRingDirection(gf, center.getCoordinate(), radius,
                             start);
                     SimpleFeature newFeature = anchorWriter.buildFeature();
                     newFeature.setDefaultGeometry(line);

@@ -31,9 +31,8 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.operations.MultiWindRoseOperation;
 import org.geotools.text.Text;
 import org.geotools.util.logging.Logging;
-import org.opengis.util.ProgressListener;
-
 import org.locationtech.jts.geom.Geometry;
+import org.opengis.util.ProgressListener;
 
 /**
  * Creates a wind roses map from features.
@@ -56,24 +55,13 @@ public class MultiWindRoseMapProcess extends AbstractStatisticsProcess {
     public static SimpleFeatureCollection process(Collection<SimpleFeatureCollection> inputFeatures,
             String weightFields, SimpleFeatureCollection centerFeatures, Geometry centerPoint,
             Double searchRadius, String valueField, int roseCnt, ProgressListener monitor) {
-        // SimpleFeatureCollection inputFeatures, String weightField,
-        // SimpleFeatureCollection centerFeatures, double searchRadius, String valueField, int roseCnt
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(MultiWindRoseMapProcessFactory.inputFeatures.key, inputFeatures);
         map.put(MultiWindRoseMapProcessFactory.weightFields.key, weightFields);
-        // map.put(VA_WindRoseFactory.inputFeatures2.key, inputFeatures[1]);
-        // map.put(VA_WindRoseFactory.weightField2.key, weightField[1]);
-        // map.put(VA_WindRoseFactory.inputFeatures3.key, inputFeatures[2]);
-        // map.put(VA_WindRoseFactory.weightField3.key, weightField[2]);
         map.put(MultiWindRoseMapProcessFactory.centerFeatures.key, centerFeatures);
         map.put(MultiWindRoseMapProcessFactory.centerPoint.key, centerPoint);
         map.put(MultiWindRoseMapProcessFactory.searchRadius.key, searchRadius);
         map.put(MultiWindRoseMapProcessFactory.roseCount.key, roseCnt);
-
-        // parameterInfo.put(inputFeatures.key, inputFeatures);
-        // parameterInfo.put(weightField.key, weightField);
-        // parameterInfo.put(valueField.key, valueField);
-        // parameterInfo.put(roseCount.key, roseCount);
 
         Process process = new MultiWindRoseMapProcess(null);
         Map<String, Object> resultMap;
@@ -104,17 +92,6 @@ public class MultiWindRoseMapProcess extends AbstractStatisticsProcess {
 
         String weightFiels = (String) Params.getValue(input,
                 MultiWindRoseMapProcessFactory.weightFields, null);
-
-        // SimpleFeatureCollection inputFeatures2 = (SimpleFeatureCollection) ParamUtil.getParam(
-        // input, MultiWindRoseMapProcessFactory.inputFeatures2, null);
-        //
-        // String weightField2 = (String) ParamUtil.getParam(input, VA_WindRoseFactory.weightField2,
-        // null);
-        // SimpleFeatureCollection inputFeatures3 = (SimpleFeatureCollection) ParamUtil.getParam(
-        // input, MultiWindRoseMapProcessFactory.inputFeatures3, null);
-        //
-        // String weightField3 = (String) ParamUtil.getParam(input, VA_WindRoseFactory.weightField3,
-        // null);
         SimpleFeatureCollection centerFeatures = (SimpleFeatureCollection) Params.getValue(input,
                 MultiWindRoseMapProcessFactory.centerFeatures, null);
         Geometry centerPoint = (Geometry) Params.getValue(input,
@@ -122,7 +99,8 @@ public class MultiWindRoseMapProcess extends AbstractStatisticsProcess {
         Double searchRadius = (Double) Params.getValue(input,
                 MultiWindRoseMapProcessFactory.searchRadius, null);
         Integer roseCount = (Integer) Params.getValue(input,
-                MultiWindRoseMapProcessFactory.roseCount, Integer.valueOf(36));
+                MultiWindRoseMapProcessFactory.roseCount,
+                MultiWindRoseMapProcessFactory.roseCount.sample);
 
         // start process
         SimpleFeatureCollection resultFc = null;
@@ -139,12 +117,12 @@ public class MultiWindRoseMapProcess extends AbstractStatisticsProcess {
 
             if (weightFiels != null && tgInputFeatures.size() != tgWeightFields.length) {
                 throw new ProcessException(
-                        "The number of parasmeters InputFeatures and WeightFields in the process are different.");
+                        "The number of parameters InputFeatures and WeightFields in the process are different.");
             }
 
             if (centerFeatures == null && centerPoint == null) {
                 throw new ProcessException(
-                        "The number of parasmeters InputFeatures and WeightFields in the process are different.");
+                        "The number of parameters InputFeatures and WeightFields in the process are different.");
             }
 
             MultiWindRoseOperation process = new MultiWindRoseOperation();
@@ -170,7 +148,6 @@ public class MultiWindRoseMapProcess extends AbstractStatisticsProcess {
         Map<String, Object> resultMap = new HashMap<String, Object>();
         resultMap.put(MultiWindRoseMapProcessFactory.result.key, resultFc);
         resultMap.put(MultiWindRoseMapProcessFactory.anchor.key, anchorFc);
-        // resultMap.put(VA_RingMapFactory.ring_anchor.key, anchorFc);
         monitor.complete(); // same as 100.0f
 
         return resultMap;

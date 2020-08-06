@@ -103,9 +103,9 @@ public class RectangularBinningProcess extends AbstractStatisticsProcess {
         }
 
         if (width == null || width <= 0 || height == null || height <= 0) {
-            width = Math.min(bbox.getWidth(), bbox.getHeight()) / 250.0d;
+            width = Math.min(bbox.getWidth(), bbox.getHeight()) / 40.0d;
             height = width;
-            LOGGER.log(Level.WARNING, "The default width / height is " + width);
+            LOGGER.log(Level.WARNING, "The default grid width/height is " + width);
         }
 
         SimpleFeatureCollection resultFc = null;

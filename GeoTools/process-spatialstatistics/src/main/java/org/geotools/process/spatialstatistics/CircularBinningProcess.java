@@ -99,8 +99,8 @@ public class CircularBinningProcess extends AbstractStatisticsProcess {
         }
 
         if (radius == null || radius <= 0) {
-            radius = (Math.min(bbox.getWidth(), bbox.getHeight()) / 250.0d) / 2.0d;
-            LOGGER.log(Level.WARNING, "The default width / height is " + radius);
+            radius = Math.min(bbox.getWidth(), bbox.getHeight()) / 40.0d;
+            LOGGER.log(Level.WARNING, "The default circle radius is " + radius);
         }
 
         SimpleFeatureCollection resultFc = null;

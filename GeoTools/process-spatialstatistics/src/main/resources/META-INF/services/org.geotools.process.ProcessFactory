@@ -32,6 +32,7 @@ org.geotools.process.spatialstatistics.LocalLeesSProcessFactory
 org.geotools.process.spatialstatistics.LocalLeesLProcessFactory
 org.geotools.process.spatialstatistics.LocalRogersonRProcessFactory
 org.geotools.process.spatialstatistics.LocalSABinningProcessFactory
+org.geotools.process.spatialstatistics.LocalSAOverlayProcessFactory
 
 org.geotools.process.spatialstatistics.MeanCenterProcessFactory
 org.geotools.process.spatialstatistics.MedianCenterProcessFactory

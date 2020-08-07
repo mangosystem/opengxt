@@ -19,9 +19,11 @@ package org.geotools.process.spatialstatistics.styler;
 import java.awt.Color;
 import java.util.logging.Logger;
 
+import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.filter.function.RangedClassifier;
+import org.geotools.process.spatialstatistics.clsssifier.DataClassify;
 import org.geotools.process.spatialstatistics.core.StringHelper;
 import org.geotools.styling.StyleFactory;
 import org.geotools.util.logging.Logging;
@@ -113,24 +115,38 @@ public abstract class AbstractFeatureStyleBuilder {
         this.outlineColor = outlineColor;
     }
 
-    protected RangedClassifier getClassifier(SimpleFeatureCollection inputFeatures,
-            String propertyName, String methodName, int numClass) {
+    public RangedClassifier getClassifier(SimpleFeatureCollection inputFeatures,
+            String propertyName, String methodName, int numClasses) {
         // ClassificationFunction : JenksNaturalBreaksFunction, EqualIntervalFunction,
         // StandardDeviationFunction, QuantileFunction, UniqueIntervalFunction, CategorizeFunction
 
-        String functionName = getFunctionName(methodName);
-        Function function = ff.function(functionName, ff.property(propertyName),
-                ff.literal(numClass));
-        return (RangedClassifier) function.evaluate(inputFeatures);
+        // String functionName = getFunctionName(methodName);
+        // Function function = ff.function(functionName, ff.property(propertyName), ff.literal(numClass));
+        // return (RangedClassifier) function.evaluate(inputFeatures);
+
+        DataClassify classifier = DataClassify.getDataClassifier(methodName);
+        Double[] classBreaks = classifier.classify(inputFeatures, propertyName, numClasses);
+
+        final int size = classBreaks.length - 1;
+
+        Comparable<?>[] localMin = new Comparable[size];
+        Comparable<?>[] localMax = new Comparable[size];
+
+        for (int i = 0; i < size; i++) {
+            localMin[i] = classBreaks[i];
+            localMax[i] = classBreaks[i + 1];
+        }
+
+        return new RangedClassifier(localMin, localMax);
     }
 
-    protected RangedClassifier getClassifier(SimpleFeatureCollection inputFeatures,
-            String propertyName, String normalProeprtyName, String methodName, int numClass) {
+    public RangedClassifier getClassifier(SimpleFeatureCollection inputFeatures,
+            String propertyName, String normalPropertyName, String methodName, int numClass) {
         // ClassificationFunction : JenksNaturalBreaksFunction, EqualIntervalFunction,
         // StandardDeviationFunction, QuantileFunction, UniqueIntervalFunction, CategorizeFunction
 
         String functionName = getFunctionName(methodName);
-        Divide divide = ff.divide(ff.property(propertyName), ff.property(normalProeprtyName));
+        Divide divide = ff.divide(ff.property(propertyName), ff.property(normalPropertyName));
         Function function = ff.function(functionName, divide, ff.literal(numClass));
 
         return (RangedClassifier) function.evaluate(inputFeatures);
@@ -161,7 +177,25 @@ public abstract class AbstractFeatureStyleBuilder {
         return functionName;
     }
 
-    protected double[] getClassBreaks(RangedClassifier classifier) {
+    public RangedClassifier getClassifier(GridCoverage2D coverage, int bandIndex, String methodName,
+            int numClasses) {
+        DataClassify classifier = DataClassify.getDataClassifier(methodName);
+        Double[] classBreaks = classifier.classify(coverage, bandIndex, numClasses);
+
+        final int size = classBreaks.length - 1;
+
+        Comparable<?>[] localMin = new Comparable[size];
+        Comparable<?>[] localMax = new Comparable[size];
+
+        for (int i = 0; i < size; i++) {
+            localMin[i] = classBreaks[i];
+            localMax[i] = classBreaks[i + 1];
+        }
+
+        return new RangedClassifier(localMin, localMax);
+    }
+
+    public double[] getClassBreaks(RangedClassifier classifier) {
         double[] classBreaks = new double[classifier.getSize() + 1];
 
         for (int slot = 0; slot < classifier.getSize(); slot++) {

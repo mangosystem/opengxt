@@ -11,7 +11,7 @@
   <!-- =========================================================== -->
   <groupId>org.geoserver</groupId>
   <artifactId>gs-wps-spatialstatistics</artifactId>
-  <version>2.15-SNAPSHOT</version>
+  <version>2.17.2</version>
   <packaging>jar</packaging>
   <name>Spatial Statistics Web Processing Service Module</name>
   <url>https://github.com/MapPlus/spatial_statistics_for_geotools_udig</url>
@@ -27,35 +27,48 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <gt.version>21-SNAPSHOT</gt.version>
+    <gt.version>23.2</gt.version>
     <wicket.version>7.6.0</wicket.version>
   </properties>
   
   <repositories>
     <repository>
-      <id>boundless</id>
-      <name>Boundless Maven Repository</name>
-      <url>https://repo.boundlessgeo.com/main/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>geosolutions</id>
-      <name>geosolutions repository</name>
-      <url>http://maven.geo-solutions.it/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>osgeo</id>
-      <name>Open Source Geospatial Foundation Repository</name>
-      <url>http://download.osgeo.org/webdav/geotools/</url>
+      <id>central.maven.org</id>
+      <name>Central Maven repository</name>
+      <url>http://central.maven.org/maven2</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
     </repository>
+    
+    <repository>
+      <id>osgeo</id>
+      <name>OSGeo Nexus Release Repository</name>
+      <url>https://repo.osgeo.org/repository/release/</url>
+      <!-- contains release (including third-party-dependences)                            -->
+      <!-- ucar (https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases) -->
+      <!-- geosolutions (http://maven.geo-solutions.it/)                                   -->
+      <snapshots><enabled>false</enabled></snapshots>
+      <releases><enabled>true</enabled></releases>
+    </repository>
+
+    <repository>
+      <id>osgeo-snapshot</id>
+      <name>OSGeo Nexus Snapshot Repository</name>
+      <url>https://repo.osgeo.org/repository/snapshot/</url>
+      <snapshots><enabled>true</enabled></snapshots>
+      <releases><enabled>false</enabled></releases>
+    </repository>
+    
+    <repository>
+      <id>geosolutions</id>
+      <name>GeoSolutions Repository</name>
+      <url>http://maven.geo-solutions.it</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    
     <repository>
       <id>maven-restlet</id>
       <name>Restlet Maven Repository</name>
@@ -328,6 +341,26 @@
     </testResources>
     
     <plugins>
+      <!-- ======================================================= -->
+      <!--     Compilation.                                        -->
+      <!-- ======================================================= -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.0</version>
+        <configuration>
+          <source>1.8</source>  <!-- The -source argument for the Java compiler. -->
+          <target>1.8</target>  <!-- The -target argument for the Java compiler. -->
+          <debug>true</debug>   <!-- Whether to include debugging information.   -->
+          <encoding>UTF-8</encoding> <!-- The -encoding argument for the Java compiler. -->
+          <fork>${fork.javac}</fork>
+          <maxmem>${javac.maxHeapSize}</maxmem>
+        </configuration>
+      </plugin>
+    
+      <!-- ======================================================= -->
+      <!--     JAR packaging.                                      -->
+      <!-- ======================================================= -->
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <version>3.1.0</version>
@@ -338,22 +371,35 @@
               <addClasspath>false</addClasspath>
             </manifest>
             <manifestEntries>
-              <Specification-Title>OpenGXT</Specification-Title>
+              <Specification-Title>OpenGXT-GeoServer</Specification-Title>
               <Specification-Version>${project.version}</Specification-Version>
               <Specification-Vendor>${project.url}</Specification-Vendor>
             </manifestEntries>
           </archive>
         </configuration>
       </plugin>
-     <!-- resources -->
-     <plugin>
-       <groupId>org.apache.maven.plugins</groupId>
-       <artifactId>maven-resources-plugin</artifactId>
-       <version>2.6</version>
-       <configuration>
-         <encoding>UTF-8</encoding>
-       </configuration>
-     </plugin>
+      
+      <!-- ======================================================= -->
+      <!--     Source packaging.                                   -->
+      <!-- ======================================================= -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.0.1</version>
+        <inherited>true</inherited>
+        <configuration>
+          <attach>true</attach>
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      
     </plugins>
   
     <extensions>

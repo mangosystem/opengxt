@@ -28,6 +28,8 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
+import org.geotools.process.spatialstatistics.enumeration.BufferEndCapStyle;
+import org.geotools.process.spatialstatistics.enumeration.BufferJoinStyle;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
@@ -47,8 +49,8 @@ public class BufferExpressionProcessFactory extends SpatialStatisticsProcessFact
     private static final String PROCESS_NAME = "BufferFeatures";
 
     /*
-     * BufferFeatures(SimpleFeatureCollection inputFeatures, Expression distance, DistanceUnit distanceUnit, int quadrantSegments):
-     * SimpleFeatureCollection
+     * BufferFeatures(SimpleFeatureCollection inputFeatures, Expression distance, DistanceUnit distanceUnit, Integer quadrantSegments,
+     * BufferEndCapStyle endCapStyle, BufferJoinStyle joinStyle): SimpleFeatureCollection
      */
 
     public BufferExpressionProcessFactory() {
@@ -79,8 +81,8 @@ public class BufferExpressionProcessFactory extends SpatialStatisticsProcessFact
     /** distance */
     public static final Parameter<Expression> distance = new Parameter<Expression>("distance",
             Expression.class, getResource("BufferFeatures.distance.title"),
-            getResource("BufferFeatures.distance.description"), true, 1, 1, null, new KVP(
-                    Params.FIELD, "inputFeatures.Number"));
+            getResource("BufferFeatures.distance.description"), true, 1, 1, null,
+            new KVP(Params.FIELD, "inputFeatures.Number"));
 
     /** distanceUnit */
     public static final Parameter<DistanceUnit> distanceUnit = new Parameter<DistanceUnit>(
@@ -90,10 +92,21 @@ public class BufferExpressionProcessFactory extends SpatialStatisticsProcessFact
 
     /** quadrantSegments */
     public static final Parameter<Integer> quadrantSegments = new Parameter<Integer>(
-            "quadrantSegments", Integer.class,
-            getResource("BufferFeatures.quadrantSegments.title"),
+            "quadrantSegments", Integer.class, getResource("BufferFeatures.quadrantSegments.title"),
             getResource("BufferFeatures.quadrantSegments.description"), false, 0, 1,
             Integer.valueOf(8), null);
+
+    /** endCapStyle */
+    public static final Parameter<BufferEndCapStyle> endCapStyle = new Parameter<BufferEndCapStyle>(
+            "endCapStyle", BufferEndCapStyle.class, getResource("BufferFeatures.endCapStyle.title"),
+            getResource("BufferFeatures.endCapStyle.description"), false, 0, 1,
+            BufferEndCapStyle.Round, null);
+
+    /** joinStyle */
+    public static final Parameter<BufferJoinStyle> joinStyle = new Parameter<BufferJoinStyle>(
+            "joinStyle", BufferJoinStyle.class, getResource("BufferFeatures.joinStyle.title"),
+            getResource("BufferFeatures.joinStyle.description"), false, 0, 1, BufferJoinStyle.Round,
+            null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -102,6 +115,8 @@ public class BufferExpressionProcessFactory extends SpatialStatisticsProcessFact
         parameterInfo.put(distance.key, distance);
         parameterInfo.put(distanceUnit.key, distanceUnit);
         parameterInfo.put(quadrantSegments.key, quadrantSegments);
+        parameterInfo.put(endCapStyle.key, endCapStyle);
+        parameterInfo.put(joinStyle.key, joinStyle);
         return parameterInfo;
     }
 

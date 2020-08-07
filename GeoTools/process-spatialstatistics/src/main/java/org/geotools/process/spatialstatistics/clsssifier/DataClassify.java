@@ -41,13 +41,17 @@ import org.opengis.filter.expression.Expression;
 
 /**
  * Classify objects apply one of several methods to statistically subdivide a set of numeric values into classes.
- * 
+ *
  * @author Minpa Lee, MangoSystem
- * 
+ *
  * @source $URL$
  */
 public abstract class DataClassify {
     protected static final Logger LOGGER = Logging.getLogger(DataClassify.class);
+
+    public enum ClassificationMethod {
+        EqualInterval, Quantile, NaturalBreaks, StandardDeviation
+    }
 
     protected Double[] classBreaks;
 
@@ -57,7 +61,7 @@ public abstract class DataClassify {
 
     /**
      * The name of the classification method
-     * 
+     *
      * @return
      */
     public abstract String getMethodName();
@@ -141,6 +145,38 @@ public abstract class DataClassify {
         Collections.sort(sortedValueList);
 
         return sortedValueList;
+    }
+
+    public static DataClassify getDataClassifier(String methodName) {
+        DataClassify classifier = new NaturalBreaksClassify();
+
+        methodName = methodName.toUpperCase();
+        if (methodName.startsWith("NA") || methodName.startsWith("JENK")) {
+            classifier = new NaturalBreaksClassify();
+        } else if (methodName.startsWith("QU")) {
+            classifier = new QuantileClassify();
+        } else if (methodName.startsWith("EQ")) {
+            classifier = new EqualIntervalClassify();
+        } else if (methodName.startsWith("ST")) {
+            classifier = new StandardDeviationClassify();
+        }
+
+        return classifier;
+    }
+
+    public static DataClassify getDataClassifier(ClassificationMethod method) {
+        switch (method) {
+        case EqualInterval:
+            return new EqualIntervalClassify();
+        case NaturalBreaks:
+            return new NaturalBreaksClassify();
+        case Quantile:
+            return new QuantileClassify();
+        case StandardDeviation:
+            return new StandardDeviationClassify();
+        default:
+            return new NaturalBreaksClassify();
+        }
     }
 
 }

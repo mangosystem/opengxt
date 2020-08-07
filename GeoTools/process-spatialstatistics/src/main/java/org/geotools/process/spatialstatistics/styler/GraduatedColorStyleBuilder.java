@@ -90,13 +90,17 @@ public class GraduatedColorStyleBuilder extends AbstractFeatureStyleBuilder {
         return numClasses;
     }
 
+
     public Style createStyle(GridCoverage2D coverage, String methodName, int numClasses,
+            String brewerPaletteName, boolean reverse, double opacity) {
+        return createStyle(coverage, 0, methodName, numClasses, brewerPaletteName, reverse, opacity);
+    }
+
+    public Style createStyle(GridCoverage2D coverage, int bandIndex, String methodName, int numClasses,
             String brewerPaletteName, boolean reverse, double opacity) {
         numClasses = checkNumClasses(numClasses);
 
-        SimpleFeatureCollection inputFeatures = new CoverageToPointFeatureCollection(coverage);
-
-        RangedClassifier classifier = getClassifier(inputFeatures, "Value", methodName, numClasses); //$NON-NLS-1$
+        RangedClassifier classifier = getClassifier(coverage, bandIndex, methodName, numClasses);
         double[] breaks = getClassBreaks(classifier);
 
         BrewerPalette brewerPalette = brewer.getPalette(brewerPaletteName);

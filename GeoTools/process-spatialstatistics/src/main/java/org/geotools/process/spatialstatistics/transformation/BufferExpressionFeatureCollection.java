@@ -31,11 +31,15 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.UnitConverter;
+import org.geotools.process.spatialstatistics.enumeration.BufferEndCapStyle;
+import org.geotools.process.spatialstatistics.enumeration.BufferJoinStyle;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.util.GeodeticBuilder;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.operation.buffer.BufferOp;
+import org.locationtech.jts.operation.buffer.BufferParameters;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
@@ -65,6 +69,10 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
 
     private int quadrantSegments = 24;
 
+    private BufferEndCapStyle endCapStyle = BufferEndCapStyle.Round;
+
+    private BufferJoinStyle joinStyle = BufferJoinStyle.Round;
+
     private SimpleFeatureType schema;
 
     public BufferExpressionFeatureCollection(SimpleFeatureCollection delegate, double distance,
@@ -77,13 +85,32 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
         this(delegate, ff.literal(distance), distanceUnit, quadrantSegments);
     }
 
+    public BufferExpressionFeatureCollection(SimpleFeatureCollection delegate, double distance,
+            DistanceUnit distanceUnit, int quadrantSegments, BufferEndCapStyle endCapStyle,
+            BufferJoinStyle joinStyle) {
+        this(delegate, ff.literal(distance), distanceUnit, quadrantSegments, endCapStyle,
+                joinStyle);
+    }
+
     public BufferExpressionFeatureCollection(SimpleFeatureCollection delegate, Expression distance,
             int quadrantSegments) {
         this(delegate, distance, DistanceUnit.Default, quadrantSegments);
     }
 
     public BufferExpressionFeatureCollection(SimpleFeatureCollection delegate, Expression distance,
+            int quadrantSegments, BufferEndCapStyle endCapStyle, BufferJoinStyle joinStyle) {
+        this(delegate, distance, DistanceUnit.Default, quadrantSegments, endCapStyle, joinStyle);
+    }
+
+    public BufferExpressionFeatureCollection(SimpleFeatureCollection delegate, Expression distance,
             DistanceUnit distanceUnit, int quadrantSegments) {
+        this(delegate, distance, distanceUnit, quadrantSegments, BufferEndCapStyle.Round,
+                BufferJoinStyle.Round);
+    }
+
+    public BufferExpressionFeatureCollection(SimpleFeatureCollection delegate, Expression distance,
+            DistanceUnit distanceUnit, int quadrantSegments, BufferEndCapStyle endCapStyle,
+            BufferJoinStyle joinStyle) {
         super(delegate);
 
         if (quadrantSegments <= 0) {
@@ -93,6 +120,8 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
         this.distance = distance;
         this.distanceUnit = distanceUnit;
         this.quadrantSegments = quadrantSegments;
+        this.endCapStyle = endCapStyle;
+        this.joinStyle = joinStyle;
 
         String typeName = delegate.getSchema().getTypeName();
         this.schema = FeatureTypes.build(delegate.getSchema(), typeName, Polygon.class);
@@ -102,7 +131,7 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
     @Override
     public SimpleFeatureIterator features() {
         return new BufferExpressionFeatureIterator(delegate.features(), getSchema(), distance,
-                distanceUnit, quadrantSegments);
+                distanceUnit, quadrantSegments, endCapStyle, joinStyle);
     }
 
     @Override
@@ -130,7 +159,7 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
 
         private DistanceUnit distanceUnit = DistanceUnit.Default;
 
-        private int quadrantSegments = 8;
+        private BufferParameters bufferParameters = new BufferParameters();
 
         private int count = 0;
 
@@ -148,8 +177,13 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
 
         public BufferExpressionFeatureIterator(SimpleFeatureIterator delegate,
                 SimpleFeatureType schema, Expression distance, DistanceUnit distanceUnit,
-                int quadrantSegments) {
+                int quadrantSegments, BufferEndCapStyle endCapStyle, BufferJoinStyle joinStyle) {
             this.delegate = delegate;
+
+            bufferParameters = new BufferParameters();
+            bufferParameters.setEndCapStyle(endCapStyle.getValue());
+            bufferParameters.setJoinStyle(joinStyle.getValue());
+            bufferParameters.setQuadrantSegments(quadrantSegments);
 
             this.distance = distance;
             this.distanceUnit = distanceUnit;
@@ -158,13 +192,13 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
             if (distanceUnit != DistanceUnit.Default) {
                 this.targetUnit = UnitConverter.getLengthUnit(crs);
             }
+
             this.isGeographicCRS = UnitConverter.isGeographicCRS(crs);
             if (isGeographicCRS) {
                 geodetic = new GeodeticBuilder(crs);
-                geodetic.setQuadrantSegments(quadrantSegments);
+                geodetic.setBufferParameters(bufferParameters);
             }
 
-            this.quadrantSegments = quadrantSegments;
             this.builder = new SimpleFeatureBuilder(schema);
             this.typeName = schema.getTypeName();
         }
@@ -187,6 +221,8 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
                     Geometry geometry = (Geometry) source.getDefaultGeometry();
                     Geometry buffered = geometry;
 
+                    BufferOp bufferOp = new BufferOp(geometry, bufferParameters);
+
                     double converted = eval;
                     if (distanceUnit != DistanceUnit.Default) {
                         if (isGeographicCRS) {
@@ -201,10 +237,10 @@ public class BufferExpressionFeatureCollection extends GXTSimpleFeatureCollectio
                         } else {
                             converted = UnitConverter.convertDistance(eval, distanceUnit,
                                     targetUnit);
-                            buffered = geometry.buffer(converted, quadrantSegments);
+                            buffered = bufferOp.getResultGeometry(converted);
                         }
                     } else {
-                        buffered = geometry.buffer(converted, quadrantSegments);
+                        buffered = bufferOp.getResultGeometry(converted);
                     }
 
                     next.setDefaultGeometry(buffered);

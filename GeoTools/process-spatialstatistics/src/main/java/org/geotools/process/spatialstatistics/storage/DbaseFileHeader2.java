@@ -139,7 +139,7 @@ public class DbaseFileHeader2 extends DbaseFileHeader {
      */
     @Override
     @SuppressWarnings("rawtypes")
-    public Class getFieldClass(int i) {
+    public Class<?> getFieldClass(int i) {
         Class typeClass = null;
 
         switch (fields[i].fieldType) {

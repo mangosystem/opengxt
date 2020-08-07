@@ -19,6 +19,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.io.xml.SaxWriter;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
+import com.thoughtworks.xstream.security.AnyTypePermission;
 
 /**
  * A PPIO to generate good looking xml for the Join Count Statistics process results
@@ -50,6 +51,10 @@ public class JoinCountStatisticsPPIO extends XStreamPPIO {
                 return new UppercaseTagMapper(next);
             };
         };
+
+        // Security
+        xstream.addPermission(AnyTypePermission.ANY);
+        xstream.allowTypesByWildcard(new String[] { "org.geotools.process.**" });
 
         xstream.processAnnotations(JoinCountProcessResult.class);
         xstream.alias("JoinCountStatistics", JoinCountProcessResult.class);

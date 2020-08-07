@@ -131,14 +131,17 @@ public class RotateFeatureCollection extends GXTSimpleFeatureCollection {
                 if (attribute instanceof Geometry) {
                     Geometry geometry = (Geometry) attribute;
                     Double theta = angleInDegree.evaluate(sourceFeature, Double.class);
-                    if (theta != null) {
+
+                    if (theta != null && !theta.isNaN() && !theta.isInfinite()) {
+                        // AffineTransformation: Positive angles correspond to a rotation in the counter-clockwise direction.
+                        double rad = -Math.toRadians(theta);
+
                         AffineTransformation trans;
                         if (anchor == null) {
                             Coordinate tx = geometry.getCentroid().getCoordinate();
-                            trans = AffineTransformation.rotationInstance(theta, tx.x, tx.y);
+                            trans = AffineTransformation.rotationInstance(rad, tx.x, tx.y);
                         } else {
-                            trans = AffineTransformation
-                                    .rotationInstance(theta, anchor.x, anchor.y);
+                            trans = AffineTransformation.rotationInstance(rad, anchor.x, anchor.y);
                         }
                         attribute = trans.transform(geometry);
                     }

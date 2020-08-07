@@ -99,8 +99,8 @@ public class HexagonalBinningProcess extends AbstractStatisticsProcess {
         }
 
         if (size == null || size <= 0) {
-            size = (Math.min(bbox.getWidth(), bbox.getHeight()) / 250.0d) / 2.0d;
-            LOGGER.log(Level.WARNING, "The default width / height is " + size);
+            size = Math.min(bbox.getWidth(), bbox.getHeight()) / 40.0d;
+            LOGGER.log(Level.WARNING, "The default grid size is " + size);
         }
 
         SimpleFeatureCollection resultFc = null;

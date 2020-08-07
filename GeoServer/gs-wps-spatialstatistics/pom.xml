@@ -27,7 +27,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <gt.version>22.2</gt.version>
+    <gt.version>22.3</gt.version>
     <wicket.version>7.6.0</wicket.version>
   </properties>
   

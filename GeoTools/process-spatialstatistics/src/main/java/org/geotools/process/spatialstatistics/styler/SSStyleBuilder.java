@@ -117,13 +117,23 @@ public class SSStyleBuilder {
 
         final double[] classBreaks = { -2.58, -1.96, -1.65, 1.65, 1.96, 2.58 };
 
-        final String[] classDescs = { "< -2.58 Std. Dev.", "-2.58 ~ -1.96 Std. Dev.",
-                "-1.96 ~ -1.65 Std. Dev.", "-1.65 ~ 1.65 Std. Dev.", "1.65 ~ 1.96 Std. Dev.",
-                "1.96 ~ 2.58 Std. Dev.", "> 2.58 Std. Dev." };
+        final String[] classDescs = { // Classes
+                "< -2.58 Std. Dev.", // 1
+                "-2.58 ~ -1.96 Std. Dev.", // 2
+                "-1.96 ~ -1.65 Std. Dev.", // 3
+                "-1.65 ~ 1.65 Std. Dev.", // 4
+                "1.65 ~ 1.96 Std. Dev.", // 5
+                "1.96 ~ 2.58 Std. Dev.", // 6
+                "> 2.58 Std. Dev." }; // 7
 
-        final Color[] colorList = { new Color(69, 117, 181), new Color(132, 158, 186),
-                new Color(192, 204, 190), new Color(255, 255, 191), new Color(250, 185, 132),
-                new Color(237, 117, 81), new Color(214, 47, 39) };
+        final Color[] colorList = { // Colors
+                new Color(69, 117, 181), // 1
+                new Color(132, 158, 186), // 2
+                new Color(192, 204, 190), // 3
+                new Color(255, 255, 191), // 4
+                new Color(250, 185, 132), // 5
+                new Color(237, 117, 81), // 6
+                new Color(214, 47, 39) }; // 7
 
         return buildStyle(propertyName, styleName, classBreaks, classDescs, colorList);
     }
@@ -135,8 +145,12 @@ public class SSStyleBuilder {
 
         final String[] classDescs = { "< -2.0", "-2.0 ~ -1.0", "-1.0 ~ 1.0", "1.0 ~ 2.0", "> 2.0" };
 
-        final Color[] colorList = { new Color(0, 92, 230), new Color(115, 255, 225),
-                new Color(255, 255, 205), new Color(255, 215, 130), new Color(255, 0, 0) };
+        final Color[] colorList = { // Colors
+                new Color(0, 92, 230), // 1
+                new Color(115, 255, 225), // 2
+                new Color(255, 255, 205), // 3
+                new Color(255, 215, 130), // 4
+                new Color(255, 0, 0) }; // 5
 
         return buildStyle(propertyName, styleName, classBreaks, classDescs, colorList);
     }
@@ -146,12 +160,23 @@ public class SSStyleBuilder {
 
         final double[] classBreaks = { -2.5, -1.5, -0.5, 0.5, 1.5, 2.5 };
 
-        final String[] classDescs = { "< -2.5", "-2.5 ~ -1.5", "-1.5 ~ -0.5", "-0.5 ~ 0.5",
-                "0.5 ~ 1.5", "1.5 ~ 2.5", "> 2.5" };
+        final String[] classDescs = { // Classes
+                "< -2.5", // 1
+                "-2.5 ~ -1.5", // 2
+                "-1.5 ~ -0.5", // 3
+                "-0.5 ~ 0.5", // 4
+                "0.5 ~ 1.5", // 5
+                "1.5 ~ 2.5", // 6
+                "> 2.5" }; // 7
 
-        final Color[] colorList = { new Color(69, 117, 181), new Color(132, 158, 186),
-                new Color(192, 204, 190), new Color(255, 255, 191), new Color(250, 185, 132),
-                new Color(237, 117, 81), new Color(214, 47, 39) };
+        final Color[] colorList = { // Colors
+                new Color(69, 117, 181), // 1
+                new Color(132, 158, 186), // 2
+                new Color(192, 204, 190), // 3
+                new Color(255, 255, 191), // 4
+                new Color(250, 185, 132), // 5
+                new Color(237, 117, 81), // 6
+                new Color(214, 47, 39) }; // 7
 
         return buildStyle(propertyName, styleName, classBreaks, classDescs, colorList);
     }
@@ -201,12 +226,16 @@ public class SSStyleBuilder {
     public Style getLISAStyle(String propertyName) {
         final String styleName = "LISA";
         final String[] classValues = { "HH", "LH", "LL", "HL", "" };
-        final String[] classDescs = { "H-H", "L-H", "L-L", "H-L", "None" };
+        final String[] classDescs = { "H-H", "L-H", "L-L", "H-L", "Not Significant" };
 
         // http://www.w3schools.com/tags/ref_color_tryit.asp
         // Color.Tomato, Color.LightGoldenrodYellow, Color.CornflowerBlue, Color.Thistle
-        final Color[] colorList = { new Color(255, 99, 71), new Color(250, 250, 210),
-                new Color(100, 149, 237), new Color(216, 191, 216), new Color(225, 225, 225) };
+        final Color[] colorList = { // Colors
+                new Color(255, 99, 71), // HH
+                new Color(250, 250, 210), // LH
+                new Color(100, 149, 237), // LL
+                new Color(216, 191, 216), // HL
+                new Color(225, 225, 225) }; // Not Significant
 
         FeatureTypeStyle featureTypeStyle = sf.createFeatureTypeStyle();
         featureTypeStyle.setName(styleName);

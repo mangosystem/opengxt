@@ -229,6 +229,9 @@ public class HexagonalBinningVisitor extends AbstractBinningVisitor {
                             xpos += xoffset;
                             resetIndexes();
 
+                            // NULL to zero
+                            value = value == null ? Double.valueOf(0d) : value;
+
                             return new Bin(featureID++, grid, value);
                         }
                     }

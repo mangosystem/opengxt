@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geotools.data.collection.ListFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.process.Process;
@@ -60,13 +61,13 @@ public class GeometryToFeaturesProcess extends AbstractStatisticsProcess {
         return factory;
     }
 
-    public static Double process(Geometry geometry, CoordinateReferenceSystem crs, String typeName,
-            ProgressListener monitor) {
+    public static SimpleFeatureCollection process(Geometry geometry, CoordinateReferenceSystem crs,
+            String typeName, ProgressListener monitor) {
         return GeometryToFeaturesProcess.process(geometry, crs, typeName, Boolean.FALSE, monitor);
     }
 
-    public static Double process(Geometry geometry, CoordinateReferenceSystem crs, String typeName,
-            Boolean singlePart, ProgressListener monitor) {
+    public static SimpleFeatureCollection process(Geometry geometry, CoordinateReferenceSystem crs,
+            String typeName, Boolean singlePart, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(GeometryToFeaturesProcessFactory.geometry.key, geometry);
         map.put(GeometryToFeaturesProcessFactory.crs.key, crs);
@@ -77,12 +78,12 @@ public class GeometryToFeaturesProcess extends AbstractStatisticsProcess {
         Map<String, Object> resultMap;
         try {
             resultMap = process.execute(map, monitor);
-            return (Double) resultMap.get(GeometryToFeaturesProcessFactory.RESULT.key);
+            return (SimpleFeatureCollection) resultMap.get(GeometryToFeaturesProcessFactory.RESULT.key);
         } catch (ProcessException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
 
-        return new Double(0.0d);
+        return null;
     }
 
     @Override
@@ -92,8 +93,7 @@ public class GeometryToFeaturesProcess extends AbstractStatisticsProcess {
                 GeometryToFeaturesProcessFactory.geometry, null);
         CoordinateReferenceSystem crs = (CoordinateReferenceSystem) Params.getValue(input,
                 GeometryToFeaturesProcessFactory.crs, null);
-        String typeName = (String) Params.getValue(input,
-                GeometryToFeaturesProcessFactory.typeName,
+        String typeName = (String) Params.getValue(input, GeometryToFeaturesProcessFactory.typeName,
                 GeometryToFeaturesProcessFactory.typeName.sample);
         Boolean singlePart = (Boolean) Params.getValue(input,
                 GeometryToFeaturesProcessFactory.singlePart,
@@ -147,10 +147,9 @@ public class GeometryToFeaturesProcess extends AbstractStatisticsProcess {
 
         // build the feature
         SimpleFeatureBuilder builder = new SimpleFeatureBuilder(schema);
-        if (singlePart
-                && (MultiPolygon.class.equals(geometryBinding)
-                        || MultiLineString.class.equals(geometryBinding) || MultiPoint.class
-                            .equals(geometryBinding))) {
+        if (singlePart && (MultiPolygon.class.equals(geometryBinding)
+                || MultiLineString.class.equals(geometryBinding)
+                || MultiPoint.class.equals(geometryBinding))) {
 
             for (int index = 1; index <= geometry.getNumGeometries(); index++) {
                 Geometry part = geometry.getGeometryN(index - 1);

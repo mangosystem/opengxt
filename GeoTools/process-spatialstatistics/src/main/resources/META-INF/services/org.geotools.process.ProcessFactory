@@ -149,6 +149,7 @@ org.geotools.process.spatialstatistics.RasterMathProcessFactory
 
 org.geotools.process.spatialstatistics.IDWProcessFactory
 org.geotools.process.spatialstatistics.TPSProcessFactory
+org.geotools.process.spatialstatistics.TINInterpolationProcessFactory
 
 org.geotools.process.spatialstatistics.HistogramGridCoverageProcessFactory
 org.geotools.process.spatialstatistics.StatisticsGridCoverageProcessFactory

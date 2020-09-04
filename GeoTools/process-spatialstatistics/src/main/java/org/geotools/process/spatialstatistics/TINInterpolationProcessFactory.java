@@ -86,8 +86,8 @@ public class TINInterpolationProcessFactory extends SpatialStatisticsProcessFact
 
     /** pixelType */
     public static final Parameter<RasterPixelType> pixelType = new Parameter<RasterPixelType>(
-            "pixelType", RasterPixelType.class, getResource("TINInterpolation.radiusType.title"),
-            getResource("TINInterpolation.radiusType.description"), false, 0, 1,
+            "pixelType", RasterPixelType.class, getResource("TINInterpolation.pixelType.title"),
+            getResource("TINInterpolation.pixelType.description"), false, 0, 1,
             RasterPixelType.FLOAT, null);
 
     /** cellSize */

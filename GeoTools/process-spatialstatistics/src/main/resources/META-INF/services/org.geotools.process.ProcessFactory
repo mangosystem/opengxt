@@ -79,6 +79,7 @@ org.geotools.process.spatialstatistics.DissolveProcessFactory
 org.geotools.process.spatialstatistics.SimplifyProcessFactory
 org.geotools.process.spatialstatistics.SimplifyPolygonProcessFactory
 org.geotools.process.spatialstatistics.DensifyProcessFactory
+org.geotools.process.spatialstatistics.SmoothProcessFactory
 org.geotools.process.spatialstatistics.RemoveHolesProcessFactory
 org.geotools.process.spatialstatistics.RemovePartsProcessFactory
 org.geotools.process.spatialstatistics.FlipLineProcessFactory

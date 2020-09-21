@@ -224,6 +224,10 @@ public class CoverageToPointFeatureCollection extends GXTSimpleFeatureCollection
 
         private void extractValues() {
             coordinates.clear();
+            if (readIter.finishedLines()) {
+                return;
+            }
+
             int column = 0; // bounds.x;
             int row = currentRow; // bounds.y + currentRow;
             readIter.startPixels();

@@ -2,7 +2,7 @@
  *    GeoTools - The Open Source Java GIS Toolkit
  *    http://geotools.org
  *
- *    (C) 2014, Open Source Geospatial Foundation (OSGeo)
+ *    (C) 2020, Open Source Geospatial Foundation (OSGeo)
  *
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -16,28 +16,30 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
-import java.awt.RenderingHints;
+import java.awt.image.WritableRaster;
 import java.util.logging.Logger;
 
-import javax.measure.Unit;
-import javax.media.jai.BorderExtender;
-import javax.media.jai.JAI;
 import javax.media.jai.KernelJAI;
-import javax.media.jai.ParameterBlockJAI;
-import javax.media.jai.PlanarImage;
 
+import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
+import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.spatialstatistics.core.StringHelper;
+import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.enumeration.KernelType;
-import org.geotools.referencing.CRS;
+import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.logging.Logging;
 import org.jaitools.media.jai.kernel.KernelFactory;
 import org.jaitools.media.jai.kernel.KernelFactory.ValueType;
+import org.jaitools.tiledimage.DiskMemImage;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.filter.Filter;
+import org.opengis.filter.expression.Expression;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.crs.GeographicCRS;
-
-import si.uom.SI;
 
 /**
  * Calculates a magnitude per unit area from point features using a kernel function to fit a smoothly tapered surface to each point.
@@ -59,6 +61,10 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
         this.kernelType = kernelType;
     }
 
+    public RasterKernelDensityOperation() {
+
+    }
+
     public GridCoverage2D execute(SimpleFeatureCollection pointFeatures, String weightField) {
         // The default is the shortest of the width or height of the extent of in_features
         // in the output spatial reference, divided by 30
@@ -69,45 +75,128 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
 
     public GridCoverage2D execute(SimpleFeatureCollection pointFeatures, String weightField,
             double searchRadius) {
-        // step 1 : convert point to gridcoverage : Sum
-        final PlanarImage outputImage = pointToRaster(pointFeatures, weightField);
+        // calculate extent & cellsize
+        calculateExtentAndCellSize(pointFeatures, Integer.MIN_VALUE);
 
-        // The kernel function is based on the quadratic kernel function described in Silverman
-        // (1986, p. 76, equation 4.5).
-        // http://arxiv.org/ftp/physics/papers/0701/0701111.pdf
+        DiskMemImage outputImage = this.createDiskMemImage(Extent, RasterPixelType.FLOAT);
+        WritableRaster raster = (WritableRaster) outputImage.getData();
 
-        // step 2 Only a circular neighborhood is possible
-        final KernelJAI kernel = getKernel(searchRadius);
-
-        final RenderingHints hints = new RenderingHints(JAI.KEY_BORDER_EXTENDER,
-                BorderExtender.createInstance(BorderExtender.BORDER_ZERO));
-
-        final ParameterBlockJAI pb = new ParameterBlockJAI("Convolve");
-        pb.setSource("source0", outputImage);
-        pb.setParameter("kernel", kernel);
-
-        PlanarImage densityImage = JAI.create("Convolve", pb, hints);
-
-        // If an area unit is selected, the calculated density for the cell is multiplied by the
-        // appropriate factor before it is written to the output raster.
-        // For example, if the input units are meters, the output area units will default to square
-        // kilometers. Comparing a unit scale factor of meters to kilometers will result in the
-        // values being different by a multiplier of 1,000,000 (1,000 meters x 1,000 meters).
+        KernelJAI kernel = getKernel(searchRadius);
 
         // if unit is a meter, apply kilometers scale factor
         CoordinateReferenceSystem crs = pointFeatures.getSchema().getCoordinateReferenceSystem();
-        if (crs != null && crs.getCoordinateSystem() != null) {
-            CoordinateReferenceSystem hor = CRS.getHorizontalCRS(crs);
-            if (!(hor instanceof GeographicCRS)) {
-                Unit<?> unit = hor.getCoordinateSystem().getAxis(0).getUnit();
-                // UnitConverter converter = SI.METER.getConverterTo(unit);
-                if (unit != null && unit == SI.METRE) {
-                    this.scaleArea = scaleArea / 1000000.0;
-                }
-            }
+        boolean isGeographicCRS = UnitConverter.isGeographicCRS(crs);
+        if (!isGeographicCRS) {
+            scaleArea = scaleArea / 1000000.0;
         }
 
-        return createGridCoverage("KernelDensity", scaleUnit(densityImage));
+        Filter filter = getBBoxFilter(pointFeatures.getSchema(), Extent, searchRadius);
+
+        GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
+        SimpleFeatureIterator featureIter = pointFeatures.subCollection(filter).features();
+        try {
+            Expression weightExp = ff.literal(1.0); // default
+            if (!StringHelper.isNullOrEmpty(weightField)) {
+                weightExp = ff.property(weightField);
+            }
+
+            final int imageWidth = outputImage.getWidth();
+            final int imageHeight = outputImage.getHeight();
+
+            final int xOrigin = kernel.getXOrigin();
+            final int yOrigin = kernel.getYOrigin();
+            final int w = kernel.getWidth();
+            final int h = kernel.getHeight();
+
+            while (featureIter.hasNext()) {
+                SimpleFeature feature = featureIter.next();
+                Geometry multiPoint = (Geometry) feature.getDefaultGeometry();
+                if (multiPoint == null || multiPoint.isEmpty()) {
+                    continue;
+                }
+
+                Double dblVal = weightExp.evaluate(feature, Double.class);
+                final double weight = dblVal == null ? 1.0 : dblVal.doubleValue();
+                if (weight == 0) {
+                    continue;
+                }
+
+                // Multipoints are treated as a set of individual points.
+                Coordinate[] coordinates = multiPoint.getCoordinates();
+                for (int part = 0; part < coordinates.length; part++) {
+                    Coordinate realPos = coordinates[part];
+                    final GridCoordinates2D gridPos = trans.worldToGrid(realPos);
+
+                    // raster index
+                    int x = gridPos.x - xOrigin;
+                    int y = gridPos.y - yOrigin;
+                    int xw = w;
+                    int yh = h;
+
+                    // kernel index
+                    int startCol = 0;
+                    int startRow = 0;
+                    int endCol = w;
+                    int endRow = h;
+
+                    if (x < 0 || y < 0) {
+                        if (x < 0) {
+                            xw = x + xw;
+                            startCol = Math.abs(x);
+                            x = 0;
+                        } else if (y < 0) {
+                            yh = y + yh;
+                            startRow = Math.abs(y);
+                            y = 0;
+                        }
+                    } else if ((x + xw) > imageWidth || (y + yh) > imageHeight) {
+                        if ((x + xw) > imageWidth) {
+                            int dif = (x + xw) - imageWidth;
+                            xw = xw - dif;
+                            endCol = xw;
+                        } else if ((y + yh) > imageHeight) {
+                            int dif = (y + yh) - imageHeight;
+                            yh = yh - dif;
+                            endRow = yh;
+                        }
+                    }
+
+                    if (x < 0 || y < 0 || xw < 1 || yh < 1) {
+                        continue;
+                    }
+
+                    // get data
+                    float[] samples = raster.getSamples(x, y, xw, yh, 0, new float[xw * yh]);
+
+                    int index = 0;
+                    for (int row = startRow; row < endRow; row++) {
+                        for (int col = startCol; col < endCol; col++) {
+                            double kernelValue = kernel.getElement(col, row);
+                            if (kernelValue == 0) {
+                                index++;
+                                continue;
+                            }
+
+                            double wValue = ((weight * kernelValue) / scaleArea) + samples[index];
+
+                            samples[index] = (float) wValue;
+                            this.MaxValue = Math.max(MaxValue, wValue);
+                            index++;
+                        }
+                    }
+
+                    // set data
+                    raster.setSamples(x, y, xw, yh, 0, samples);
+                }
+            }
+        } finally {
+            featureIter.close();
+        }
+
+        // finally, set raster data to image
+        outputImage.setData(raster);
+
+        return createGridCoverage("KernelDensity", outputImage);
     }
 
     private KernelJAI getKernel(double searchRadius) {
@@ -135,9 +224,6 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
             }
         }
 
-        // area of circle
-        // scaleArea = Math.PI * searchRadius * searchRadius;
-
         KernelJAI kernel = null;
         switch (this.kernelType) {
         case Binary:
@@ -163,7 +249,7 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
             for (int dY = -radius; dY <= radius; dY++) {
                 final double dy2 = dY * dY;
                 for (int dX = -radius; dX <= radius; dX++) {
-                    final int index = (dY + radius) * width + (dX + radius);
+                    final int index = ((dY + radius) * width) + (dX + radius);
                     if (data[index] == 0.0) {
                         weights[index] = 0;
                     } else {
@@ -194,7 +280,7 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
             for (int dY = -radius; dY <= radius; dY++) {
                 final double dy2 = dY * dY;
                 for (int dX = -radius; dX <= radius; dX++) {
-                    final int index = (dY + radius) * width + (dX + radius);
+                    final int index = ((dY + radius) * width) + (dX + radius);
                     if (data[index] == 0.0) {
                         tcWeights[index] = 0;
                     } else {

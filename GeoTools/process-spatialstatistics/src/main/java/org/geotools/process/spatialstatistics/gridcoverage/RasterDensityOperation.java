@@ -45,6 +45,7 @@ import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.StringHelper;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
@@ -55,6 +56,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
 import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
@@ -71,7 +73,19 @@ public class RasterDensityOperation extends RasterProcessingOperation {
 
     protected double scaleArea = 0.0;
 
-    FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
+    protected FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
+
+    protected Filter getBBoxFilter(SimpleFeatureType schema, ReferencedEnvelope extent,
+            double expandDistance) {
+        String the_geom = schema.getGeometryDescriptor().getLocalName();
+
+        ReferencedEnvelope bbox = new ReferencedEnvelope(extent);
+        if (expandDistance != 0) {
+            bbox.expandBy(expandDistance);
+        }
+
+        return ff.bbox(ff.property(the_geom), bbox);
+    }
 
     protected PlanarImage scaleUnit(PlanarImage image) {
         final RenderingHints hints = new RenderingHints(JAI.KEY_BORDER_EXTENDER,
@@ -132,7 +146,8 @@ public class RasterDensityOperation extends RasterProcessingOperation {
         return outputImage;
     }
 
-    protected PlanarImage lineToRaster(SimpleFeatureCollection lineFeatures, String populationField) {
+    protected PlanarImage lineToRaster(SimpleFeatureCollection lineFeatures,
+            String populationField) {
         // calculate extent & cellsize
         calculateExtentAndCellSize(lineFeatures, Integer.MIN_VALUE);
         Extent = RasterHelper.getResolvedEnvelope(Extent, CellSizeX, CellSizeY);
@@ -245,7 +260,8 @@ public class RasterDensityOperation extends RasterProcessingOperation {
         return destImage;
     }
 
-    private void addLineStringToPath(boolean isRing, LineString lineString, GeneralPath targetPath) {
+    private void addLineStringToPath(boolean isRing, LineString lineString,
+            GeneralPath targetPath) {
         Coordinate[] cs = lineString.getCoordinates();
 
         double xOffset = 0;

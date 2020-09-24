@@ -32,6 +32,9 @@ allows users to share and edit geospatial data. Designed for interoperability, i
 * Visit [OpenGXT - uDig Processing Toolbox](https://github.com/mapplus/opengxt-udig-plugin/)
 
 ### Manual & Documents
+* OpenGXT Online User Manual
+  * [OpenGXT Online User Manual](http://www.mangosystem.com:8080/opengxt/ko/)
+  
 * GeoTools Developer Guide
   * [Korean v1.0 - 2MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoTools_Process_1.0_Developer_Guide_ko_v.1.0.pdf)
   * [Korean v1.0-latest - 2MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoTools_Process_1.0_Developer_Guide_ko_v.1.latest.pdf)

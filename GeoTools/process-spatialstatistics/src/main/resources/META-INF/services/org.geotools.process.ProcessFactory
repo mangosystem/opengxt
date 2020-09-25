@@ -16,6 +16,8 @@ org.geotools.process.spatialstatistics.MultiWindRoseMapProcessFactory
 org.geotools.process.spatialstatistics.RectangularBinningProcessFactory
 org.geotools.process.spatialstatistics.CircularBinningProcessFactory
 org.geotools.process.spatialstatistics.HexagonalBinningProcessFactory
+org.geotools.process.spatialstatistics.ClusterGAMProcessFactory
+org.geotools.process.spatialstatistics.ClusterBesagNewellProcessFactory
 
 org.geotools.process.spatialstatistics.JoinCountStatisticsProcessFactory
 org.geotools.process.spatialstatistics.GlobalMoransIProcessFactory

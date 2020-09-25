@@ -149,7 +149,9 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
                             startRow = Math.abs(y);
                             y = 0;
                         }
-                    } else if ((x + xw) > imageWidth || (y + yh) > imageHeight) {
+                    }
+
+                    if ((x + xw) > imageWidth || (y + yh) > imageHeight) {
                         if ((x + xw) > imageWidth) {
                             int dif = (x + xw) - imageWidth;
                             xw = xw - dif;

@@ -33,7 +33,7 @@ allows users to share and edit geospatial data. Designed for interoperability, i
 
 ### Manual & Documents
 * OpenGXT Online User Manual
-  * [OpenGXT Online User Manual](http://www.mangosystem.com:8080/opengxt/ko/)
+  * [OpenGXT Online User Manual](http://opengxt.mangosystem.com/)
   
 * GeoTools Developer Guide
   * [Korean v1.0 - 2MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoTools_Process_1.0_Developer_Guide_ko_v.1.0.pdf)

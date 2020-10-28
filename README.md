@@ -53,7 +53,7 @@ allows users to share and edit geospatial data. Designed for interoperability, i
   * [SlideShare](https://www.slideshare.net/mapplus)
  
 ### Localization
-* [Transifex - English(defalut), Korean ...](https://www.transifex.com/projects/p/ss-rd/)
+* [Transifex - English(defalut), Korean ...](https://www.transifex.com/mangosystem/opengxt/)
 
 ### Contributor
 * mapplus (mapplus@gmail.com)

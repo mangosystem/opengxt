@@ -60,30 +60,33 @@ public class OLSProcessFactory extends SpatialStatisticsProcessFactory {
 
     @Override
     public InternationalString getTitle() {
-        return getResource("OLS.title");
+        return getResource("OrdinaryLeastSquares.title");
     }
 
     @Override
     public InternationalString getDescription() {
-        return getResource("OLS.description");
+        return getResource("OrdinaryLeastSquares.description");
     }
 
     /** inputFeatures */
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
-            "inputFeatures", SimpleFeatureCollection.class, getResource("OLS.inputFeatures.title"),
-            getResource("OLS.inputFeatures.description"), true, 1, 1, null, null);
+            "inputFeatures", SimpleFeatureCollection.class,
+            getResource("OrdinaryLeastSquares.inputFeatures.title"),
+            getResource("OrdinaryLeastSquares.inputFeatures.description"), true, 1, 1, null, null);
 
     /** dependentVariable */
     public static final Parameter<String> dependentVariable = new Parameter<String>(
-            "dependentVariable", String.class, getResource("OLS.dependentVariable.title"),
-            getResource("OLS.dependentVariable.description"), true, 1, 1, null, new KVP(
-                    Params.FIELD, "inputFeatures.Number"));
+            "dependentVariable", String.class,
+            getResource("OrdinaryLeastSquares.dependentVariable.title"),
+            getResource("OrdinaryLeastSquares.dependentVariable.description"), true, 1, 1, null,
+            new KVP(Params.FIELD, "inputFeatures.Number"));
 
     /** explanatoryVariables */
     public static final Parameter<String> explanatoryVariables = new Parameter<String>(
-            "explanatoryVariables", String.class, getResource("OLS.explanatoryVariables.title"),
-            getResource("OLS.explanatoryVariables.description"), true, 1, 1, null, new KVP(
-                    Params.FIELDS, "inputFeatures.Number"));
+            "explanatoryVariables", String.class,
+            getResource("OrdinaryLeastSquares.explanatoryVariables.title"),
+            getResource("OrdinaryLeastSquares.explanatoryVariables.description"), true, 1, 1, null,
+            new KVP(Params.FIELDS, "inputFeatures.Number"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -96,14 +99,15 @@ public class OLSProcessFactory extends SpatialStatisticsProcessFactory {
 
     /** report */
     public static final Parameter<OLSResult> report = new Parameter<OLSResult>("report",
-            OLSResult.class, getResource("OLS.report.title"),
-            getResource("OLS.report.description"), true, 1, 1, null, null);
+            OLSResult.class, getResource("OrdinaryLeastSquares.report.title"),
+            getResource("OrdinaryLeastSquares.report.description"), true, 1, 1, null, null);
 
     /** olsFeatures */
     public static final Parameter<SimpleFeatureCollection> olsFeatures = new Parameter<SimpleFeatureCollection>(
-            "olsFeatures", SimpleFeatureCollection.class, getResource("OLS.olsFeatures.title"),
-            getResource("OLS.olsFeatures.description"), false, 0, 1, null, new KVP(Params.STYLES,
-                    "OLS.StdResid"));
+            "olsFeatures", SimpleFeatureCollection.class,
+            getResource("OrdinaryLeastSquares.olsFeatures.title"),
+            getResource("OrdinaryLeastSquares.olsFeatures.description"), false, 0, 1, null,
+            new KVP(Params.STYLES, "OrdinaryLeastSquares.StdResid"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

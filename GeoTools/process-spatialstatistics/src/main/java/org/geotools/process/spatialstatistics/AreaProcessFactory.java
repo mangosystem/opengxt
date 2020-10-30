@@ -61,29 +61,30 @@ public class AreaProcessFactory extends SpatialStatisticsProcessFactory {
 
     @Override
     public InternationalString getTitle() {
-        return getResource("Area.title");
+        return getResource("SumAreas.title");
     }
 
     @Override
     public InternationalString getDescription() {
-        return getResource("Area.description");
+        return getResource("SumAreas.description");
     }
 
     /** inputFeatures */
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
-            getResource("Area.inputFeatures.title"), getResource("Area.inputFeatures.description"),
-            true, 1, 1, null, new KVP(Params.FEATURES, Params.Polygon));
+            getResource("SumAreas.inputFeatures.title"),
+            getResource("SumAreas.inputFeatures.description"), true, 1, 1, null,
+            new KVP(Params.FEATURES, Params.Polygon));
 
     /** filter */
     public static final Parameter<Filter> filter = new Parameter<Filter>("filter", Filter.class,
-            getResource("Area.filter.title"), getResource("Area.filter.description"), false, 0, 1,
-            null, null);
+            getResource("SumAreas.filter.title"), getResource("SumAreas.filter.description"), false,
+            0, 1, null, null);
 
     /** areaUnit */
     public static final Parameter<AreaUnit> areaUnit = new Parameter<AreaUnit>("areaUnit",
-            AreaUnit.class, getResource("Area.areaUnit.title"),
-            getResource("Area.areaUnit.description"), false, 0, 1, AreaUnit.Default, null);
+            AreaUnit.class, getResource("SumAreas.areaUnit.title"),
+            getResource("SumAreas.areaUnit.description"), false, 0, 1, AreaUnit.Default, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -96,7 +97,7 @@ public class AreaProcessFactory extends SpatialStatisticsProcessFactory {
 
     /** result */
     public static final Parameter<Double> RESULT = new Parameter<Double>("result", Double.class,
-            getResource("Area.result.title"), getResource("Area.result.description"));
+            getResource("SumAreas.result.title"), getResource("SumAreas.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

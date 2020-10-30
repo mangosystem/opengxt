@@ -59,31 +59,31 @@ public class NearestNeighborProcessFactory extends SpatialStatisticsProcessFacto
 
     @Override
     public InternationalString getTitle() {
-        return getResource("NearestNeighbor.title");
+        return getResource("NearestNeighborIndex.title");
     }
 
     @Override
     public InternationalString getDescription() {
-        return getResource("NearestNeighbor.description");
+        return getResource("NearestNeighborIndex.description");
     }
 
     /** inputFeatures */
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
-            getResource("NearestNeighbor.inputFeatures.title"),
-            getResource("NearestNeighbor.inputFeatures.description"), true, 1, 1, null, null);
+            getResource("NearestNeighborIndex.inputFeatures.title"),
+            getResource("NearestNeighborIndex.inputFeatures.description"), true, 1, 1, null, null);
 
     /** distanceMethod */
     public static final Parameter<DistanceMethod> distanceMethod = new Parameter<DistanceMethod>(
             "distanceMethod", DistanceMethod.class,
-            getResource("NearestNeighbor.distanceMethod.title"),
-            getResource("NearestNeighbor.distanceMethod.description"), false, 0, 1,
+            getResource("NearestNeighborIndex.distanceMethod.title"),
+            getResource("NearestNeighborIndex.distanceMethod.description"), false, 0, 1,
             DistanceMethod.Euclidean, null);
 
     /** area */
     public static final Parameter<Double> area = new Parameter<Double>("area", Double.class,
-            getResource("NearestNeighbor.area.title"),
-            getResource("NearestNeighbor.area.description"), false, 0, 1, 0.0, null);
+            getResource("NearestNeighborIndex.area.title"),
+            getResource("NearestNeighborIndex.area.description"), false, 0, 1, 0.0, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -96,8 +96,8 @@ public class NearestNeighborProcessFactory extends SpatialStatisticsProcessFacto
 
     /** result */
     public static final Parameter<NearestNeighborResult> RESULT = new Parameter<NearestNeighborResult>(
-            "result", NearestNeighborResult.class, getResource("NearestNeighbor.result.title"),
-            getResource("NearestNeighbor.result.description"));
+            "result", NearestNeighborResult.class, getResource("NearestNeighborIndex.result.title"),
+            getResource("NearestNeighborIndex.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

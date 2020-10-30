@@ -59,32 +59,33 @@ public class DirectionalMeanProcessFactory extends SpatialStatisticsProcessFacto
 
     @Override
     public InternationalString getTitle() {
-        return getResource("DirectionalMean.title");
+        return getResource("LinearDirectionalMean.title");
     }
 
     @Override
     public InternationalString getDescription() {
-        return getResource("DirectionalMean.description");
+        return getResource("LinearDirectionalMean.description");
     }
 
     /** inputFeatures */
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
-            getResource("DirectionalMean.inputFeatures.title"),
-            getResource("DirectionalMean.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, Params.LineString));
+            getResource("LinearDirectionalMean.inputFeatures.title"),
+            getResource("LinearDirectionalMean.inputFeatures.description"), true, 1, 1, null,
+            new KVP(Params.FEATURES, Params.LineString));
 
     /** orientationOnly */
     public static final Parameter<Boolean> orientationOnly = new Parameter<Boolean>(
-            "orientationOnly", Boolean.class, getResource("DirectionalMean.orientationOnly.title"),
-            getResource("DirectionalMean.orientationOnly.description"), false, 0, 1, Boolean.TRUE,
-            null);
+            "orientationOnly", Boolean.class,
+            getResource("LinearDirectionalMean.orientationOnly.title"),
+            getResource("LinearDirectionalMean.orientationOnly.description"), false, 0, 1,
+            Boolean.TRUE, null);
 
     /** caseField */
     public static final Parameter<String> caseField = new Parameter<String>("caseField",
-            String.class, getResource("DirectionalMean.caseField.title"),
-            getResource("DirectionalMean.caseField.description"), false, 0, 1, null, new KVP(
-                    Params.FIELD, "inputFeatures.All"));
+            String.class, getResource("LinearDirectionalMean.caseField.title"),
+            getResource("LinearDirectionalMean.caseField.description"), false, 0, 1, null,
+            new KVP(Params.FIELD, "inputFeatures.All"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -97,8 +98,9 @@ public class DirectionalMeanProcessFactory extends SpatialStatisticsProcessFacto
 
     /** result */
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
-            "result", SimpleFeatureCollection.class, getResource("DirectionalMean.result.title"),
-            getResource("DirectionalMean.result.description"));
+            "result", SimpleFeatureCollection.class,
+            getResource("LinearDirectionalMean.result.title"),
+            getResource("LinearDirectionalMean.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

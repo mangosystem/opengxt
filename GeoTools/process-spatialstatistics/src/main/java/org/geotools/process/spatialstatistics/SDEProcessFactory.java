@@ -60,35 +60,38 @@ public class SDEProcessFactory extends SpatialStatisticsProcessFactory {
 
     @Override
     public InternationalString getTitle() {
-        return getResource("Sde.title");
+        return getResource("StandardDeviationalEllipse.title");
     }
 
     @Override
     public InternationalString getDescription() {
-        return getResource("Sde.description");
+        return getResource("StandardDeviationalEllipse.description");
     }
 
     /** inputFeatures */
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
-            "inputFeatures", SimpleFeatureCollection.class, getResource("Sde.inputFeatures.title"),
-            getResource("Sde.inputFeatures.description"), true, 1, 1, null, null);
+            "inputFeatures", SimpleFeatureCollection.class,
+            getResource("StandardDeviationalEllipse.inputFeatures.title"),
+            getResource("StandardDeviationalEllipse.inputFeatures.description"), true, 1, 1, null,
+            null);
 
     /** ellipseSize */
     public static final Parameter<String> ellipseSize = new Parameter<String>("ellipseSize",
-            String.class, getResource("Sde.ellipseSize.title"),
-            getResource("Sde.ellipseSize.description"), false, 0, 1, "1_STANDARD_DEVIATION", null);
+            String.class, getResource("StandardDeviationalEllipse.ellipseSize.title"),
+            getResource("StandardDeviationalEllipse.ellipseSize.description"), false, 0, 1,
+            "1_STANDARD_DEVIATION", null);
 
     /** weightField */
     public static final Parameter<String> weightField = new Parameter<String>("weightField",
-            String.class, getResource("Sde.weightField.title"),
-            getResource("Sde.weightField.description"), false, 0, 1, null, new KVP(Params.FIELD,
-                    "inputFeatures.Number"));
+            String.class, getResource("StandardDeviationalEllipse.weightField.title"),
+            getResource("StandardDeviationalEllipse.weightField.description"), false, 0, 1, null,
+            new KVP(Params.FIELD, "inputFeatures.Number"));
 
     /** caseField */
     public static final Parameter<String> caseField = new Parameter<String>("caseField",
-            String.class, getResource("Sde.caseField.title"),
-            getResource("Sde.caseField.description"), false, 0, 1, null, new KVP(Params.FIELD,
-                    "inputFeatures.All"));
+            String.class, getResource("StandardDeviationalEllipse.caseField.title"),
+            getResource("StandardDeviationalEllipse.caseField.description"), false, 0, 1, null,
+            new KVP(Params.FIELD, "inputFeatures.All"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -102,8 +105,9 @@ public class SDEProcessFactory extends SpatialStatisticsProcessFactory {
 
     /** result */
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
-            "result", SimpleFeatureCollection.class, getResource("Sde.result.title"),
-            getResource("Sde.result.description"));
+            "result", SimpleFeatureCollection.class,
+            getResource("StandardDeviationalEllipse.result.title"),
+            getResource("StandardDeviationalEllipse.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

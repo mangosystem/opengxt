@@ -62,31 +62,32 @@ public class ThiessenPolygonProcessFactory extends SpatialStatisticsProcessFacto
 
     @Override
     public InternationalString getTitle() {
-        return getResource("Thiessen.title");
+        return getResource("ThiessenPolygon.title");
     }
 
     @Override
     public InternationalString getDescription() {
-        return getResource("Thiessen.description");
+        return getResource("ThiessenPolygon.description");
     }
 
     /** inputFeatures */
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
             "inputFeatures", SimpleFeatureCollection.class,
-            getResource("Thiessen.inputFeatures.title"),
-            getResource("Thiessen.inputFeatures.description"), true, 1, 1, null, new KVP(
-                    Params.FEATURES, Params.Point));
+            getResource("ThiessenPolygon.inputFeatures.title"),
+            getResource("ThiessenPolygon.inputFeatures.description"), true, 1, 1, null,
+            new KVP(Params.FEATURES, Params.Point));
 
     /** attributes */
     public static final Parameter<ThiessenAttributeMode> attributes = new Parameter<ThiessenAttributeMode>(
-            "attributes", ThiessenAttributeMode.class, getResource("Thiessen.attributes.title"),
-            getResource("Thiessen.attributes.description"), false, 0, 1,
+            "attributes", ThiessenAttributeMode.class,
+            getResource("ThiessenPolygon.attributes.title"),
+            getResource("ThiessenPolygon.attributes.description"), false, 0, 1,
             ThiessenAttributeMode.OnlyFID, null);
 
     /** clipArea */
     public static final Parameter<Geometry> clipArea = new Parameter<Geometry>("clipArea",
-            Geometry.class, getResource("Thiessen.clipArea.title"),
-            getResource("Thiessen.clipArea.description"), false, 0, 1, null, null);
+            Geometry.class, getResource("ThiessenPolygon.clipArea.title"),
+            getResource("ThiessenPolygon.clipArea.description"), false, 0, 1, null, null);
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -99,8 +100,8 @@ public class ThiessenPolygonProcessFactory extends SpatialStatisticsProcessFacto
 
     /** result */
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
-            "result", SimpleFeatureCollection.class, getResource("Thiessen.result.title"),
-            getResource("Thiessen.result.description"));
+            "result", SimpleFeatureCollection.class, getResource("ThiessenPolygon.result.title"),
+            getResource("ThiessenPolygon.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

@@ -59,35 +59,37 @@ public class SDProcessFactory extends SpatialStatisticsProcessFactory {
 
     @Override
     public InternationalString getTitle() {
-        return getResource("Sd.title");
+        return getResource("StandardDistance.title");
     }
 
     @Override
     public InternationalString getDescription() {
-        return getResource("Sd.description");
+        return getResource("StandardDistance.description");
     }
 
     /** inputFeatures */
     public static final Parameter<SimpleFeatureCollection> inputFeatures = new Parameter<SimpleFeatureCollection>(
-            "inputFeatures", SimpleFeatureCollection.class, getResource("Sd.inputFeatures.title"),
-            getResource("Sd.inputFeatures.description"), true, 1, 1, null, null);
+            "inputFeatures", SimpleFeatureCollection.class,
+            getResource("StandardDistance.inputFeatures.title"),
+            getResource("StandardDistance.inputFeatures.description"), true, 1, 1, null, null);
 
     /** circleSize */
     public static final Parameter<String> circleSize = new Parameter<String>("circleSize",
-            String.class, getResource("Sd.circleSize.title"),
-            getResource("Sd.circleSize.description"), false, 0, 1, "1_STANDARD_DEVIATION", null);
+            String.class, getResource("StandardDistance.circleSize.title"),
+            getResource("StandardDistance.circleSize.description"), false, 0, 1,
+            "1_STANDARD_DEVIATION", null);
 
     /** weightField */
     public static final Parameter<String> weightField = new Parameter<String>("weightField",
-            String.class, getResource("Sd.weightField.title"),
-            getResource("Sd.weightField.description"), false, 0, 1, null, new KVP(Params.FIELD,
-                    "inputFeatures.Number"));
+            String.class, getResource("StandardDistance.weightField.title"),
+            getResource("StandardDistance.weightField.description"), false, 0, 1, null,
+            new KVP(Params.FIELD, "inputFeatures.Number"));
 
     /** caseField */
     public static final Parameter<String> caseField = new Parameter<String>("caseField",
-            String.class, getResource("Sd.caseField.title"),
-            getResource("Sd.caseField.description"), false, 0, 1, null, new KVP(Params.FIELD,
-                    "inputFeatures.All"));
+            String.class, getResource("StandardDistance.caseField.title"),
+            getResource("StandardDistance.caseField.description"), false, 0, 1, null,
+            new KVP(Params.FIELD, "inputFeatures.All"));
 
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
@@ -101,8 +103,8 @@ public class SDProcessFactory extends SpatialStatisticsProcessFactory {
 
     /** result */
     public static final Parameter<SimpleFeatureCollection> RESULT = new Parameter<SimpleFeatureCollection>(
-            "result", SimpleFeatureCollection.class, getResource("Sd.result.title"),
-            getResource("Sd.result.description"));
+            "result", SimpleFeatureCollection.class, getResource("StandardDistance.result.title"),
+            getResource("StandardDistance.result.description"));
 
     static final Map<String, Parameter<?>> resultInfo = new TreeMap<String, Parameter<?>>();
     static {

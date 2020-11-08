@@ -51,7 +51,7 @@ public class RasterCutFillProcess extends AbstractStatisticsProcess {
         return factory;
     }
 
-    public static GridCoverage2D process(GridCoverage2D inputCoverage, Geometry cropShape,
+    public static SimpleFeatureCollection process(GridCoverage2D inputCoverage, Geometry cropShape,
             Double baseHeight, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(RasterCutFillProcessFactory.inputCoverage.key, inputCoverage);
@@ -63,7 +63,7 @@ public class RasterCutFillProcess extends AbstractStatisticsProcess {
         try {
             resultMap = process.execute(map, monitor);
 
-            return (GridCoverage2D) resultMap.get(RasterCutFillProcessFactory.RESULT.key);
+            return (SimpleFeatureCollection) resultMap.get(RasterCutFillProcessFactory.RESULT.key);
         } catch (ProcessException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }

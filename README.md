@@ -28,10 +28,10 @@ allows users to share and edit geospatial data. Designed for interoperability, i
   
 * GeoServer
   * Download GeoServer-Extension-OpenGxT-x.xx.x.zip
-  * Unzip and copy these two files to the WEB-INF/lib directory of the GeoServer installation.
+  * Unzip and copy two files to the WEB-INF/lib directory of the GeoServer installation.
   * Restart GeoServer
 
-### uDig Processing Toolbox Plugin Installation
+### uDig Processing Toolbox Plugin project
 * Visit [OpenGXT - uDig Processing Toolbox](https://github.com/mapplus/opengxt-udig-plugin/)
 
 ### Manual & Documents
@@ -39,17 +39,17 @@ allows users to share and edit geospatial data. Designed for interoperability, i
   * [OpenGXT Online User Manual](http://opengxt.mangosystem.com/)
   
 * GeoTools Developer Guide
-  * [Korean v1.0 - 2MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoTools_Process_1.0_Developer_Guide_ko_v.1.0.pdf)
-  * [Korean v1.0-latest - 2MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoTools_Process_1.0_Developer_Guide_ko_v.1.latest.pdf)
+  * [Korean v1.0 - 2MB](docs/manual/GeoTools_Process_1.0_Developer_Guide_ko_v.1.0.pdf)
+  * [Korean v1.0-latest - 2MB](docs/manual/GeoTools_Process_1.0_Developer_Guide_ko_v.1.latest.pdf)
   
 * GeoServer WPS Processes Manual
-  * [Korean v1.0 - 25MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.0.pdf)
-  * [Korean v2.x-latest - 33MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.2.latest.pdf)
-  * [English v2.x-latest - 21MB](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/manual/GeoServer_WPS_1.0_User_Manual_en_v.2.latest.pdf)
+  * [Korean v1.0 - 25MB](docs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.1.0.pdf)
+  * [Korean v2.x-latest - 33MB](hdocs/manual/GeoServer_WPS_1.0_User_Manual_ko_v.2.latest.pdf)
+  * [English v2.x-latest - 21MB](docs/manual/GeoServer_WPS_1.0_User_Manual_en_v.2.latest.pdf)
 
 * uDig Processing Toolbox Manual
-  * [Korean v2.0 - 28MB](https://github.com/mapplus/opengxt-udig-plugin/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.0.pdf)
-  * [Korean v3.x-latest - 35MB](https://github.com/mapplus/opengxt-udig-plugin/blob/master/docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.3.latest.pdf)
+  * [Korean v2.0 - 28MB](docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.2.0.pdf)
+  * [Korean v3.x-latest - 35MB](docs/manual/uDig_ProcessingToolbox_1.0_User_Manual_ko_v.3.latest.pdf)
   * [2018 OSGeo UN Committee Educational Challenge - Training Material for UN Open GIS Spiral 3](https://wiki.osgeo.org/wiki/Training_Material_for_UN_Open_GIS_Spiral_3)
 
 * Presentation
@@ -60,17 +60,19 @@ allows users to share and edit geospatial data. Designed for interoperability, i
 
 ### Contributor
 * mapplus (mapplus@gmail.com)
-* mangosystem (https://github.com/mangosystem)
 * mangowoong (https://github.com/mangowoong)
 * favorson (https://github.com/favorson)
-* rlawlgus18 (https://github.com/rlawlgus18)
+* jyajya (https://github.com/jyajya)
+* saranghyuni (https://github.com/saranghyuni)
+* jinifor (https://github.com/jinifor)
+* tkdnsk0070 (https://github.com/tkdnsk0070)
 
 ### Gallery
 
-![screenshot](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/images/geoserver_wps_request.png?width=800)
+![screenshot](docs/images/geoserver_wps_request.png?width=800)
 
 
-![screenshot](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/images/geoserver_wps_client.png?width=800)
+![screenshot](docs/images/geoserver_wps_client.png?width=800)
 
 
-![screenshot](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/images/udig_processing_toolbox.png?width=800)
+![screenshot](docs/images/udig_processing_toolbox.png?width=800)

@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 
 import org.geotools.data.FeatureWriter;
 import org.geotools.data.shapefile.dbf.DbaseFileException;
+import org.geotools.data.shapefile.dbf.DbaseFileHeader;
 import org.geotools.data.shapefile.dbf.DbaseFileWriter;
 import org.geotools.data.shapefile.files.ShpFileType;
 import org.geotools.data.shapefile.files.ShpFiles;
@@ -101,7 +102,7 @@ public class ShapefileFeatureInserter implements IFeatureInserter {
 
     private TimeZone dbfTimeZone = TimeZone.getDefault();;
 
-    private DbaseFileHeader2 dbfHeader;
+    private DbaseFileHeader dbfHeader;
 
     private byte[] writeFlags;
 
@@ -368,9 +369,9 @@ public class ShapefileFeatureInserter implements IFeatureInserter {
         }
     }
 
-    private DbaseFileHeader2 createDbaseHeader(SimpleFeatureType featureType)
+    private DbaseFileHeader createDbaseHeader(SimpleFeatureType featureType)
             throws IOException, DbaseFileException {
-        DbaseFileHeader2 header = new DbaseFileHeader2();
+        DbaseFileHeader header = new DbaseFileHeader(dbfCharset);
 
         final int attributeCount = featureType.getAttributeCount();
         writeFlags = new byte[attributeCount];

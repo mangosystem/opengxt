@@ -6,11 +6,11 @@
 ### Overview
 The goal of this project is to provide a spatial statistics tools for Geotools, Geoserver WPS, uDig Statistics Toolbox
 
-![screenshot](https://github.com/mapplus/spatial_statistics_for_geotools_udig/blob/master/docs/images/architecture.png?width=600)
+![screenshot](docs/images/architecture.png?width=600)
  
 ### Related Projects
 * [GeoTools](http://geotools.org) is an open source Java library that provides tools for geospatial data. 
-* [GeoServer](http://geoserver.org) GeoServer is an open source software server written in Java that 
+* [GeoServer](http://geoserver.org) is an open source software server written in Java that 
 allows users to share and edit geospatial data. Designed for interoperability, it publishes data from any major spatial data source using open standards.
 * [uDig](http://locationtech.org/projects/technology.udig) is an open source desktop application framework, built with the Eclipse Rich Client (RCP) technology.
 * [uDig Processing Toolbox](https://github.com/mapplus/opengxt-udig-plugin) is a geospatial analysis plugin.

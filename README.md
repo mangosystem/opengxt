@@ -1,3 +1,6 @@
+[![English](https://img.shields.io/badge/language-English-orange.svg)](README)
+[![Korean](https://img.shields.io/badge/language-Korean-blue.svg)](README-KOREAN)
+
 ## OpenGXT - Spatial Analysis
 
 ### Overview

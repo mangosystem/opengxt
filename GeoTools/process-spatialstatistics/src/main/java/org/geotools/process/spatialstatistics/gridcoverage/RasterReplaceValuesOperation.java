@@ -31,6 +31,7 @@ import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
@@ -51,6 +52,11 @@ public class RasterReplaceValuesOperation extends RasterProcessingOperation {
     public GridCoverage2D execute(GridCoverage2D inputCoverage, Geometry region,
             double replaceValue) {
         if (region == null || region.isEmpty()) {
+            return inputCoverage;
+        }
+
+        Envelope regionEnv = region.getEnvelopeInternal();
+        if (regionEnv.getWidth() == 0d || regionEnv.getHeight() == 0d) {
             return inputCoverage;
         }
 

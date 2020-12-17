@@ -23,7 +23,7 @@ OGC 국제표준과 Open Source GIS에 기반하여 개발한 공간(통계)분�
 * gs-wps-spatialstatistics는 GeoServer [GPL](http://www.gnu.org/licenses/old-licenses/gpl-2.0.html) 라이선스를 따릅니다.
 
 ### GeoTools & GeoServer용 OpenGXT 다운로드
-* [SourceForge](https://sourceforge.net/projects/mango-spatialstatistics/) 연결
+* [SourceForge](https://sourceforge.net/projects/opengxt) 연결
 
 * Geotools
   * gt-process-spatialstatistics-xx.x.jar 파일 다운로드  
@@ -34,10 +34,10 @@ OGC 국제표준과 Open Source GIS에 기반하여 개발한 공간(통계)분�
   * GeoServer 재시작
 
 ### uDig Processing Toolbox 플러그인 프로젝트
-* [OpenGXT - uDig Processing Toolbox](https://github.com/mapplus/opengxt-udig-plugin/) 프로젝트
+* [OpenGXT - uDig Processing Toolbox](https://github.com/mangosystem/opengxt-udig-plugin/) 프로젝트
 
 ### 사용자 지침서
-* OpenGXT 온라인 사용자 지침서
+* OpenGXT 온라인 사용자 지침서mangosystem
   * [OpenGXT Online User Manual](http://opengxt.mangosystem.com/)
   
 * GeoTools 개발자 가이드

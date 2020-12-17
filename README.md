@@ -13,7 +13,7 @@ The goal of this project is to provide a spatial statistics tools for Geotools, 
 * [GeoServer](http://geoserver.org) is an open source software server written in Java that 
 allows users to share and edit geospatial data. Designed for interoperability, it publishes data from any major spatial data source using open standards.
 * [uDig](http://locationtech.org/projects/technology.udig) is an open source desktop application framework, built with the Eclipse Rich Client (RCP) technology.
-* [uDig Processing Toolbox](https://github.com/mapplus/opengxt-udig-plugin) is a geospatial analysis plugin.
+* [uDig Processing Toolbox](https://github.com/mangosystem/opengxt-udig-plugin) is a geospatial analysis plugin.
 
 ### License
 * GeoTools process-spatialstatistics licensed under the [LGPL](http://www.gnu.org/licenses/lgpl.html). [License guide](http://docs.geotools.org/latest/userguide/welcome/license.html)
@@ -21,7 +21,7 @@ allows users to share and edit geospatial data. Designed for interoperability, i
 * uDig org.locationtech.udig.processingtoolbox licensed under the [EPL](http://www.eclipse.org/legal/epl-v10.html) + [BSD](http://udig.refractions.net/files/bsd3-v10.html).
 
 ### Download GeoTools & GeoServer WPS libraries
-* Visit [SourceForge](https://sourceforge.net/projects/mango-spatialstatistics/)
+* Visit [SourceForge](https://sourceforge.net/projects/opengxt)
 
 * Geotools
   * Download gt-process-spatialstatistics-xx.x.jar file
@@ -32,7 +32,7 @@ allows users to share and edit geospatial data. Designed for interoperability, i
   * Restart GeoServer
 
 ### uDig Processing Toolbox Plugin project
-* Visit [OpenGXT - uDig Processing Toolbox](https://github.com/mapplus/opengxt-udig-plugin/)
+* Visit [OpenGXT - uDig Processing Toolbox](https://github.com/mangosystem/opengxt-udig-plugin/)
 
 ### Manual & Documents
 * OpenGXT Online User Manual

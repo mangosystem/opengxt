@@ -38,7 +38,7 @@ public class OpenGXTPage extends AbstractSecurityPage {
         // 1. status
         add(new ExternalLink("gxt.author", "http://www.mangosystem.com", "Mango System"));
         add(new ExternalLink("gxt.source",
-                "https://github.com/mapplus/spatial_statistics_for_geotools_udig/", "GitHub"));
+                "https://github.com/mangosystem/opengxt/", "GitHub"));
 
         add(new ExternalLink("gxt.license",
                 "https://docs.geoserver.org/latest/en/user/introduction/license.html",

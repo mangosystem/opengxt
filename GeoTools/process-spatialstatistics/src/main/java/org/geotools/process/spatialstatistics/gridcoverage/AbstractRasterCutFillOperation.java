@@ -29,6 +29,7 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
@@ -38,6 +39,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.operation.union.CascadedPolygonUnion;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.FilterFactory2;
 
 /**
  * Abstract Raster CutFill Operation.
@@ -48,6 +50,10 @@ import org.opengis.feature.simple.SimpleFeatureType;
  */
 public class AbstractRasterCutFillOperation extends RasterProcessingOperation {
     protected static final Logger LOGGER = Logging.getLogger(AbstractRasterCutFillOperation.class);
+
+    protected final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+
+    protected final String CATEGORY = "category";
 
     protected GridCoverage2D cutFillRaster = null;
 
@@ -62,7 +68,7 @@ public class AbstractRasterCutFillOperation extends RasterProcessingOperation {
     protected SimpleFeatureCollection buildFeatures(GridCoverage2D cutFillGc, CutFillResult result)
             throws ProcessException, IOException {
         RasterToPolygonOperation converter = new RasterToPolygonOperation();
-        SimpleFeatureCollection features = converter.execute(cutFillGc, 0, false, "category");
+        SimpleFeatureCollection features = converter.execute(cutFillGc, 0, false, CATEGORY);
 
         Map<Integer, List<Geometry>> map = buildMap(features);
 
@@ -104,7 +110,7 @@ public class AbstractRasterCutFillOperation extends RasterProcessingOperation {
             SimpleFeature newFeature = builder.buildFeature(fid);
             newFeature.setDefaultGeometry(unionGeometry);
 
-            newFeature.setAttribute("category", category);
+            newFeature.setAttribute(CATEGORY, category);
             newFeature.setAttribute("count", count);
             newFeature.setAttribute("area", area);
             newFeature.setAttribute("volume", volume);
@@ -129,7 +135,7 @@ public class AbstractRasterCutFillOperation extends RasterProcessingOperation {
         try {
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
-                Object val = feature.getAttribute("category");
+                Object val = feature.getAttribute(CATEGORY);
                 Integer category = Converters.convert(val, Integer.class);
 
                 if (val != null) {

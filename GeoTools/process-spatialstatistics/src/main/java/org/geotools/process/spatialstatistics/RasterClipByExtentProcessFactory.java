@@ -75,7 +75,7 @@ public class RasterClipByExtentProcessFactory extends SpatialStatisticsProcessFa
 
     /** extent */
     public static final Parameter<ReferencedEnvelope> extent = new Parameter<ReferencedEnvelope>(
-            "cropShape", ReferencedEnvelope.class, getResource("RasterClipByExtent.extent.title"),
+            "extent", ReferencedEnvelope.class, getResource("RasterClipByExtent.extent.title"),
             getResource("RasterClipByExtent.extent.description"), true, 1, 1, null, null);
 
     @Override

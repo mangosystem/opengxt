@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.geotools.data.DataUtilities;
+import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -29,6 +29,7 @@ import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.transformation.IntersectFeatureCollection;
 import org.geotools.util.logging.Logging;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.util.ProgressListener;
 
 /**
@@ -80,8 +81,11 @@ public class IntersectProcess extends AbstractStatisticsProcess {
         }
 
         // start process
-        SimpleFeatureCollection resultFc = DataUtilities.simple(new IntersectFeatureCollection(
-                inputFeatures, overlayFeatures));
+        SimpleFeatureType schema = inputFeatures.getSchema();
+        SimpleFeatureCollection resultFc = new ListFeatureCollection(schema);
+        if (inputFeatures.size() > 0 && overlayFeatures.size() > 0) {
+            resultFc = new IntersectFeatureCollection(inputFeatures, overlayFeatures);
+        }
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

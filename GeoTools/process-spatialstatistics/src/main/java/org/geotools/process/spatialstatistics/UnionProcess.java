@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.geotools.data.DataUtilities;
+import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -31,6 +31,7 @@ import org.geotools.process.spatialstatistics.transformation.DifferenceFeatureCo
 import org.geotools.process.spatialstatistics.transformation.IntersectFeatureCollection;
 import org.geotools.process.spatialstatistics.transformation.MergeFeatureCollection;
 import org.geotools.util.logging.Logging;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.util.ProgressListener;
 
 /**
@@ -82,20 +83,24 @@ public class UnionProcess extends AbstractStatisticsProcess {
         }
 
         // start process
-        SimpleFeatureCollection intersect = DataUtilities.simple(new IntersectFeatureCollection(
-                inputFeatures, overlayFeatures));
+        SimpleFeatureType schema = inputFeatures.getSchema();
+        SimpleFeatureCollection intersect = new ListFeatureCollection(schema);
+        if (inputFeatures.size() > 0 && overlayFeatures.size() > 0) {
+            intersect = new IntersectFeatureCollection(inputFeatures, overlayFeatures);
+        }
 
-        SimpleFeatureCollection difference1 = DataUtilities.simple(new DifferenceFeatureCollection(
-                inputFeatures, overlayFeatures));
+        SimpleFeatureCollection difference1 = inputFeatures;
+        if (inputFeatures.size() > 0 && overlayFeatures.size() > 0) {
+            difference1 = new DifferenceFeatureCollection(inputFeatures, overlayFeatures);
+        }
 
-        SimpleFeatureCollection difference2 = DataUtilities.simple(new DifferenceFeatureCollection(
-                overlayFeatures, inputFeatures));
+        SimpleFeatureCollection difference2 = overlayFeatures;
+        if (inputFeatures.size() > 0 && overlayFeatures.size() > 0) {
+            difference2 = new DifferenceFeatureCollection(overlayFeatures, inputFeatures);
+        }
 
-        SimpleFeatureCollection merge1 = DataUtilities.simple(new MergeFeatureCollection(intersect,
-                difference1));
-
-        SimpleFeatureCollection resultFc = DataUtilities.simple(new MergeFeatureCollection(merge1,
-                difference2));
+        SimpleFeatureCollection merge1 = new MergeFeatureCollection(intersect, difference1);
+        SimpleFeatureCollection resultFc = new MergeFeatureCollection(merge1, difference2);
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

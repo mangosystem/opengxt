@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -73,15 +72,17 @@ public class DifferenceProcess extends AbstractStatisticsProcess {
         SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
                 DifferenceProcessFactory.inputFeatures, null);
 
-        SimpleFeatureCollection differenceFeatures = (SimpleFeatureCollection) Params.getValue(
-                input, DifferenceProcessFactory.differenceFeatures, null);
+        SimpleFeatureCollection differenceFeatures = (SimpleFeatureCollection) Params
+                .getValue(input, DifferenceProcessFactory.differenceFeatures, null);
         if (inputFeatures == null || differenceFeatures == null) {
             throw new NullPointerException("inputFeatures, differenceFeatures parameters required");
         }
 
         // start process
-        SimpleFeatureCollection resultFc = DataUtilities.simple(new DifferenceFeatureCollection(
-                inputFeatures, differenceFeatures));
+        SimpleFeatureCollection resultFc = inputFeatures;
+        if (inputFeatures.size() > 0 && differenceFeatures.size() > 0) {
+            resultFc = new DifferenceFeatureCollection(inputFeatures, differenceFeatures);
+        }
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

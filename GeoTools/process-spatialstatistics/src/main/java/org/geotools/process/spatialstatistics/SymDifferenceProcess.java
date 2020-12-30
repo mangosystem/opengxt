@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -74,20 +73,24 @@ public class SymDifferenceProcess extends AbstractStatisticsProcess {
         SimpleFeatureCollection inputFeatures = (SimpleFeatureCollection) Params.getValue(input,
                 SymDifferenceProcessFactory.inputFeatures, null);
 
-        SimpleFeatureCollection differenceFeatures = (SimpleFeatureCollection) Params.getValue(
-                input, SymDifferenceProcessFactory.differenceFeatures, null);
+        SimpleFeatureCollection differenceFeatures = (SimpleFeatureCollection) Params
+                .getValue(input, SymDifferenceProcessFactory.differenceFeatures, null);
         if (inputFeatures == null || differenceFeatures == null) {
             throw new NullPointerException("inputFeatures, differenceFeatures parameters required");
         }
 
         // start process
-        SimpleFeatureCollection diff1 = DataUtilities.simple(new DifferenceFeatureCollection(
-                inputFeatures, differenceFeatures));
-        SimpleFeatureCollection diff2 = DataUtilities.simple(new DifferenceFeatureCollection(
-                differenceFeatures, inputFeatures));
+        SimpleFeatureCollection diff1 = inputFeatures;
+        if (inputFeatures.size() > 0 && differenceFeatures.size() > 0) {
+            diff1 = new DifferenceFeatureCollection(inputFeatures, differenceFeatures);
+        }
 
-        SimpleFeatureCollection resultFc = DataUtilities.simple(new MergeFeatureCollection(diff1,
-                diff2));
+        SimpleFeatureCollection diff2 = differenceFeatures;
+        if (inputFeatures.size() > 0 && differenceFeatures.size() > 0) {
+            diff2 = new DifferenceFeatureCollection(differenceFeatures, inputFeatures);
+        }
+
+        SimpleFeatureCollection resultFc = new MergeFeatureCollection(diff1, diff2);
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

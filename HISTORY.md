@@ -1,4 +1,7 @@
 
+## 2021-02-16
+  * Update LinearLineOfSight, RadialLineOfSight processes
+  
 ## 2020-12-21
   * Add RegularPoints process
   

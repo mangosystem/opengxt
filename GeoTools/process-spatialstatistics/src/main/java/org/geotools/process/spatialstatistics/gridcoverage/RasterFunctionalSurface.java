@@ -19,10 +19,13 @@ package org.geotools.process.spatialstatistics.gridcoverage;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -88,9 +91,9 @@ public class RasterFunctionalSurface {
     private double _8DX = cellSizeX * 8;
 
     private double _8DY = cellSizeY * 8;
-    
+
     private boolean isGeographic = false;
-    
+
     private GeodeticCalculator calculator = null;
 
     private GeometryFactory gf = JTSFactoryFinder.getGeometryFactory(GeoTools.getDefaultHints());
@@ -110,7 +113,7 @@ public class RasterFunctionalSurface {
 
         this.image = (PlanarImage) srcCoverage.getRenderedImage();
         this.bounds = image.getBounds();
-        
+
         CoordinateReferenceSystem crs = srcCoverage.getCoordinateReferenceSystem();
         CoordinateReferenceSystem hor = CRS.getHorizontalCRS(crs);
         this.isGeographic = hor instanceof GeographicCRS;
@@ -128,9 +131,9 @@ public class RasterFunctionalSurface {
         GeometryFactory gf = lineString.getFactory();
 
         Coordinate[] coordinates = lineString.getCoordinates();
-        for (int i = 0; i < coordinates.length - 1; i++) {
+        for (int i = 1; i < coordinates.length; i++) {
             int visible = (int) coordinates[i].z;
-            LineSegment lineSeg = new LineSegment(coordinates[i], coordinates[i + 1]);
+            LineSegment lineSeg = new LineSegment(coordinates[i - 1], coordinates[i]);
             LineString line = lineSeg.toGeometry(gf);
 
             if (visible == 1) {
@@ -143,19 +146,34 @@ public class RasterFunctionalSurface {
         @SuppressWarnings("rawtypes")
         Collection lineStrings = vm.getMergedLineStrings();
         if (lineStrings.size() > 0) {
-            Geometry lines = gf.createMultiLineString(GeometryFactory
-                    .toLineStringArray(lineStrings));
+            Geometry lines = gf.createMultiLineString(simplify(lineStrings));
             map.put(Integer.valueOf(1), lines);
         }
 
         lineStrings = ivm.getMergedLineStrings();
         if (lineStrings.size() > 0) {
-            Geometry lines = gf.createMultiLineString(GeometryFactory
-                    .toLineStringArray(lineStrings));
+            Geometry lines = gf.createMultiLineString(simplify(lineStrings));
             map.put(Integer.valueOf(0), lines);
         }
 
         return map;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private LineString[] simplify(Collection lineStrings) {
+        List<LineString> lineList = new ArrayList<LineString>();
+
+        Iterator it = lineStrings.iterator();
+        while (it.hasNext()) {
+            LineString lineString = (LineString) it.next();
+
+            Coordinate[] coords = new Coordinate[2];
+            coords[0] = lineString.getStartPoint().getCoordinate();
+            coords[1] = lineString.getEndPoint().getCoordinate();
+            lineList.add(lineString.getFactory().createLineString(coords));
+        }
+
+        return GeometryFactory.toLineStringArray(lineList);
     }
 
     public LineString getLineOfSight(Coordinate observer, Coordinate target, double observerOffset,
@@ -170,7 +188,8 @@ public class RasterFunctionalSurface {
                 observerOffset, useCurvature, useRefraction, refractionFactor);
     }
 
-    public LineString getLineOfSight(LineString segment, double observerOffset, boolean useCurvature) {
+    public LineString getLineOfSight(LineString segment, double observerOffset,
+            boolean useCurvature) {
         return getLineOfSight(segment, observerOffset, useCurvature, false, 0.13);
     }
 
@@ -410,8 +429,10 @@ public class RasterFunctionalSurface {
         }
 
         // aspect
-        dZdX = ((mx[2][0] + 2 * mx[2][1] + mx[2][2]) - (mx[0][0] + 2 * mx[0][1] + mx[0][2])) / (8.0);
-        dZdY = ((mx[0][2] + 2 * mx[1][2] + mx[2][2]) - (mx[0][0] + 2 * mx[1][0] + mx[2][0])) / (8.0);
+        dZdX = ((mx[2][0] + 2 * mx[2][1] + mx[2][2]) - (mx[0][0] + 2 * mx[0][1] + mx[0][2]))
+                / (8.0);
+        dZdY = ((mx[0][2] + 2 * mx[1][2] + mx[2][2]) - (mx[0][0] + 2 * mx[1][0] + mx[2][0]))
+                / (8.0);
 
         double aspect = (180.0 / Math.PI) * Math.atan2(dZdY, -dZdX);
 
@@ -483,8 +504,9 @@ public class RasterFunctionalSurface {
             }
         }
 
-        double hsdVal = 255.0 * ((Math.cos(zenith_rad) * Math.cos(slope_rad)) + (Math
-                .sin(zenith_rad) * Math.sin(slope_rad) * Math.cos(azimuth_rad - aspect_rad)));
+        double hsdVal = 255.0
+                * ((Math.cos(zenith_rad) * Math.cos(slope_rad)) + (Math.sin(zenith_rad)
+                        * Math.sin(slope_rad) * Math.cos(azimuth_rad - aspect_rad)));
 
         return hsdVal;
     }

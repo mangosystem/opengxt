@@ -125,7 +125,6 @@ public class ConcaveHullOperation extends GeneralOperation {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
             featureWriter.rollback(e);
         } finally {
             featureWriter.close();

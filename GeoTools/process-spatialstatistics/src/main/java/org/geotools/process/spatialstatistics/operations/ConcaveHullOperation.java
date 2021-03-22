@@ -102,8 +102,16 @@ public class ConcaveHullOperation extends GeneralOperation {
                 String groupValue = Converters.convert(entry.getKey(), String.class);
                 CoordinateList points = entry.getValue();
 
-                List<Geometry> concaveHulls = generateConcaveHull(points, alpha, removeHoles,
-                        splitMultipart);
+                List<Geometry> concaveHulls = null;
+                try {
+                    concaveHulls = generateConcaveHull(points, alpha, removeHoles, splitMultipart);
+                } catch (NullPointerException npe) {
+                    continue;
+                }
+                
+                if(concaveHulls == null) {
+                    continue;
+                }
 
                 // writer a feature
                 for (int index = 0; index < concaveHulls.size(); index++) {
@@ -117,6 +125,7 @@ public class ConcaveHullOperation extends GeneralOperation {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             featureWriter.rollback(e);
         } finally {
             featureWriter.close();

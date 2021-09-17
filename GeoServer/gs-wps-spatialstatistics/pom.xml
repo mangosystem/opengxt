@@ -11,7 +11,7 @@
   <!-- =========================================================== -->
   <groupId>org.geoserver</groupId>
   <artifactId>gs-wps-spatialstatistics</artifactId>
-  <version>2.18.1</version>
+  <version>2.19-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Spatial Statistics Web Processing Service Module</name>
   <url>https://github.com/MapPlus/spatial_statistics_for_geotools_udig</url>
@@ -27,8 +27,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <gt.version>24.1</gt.version>
-    <wicket.version>7.6.0</wicket.version>
+    <gt.version>25-SNAPSHOT</gt.version>
+    <wicket.version>7.18.0</wicket.version>
   </properties>
   
   <repositories>
@@ -235,7 +235,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.13.1</version>
       <scope>test</scope>
     </dependency>   
   </dependencies>
@@ -247,7 +247,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>cobertura-maven-plugin</artifactId>
-          <version>2.3</version>
+          <version>2.4</version>
         </plugin>
       </plugins>
     </pluginManagement>

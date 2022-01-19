@@ -11,7 +11,7 @@
   <!-- =========================================================== -->
   <groupId>org.geoserver</groupId>
   <artifactId>gs-wps-spatialstatistics</artifactId>
-  <version>2.15.5</version>
+  <version>2.15-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Spatial Statistics Web Processing Service Module</name>
   <url>https://github.com/MapPlus/spatial_statistics_for_geotools_udig</url>
@@ -27,7 +27,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <gt.version>21.5</gt.version>
+    <gt.version>21-SNAPSHOT</gt.version>
     <wicket.version>7.6.0</wicket.version>
   </properties>
   

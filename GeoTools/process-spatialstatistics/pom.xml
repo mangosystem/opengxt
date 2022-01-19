@@ -17,7 +17,7 @@
   <packaging>jar</packaging>
   <name>Process Spatialstatistics</name>
   <description>Processes for spatial statistics.</description>
-  <version>21.5</version>
+  <version>21-SNAPSHOT</version>
   <url>https://github.com/mangosystem/opengxt</url>
   
   <licenses>

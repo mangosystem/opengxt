@@ -1,3 +1,7 @@
+<p align="center">
+  <a href="http://opengxt.mangosystem.com"><img align="center" width="50%" src="https://github.com/mangosystem/opengxt/raw/master/docs/images/opengxt.png"></img></a>
+</p>
+
 [![English](https://img.shields.io/badge/language-English-orange.svg)](README.md)
 [![Korean](https://img.shields.io/badge/language-Korean-blue.svg)](README-KOREAN.md)
 

@@ -164,9 +164,9 @@ public class ClipWithGeometryFeatureCollection extends GXTSimpleFeatureCollectio
                 // default geometry is clipped out, skip it
                 SimpleFeature feature = delegate.next();
                 GeometryDescriptor gds = feature.getFeatureType().getGeometryDescriptor();
-                Object cliped = clipGeometry((Geometry) feature.getDefaultGeometry(), gds.getType()
+                Geometry cliped = clipGeometry((Geometry) feature.getDefaultGeometry(), gds.getType()
                         .getBinding());
-                if (cliped == null) {
+                if (cliped == null || cliped.isEmpty()) {
                     clippedOut = true;
                 }
 
@@ -196,7 +196,7 @@ public class ClipWithGeometryFeatureCollection extends GXTSimpleFeatureCollectio
             return result;
         }
 
-        private Object clipGeometry(Geometry geom, Class<?> target) {
+        private Geometry clipGeometry(Geometry geom, Class<?> target) {
             // first off, clip
             Geometry clipped = null;
             if (clipper != null) {

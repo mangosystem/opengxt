@@ -87,7 +87,7 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
 
         processGeometry(inputGeometry, gridValue);
 
-        this.MinValue = this.MaxValue = gridValue.doubleValue();
+        this.minValue = this.maxValue = gridValue.doubleValue();
 
         return close();
     }
@@ -98,10 +98,10 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
         calculateExtentAndCellSize(gridExtent, nodataValue);
 
         // set pixel type
-        PixelType = transferType;
+        pixelType = transferType;
 
         // recalculate coverage extent
-        Extent = RasterHelper.getResolvedEnvelope(Extent, CellSizeX, CellSizeY);
+        gridExtent = RasterHelper.getResolvedEnvelope(gridExtent, pixelSizeX, pixelSizeY);
 
         final int tw = 64;
         final int th = 64;
@@ -109,7 +109,7 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
         ColorModel colorModel = ColorModel.getRGBdefault();
         SampleModel smpModel = colorModel.createCompatibleSampleModel(tw, th);
 
-        Dimension dim = RasterHelper.getDimension(Extent, CellSizeX, CellSizeY);
+        Dimension dim = RasterHelper.getDimension(gridExtent, pixelSizeX, pixelSizeY);
 
         dmImage = new DiskMemImage(0, 0, dim.width, dim.height, 0, 0, smpModel, colorModel);
         dmImage.setUseCommonCache(true);
@@ -121,13 +121,13 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
         g2D.setComposite(AlphaComposite.Src);
 
         // set nodata value
-        g2D.setPaint(valueToColor(NoData));
+        g2D.setPaint(valueToColor(noData));
         g2D.fillRect(0, 0, dmImage.getWidth(), dmImage.getHeight());
 
         // setup affine transform
-        double x_scale = dmImage.getWidth() / Extent.getWidth();
-        double y_scale = dmImage.getHeight() / Extent.getHeight();
-        Coordinate centerPos = Extent.centre();
+        double x_scale = dmImage.getWidth() / gridExtent.getWidth();
+        double y_scale = dmImage.getHeight() / gridExtent.getHeight();
+        Coordinate centerPos = gridExtent.centre();
 
         affineTrans = new AffineTransform();
         affineTrans.translate(dmImage.getWidth() / 2, dmImage.getHeight() / 2);
@@ -136,7 +136,7 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
     }
 
     private void processGeometry(Geometry geometry, Number value) {
-        if (!Extent.intersects(geometry.getEnvelopeInternal())) {
+        if (!gridExtent.intersects(geometry.getEnvelopeInternal())) {
             return;
         }
 
@@ -198,8 +198,8 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
         Coordinate[] cs = lineString.getCoordinates();
 
         // Offset like ArcGIS
-        double offsetX = shapeType == SimpleShapeType.POLYGON ? CellSizeX / 2.0 : 0;
-        double offsetY = shapeType == SimpleShapeType.POLYGON ? CellSizeY / 2.0 : 0;
+        double offsetX = shapeType == SimpleShapeType.POLYGON ? pixelSizeX / 2.0 : 0;
+        double offsetY = shapeType == SimpleShapeType.POLYGON ? pixelSizeY / 2.0 : 0;
 
         for (int i = 0; i < cs.length; i++) {
             if (i == 0) {
@@ -222,7 +222,7 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
         ColorModel cm = null;
         DiskMemImage destImage = null;
 
-        switch (PixelType) {
+        switch (pixelType) {
         case BYTE:
         case SHORT:
             sm = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_SHORT,
@@ -264,7 +264,7 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
                 final Rectangle bounds = destTile.getBounds();
                 for (int dy = bounds.y, drow = 0; drow < bounds.height; dy++, drow++) {
                     for (int dx = bounds.x, dcol = 0; dcol < bounds.width; dx++, dcol++) {
-                        switch (PixelType) {
+                        switch (pixelType) {
                         case BYTE:
                         case SHORT:
                         case INTEGER:
@@ -284,14 +284,14 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
             }
         }
 
-        return createGridCoverage("FeaturesToRaster", destImage, 0, NoData, MinValue, MaxValue,
-                Extent);
+        return createGridCoverage("FeaturesToRaster", destImage, 0, noData, minValue, maxValue,
+                gridExtent);
     }
 
     private Color valueToColor(Number value) {
         int intBits;
 
-        switch (PixelType) {
+        switch (pixelType) {
         case BYTE:
             intBits = value.byteValue();
             break;

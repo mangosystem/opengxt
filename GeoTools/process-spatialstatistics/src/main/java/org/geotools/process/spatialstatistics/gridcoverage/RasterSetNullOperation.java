@@ -57,7 +57,7 @@ public class RasterSetNullOperation extends RasterProcessingOperation {
             return inputCoverage;
         }
 
-        this.NoData = RasterHelper.getNoDataValue(inputCoverage);
+        this.noData = RasterHelper.getNoDataValue(inputCoverage);
 
         // decide pixel type
         RasterPixelType pixelType = RasterHelper.getTransferType(inputCoverage);
@@ -79,7 +79,7 @@ public class RasterSetNullOperation extends RasterProcessingOperation {
                 double value = inputIter.getSampleDouble(bandIndex);
 
                 // check nodata
-                boolean isNoData = SSUtils.compareDouble(value, NoData);
+                boolean isNoData = SSUtils.compareDouble(value, noData);
                 if (isNoData && replaceNoData) {
                     writerIter.setSample(0, newValue);
                     this.updateStatistics(value);
@@ -89,14 +89,14 @@ public class RasterSetNullOperation extends RasterProcessingOperation {
                 }
 
                 if (isNoData) {
-                    writerIter.setSample(0, NoData);
+                    writerIter.setSample(0, noData);
                 } else {
                     // evaluate grid value
                     feature.setAttribute(1, value); // raster name
                     feature.setAttribute(2, value); // Value
                     if (filter.evaluate(feature)) {
                         // set null
-                        writerIter.setSample(0, NoData);
+                        writerIter.setSample(0, noData);
                     } else {
                         writerIter.setSample(0, value);
                         this.updateStatistics(value);

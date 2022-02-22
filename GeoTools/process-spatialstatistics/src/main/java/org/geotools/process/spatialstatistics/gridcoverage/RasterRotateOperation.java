@@ -47,6 +47,8 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 
+import it.geosolutions.jaiext.range.NoDataContainer;
+
 /**
  * Turns a raster dataset around the specified pivot point by the angle specified angle in degrees. <br>
  * the raster dataset will rotate in a clockwise direction.
@@ -125,7 +127,7 @@ public class RasterRotateOperation extends AbstractTransformationOperation {
 
         final double[] backgroundValues = new double[inputImage.getSampleModel().getNumBands()];
         for (int index = 0; index < backgroundValues.length; index++) {
-            backgroundValues[index] = NoData;
+            backgroundValues[index] = noData;
         }
         parameterBlock.setParameter("backgroundValues", backgroundValues);
 
@@ -141,7 +143,7 @@ public class RasterRotateOperation extends AbstractTransformationOperation {
                     anchorPoint.x, anchorPoint.y);
             MathTransform mathTransform = new AffineTransform2D(affineTransform);
 
-            newExt = JTS.transform(Extent, mathTransform);
+            newExt = JTS.transform(gridExtent, mathTransform);
         } catch (MismatchedDimensionException e) {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
         } catch (TransformException e) {
@@ -151,10 +153,10 @@ public class RasterRotateOperation extends AbstractTransformationOperation {
         // adjust extent
         final int column = outputImage.getWidth();
         final int row = outputImage.getHeight();
-        final double maxX = newExt.getMinX() + (column * CellSizeX);
-        final double maxY = newExt.getMinY() + (row * CellSizeY);
+        final double maxX = newExt.getMinX() + (column * pixelSizeX);
+        final double maxY = newExt.getMinY() + (row * pixelSizeY);
 
-        Extent = new ReferencedEnvelope(newExt.getMinX(), maxX, newExt.getMinY(), maxY, crs);
+        gridExtent = new ReferencedEnvelope(newExt.getMinX(), maxX, newExt.getMinY(), maxY, crs);
 
         final int numBands = inputCoverage.getNumSampleDimensions();
 
@@ -168,10 +170,10 @@ public class RasterRotateOperation extends AbstractTransformationOperation {
 
             Map properties = inputCoverage.getProperties();
             properties.put(Vocabulary.formatInternational(VocabularyKeys.NODATA), noData);
-            properties.put("GC_NODATA", noData);
+            properties.put(NoDataContainer.GC_NODATA, noData);
 
             GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
-            return factory.create(inputCoverage.getName(), outputImage, Extent, bands, null,
+            return factory.create(inputCoverage.getName(), outputImage, gridExtent, bands, null,
                     properties);
         }
     }

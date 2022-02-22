@@ -32,6 +32,8 @@ import org.geotools.metadata.i18n.Vocabulary;
 import org.geotools.metadata.i18n.VocabularyKeys;
 import org.geotools.util.logging.Logging;
 
+import it.geosolutions.jaiext.range.NoDataContainer;
+
 /**
  * Reorients the raster by turning it over, from top to bottom, along the horizontal axis through the center of the raster.
  * 
@@ -68,10 +70,10 @@ public class RasterFlipOperation extends AbstractTransformationOperation {
 
             Map properties = inputCoverage.getProperties();
             properties.put(Vocabulary.formatInternational(VocabularyKeys.NODATA), noData);
-            properties.put("GC_NODATA", noData);
+            properties.put(NoDataContainer.GC_NODATA, noData);
 
             GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
-            return factory.create(inputCoverage.getName(), outputImage, Extent, bands, null,
+            return factory.create(inputCoverage.getName(), outputImage, gridExtent, bands, null,
                     properties);
         }
     }

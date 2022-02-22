@@ -59,8 +59,8 @@ public class RasterInterpolationTPSOperation extends RasterInterpolationOperator
         final ThinPlateSplineInterpolator interpolator = new ThinPlateSplineInterpolator(pts);
 
         // create image & write pixels
-        final DiskMemImage oi = this.createDiskMemImage(Extent, pixelType);
-        final GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
+        final DiskMemImage oi = this.createDiskMemImage(gridExtent, pixelType);
+        final GridTransformer trans = new GridTransformer(gridExtent, pixelSizeX, pixelSizeY);
 
         // divide 500 pixels
         final java.awt.Rectangle bounds = oi.getBounds();

@@ -92,14 +92,6 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
     public GridCoverage2D execute(SimpleFeatureCollection inputFeatures, Number gridValue) {
         shapeType = FeatureTypes.getSimpleShapeType(inputFeatures.getSchema());
 
-        // Point To Raster Conversion
-        if (shapeType == SimpleShapeType.POINT) {
-            PointsToRasterOperation pointToRaster = new PointsToRasterOperation();
-            pointToRaster.setRasterEnvironment(getRasterEnvironment());
-
-            return pointToRaster.execute(inputFeatures, gridValue.intValue());
-        }
-
         RasterPixelType rsType = RasterPixelType.SHORT;
         if (gridValue.getClass().equals(Short.class)) {
             rsType = RasterPixelType.SHORT;
@@ -111,6 +103,18 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
             rsType = RasterPixelType.DOUBLE;
         } else if (gridValue.getClass().equals(Byte.class)) {
             rsType = RasterPixelType.BYTE;
+        }
+
+        // calculate extent & cellsize
+        Object nodataValue = RasterHelper.getDefaultNoDataValue(rsType);
+        calculateExtentAndCellSize(inputFeatures.getBounds(), nodataValue);
+
+        // Point To Raster Conversion
+        if (shapeType == SimpleShapeType.POINT) {
+            PointsToRasterOperation pointToRaster = new PointsToRasterOperation();
+            pointToRaster.setExtentAndCellSize(gridExtent, pixelSizeX, pixelSizeY);
+
+            return pointToRaster.execute(inputFeatures, gridValue.intValue());
         }
 
         initializeTiledImage(inputFeatures.getBounds(), rsType);
@@ -131,7 +135,7 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
             featureIter.close();
         }
 
-        this.MinValue = this.MaxValue = gridValue.doubleValue();
+        this.minValue = this.maxValue = gridValue.doubleValue();
 
         return close();
     }
@@ -174,11 +178,16 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
         SimpleFeatureType schema = inputFeatures.getSchema();
         Class<?> geomBinding = schema.getGeometryDescriptor().getType().getBinding();
         shapeType = FeatureTypes.getSimpleShapeType(geomBinding);
+        RasterPixelType transferType = RasterPixelType.SHORT;
+
+        // calculate extent & cellsize
+        Object nodataValue = RasterHelper.getDefaultNoDataValue(transferType);
+        calculateExtentAndCellSize(inputFeatures.getBounds(), nodataValue);
 
         // Point To Raster Conversion
         if (shapeType == SimpleShapeType.POINT) {
             PointsToRasterOperation pointToRaster = new PointsToRasterOperation();
-            pointToRaster.setRasterEnvironment(getRasterEnvironment());
+            pointToRaster.setExtentAndCellSize(gridExtent, pixelSizeX, pixelSizeY);
 
             return pointToRaster.execute(inputFeatures, valueField,
                     PointAssignmentType.MostFrequent);
@@ -198,7 +207,6 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
             }
         }
 
-        RasterPixelType transferType = RasterPixelType.SHORT;
         Map<Object, Integer> uvMap = new TreeMap<Object, Integer>();
         if (isNuemricField) {
             transferType = RasterHelper.getTransferType(schema, valueField);
@@ -224,7 +232,7 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
                 if (isNuemricField) {
                     Number gridValue = valueExp.evaluate(feature, Number.class);
                     if (gridValue == null) {
-                        gridValue = this.NoData;
+                        gridValue = this.noData;
                     }
 
                     processGeometry(geometry, gridValue);
@@ -247,15 +255,8 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
     }
 
     private void initializeTiledImage(ReferencedEnvelope gridExtent, RasterPixelType transferType) {
-        // calculate extent & cellsize
-        Object nodataValue = RasterHelper.getDefaultNoDataValue(transferType);
-        calculateExtentAndCellSize(gridExtent, nodataValue);
-
         // set pixel type
-        PixelType = transferType;
-
-        // recalculate coverage extent
-        Extent = RasterHelper.getResolvedEnvelope(Extent, CellSizeX, CellSizeY);
+        pixelType = transferType;
 
         final int tw = 64;
         final int th = 64;
@@ -263,7 +264,7 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
         ColorModel colorModel = ColorModel.getRGBdefault();
         SampleModel smpModel = colorModel.createCompatibleSampleModel(tw, th);
 
-        Dimension dim = RasterHelper.getDimension(Extent, CellSizeX, CellSizeY);
+        Dimension dim = RasterHelper.getDimension(gridExtent, pixelSizeX, pixelSizeY);
 
         dmImage = new DiskMemImage(0, 0, dim.width, dim.height, 0, 0, smpModel, colorModel);
         dmImage.setUseCommonCache(true);
@@ -275,18 +276,18 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
         g2D.setComposite(AlphaComposite.Src);
 
         // set nodata value
-        g2D.setPaint(valueToColor(NoData));
+        g2D.setPaint(valueToColor(noData));
         g2D.fillRect(0, 0, dmImage.getWidth(), dmImage.getHeight());
 
         if (shapeType == SimpleShapeType.LINESTRING) {
-            g2D.setStroke(new BasicStroke(1.1f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER,
-                    10.0f));
+            g2D.setStroke(
+                    new BasicStroke(1.1f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f));
         }
 
         // setup affine transform
-        double x_scale = dmImage.getWidth() / Extent.getWidth();
-        double y_scale = dmImage.getHeight() / Extent.getHeight();
-        Coordinate centerPos = Extent.centre();
+        double x_scale = dmImage.getWidth() / gridExtent.getWidth();
+        double y_scale = dmImage.getHeight() / gridExtent.getHeight();
+        Coordinate centerPos = gridExtent.centre();
 
         affineTrans = new AffineTransform();
         affineTrans.translate(dmImage.getWidth() / 2.0, dmImage.getHeight() / 2.0);
@@ -295,7 +296,7 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
     }
 
     private void processGeometry(Geometry geometry, Number value) {
-        if (!Extent.intersects(geometry.getEnvelopeInternal())) {
+        if (!gridExtent.intersects(geometry.getEnvelopeInternal())) {
             return;
         }
 
@@ -353,7 +354,8 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
         return gPath;
     }
 
-    private void addLineStringToPath(boolean isRing, LineString lineString, GeneralPath targetPath) {
+    private void addLineStringToPath(boolean isRing, LineString lineString,
+            GeneralPath targetPath) {
         Coordinate[] cs = lineString.getCoordinates();
 
         double xOffset = 0;
@@ -361,8 +363,8 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
 
         // Offset like ArcGIS
         if (shapeType == SimpleShapeType.POLYGON) {
-            xOffset = CellSizeX / 2.0;
-            yOffset = CellSizeY / 2.0;
+            xOffset = pixelSizeX / 2.0;
+            yOffset = pixelSizeY / 2.0;
         }
 
         for (int i = 0; i < cs.length; i++) {
@@ -386,7 +388,7 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
         ColorModel cm = null;
         DiskMemImage destImage = null;
 
-        switch (PixelType) {
+        switch (pixelType) {
         case BYTE:
         case SHORT:
             sm = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_SHORT,
@@ -428,7 +430,7 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
                 final Rectangle bounds = destTile.getBounds();
                 for (int dy = bounds.y, drow = 0; drow < bounds.height; dy++, drow++) {
                     for (int dx = bounds.x, dcol = 0; dcol < bounds.width; dx++, dcol++) {
-                        switch (PixelType) {
+                        switch (pixelType) {
                         case BYTE:
                         case SHORT:
                         case INTEGER:
@@ -454,7 +456,7 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
     private Color valueToColor(Number value) {
         int intBits;
 
-        switch (PixelType) {
+        switch (pixelType) {
         case BYTE:
             intBits = value.byteValue();
             break;

@@ -168,10 +168,10 @@ public class RasterCutFillOperation3 extends AbstractRasterCutFillOperation {
         }
 
         GridCoverage2D beforeCutFill = createGridCoverage("CutFill_Before", beforeOutput, 0,
-                outputNoData, -1, 1, Extent);
+                outputNoData, -1, 1, gridExtent);
 
         GridCoverage2D aftreCutFill = createGridCoverage("CutFill_After", afterOutput, 0,
-                outputNoData, -1, 1, Extent);
+                outputNoData, -1, 1, gridExtent);
 
         // finally build features
         return buildFeatures(beforeCutFill, aftreCutFill, result);

@@ -141,20 +141,8 @@ public class IDWProcess extends AbstractStatisticsProcess {
 
         GridCoverage2D resultGc = null;
         RasterInterpolationIDWOperation process = new RasterInterpolationIDWOperation();
-        process.getRasterEnvironment().setExtent(boundingBox);
-
-        if (cellSize > 0) {
-            double origCellSizeX = process.getRasterEnvironment().getCellSizeX();
-            double origCellSizeY = process.getRasterEnvironment().getCellSizeY();
-            process.getRasterEnvironment().setCellSizeX(cellSize);
-            process.getRasterEnvironment().setCellSizeY(cellSize);
-
-            resultGc = process.execute(inputFeatures, inputField, power, rasterRadius);
-            process.getRasterEnvironment().setCellSizeX(origCellSizeX);
-            process.getRasterEnvironment().setCellSizeY(origCellSizeY);
-        } else {
-            resultGc = process.execute(inputFeatures, inputField, power, rasterRadius);
-        }
+        process.setExtentAndCellSize(boundingBox, cellSize, cellSize);
+        resultGc = process.execute(inputFeatures, inputField, power, rasterRadius);
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

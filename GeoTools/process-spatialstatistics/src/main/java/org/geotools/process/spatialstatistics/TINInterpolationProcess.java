@@ -107,13 +107,7 @@ public class TINInterpolationProcess extends AbstractStatisticsProcess {
 
         GridCoverage2D resultGc = null;
         RasterInterpolationTINOperation process = new RasterInterpolationTINOperation();
-        process.getRasterEnvironment().setExtent(boundingBox);
-
-        if (cellSize > 0) {
-            process.getRasterEnvironment().setCellSizeX(cellSize);
-            process.getRasterEnvironment().setCellSizeY(cellSize);
-        }
-
+        process.setExtentAndCellSize(boundingBox, cellSize, cellSize);
         resultGc = process.execute(inputFeatures, inputField, pixelType);
         // end process
 

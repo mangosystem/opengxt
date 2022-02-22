@@ -70,7 +70,7 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
         // calculate extent & cellsize
         calculateExtentAndCellSize(pointFeatures, Short.MIN_VALUE);
 
-        outputImage = this.createDiskMemImage(Extent, RasterPixelType.SHORT);
+        outputImage = this.createDiskMemImage(gridExtent, RasterPixelType.SHORT);
 
         // initialize nodata value
         initializeDefaultValue(outputImage, (double) defaultValue);
@@ -79,9 +79,9 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
 
         FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
         String the_geom = pointFeatures.getSchema().getGeometryDescriptor().getLocalName();
-        Filter filter = ff.bbox(ff.property(the_geom), Extent);
+        Filter filter = ff.bbox(ff.property(the_geom), gridExtent);
 
-        GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
+        GridTransformer trans = new GridTransformer(gridExtent, pixelSizeX, pixelSizeY);
         SimpleFeatureIterator featureIter = null;
         try {
             featureIter = pointFeatures.subCollection(filter).features();
@@ -95,7 +95,7 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
                     final GridCoordinates2D gridPos = trans.worldToGrid(realPos);
                     if (trans.contains(gridPos.x, gridPos.y)) {
                         final int sampleVal = outputImage.getSample(gridPos.x, gridPos.y, 0);
-                        if (sampleVal == NoData || sampleVal == defaultValue) {
+                        if (sampleVal == noData || sampleVal == defaultValue) {
                             intValue = 1;
                         } else {
                             intValue = sampleVal + 1;
@@ -124,13 +124,13 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
         int gridValue = 0;
         if (StringHelper.isNullOrEmpty(fieldOrValue) || fieldOrValue.toUpperCase().contains("NONE")) {
             this.cellAssignment = PointAssignmentType.Count;
-            PixelType = RasterPixelType.SHORT;
+            pixelType = RasterPixelType.SHORT;
             valueType = ValueType.COUNT;
         } else if (StringHelper.isNumeric(fieldOrValue)) {
             this.cellAssignment = PointAssignmentType.MostFrequent;
             valueType = ValueType.CONSTANT;
             gridValue = Integer.valueOf(fieldOrValue);
-            PixelType = RasterPixelType.INTEGER;
+            pixelType = RasterPixelType.INTEGER;
         } else {
             this.cellAssignment = cellAssignment;
             valueType = ValueType.FIELD;
@@ -138,15 +138,15 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
         }
 
         // calculate extent & cellsize
-        calculateExtentAndCellSize(pointFeatures, RasterHelper.getDefaultNoDataValue(PixelType));
+        calculateExtentAndCellSize(pointFeatures, RasterHelper.getDefaultNoDataValue(pixelType));
 
         // create image
-        outputImage = this.createDiskMemImage(Extent, PixelType);
+        outputImage = this.createDiskMemImage(gridExtent, pixelType);
 
         // initialize nodata value
-        initializeDefaultValue(outputImage, this.NoData);
+        initializeDefaultValue(outputImage, this.noData);
 
-        GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
+        GridTransformer trans = new GridTransformer(gridExtent, pixelSizeX, pixelSizeY);
         SimpleFeatureIterator featureIter = pointFeatures.features();
         try {
             while (featureIter.hasNext()) {
@@ -162,7 +162,7 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
                     if (trans.contains(gridPos.x, gridPos.y)) {
                         if (valueType == ValueType.COUNT) {
                             gridValue = outputImage.getSample(gridPos.x, gridPos.y, 0);
-                            gridValue = gridValue == NoData ? 1 : gridValue++;
+                            gridValue = gridValue == noData ? 1 : gridValue++;
                         }
 
                         outputImage.setSample(gridPos.x, gridPos.y, 0, gridValue);
@@ -184,32 +184,32 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
         case Minimum:
         case Maximum:
         case Range:
-            PixelType = RasterHelper.getTransferType(pointFeatures.getSchema(), field);
+            pixelType = RasterHelper.getTransferType(pointFeatures.getSchema(), field);
             break;
         case Mean:
         case StandardDeviation:
-            PixelType = RasterPixelType.FLOAT;
+            pixelType = RasterPixelType.FLOAT;
             break;
         default:
-            PixelType = RasterPixelType.FLOAT;
+            pixelType = RasterPixelType.FLOAT;
             break;
         }
 
         // calculate extent & cellsize
-        calculateExtentAndCellSize(pointFeatures, RasterHelper.getDefaultNoDataValue(PixelType));
+        calculateExtentAndCellSize(pointFeatures, RasterHelper.getDefaultNoDataValue(pixelType));
 
         // create image
-        outputImage = this.createDiskMemImage(Extent, PixelType);
+        outputImage = this.createDiskMemImage(gridExtent, pixelType);
 
         // initialize nodata value
-        initializeDefaultValue(outputImage, this.NoData);
+        initializeDefaultValue(outputImage, this.noData);
 
         PointVisitor pointVisitor = new PointVisitor();
 
         field = FeatureTypes.validateProperty(pointFeatures.getSchema(), field);
         int fieldIndex = pointFeatures.getSchema().indexOf(field);
 
-        GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
+        GridTransformer trans = new GridTransformer(gridExtent, pixelSizeX, pixelSizeY);
         SimpleFeatureIterator featureIter = pointFeatures.features();
         try {
             while (featureIter.hasNext()) {
@@ -241,7 +241,7 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
 
                 StatisticsVisitorResult statics = pointVisitor.getStatistics(valueList);
 
-                Number value = NoData;
+                Number value = noData;
                 switch (cellAssignment) {
                 case MostFrequent:
                     if (valueList.size() <= 2) {
@@ -281,8 +281,8 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
             }
         }
 
-        return createGridCoverage("PointsToRaster", outputImage, 0, NoData, MinValue, MaxValue,
-                Extent);
+        return createGridCoverage("PointsToRaster", outputImage, 0, noData, minValue, maxValue,
+                gridExtent);
     }
 
     final class PointVisitor {

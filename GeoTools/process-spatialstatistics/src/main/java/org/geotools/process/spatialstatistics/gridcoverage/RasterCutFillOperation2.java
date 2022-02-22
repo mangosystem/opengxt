@@ -140,7 +140,7 @@ public class RasterCutFillOperation2 extends AbstractRasterCutFillOperation {
             writerIter.nextLine();
         }
 
-        cutFillRaster = createGridCoverage("CutFill", outputImage, 0, outputNoData, -1, 1, Extent);
+        cutFillRaster = createGridCoverage("CutFill", outputImage, 0, outputNoData, -1, 1, gridExtent);
 
         // finally build features
         return buildFeatures(cutFillRaster, result);

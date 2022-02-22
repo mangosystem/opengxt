@@ -34,6 +34,8 @@ import org.geotools.util.logging.Logging;
 import org.opengis.parameter.InvalidParameterValueException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import it.geosolutions.jaiext.range.NoDataContainer;
+
 /**
  * Resizes a raster by the specified x and y scale factors.
  * 
@@ -71,8 +73,8 @@ public class RasterRescaleOperation extends AbstractTransformationOperation {
         ReferencedEnvelope extent = new ReferencedEnvelope(inputCoverage.getEnvelope());
         GridGeometry2D gridGeometry2D = inputCoverage.getGridGeometry();
         AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
-        CellSizeX = Math.abs(gridToWorld.getScaleX()) * xScale;
-        CellSizeY = Math.abs(gridToWorld.getScaleY()) * yScale;
+        pixelSizeX = Math.abs(gridToWorld.getScaleX()) * xScale;
+        pixelSizeY = Math.abs(gridToWorld.getScaleY()) * yScale;
 
         // 1. The output size is multiplied by the scale factor for both the x and y directions. The
         // number of columns and rows stays the same in this process, but the cell size is
@@ -86,11 +88,11 @@ public class RasterRescaleOperation extends AbstractTransformationOperation {
 
         // Rescale extent
         final PlanarImage inputImage = (PlanarImage) inputCoverage.getRenderedImage();
-        double maxX = extent.getMinX() + (inputImage.getWidth() * CellSizeX);
-        double maxY = extent.getMinY() + (inputImage.getHeight() * CellSizeY);
+        double maxX = extent.getMinX() + (inputImage.getWidth() * pixelSizeX);
+        double maxY = extent.getMinY() + (inputImage.getHeight() * pixelSizeY);
 
         CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
-        Extent = new ReferencedEnvelope(extent.getMinX(), maxX, extent.getMinY(), maxY, crs);
+        gridExtent = new ReferencedEnvelope(extent.getMinX(), maxX, extent.getMinY(), maxY, crs);
 
         if (numBands == 1) {
             return createGridCoverage(inputCoverage.getName(), inputImage);
@@ -102,10 +104,10 @@ public class RasterRescaleOperation extends AbstractTransformationOperation {
 
             Map properties = inputCoverage.getProperties();
             properties.put(Vocabulary.formatInternational(VocabularyKeys.NODATA), noData);
-            properties.put("GC_NODATA", noData);
+            properties.put(NoDataContainer.GC_NODATA, noData);
 
             GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
-            return factory.create(inputCoverage.getName(), inputImage, Extent, bands, null,
+            return factory.create(inputCoverage.getName(), inputImage, gridExtent, bands, null,
                     properties);
         }
     }

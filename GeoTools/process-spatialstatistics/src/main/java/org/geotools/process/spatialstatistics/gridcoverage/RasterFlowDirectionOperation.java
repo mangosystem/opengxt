@@ -84,7 +84,7 @@ public class RasterFlowDirectionOperation extends AbstractSurfaceOperation {
 
         double[][] mx = getSubMatrix(pos, 3, 3);
         if (Double.isNaN(mx[1][1]) || SSUtils.compareDouble(srcNoData, mx[1][1])) {
-            writer.setSample(0, NoData);
+            writer.setSample(0, noData);
             return;
         }
 

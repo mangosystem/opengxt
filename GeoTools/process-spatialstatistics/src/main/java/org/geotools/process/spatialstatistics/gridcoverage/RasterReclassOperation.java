@@ -56,7 +56,7 @@ public class RasterReclassOperation extends RasterProcessingOperation {
 
         // output will always be of integer type.
         DiskMemImage outputImage = this.createDiskMemImage(inputGc, RasterPixelType.INTEGER);
-        this.NoData = Integer.MIN_VALUE;
+        this.noData = Integer.MIN_VALUE;
 
         final double inputNoData = RasterHelper.getNoDataValue(inputGc);
         PlanarImage inputImage = (PlanarImage) inputGc.getRenderedImage();
@@ -73,13 +73,13 @@ public class RasterReclassOperation extends RasterProcessingOperation {
             while (!inputIter.finishedPixels() && !writerIter.finishedPixels()) {
                 double value = inputIter.getSampleDouble(bandIndex);
                 if (SSUtils.compareDouble(inputNoData, value)) {
-                    writerIter.setSample(0, NoData);
+                    writerIter.setSample(0, noData);
                     inputIter.nextPixel();
                     writerIter.nextPixel();
                     continue;
                 }
 
-                double classValue = this.NoData;
+                double classValue = this.noData;
                 boolean isMissing = true;
                 for (ReclassRange range : reclassRange.values()) {
                     if (range.contains(value)) {
@@ -103,7 +103,7 @@ public class RasterReclassOperation extends RasterProcessingOperation {
             writerIter.nextLine();
         }
 
-        return createGridCoverage("Reclass", outputImage, 0, NoData, MinValue, MaxValue, Extent);
+        return createGridCoverage("Reclass", outputImage, 0, noData, minValue, maxValue, gridExtent);
     }
 
     private boolean prepareRanges(String ranges) {

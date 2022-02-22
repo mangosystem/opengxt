@@ -71,7 +71,7 @@ public class RasterConditionalOperation extends RasterProcessingOperation {
         RectIter inputIter = RectIterFactory.create(inputImage, inputImage.getBounds());
 
         DiskMemImage outputImage = this.createDiskMemImage(inputGc, RasterPixelType.INTEGER);
-        this.NoData = Integer.MIN_VALUE;  // change nodata value
+        this.noData = Integer.MIN_VALUE;  // change nodata value
         
         WritableRectIter writerIter = RectIterFactory.createWritable(outputImage,
                 outputImage.getBounds());
@@ -92,7 +92,7 @@ public class RasterConditionalOperation extends RasterProcessingOperation {
                     }
                 } else {
                     if (SSUtils.compareDouble(curVal, inputNoData)) {
-                        writerIter.setSample(0, this.NoData);
+                        writerIter.setSample(0, this.noData);
                     } else {
                         feature.setAttribute(1, curVal); // raster name
                         feature.setAttribute(2, curVal); // Value
@@ -109,13 +109,13 @@ public class RasterConditionalOperation extends RasterProcessingOperation {
             writerIter.nextLine();
         }
 
-        if (SSUtils.compareDouble(valueFalse, this.NoData)) {
-            MinValue = valueTrue;
+        if (SSUtils.compareDouble(valueFalse, this.noData)) {
+            minValue = valueTrue;
         } else {
-            MinValue = Math.min(valueTrue, valueFalse);
+            minValue = Math.min(valueTrue, valueFalse);
         }
 
-        MaxValue = Math.max(valueTrue, valueFalse);
+        maxValue = Math.max(valueTrue, valueFalse);
 
         return createGridCoverage(inputGc.getName(), outputImage);
     }

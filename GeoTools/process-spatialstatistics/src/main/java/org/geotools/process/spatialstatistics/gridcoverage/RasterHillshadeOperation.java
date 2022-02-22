@@ -103,7 +103,7 @@ public class RasterHillshadeOperation extends AbstractSurfaceOperation {
         // +-------+ +-------+
         double[][] mx = getSubMatrix(pos, 3, 3, zFactor);
         if (Double.isNaN(mx[1][1]) || SSUtils.compareDouble(srcNoData, mx[1][1])) {
-            writer.setSample(0, NoData);
+            writer.setSample(0, noData);
             return;
         }
 
@@ -114,7 +114,7 @@ public class RasterHillshadeOperation extends AbstractSurfaceOperation {
 
         if (Double.isNaN(dZdX) || Double.isNaN(dZdY) || Double.isInfinite(dZdX)
                 || Double.isInfinite(dZdY)) {
-            writer.setSample(0, NoData);
+            writer.setSample(0, noData);
             return;
         }
 

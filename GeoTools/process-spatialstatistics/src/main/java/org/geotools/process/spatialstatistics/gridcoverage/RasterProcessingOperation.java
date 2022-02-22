@@ -86,6 +86,8 @@ import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.ProgressListener;
 
+import it.geosolutions.jaiext.range.NoDataContainer;
+
 /**
  * Abstract Raster Processing Operation
  * 
@@ -96,16 +98,6 @@ import org.opengis.util.ProgressListener;
 public abstract class RasterProcessingOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterProcessingOperation.class);
 
-    private RasterEnvironment rasterEnvironment = new RasterEnvironment();
-
-    public void setRasterEnvironment(RasterEnvironment rasterEnvironment) {
-        this.rasterEnvironment = rasterEnvironment;
-    }
-
-    public RasterEnvironment getRasterEnvironment() {
-        return rasterEnvironment;
-    }
-
     public ProgressListener Progress = new NullProgressListener();
 
     protected int MIN_CELL_COUNT = 600;
@@ -113,19 +105,19 @@ public abstract class RasterProcessingOperation {
     // it is the shorter of the width or the height of the extent of the input point features
     // in the input spatial reference, divided by 250.
 
-    protected double CellSizeX = 30.0d;
+    protected double pixelSizeX = Double.NaN;
 
-    protected double CellSizeY = 30.0d;
+    protected double pixelSizeY = Double.NaN;
 
-    protected ReferencedEnvelope Extent = null;
+    protected ReferencedEnvelope gridExtent = null;
 
-    protected RasterPixelType PixelType = RasterPixelType.INTEGER;
+    protected RasterPixelType pixelType = RasterPixelType.INTEGER;
 
-    protected double NoData = Float.MIN_VALUE;
+    protected double noData = Float.MIN_VALUE;
 
-    protected double MinValue = Double.MAX_VALUE;
+    protected double minValue = Double.MAX_VALUE;
 
-    protected double MaxValue = Double.MIN_VALUE;
+    protected double maxValue = Double.MIN_VALUE;
 
     private String outTypeName = null;
 
@@ -171,12 +163,12 @@ public abstract class RasterProcessingOperation {
     }
 
     protected void updateStatistics(double retVal) {
-        if (SSUtils.compareDouble(retVal, NoData)) {
+        if (SSUtils.compareDouble(retVal, noData)) {
             return;
         }
 
-        this.MinValue = Math.min(MinValue, retVal);
-        this.MaxValue = Math.max(MaxValue, retVal);
+        this.minValue = Math.min(minValue, retVal);
+        this.maxValue = Math.max(maxValue, retVal);
     }
 
     /**
@@ -395,46 +387,55 @@ public abstract class RasterProcessingOperation {
         }
     }
 
-    protected void calculateExtentAndCellSize(SimpleFeatureCollection srcSfs, Object noDataValue) {
-        calculateExtentAndCellSize(srcSfs.getBounds(), noDataValue);
+    public void setExtentAndCellSize(ReferencedEnvelope extent, double cellSizeX,
+            double cellSizeY) {
+        this.pixelSizeX = cellSizeX;
+        this.pixelSizeY = cellSizeY;
+
+        this.gridExtent = RasterHelper.getResolvedEnvelope(extent, pixelSizeX, pixelSizeY);
     }
 
-    protected void calculateExtentAndCellSize(ReferencedEnvelope srcExtent, Object noDataValue) {
-        // calculate extent & cellsize
-        CellSizeX = this.getRasterEnvironment().getCellSizeX();
-        CellSizeY = this.getRasterEnvironment().getCellSizeY();
-        NoData = Double.parseDouble(noDataValue.toString());
-        Extent = this.getRasterEnvironment().getExtent();
+    protected void calculateExtentAndCellSize(SimpleFeatureCollection features,
+            Object noDataValue) {
+        calculateExtentAndCellSize(features.getBounds(), noDataValue);
+    }
+
+    protected void calculateExtentAndCellSize(ReferencedEnvelope extent, Object noDataValue) {
+        if (noDataValue != null) {
+            noData = Double.parseDouble(noDataValue.toString());
+        }
 
         boolean boundUpdated = false;
-        if (Extent == null || Extent.isEmpty() || Extent.isNull()) {
-            Extent = srcExtent;
+        if (gridExtent == null || gridExtent.isEmpty() || gridExtent.isNull()) {
+            gridExtent = extent;
             boundUpdated = true;
         }
 
-        if (Double.isNaN(CellSizeX) && Double.isNaN(CellSizeX)) {
+        if (Double.isNaN(pixelSizeX) && Double.isNaN(pixelSizeX)) {
             // it is the shorter of the width or the height of the extent of the input point
             // features in the input spatial reference, divided by 250.
-            this.CellSizeX = Math.min(Extent.getWidth(), Extent.getHeight()) / 250.0;
-            this.CellSizeY = Math.min(Extent.getWidth(), Extent.getHeight()) / 250.0;
+            this.pixelSizeX = Math.min(gridExtent.getWidth(), gridExtent.getHeight()) / 250.0;
+            this.pixelSizeY = Math.min(gridExtent.getWidth(), gridExtent.getHeight()) / 250.0;
         }
 
         if (boundUpdated) {
-            Extent.expandBy(CellSizeX / 2.0, CellSizeY / 2.0);
+            gridExtent.expandBy(pixelSizeX / 2.0, pixelSizeY / 2.0);
         }
+
+        gridExtent = RasterHelper.getResolvedEnvelope(gridExtent, pixelSizeX, pixelSizeY);
     }
 
     protected DiskMemImage createDiskMemImage(GridCoverage2D srcCoverage,
             RasterPixelType transferType) {
-        Extent = new ReferencedEnvelope(srcCoverage.getEnvelope());
+        gridExtent = new ReferencedEnvelope(srcCoverage.getEnvelope());
         GridGeometry2D gridGeometry2D = srcCoverage.getGridGeometry();
         AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
 
-        CellSizeX = Math.abs(gridToWorld.getScaleX());
-        CellSizeY = Math.abs(gridToWorld.getScaleY());
+        pixelSizeX = Math.abs(gridToWorld.getScaleX());
+        pixelSizeY = Math.abs(gridToWorld.getScaleY());
 
         final RenderedImage img = srcCoverage.getRenderedImage();
-        return createDiskMemImage(Extent, transferType, img.getTileWidth(), img.getTileHeight());
+        return createDiskMemImage(gridExtent, transferType, img.getTileWidth(), img.getTileHeight());
     }
 
     protected DiskMemImage createDiskMemImage(ReferencedEnvelope extent,
@@ -448,14 +449,14 @@ public abstract class RasterProcessingOperation {
     protected DiskMemImage createDiskMemImage(ReferencedEnvelope extent,
             RasterPixelType transferType, int tw, int th) {
         // set pixel type
-        PixelType = transferType;
+        pixelType = transferType;
 
         // recalculate coverage extent
-        Extent = RasterHelper.getResolvedEnvelope(extent, CellSizeX, CellSizeY);
+        gridExtent = RasterHelper.getResolvedEnvelope(extent, pixelSizeX, pixelSizeY);
 
         // initialize statistics
-        MinValue = Double.MAX_VALUE;
-        MaxValue = Double.MIN_VALUE;
+        minValue = Double.MAX_VALUE;
+        maxValue = Double.MIN_VALUE;
 
         // We need a sample model. The most appropriate is created as shown:
         SampleModel sampleModel = null;
@@ -489,7 +490,7 @@ public abstract class RasterProcessingOperation {
         }
 
         // Create a TiledImage using the SampleModel.
-        Dimension dm = RasterHelper.getDimension(Extent, CellSizeX, CellSizeY);
+        Dimension dm = RasterHelper.getDimension(gridExtent, pixelSizeX, pixelSizeY);
 
         DiskMemImage diskMemImage = null;
         diskMemImage = new DiskMemImage(0, 0, dm.width, dm.height, 0, 0, sampleModel, cm);
@@ -550,14 +551,14 @@ public abstract class RasterProcessingOperation {
         // properties.put("Mean", 1.0);
         // properties.put("StdDev", 1.0);
         properties.put(noDataName, Double.valueOf(noDataValue));
-        properties.put("GC_NODATA", Double.valueOf(noDataValue));
+        properties.put(NoDataContainer.GC_NODATA, Double.valueOf(noDataValue));
 
         GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
         return factory.create(name, image, extent, bands, null, properties);
     }
 
     protected GridCoverage2D createGridCoverage(CharSequence name, PlanarImage tiledImage) {
-        return createGridCoverage(name, tiledImage, 1, NoData, MinValue, MaxValue, Extent);
+        return createGridCoverage(name, tiledImage, 1, noData, minValue, maxValue, gridExtent);
     }
 
     protected GridCoverage2D createGridCoverage(CharSequence name, PlanarImage tiledImage,
@@ -580,11 +581,12 @@ public abstract class RasterProcessingOperation {
         Category nan = new Category(noDataName, new Color[] { new Color(255, 255, 255, 0) },
                 NumberRange.create(noDataValue, noDataValue));
 
-        Color[] colors = new Color[] { Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED };
+        Color[] colors = new Color[] { Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW,
+                Color.RED };
         Category values = new Category("values", colors, NumberRange.create(minValue, maxValue));
 
-        GridSampleDimension band = new GridSampleDimension("Dimension", new Category[] { nan,
-                values }, null);
+        GridSampleDimension band = new GridSampleDimension("Dimension",
+                new Category[] { nan, values }, null);
         GridSampleDimension[] bands = new GridSampleDimension[] { band };
 
         // setting metadata
@@ -594,7 +596,7 @@ public abstract class RasterProcessingOperation {
         // properties.put("Mean", 1.0);
         // properties.put("StdDev", 1.0);
         properties.put(noDataName, Double.valueOf(noDataValue));
-        properties.put("GC_NODATA", Double.valueOf(noDataValue));
+        properties.put(NoDataContainer.GC_NODATA, Double.valueOf(noDataValue));
 
         GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
         return factory.create(name, tiledImage, extent, bands, null, properties);

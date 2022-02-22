@@ -72,22 +72,22 @@ public class RasterClipOperation extends RasterProcessingOperation {
             RasterCropOperation cropOp = new RasterCropOperation();
             clipped = cropOp.execute(inputCoverage, extent);
         } else {
-            NoData = RasterHelper.getNoDataValue(inputCoverage);
+            noData = RasterHelper.getNoDataValue(inputCoverage);
 
             GridGeometry2D gridGeometry2D = inputCoverage.getGridGeometry();
             AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
 
-            CellSizeX = Math.abs(gridToWorld.getScaleX());
-            CellSizeY = Math.abs(gridToWorld.getScaleY());
-            Extent = RasterHelper.getResolvedEnvelope(extent, CellSizeX, CellSizeY);
+            pixelSizeX = Math.abs(gridToWorld.getScaleX());
+            pixelSizeY = Math.abs(gridToWorld.getScaleY());
+            gridExtent = RasterHelper.getResolvedEnvelope(extent, pixelSizeX, pixelSizeY);
 
             int bandCount = inputCoverage.getNumSampleDimensions();
 
             // calculate pad
-            int leftPad = calculatePad(gridExtent.getMinX(), Extent.getMinX(), CellSizeX, false);
-            int rightPad = calculatePad(gridExtent.getMaxX(), Extent.getMaxX(), CellSizeX, true);
-            int bottomPad = calculatePad(gridExtent.getMinY(), Extent.getMinY(), CellSizeY, false);
-            int topPad = calculatePad(gridExtent.getMaxY(), Extent.getMaxY(), CellSizeY, true);
+            int leftPad = calculatePad(gridExtent.getMinX(), gridExtent.getMinX(), pixelSizeX, false);
+            int rightPad = calculatePad(gridExtent.getMaxX(), gridExtent.getMaxX(), pixelSizeX, true);
+            int bottomPad = calculatePad(gridExtent.getMinY(), gridExtent.getMinY(), pixelSizeY, false);
+            int topPad = calculatePad(gridExtent.getMaxY(), gridExtent.getMaxY(), pixelSizeY, true);
 
             final PlanarImage inputImage = (PlanarImage) inputCoverage.getRenderedImage();
 
@@ -100,18 +100,18 @@ public class RasterClipOperation extends RasterProcessingOperation {
             parameterBlock.setParameter("topPad", topPad);
             final double[] fillValue = new double[bandCount];
             for (int index = 0; index < fillValue.length; index++) {
-                fillValue[index] = bandCount == 1 ? NoData : -1;
+                fillValue[index] = bandCount == 1 ? noData : -1;
             }
             parameterBlock.setParameter("type", new BorderExtenderConstant(fillValue));
             PlanarImage outputImage = JAI.create("border", parameterBlock);
 
             // resize extent
             if (bandCount > 1) {
-                NoData = -1;
-                MaxValue = 255;
-                MinValue = 0;
+                noData = -1;
+                maxValue = 255;
+                minValue = 0;
                 clipped = createGridCoverage(inputCoverage.getName(), outputImage,
-                        inputCoverage.getSampleDimensions(), NoData, MinValue, MaxValue, Extent);
+                        inputCoverage.getSampleDimensions(), noData, minValue, maxValue, gridExtent);
             } else {
                 RectIter readIter = RectIterFactory.create(outputImage, outputImage.getBounds());
                 readIter.startLines();
@@ -119,9 +119,9 @@ public class RasterClipOperation extends RasterProcessingOperation {
                     readIter.startPixels();
                     while (!readIter.finishedPixels()) {
                         double sampleValue = readIter.getSampleDouble(0);
-                        if (!SSUtils.compareDouble(sampleValue, NoData)) {
-                            MaxValue = Math.max(MaxValue, sampleValue);
-                            MinValue = Math.min(MinValue, sampleValue);
+                        if (!SSUtils.compareDouble(sampleValue, noData)) {
+                            maxValue = Math.max(maxValue, sampleValue);
+                            minValue = Math.min(minValue, sampleValue);
                         }
                         readIter.nextPixel();
                     }

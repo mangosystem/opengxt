@@ -84,7 +84,7 @@ public class RasterFuzzyOperation extends RasterProcessingOperation {
 
         PlanarImage inputImage = (PlanarImage) inputGc.getRenderedImage();
         final double inputNoData = RasterHelper.getNoDataValue(inputGc);
-        this.NoData = RasterHelper.getDefaultNoDataValue(PixelType);
+        this.noData = RasterHelper.getDefaultNoDataValue(pixelType);
 
         RectIter inputIter = RectIterFactory.create(inputImage, inputImage.getBounds());
         WritableRectIter writerIter = RectIterFactory.createWritable(outputImage,
@@ -99,7 +99,7 @@ public class RasterFuzzyOperation extends RasterProcessingOperation {
                 final double inputVal = inputIter.getSampleDouble(0);
 
                 if (SSUtils.compareDouble(inputNoData, inputVal)) {
-                    writerIter.setSample(0, NoData);
+                    writerIter.setSample(0, noData);
                 } else {
                     double fuzzyValue = getFuzzyValue(inputVal, fuzzyValues) * maxRange;
                     writerIter.setSample(0, fuzzyValue);

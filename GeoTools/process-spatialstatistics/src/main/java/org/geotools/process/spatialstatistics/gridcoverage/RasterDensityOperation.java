@@ -93,13 +93,13 @@ public class RasterDensityOperation extends RasterProcessingOperation {
                     populationField);
         }
 
-        DiskMemImage outputImage = this.createDiskMemImage(Extent, RasterPixelType.FLOAT);
+        DiskMemImage outputImage = this.createDiskMemImage(gridExtent, RasterPixelType.FLOAT);
         this.initializeDefaultValue(outputImage, 0.0);
 
         String the_geom = pointFeatures.getSchema().getGeometryDescriptor().getLocalName();
-        Filter filter = ff.bbox(ff.property(the_geom), Extent);
+        Filter filter = ff.bbox(ff.property(the_geom), gridExtent);
 
-        GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
+        GridTransformer trans = new GridTransformer(gridExtent, pixelSizeX, pixelSizeY);
         SimpleFeatureIterator featureIter = pointFeatures.subCollection(filter).features();
         try {
             Expression weightExp = ff.property(populationField);
@@ -118,7 +118,7 @@ public class RasterDensityOperation extends RasterProcessingOperation {
                         wVal += outputImage.getSampleDouble(gridPos.x, gridPos.y, 0);
 
                         outputImage.setSample(gridPos.x, gridPos.y, 0, wVal);
-                        this.MaxValue = Math.max(MaxValue, wVal);
+                        this.maxValue = Math.max(maxValue, wVal);
                     }
                 }
             }

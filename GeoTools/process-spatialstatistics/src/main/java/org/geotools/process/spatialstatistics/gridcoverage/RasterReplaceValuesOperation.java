@@ -67,20 +67,16 @@ public class RasterReplaceValuesOperation extends RasterProcessingOperation {
 
         WritableRaster outputRaster = (WritableRaster) outputImage.getData();
 
-        this.NoData = RasterHelper.getNoDataValue(inputCoverage);
+        this.noData = RasterHelper.getNoDataValue(inputCoverage);
         GridTransformer inputTrans = new GridTransformer(inputCoverage);
 
         // convert region geometry to raster
         CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
         Geometry aoiGeom = super.transformGeometry(region, crs);
 
-        RasterEnvironment rasterEnv = new RasterEnvironment();
-        rasterEnv.setCellSizeX(CellSizeX);
-        rasterEnv.setCellSizeY(CellSizeY);
-        rasterEnv.setExtent(new ReferencedEnvelope(aoiGeom.getEnvelopeInternal(), crs));
-
         GeometryToRasterOperation geometryToRaster = new GeometryToRasterOperation();
-        geometryToRaster.setRasterEnvironment(rasterEnv);
+        geometryToRaster.setExtentAndCellSize(
+                new ReferencedEnvelope(aoiGeom.getEnvelopeInternal(), crs), pixelSizeX, pixelSizeY);
 
         GridCoverage2D aoiGc = geometryToRaster.execute(aoiGeom, crs, replaceValue, pixelType);
         double aoiNoData = RasterHelper.getNoDataValue(aoiGc);
@@ -100,7 +96,7 @@ public class RasterReplaceValuesOperation extends RasterProcessingOperation {
             while (!readIter.finishedPixels()) {
                 final double gridVal = readIter.getSampleDouble(0);
 
-                if (SSUtils.compareDouble(gridVal, NoData)
+                if (SSUtils.compareDouble(gridVal, noData)
                         || SSUtils.compareDouble(gridVal, aoiNoData)) {
                     column++;
                     readIter.nextPixel();

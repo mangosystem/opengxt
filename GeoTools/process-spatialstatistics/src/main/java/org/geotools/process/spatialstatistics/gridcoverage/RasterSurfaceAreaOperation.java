@@ -16,7 +16,6 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
-import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +27,8 @@ import javax.media.jai.iterator.RectIter;
 import javax.media.jai.iterator.RectIterFactory;
 
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.JTS;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.SSUtils;
@@ -83,14 +80,7 @@ public class RasterSurfaceAreaOperation extends GeneralOperation {
 
         // 1. extract points
         final double noData = RasterHelper.getNoDataValue(coverage);
-
-        GridGeometry2D gridGeometry2D = coverage.getGridGeometry();
-        ReferencedEnvelope extent = new ReferencedEnvelope(gridGeometry2D.getEnvelope());
-        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
-
-        double dx = Math.abs(gridToWorld.getScaleX());
-        double dy = Math.abs(gridToWorld.getScaleY());
-        GridTransformer trans = new GridTransformer(extent, dx, dy);
+        GridTransformer trans = new GridTransformer(coverage);
 
         PlanarImage inputImage = (PlanarImage) coverage.getRenderedImage();
         java.awt.Rectangle inputBounds = inputImage.getBounds();

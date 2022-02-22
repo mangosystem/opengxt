@@ -104,10 +104,10 @@ public class RasterInterpolationTINOperation extends RasterProcessingOperation {
         calculateExtentAndCellSize(features, RasterHelper.getDefaultNoDataValue(pixelType));
 
         // create image & write pixels
-        final DiskMemImage oi = createDiskMemImage(Extent, pixelType);
-        initializeDefaultValue(oi, this.NoData);
+        final DiskMemImage oi = createDiskMemImage(gridExtent, pixelType);
+        initializeDefaultValue(oi, this.noData);
 
-        final GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
+        final GridTransformer trans = new GridTransformer(gridExtent, pixelSizeX, pixelSizeY);
 
         CoordinateReferenceSystem crs = features.getSchema().getCoordinateReferenceSystem();
         ReferencedEnvelope envelope = null;
@@ -143,7 +143,7 @@ public class RasterInterpolationTINOperation extends RasterProcessingOperation {
                     if (!preparedGeom.disjoint(gf.createPoint(p))) {
                         double interpolated = Triangle.interpolateZ(p, v0, v1, v2);
                         if (Double.isNaN(interpolated) || Double.isInfinite(interpolated)) {
-                            interpolated = this.NoData;
+                            interpolated = this.noData;
                         }
 
                         writer.setSample(0, interpolated);

@@ -62,11 +62,11 @@ public class RasterCurvatureOperation extends AbstractSurfaceOperation {
     public GridCoverage2D execute(GridCoverage2D inputGc, double zFactor) {
         this.initSurface(inputGc);
 
-        xL2 = CellSizeX * CellSizeX;
-        x2L = 2.0 * CellSizeX;
+        xL2 = pixelSizeX * pixelSizeX;
+        x2L = 2.0 * pixelSizeX;
 
-        yL2 = CellSizeY * CellSizeY;
-        y2L = 2.0 * CellSizeY;
+        yL2 = pixelSizeY * pixelSizeY;
+        y2L = 2.0 * pixelSizeY;
 
         DiskMemImage outputImage = this.createDiskMemImage(inputGc, RasterPixelType.FLOAT);
         WritableRectIter writer = RectIterFactory.createWritable(outputImage,
@@ -104,7 +104,7 @@ public class RasterCurvatureOperation extends AbstractSurfaceOperation {
 
         double[][] mx = getSubMatrix(pos, 3, 3, zFactor);
         if (Double.isNaN(mx[1][1]) || SSUtils.compareDouble(srcNoData, mx[1][1])) {
-            writer.setSample(0, NoData);
+            writer.setSample(0, noData);
             return;
         }
 

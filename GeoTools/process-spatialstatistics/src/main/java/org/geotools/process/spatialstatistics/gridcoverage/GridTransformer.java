@@ -37,6 +37,10 @@ import org.opengis.geometry.DirectPosition;
  * 
  * @source $URL$
  */
+/**
+ * @author mappl
+ *
+ */
 public class GridTransformer {
     protected static final Logger LOGGER = Logging.getLogger(GridTransformer.class);
 
@@ -91,6 +95,18 @@ public class GridTransformer {
         final double maxY = extent.getMinY() + (rows * dy);
 
         this.extent = new Envelope(extent.getMinX(), maxX, extent.getMinY(), maxY);
+    }
+
+    public Envelope getExtent() {
+        return this.extent;
+    }
+
+    public int getColumns() {
+        return this.columns;
+    }
+
+    public int getRows() {
+        return this.rows;
     }
 
     /**

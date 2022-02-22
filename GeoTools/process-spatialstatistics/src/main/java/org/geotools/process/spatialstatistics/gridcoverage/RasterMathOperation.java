@@ -16,7 +16,6 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
-import java.awt.geom.AffineTransform;
 import java.util.logging.Logger;
 
 import javax.media.jai.PlanarImage;
@@ -25,9 +24,7 @@ import javax.media.jai.iterator.RectIterFactory;
 import javax.media.jai.iterator.WritableRectIter;
 
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.jts.JTSFactoryFinder;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.factory.GeoTools;
@@ -60,16 +57,8 @@ public class RasterMathOperation extends RasterProcessingOperation {
         DiskMemImage outputImage = this.createDiskMemImage(inputGc, pixelType);
 
         PlanarImage inputImage = (PlanarImage) inputGc.getRenderedImage();
-        this.NoData = RasterHelper.getNoDataValue(inputGc);
-
-        GridGeometry2D gridGeometry2D = inputGc.getGridGeometry();
-        ReferencedEnvelope extent = new ReferencedEnvelope(gridGeometry2D.getEnvelope());
-        AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
-
-        double dx = Math.abs(gridToWorld.getScaleX());
-        double dy = Math.abs(gridToWorld.getScaleY());
-        GridTransformer trans = new GridTransformer(extent, dx, dy);
-        // GridTransformer trans = new GridTransformer(coverage);
+        this.noData = RasterHelper.getNoDataValue(inputGc);
+        GridTransformer trans = new GridTransformer(inputGc);
 
         java.awt.Rectangle inputBounds = inputImage.getBounds();
         RectIter inputIter = RectIterFactory.create(inputImage, inputBounds);
@@ -86,8 +75,8 @@ public class RasterMathOperation extends RasterProcessingOperation {
             while (!inputIter.finishedPixels() && !writerIter.finishedPixels()) {
                 final double gridVal = inputIter.getSampleDouble(bandIndex);
 
-                if (SSUtils.compareDouble(gridVal, this.NoData)) {
-                    writerIter.setSample(0, this.NoData);
+                if (SSUtils.compareDouble(gridVal, this.noData)) {
+                    writerIter.setSample(0, this.noData);
                 } else {
                     Coordinate coord = trans.gridToWorldCoordinate(column, row);
                     feature.setDefaultGeometry(gf.createPoint(coord));
@@ -96,7 +85,7 @@ public class RasterMathOperation extends RasterProcessingOperation {
 
                     Double value = expression.evaluate(feature, Double.class);
                     if (value == null || value.isInfinite() || value.isNaN()) {
-                        writerIter.setSample(0, this.NoData);
+                        writerIter.setSample(0, this.noData);
                     } else {
                         writerIter.setSample(0, value.doubleValue());
                         updateStatistics(value);

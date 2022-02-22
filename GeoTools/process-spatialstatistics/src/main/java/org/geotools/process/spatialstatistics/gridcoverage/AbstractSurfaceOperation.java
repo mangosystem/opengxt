@@ -41,9 +41,9 @@ public abstract class AbstractSurfaceOperation extends RasterProcessingOperation
 
     protected double srcNoData = -Float.MAX_VALUE;
 
-    protected double _8DX = CellSizeX * 8;
+    protected double _8DX = pixelSizeX * 8;
 
-    protected double _8DY = CellSizeY * 8;
+    protected double _8DY = pixelSizeY * 8;
 
     protected PlanarImage image;
 
@@ -57,14 +57,14 @@ public abstract class AbstractSurfaceOperation extends RasterProcessingOperation
         GridGeometry2D gridGeometry2D = gc.getGridGeometry();
         AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
 
-        CellSizeX = Math.abs(gridToWorld.getScaleX());
-        CellSizeY = Math.abs(gridToWorld.getScaleY());
+        pixelSizeX = Math.abs(gridToWorld.getScaleX());
+        pixelSizeY = Math.abs(gridToWorld.getScaleY());
 
         srcNoData = RasterHelper.getNoDataValue(gc);
-        NoData = -9999;
+        noData = -9999;
 
-        _8DX = CellSizeX * 8;
-        _8DY = CellSizeY * 8;
+        _8DX = pixelSizeX * 8;
+        _8DY = pixelSizeY * 8;
 
         image = (PlanarImage) gc.getRenderedImage();
         bounds = image.getBounds();

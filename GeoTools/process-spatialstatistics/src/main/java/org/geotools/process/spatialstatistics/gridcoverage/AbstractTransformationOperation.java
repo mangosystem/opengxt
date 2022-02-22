@@ -35,16 +35,16 @@ public abstract class AbstractTransformationOperation extends RasterProcessingOp
     protected static final Logger LOGGER = Logging.getLogger(AbstractTransformationOperation.class);
 
     protected void initilizeVariables(GridCoverage2D coverage) {
-        NoData = RasterHelper.getNoDataValue(coverage);
+        noData = RasterHelper.getNoDataValue(coverage);
 
         GridGeometry2D gridGeometry2D = coverage.getGridGeometry();
         AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
 
-        CellSizeX = Math.abs(gridToWorld.getScaleX());
-        CellSizeY = Math.abs(gridToWorld.getScaleY());
+        pixelSizeX = Math.abs(gridToWorld.getScaleX());
+        pixelSizeY = Math.abs(gridToWorld.getScaleY());
 
-        MaxValue = 1;
-        MinValue = 0;
-        Extent = new ReferencedEnvelope(coverage.getEnvelope());
+        maxValue = 1;
+        minValue = 0;
+        gridExtent = new ReferencedEnvelope(coverage.getEnvelope());
     }
 }

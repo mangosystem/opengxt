@@ -260,13 +260,13 @@ public class RasterHelper {
     public static double getNoDataValue(GridCoverage2D srcCoverage) {
         double noDataValue = 0.0f;
 
-        // No data or GC_NODATA
+        // No data or GC_NODATA(NoDataContainer.GC_NODATA)
         InternationalString noDataName = Vocabulary.formatInternational(VocabularyKeys.NODATA);
         Object objNoData = srcCoverage.getProperty(noDataName.toString());
         if (objNoData != null && objNoData instanceof Number) {
             return (Double) objNoData;
         } else {
-            objNoData = srcCoverage.getProperty("GC_NODATA");
+            objNoData = srcCoverage.getProperty(NoDataContainer.GC_NODATA);
             if (objNoData != null && objNoData instanceof Number) {
                 return (Double) objNoData;
             } else if (objNoData != null && objNoData instanceof NoDataContainer) {
@@ -444,7 +444,7 @@ public class RasterHelper {
         // properties.put("Mean", 1.0);
         // properties.put("StdDev", 1.0);
         properties.put(noDataName, Double.valueOf(noDataValue));
-        properties.put("GC_NODATA", Double.valueOf(noDataValue));
+        properties.put(NoDataContainer.GC_NODATA, Double.valueOf(noDataValue));
 
         GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
         return factory.create(name, tiledImage, coverageExtent, bands, null, properties);

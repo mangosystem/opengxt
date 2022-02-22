@@ -104,9 +104,7 @@ public class RasterZonalOperation extends RasterProcessingOperation {
 
         // features to raster zone
         FeaturesToRasterOperation rsOp = new FeaturesToRasterOperation();
-        rsOp.getRasterEnvironment().setCellSizeX(cellSizeX);
-        rsOp.getRasterEnvironment().setCellSizeY(cellSizeY);
-        rsOp.getRasterEnvironment().setExtent(new ReferencedEnvelope(cropGc.getEnvelope2D(), tCRS));
+        rsOp.setExtentAndCellSize(new ReferencedEnvelope(cropGc.getEnvelope2D(), tCRS), cellSizeX, cellSizeY);
         GridCoverage2D zonalGc = rsOp.execute(zoneFeatures);
 
         // calculate statistics

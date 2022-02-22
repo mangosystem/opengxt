@@ -82,7 +82,7 @@ public class RasterPointDensityOperation extends RasterDensityOperation {
         // calculate extent & cellsize
         calculateExtentAndCellSize(pointFeatures, Integer.MIN_VALUE);
 
-        DiskMemImage outputImage = this.createDiskMemImage(Extent, RasterPixelType.FLOAT);
+        DiskMemImage outputImage = this.createDiskMemImage(gridExtent, RasterPixelType.FLOAT);
         WritableRaster raster = (WritableRaster) outputImage.getData();
 
         final KernelJAI kernel = getKernel(this.rnh);
@@ -94,11 +94,11 @@ public class RasterPointDensityOperation extends RasterDensityOperation {
             scaleArea = scaleArea / 1000000.0;
         }
 
-        double cellSize = Math.max(CellSizeX, CellSizeY);
+        double cellSize = Math.max(pixelSizeX, pixelSizeY);
         double searchRadius = Math.max(kernel.getWidth(), kernel.getHeight()) * cellSize;
-        Filter filter = getBBoxFilter(pointFeatures.getSchema(), Extent, searchRadius);
+        Filter filter = getBBoxFilter(pointFeatures.getSchema(), gridExtent, searchRadius);
 
-        GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
+        GridTransformer trans = new GridTransformer(gridExtent, pixelSizeX, pixelSizeY);
         SimpleFeatureIterator featureIter = pointFeatures.subCollection(filter).features();
         try {
             Expression weightExp = ff.literal(1.0); // default
@@ -188,7 +188,7 @@ public class RasterPointDensityOperation extends RasterDensityOperation {
                             double wValue = ((weight * kernelValue) / scaleArea) + samples[index];
 
                             samples[index] = (float) wValue;
-                            this.MaxValue = Math.max(MaxValue, wValue);
+                            this.maxValue = Math.max(maxValue, wValue);
                             index++;
                         }
                     }
@@ -256,7 +256,7 @@ public class RasterPointDensityOperation extends RasterDensityOperation {
             int radius = (int) rnh.getRadius();
             if (rnh.getNeighborUnits() == NeighborUnits.MAP) {
                 // convert map unit to cell unit
-                double cellSize = Math.max(CellSizeX, CellSizeY);
+                double cellSize = Math.max(pixelSizeX, pixelSizeY);
                 radius = (int) Math.floor(rnh.getRadius() / cellSize);
             }
 
@@ -268,8 +268,8 @@ public class RasterPointDensityOperation extends RasterDensityOperation {
             int rh = (int) rnh.getHeight();
             if (rnh.getNeighborUnits() == NeighborUnits.MAP) {
                 // convert map unit to cell unit
-                rw = (int) Math.floor(rnh.getWidth() / CellSizeX);
-                rh = (int) Math.floor(rnh.getHeight() / CellSizeY);
+                rw = (int) Math.floor(rnh.getWidth() / pixelSizeX);
+                rh = (int) Math.floor(rnh.getHeight() / pixelSizeY);
             }
 
             // Creates a rectangular kernel where all elements have value 1.0.
@@ -278,7 +278,7 @@ public class RasterPointDensityOperation extends RasterDensityOperation {
         }
 
         // calculate area
-        final double cellArea = CellSizeX * CellSizeY;
+        final double cellArea = pixelSizeX * pixelSizeY;
         final float[] data = kernel.getKernelData();
         int valid = 0;
         for (int index = 0; index < data.length; index++) {
@@ -288,8 +288,8 @@ public class RasterPointDensityOperation extends RasterDensityOperation {
             }
         }
 
-        this.MinValue = 0.0;
-        this.MaxValue = MaxValue * valid;
+        this.minValue = 0.0;
+        this.maxValue = maxValue * valid;
 
         return kernel;
     }

@@ -78,7 +78,7 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
         // calculate extent & cellsize
         calculateExtentAndCellSize(pointFeatures, Integer.MIN_VALUE);
 
-        DiskMemImage outputImage = this.createDiskMemImage(Extent, RasterPixelType.FLOAT);
+        DiskMemImage outputImage = this.createDiskMemImage(gridExtent, RasterPixelType.FLOAT);
         WritableRaster raster = (WritableRaster) outputImage.getData();
 
         KernelJAI kernel = getKernel(searchRadius);
@@ -90,9 +90,9 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
             scaleArea = scaleArea / 1000000.0;
         }
 
-        Filter filter = getBBoxFilter(pointFeatures.getSchema(), Extent, searchRadius);
+        Filter filter = getBBoxFilter(pointFeatures.getSchema(), gridExtent, searchRadius);
 
-        GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
+        GridTransformer trans = new GridTransformer(gridExtent, pixelSizeX, pixelSizeY);
         SimpleFeatureIterator featureIter = pointFeatures.subCollection(filter).features();
         try {
             Expression weightExp = ff.literal(1.0); // default
@@ -182,7 +182,7 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
                             double wValue = ((weight * kernelValue) / scaleArea) + samples[index];
 
                             samples[index] = (float) wValue;
-                            this.MaxValue = Math.max(MaxValue, wValue);
+                            this.maxValue = Math.max(maxValue, wValue);
                             index++;
                         }
                     }
@@ -205,13 +205,13 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
         scaleArea = 0.0;
 
         // http://en.wikipedia.org/wiki/Kernel_(statistics)
-        double cellSize = Math.max(CellSizeX, CellSizeY);
+        double cellSize = Math.max(pixelSizeX, pixelSizeY);
         int radius = (int) Math.floor(searchRadius / cellSize);
         int width = 2 * radius + 1;
         final double r2 = radius * radius;
 
         // calculate area
-        final double cellArea = CellSizeX * CellSizeY;
+        final double cellArea = pixelSizeX * pixelSizeY;
 
         // build kernel
         final KernelJAI binKernel = KernelFactory.createCircle(radius, ValueType.BINARY);
@@ -300,8 +300,8 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
             break;
         }
 
-        this.MinValue = 0.0;
-        this.MaxValue = MaxValue * valid;
+        this.minValue = 0.0;
+        this.maxValue = maxValue * valid;
 
         return kernel;
     }

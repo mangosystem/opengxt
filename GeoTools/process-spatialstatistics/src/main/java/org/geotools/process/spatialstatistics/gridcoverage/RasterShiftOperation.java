@@ -30,6 +30,8 @@ import org.geotools.metadata.i18n.Vocabulary;
 import org.geotools.metadata.i18n.VocabularyKeys;
 import org.geotools.util.logging.Logging;
 
+import it.geosolutions.jaiext.range.NoDataContainer;
+
 /**
  * Moves (slides) the raster to a new geographic location, based on x and y shift values.
  * 
@@ -69,8 +71,8 @@ public class RasterShiftOperation extends AbstractTransformationOperation {
         // shift y-coordinate value will shift the output down. A positive shift y-coordinate value
         // will shift the output to the top.
 
-        Extent = new ReferencedEnvelope(inputCoverage.getEnvelope());
-        Extent.translate(xTrans, yTrans);
+        gridExtent = new ReferencedEnvelope(inputCoverage.getEnvelope());
+        gridExtent.translate(xTrans, yTrans);
 
         if (numBands == 1) {
             return createGridCoverage(inputCoverage.getName(), inputImage);
@@ -82,10 +84,10 @@ public class RasterShiftOperation extends AbstractTransformationOperation {
 
             Map properties = inputCoverage.getProperties();
             properties.put(Vocabulary.formatInternational(VocabularyKeys.NODATA), noData);
-            properties.put("GC_NODATA", noData);
+            properties.put(NoDataContainer.GC_NODATA, noData);
 
             GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
-            return factory.create(inputCoverage.getName(), inputImage, Extent, bands, null,
+            return factory.create(inputCoverage.getName(), inputImage, gridExtent, bands, null,
                     properties);
         }
     }

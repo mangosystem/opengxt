@@ -51,13 +51,13 @@ public class RasterExtractByMaskOperation extends RasterProcessingOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterExtractByMaskOperation.class);
 
     public GridCoverage2D execute(GridCoverage2D inputCoverage, GridCoverage2D maskCoverage) {
-        NoData = RasterHelper.getNoDataValue(inputCoverage);
+        noData = RasterHelper.getNoDataValue(inputCoverage);
 
         GridGeometry2D gridGeometry2D = inputCoverage.getGridGeometry();
         AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
 
-        CellSizeX = Math.abs(gridToWorld.getScaleX());
-        CellSizeY = Math.abs(gridToWorld.getScaleY());
+        pixelSizeX = Math.abs(gridToWorld.getScaleX());
+        pixelSizeY = Math.abs(gridToWorld.getScaleY());
 
         CoordinateReferenceSystem inputCrs = inputCoverage.getCoordinateReferenceSystem();
         CoordinateReferenceSystem maskCrs = maskCoverage.getCoordinateReferenceSystem();
@@ -65,7 +65,7 @@ public class RasterExtractByMaskOperation extends RasterProcessingOperation {
             // Reproject raster
             RasterReprojectOperation reprojectOp = new RasterReprojectOperation();
             maskCoverage = reprojectOp.execute(maskCoverage, inputCrs, ResampleType.BILINEAR,
-                    CellSizeX, CellSizeY);
+                    pixelSizeX, pixelSizeY);
         }
 
         // init
@@ -79,12 +79,12 @@ public class RasterExtractByMaskOperation extends RasterProcessingOperation {
         double maskSizeX = Math.abs(gtw.getScaleX());
         double maskSizeY = Math.abs(gtw.getScaleY());
 
-        if (!SSUtils.compareDouble(CellSizeX, maskSizeX)
-                || !SSUtils.compareDouble(CellSizeY, maskSizeY)) {
+        if (!SSUtils.compareDouble(pixelSizeX, maskSizeX)
+                || !SSUtils.compareDouble(pixelSizeY, maskSizeY)) {
             LOGGER.log(Level.WARNING, "Resampling mask coverage...");
-            maskCoverage = resampleNearest(maskCoverage, CellSizeX, CellSizeY);
+            maskCoverage = resampleNearest(maskCoverage, pixelSizeX, pixelSizeY);
         }
-        Extent = new ReferencedEnvelope(maskCoverage.getEnvelope());
+        gridExtent = new ReferencedEnvelope(maskCoverage.getEnvelope());
 
         // same extent, columns, rows
         ReferencedEnvelope clipExt = new ReferencedEnvelope(maskCoverage.getEnvelope2D(), inputCrs);
@@ -94,7 +94,7 @@ public class RasterExtractByMaskOperation extends RasterProcessingOperation {
         RasterPixelType pixelType = RasterHelper.getTransferType(inputCoverage);
         PlanarImage maskImage = (PlanarImage) maskCoverage.getRenderedImage();
         PlanarImage inputImage = (PlanarImage) inputCoverage.getRenderedImage();
-        DiskMemImage outputImage = this.createDiskMemImage(Extent, pixelType,
+        DiskMemImage outputImage = this.createDiskMemImage(gridExtent, pixelType,
                 maskImage.getTileWidth(), maskImage.getTileHeight());
 
         WritableRectIter writerIter = RectIterFactory.createWritable(outputImage,
@@ -116,8 +116,8 @@ public class RasterExtractByMaskOperation extends RasterProcessingOperation {
                 double inputVal = inputIter.getSampleDouble(0);
 
                 if (SSUtils.compareDouble(maskNoData, maskVal)
-                        || SSUtils.compareDouble(NoData, inputVal)) {
-                    writerIter.setSample(0, NoData);
+                        || SSUtils.compareDouble(noData, inputVal)) {
+                    writerIter.setSample(0, noData);
                 } else {
                     writerIter.setSample(0, inputVal);
                     updateStatistics(inputVal);
@@ -150,7 +150,7 @@ public class RasterExtractByMaskOperation extends RasterProcessingOperation {
         PlanarImage inputImage = (PlanarImage) coverage.getRenderedImage();
         double[] backgroundValues = new double[inputImage.getSampleModel().getNumBands()];
         for (int index = 0; index < backgroundValues.length; index++) {
-            backgroundValues[index] = NoData;
+            backgroundValues[index] = noData;
         }
 
         return (GridCoverage2D) Operations.DEFAULT.resample(coverage, crs, gg2D, interpolation,

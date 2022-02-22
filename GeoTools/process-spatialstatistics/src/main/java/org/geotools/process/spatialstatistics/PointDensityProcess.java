@@ -129,9 +129,7 @@ public class PointDensityProcess extends AbstractStatisticsProcess {
 
         GridCoverage2D resultGc = null;
         RasterPointDensityOperation process = new RasterPointDensityOperation();
-        process.getRasterEnvironment().setExtent(boundingBox);
-        process.getRasterEnvironment().setCellSizeX(cellSize);
-        process.getRasterEnvironment().setCellSizeY(cellSize);
+        process.setExtentAndCellSize(boundingBox, cellSize, cellSize);
         process.setNeighbor(rnh);
 
         resultGc = process.execute(inputFeatures, populationField);

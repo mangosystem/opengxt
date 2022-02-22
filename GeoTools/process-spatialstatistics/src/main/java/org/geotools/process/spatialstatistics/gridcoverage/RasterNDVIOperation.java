@@ -55,7 +55,7 @@ public class RasterNDVIOperation extends RasterProcessingOperation {
         // Extent, CellSize, CRS 확인 후 동일하게 리샘플링 후 계산
         nirNoData = RasterHelper.getNoDataValue(nirCoverage);
         redNoData = RasterHelper.getNoDataValue(redCoverage);
-        this.NoData = nirNoData; // default nodata
+        this.noData = nirNoData; // default nodata
 
         GridGeometry2D gridGeometry2D = nirCoverage.getGridGeometry();
         AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
@@ -149,7 +149,7 @@ public class RasterNDVIOperation extends RasterProcessingOperation {
                 double red = redIter.getSampleDouble(redIndex);
 
                 if (SSUtils.compareDouble(nir, nirNoData) || SSUtils.compareDouble(nir, redNoData)) {
-                    writerIter.setSample(0, this.NoData);
+                    writerIter.setSample(0, this.noData);
                 } else {
                     // NDVI = ((IR - R)/(IR + R)) = -1.0 ~ 1.0
                     double ndviValue = (nir - red) / (nir + red);
@@ -164,8 +164,8 @@ public class RasterNDVIOperation extends RasterProcessingOperation {
             writerIter.nextLine();
         }
 
-        this.MinValue = -1.0;
-        this.MaxValue = 1.0;
+        this.minValue = -1.0;
+        this.maxValue = 1.0;
 
         return createGridCoverage("NDVI", outputImage);
     }

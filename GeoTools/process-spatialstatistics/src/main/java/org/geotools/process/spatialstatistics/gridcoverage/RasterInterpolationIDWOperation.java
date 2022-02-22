@@ -83,8 +83,8 @@ public class RasterInterpolationIDWOperation extends RasterInterpolationOperator
         final IDWInterpolator interpolator = new IDWInterpolator(pts, radius, power);
 
         // create image & write pixels
-        final DiskMemImage oi = createDiskMemImage(Extent, pixelType);
-        final GridTransformer trans = new GridTransformer(Extent, CellSizeX, CellSizeY);
+        final DiskMemImage oi = createDiskMemImage(gridExtent, pixelType);
+        final GridTransformer trans = new GridTransformer(gridExtent, pixelSizeX, pixelSizeY);
 
         // divide 500 pixels
         final java.awt.Rectangle bounds = oi.getBounds();

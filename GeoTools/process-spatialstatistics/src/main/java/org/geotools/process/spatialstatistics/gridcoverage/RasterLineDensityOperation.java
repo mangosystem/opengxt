@@ -74,7 +74,7 @@ public class RasterLineDensityOperation extends RasterDensityOperation {
         // calculate extent & cellsize
         calculateExtentAndCellSize(lineFeatures, Integer.MIN_VALUE);
 
-        DiskMemImage outputImage = this.createDiskMemImage(Extent, RasterPixelType.FLOAT);
+        DiskMemImage outputImage = this.createDiskMemImage(gridExtent, RasterPixelType.FLOAT);
         WritableRaster raster = (WritableRaster) outputImage.getData();
 
         // step 1 : convert line to gridcoverage
@@ -172,7 +172,7 @@ public class RasterLineDensityOperation extends RasterDensityOperation {
                         double wValue = ((weight * kernelValue) / scaleArea) + samples[index];
 
                         samples[index] = (float) wValue;
-                        this.MaxValue = Math.max(MaxValue, wValue);
+                        this.maxValue = Math.max(maxValue, wValue);
                         index++;
                     }
                 }
@@ -199,7 +199,7 @@ public class RasterLineDensityOperation extends RasterDensityOperation {
 
         ColorModel colorModel = ColorModel.getRGBdefault();
         SampleModel smpModel = colorModel.createCompatibleSampleModel(64, 64);
-        Dimension dim = RasterHelper.getDimension(Extent, CellSizeX, CellSizeY);
+        Dimension dim = RasterHelper.getDimension(gridExtent, pixelSizeX, pixelSizeY);
 
         dmImage = new DiskMemImage(0, 0, dim.width, dim.height, 0, 0, smpModel, colorModel);
         dmImage.setUseCommonCache(true);
@@ -217,9 +217,9 @@ public class RasterLineDensityOperation extends RasterDensityOperation {
         g2D.setComposite(BlendAddComposite.getInstance());
 
         // setup affine transform
-        double x_scale = dmImage.getWidth() / Extent.getWidth();
-        double y_scale = dmImage.getHeight() / Extent.getHeight();
-        Coordinate centerPos = Extent.centre();
+        double x_scale = dmImage.getWidth() / gridExtent.getWidth();
+        double y_scale = dmImage.getHeight() / gridExtent.getHeight();
+        Coordinate centerPos = gridExtent.centre();
 
         AffineTransform affineTrans = new AffineTransform();
         affineTrans.translate(dmImage.getWidth() / 2.0, dmImage.getHeight() / 2.0);
@@ -227,7 +227,7 @@ public class RasterLineDensityOperation extends RasterDensityOperation {
         affineTrans.translate(-centerPos.x, -centerPos.y);
 
         // draw line
-        Filter filter = getBBoxFilter(lineFeatures.getSchema(), Extent, searchRadius);
+        Filter filter = getBBoxFilter(lineFeatures.getSchema(), gridExtent, searchRadius);
 
         SimpleFeatureIterator featureIter = lineFeatures.subCollection(filter).features();
         try {
@@ -295,14 +295,14 @@ public class RasterLineDensityOperation extends RasterDensityOperation {
         scaleArea = 0.0;
 
         // convert map unit to cell unit
-        double cellSize = Math.max(CellSizeX, CellSizeY);
+        double cellSize = Math.max(pixelSizeX, pixelSizeY);
         int radius = (int) Math.floor(searchRadius / cellSize);
 
         // Creates a circular kernel with width 2*radius + 1
         KernelJAI kernel = KernelFactory.createConstantCircle(radius, (float) cellSize);
 
         // calculate area
-        final double cellArea = CellSizeX * CellSizeY;
+        final double cellArea = pixelSizeX * pixelSizeY;
         final float[] data = kernel.getKernelData();
         int valid = 0;
         for (int index = 0; index < data.length; index++) {
@@ -312,8 +312,8 @@ public class RasterLineDensityOperation extends RasterDensityOperation {
             }
         }
 
-        this.MinValue = 0.0;
-        this.MaxValue = MaxValue * valid;
+        this.minValue = 0.0;
+        this.maxValue = maxValue * valid;
 
         return kernel;
     }

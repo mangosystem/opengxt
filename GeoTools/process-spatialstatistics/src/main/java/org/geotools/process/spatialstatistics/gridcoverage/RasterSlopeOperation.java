@@ -104,7 +104,7 @@ public class RasterSlopeOperation extends AbstractSurfaceOperation {
         // +-------+ +-------+
         double[][] mx = getSubMatrix(pos, 3, 3, zFactor);
         if (Double.isNaN(mx[1][1]) || SSUtils.compareDouble(srcNoData, mx[1][1])) {
-            writer.setSample(0, NoData);
+            writer.setSample(0, noData);
             return;
         }
 
@@ -115,7 +115,7 @@ public class RasterSlopeOperation extends AbstractSurfaceOperation {
 
         double rise_run = (dZdX * dZdX) + (dZdY * dZdY);
         if (Double.isNaN(rise_run) || Double.isInfinite(rise_run)) {
-            writer.setSample(0, NoData);
+            writer.setSample(0, noData);
             return;
         }
 
@@ -128,7 +128,7 @@ public class RasterSlopeOperation extends AbstractSurfaceOperation {
         }
 
         if (slope < 0 || slope > 100) {
-            writer.setSample(0, NoData);
+            writer.setSample(0, noData);
             return;
         }
 

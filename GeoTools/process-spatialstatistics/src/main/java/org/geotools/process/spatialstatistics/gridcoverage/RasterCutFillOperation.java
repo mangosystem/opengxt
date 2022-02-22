@@ -78,17 +78,17 @@ public class RasterCutFillOperation extends AbstractRasterCutFillOperation {
 
     public SimpleFeatureCollection execute(GridCoverage2D inputDEM, double baseHeight)
             throws ProcessException, IOException {
-        NoData = RasterHelper.getNoDataValue(inputDEM);
+        noData = RasterHelper.getNoDataValue(inputDEM);
 
         GridGeometry2D gridGeometry2D = inputDEM.getGridGeometry();
         AffineTransform gridToWorld = (AffineTransform) gridGeometry2D.getGridToCRS2D();
 
-        CellSizeX = Math.abs(gridToWorld.getScaleX());
-        CellSizeY = Math.abs(gridToWorld.getScaleY());
-        Extent = new ReferencedEnvelope(inputDEM.getEnvelope());
+        pixelSizeX = Math.abs(gridToWorld.getScaleX());
+        pixelSizeY = Math.abs(gridToWorld.getScaleY());
+        gridExtent = new ReferencedEnvelope(inputDEM.getEnvelope());
 
         final int outputNoData = -9999;
-        final double cellArea = CellSizeX * CellSizeY;
+        final double cellArea = pixelSizeX * pixelSizeY;
         CutFillResult result = new CutFillResult(baseHeight);
 
         PlanarImage inputImage = (PlanarImage) inputDEM.getRenderedImage();
@@ -111,7 +111,7 @@ public class RasterCutFillOperation extends AbstractRasterCutFillOperation {
                 // Cut = 1, Fill = -1, Unchanged = 0
                 int flag = outputNoData;
 
-                if (!SSUtils.compareDouble(NoData, gridVal)) {
+                if (!SSUtils.compareDouble(noData, gridVal)) {
                     double diffVal = gridVal - baseHeight;
                     double volume = Math.abs(cellArea * diffVal);
 
@@ -142,7 +142,7 @@ public class RasterCutFillOperation extends AbstractRasterCutFillOperation {
             writerIter.nextLine();
         }
 
-        cutFillRaster = createGridCoverage("CutFill", outputImage, 0, outputNoData, -1, 1, Extent);
+        cutFillRaster = createGridCoverage("CutFill", outputImage, 0, outputNoData, -1, 1, gridExtent);
 
         // finally build features
         return buildFeatures(cutFillRaster, result);

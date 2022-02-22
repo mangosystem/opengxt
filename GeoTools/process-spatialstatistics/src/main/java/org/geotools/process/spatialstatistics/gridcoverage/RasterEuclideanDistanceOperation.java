@@ -26,7 +26,6 @@ import javax.media.jai.iterator.RectIterFactory;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.factory.GeoTools;
@@ -53,38 +52,33 @@ public class RasterEuclideanDistanceOperation extends RasterProcessingOperation 
 
     private double maximumDistance = Double.MAX_VALUE;
 
+    private FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
+
     private DiskMemImage outputImage;
 
     public GridCoverage2D execute(SimpleFeatureCollection inputFeatures, double maximumDistance) {
-        FeaturesToRasterOperation process = new FeaturesToRasterOperation();
         final Number gridVal = Short.valueOf((short) 1);
         GridCoverage2D finalGc = null;
 
+        calculateExtentAndCellSize(inputFeatures, RasterPixelType.FLOAT);
+
+        FeaturesToRasterOperation process = new FeaturesToRasterOperation();
+        process.setExtentAndCellSize(gridExtent, pixelSizeX, pixelSizeY);
+
         // check features in this analysis extent
-        ReferencedEnvelope extent = getRasterEnvironment().getExtent();
-        if (extent != null) {
-            FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
-            String the_geom = inputFeatures.getSchema().getGeometryDescriptor().getLocalName();
+        String the_geom = inputFeatures.getSchema().getGeometryDescriptor().getLocalName();
+        Filter filter = ff.bbox(ff.property(the_geom), gridExtent);
 
-            Filter filter = ff.bbox(ff.property(the_geom), extent);
-            int featureCount = inputFeatures.subCollection(filter).size();
-            if (featureCount == 0) {
-                // 1. feature to raster as origin extent
-                process.getRasterEnvironment().setExtent(inputFeatures.getBounds());
-                process.getRasterEnvironment().setCellSizeX(getRasterEnvironment().getCellSizeX());
-                process.getRasterEnvironment().setCellSizeY(getRasterEnvironment().getCellSizeY());
+        int featureCount = inputFeatures.subCollection(filter).size();
+        if (featureCount == 0) {
+            // 1. feature to raster as origin extent
+            process.setExtentAndCellSize(inputFeatures.getBounds(), pixelSizeX, pixelSizeY);
+            GridCoverage2D distGc = process.execute(inputFeatures, gridVal);
 
-                GridCoverage2D distGc = process.execute(inputFeatures, gridVal);
-
-                // 2. crop raster with analysis extent
-                RasterCropOperation cropOp = new RasterCropOperation();
-                finalGc = cropOp.execute(distGc, extent);
-            } else {
-                process.setRasterEnvironment(getRasterEnvironment());
-                finalGc = process.execute(inputFeatures, gridVal);
-            }
+            // 2. crop raster with analysis extent
+            RasterClipOperation cropOp = new RasterClipOperation();
+            finalGc = cropOp.execute(distGc, gridExtent);
         } else {
-            process.setRasterEnvironment(getRasterEnvironment());
             finalGc = process.execute(inputFeatures, gridVal);
         }
 
@@ -312,11 +306,11 @@ public class RasterEuclideanDistanceOperation extends RasterProcessingOperation 
             int val = colValues[col + 1];
 
             if (val == INT_MAX) {
-                outputImage.setSample(col, row, 0, NoData);
+                outputImage.setSample(col, row, 0, noData);
             } else {
-                double distance = Math.sqrt(val) * CellSizeX;
+                double distance = Math.sqrt(val) * pixelSizeX;
                 if (maximumDistance < distance) {
-                    outputImage.setSample(col, row, 0, NoData);
+                    outputImage.setSample(col, row, 0, noData);
                 } else {
                     outputImage.setSample(col, row, 0, distance);
                     updateStatistics(distance);

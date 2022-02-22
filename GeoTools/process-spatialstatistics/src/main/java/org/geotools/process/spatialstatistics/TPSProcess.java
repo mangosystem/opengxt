@@ -107,20 +107,8 @@ public class TPSProcess extends AbstractStatisticsProcess {
 
         GridCoverage2D resultGc = null;
         RasterInterpolationTPSOperation process = new RasterInterpolationTPSOperation();
-        process.getRasterEnvironment().setExtent(boundingBox);
-
-        if (cellSize > 0) {
-            double origCellSizeX = process.getRasterEnvironment().getCellSizeX();
-            double origCellSizeY = process.getRasterEnvironment().getCellSizeY();
-            process.getRasterEnvironment().setCellSizeX(cellSize);
-            process.getRasterEnvironment().setCellSizeY(cellSize);
-
-            resultGc = process.execute(inputFeatures, inputField);
-            process.getRasterEnvironment().setCellSizeX(origCellSizeX);
-            process.getRasterEnvironment().setCellSizeY(origCellSizeY);
-        } else {
-            resultGc = process.execute(inputFeatures, inputField);
-        }
+        process.setExtentAndCellSize(boundingBox, cellSize, cellSize);
+        resultGc = process.execute(inputFeatures, inputField);
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

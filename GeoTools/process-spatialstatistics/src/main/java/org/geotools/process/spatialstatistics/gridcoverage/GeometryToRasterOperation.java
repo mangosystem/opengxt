@@ -81,7 +81,11 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
         shapeType = FeatureTypes.getSimpleShapeType(inputGeometry.getClass());
 
         Envelope geomEnvelope = inputGeometry.getEnvelopeInternal();
-        ReferencedEnvelope gridExtent = new ReferencedEnvelope(geomEnvelope, forcedCRS);
+        ReferencedEnvelope extent = new ReferencedEnvelope(geomEnvelope, forcedCRS);
+
+        // calculate extent & cellsize
+        Object nodataValue = RasterHelper.getDefaultNoDataValue(pixelType);
+        calculateExtentAndCellSize(extent, nodataValue);
 
         initializeTiledImage(gridExtent, pixelType);
 
@@ -93,10 +97,6 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
     }
 
     private void initializeTiledImage(ReferencedEnvelope gridExtent, RasterPixelType transferType) {
-        // calculate extent & cellsize
-        Object nodataValue = RasterHelper.getDefaultNoDataValue(transferType);
-        calculateExtentAndCellSize(gridExtent, nodataValue);
-
         // set pixel type
         pixelType = transferType;
 
@@ -194,7 +194,8 @@ public class GeometryToRasterOperation extends RasterProcessingOperation {
         return gPath;
     }
 
-    private void addLineStringToPath(boolean isRing, LineString lineString, GeneralPath targetPath) {
+    private void addLineStringToPath(boolean isRing, LineString lineString,
+            GeneralPath targetPath) {
         Coordinate[] cs = lineString.getCoordinates();
 
         // Offset like ArcGIS

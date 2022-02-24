@@ -117,7 +117,7 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
             return pointToRaster.execute(inputFeatures, gridValue.intValue());
         }
 
-        initializeTiledImage(inputFeatures.getBounds(), rsType);
+        initializeTiledImage(gridExtent, rsType);
 
         SimpleFeatureIterator featureIter = null;
         try {
@@ -216,7 +216,7 @@ public class FeaturesToRasterOperation extends RasterProcessingOperation {
             }
         }
 
-        initializeTiledImage(inputFeatures.getBounds(), transferType);
+        initializeTiledImage(gridExtent, transferType);
 
         SimpleFeatureIterator featureIter = inputFeatures.features();
         try {

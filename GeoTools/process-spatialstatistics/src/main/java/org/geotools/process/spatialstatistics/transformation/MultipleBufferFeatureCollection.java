@@ -203,8 +203,8 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
                     try {
                         buffered = geodetic.buffer(orig, distances[bufferIndex]);
                         if (outsideOnly && bufferIndex > 0) {
-                            buffered = buffered
-                                    .difference(geodetic.buffer(orig, distances[bufferIndex - 1]));
+                            Geometry before = geodetic.buffer(orig, distances[bufferIndex - 1]);
+                            buffered = before.difference(buffered);
                         }
                     } catch (FactoryException e) {
                         LOGGER.log(Level.FINER, e.getMessage(), e);
@@ -214,8 +214,8 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
                 } else {
                     buffered = orig.buffer(distances[bufferIndex], quadrantSegments);
                     if (outsideOnly && bufferIndex > 0) {
-                        buffered = buffered.difference(
-                                orig.buffer(distances[bufferIndex - 1], quadrantSegments));
+                        Geometry before = orig.buffer(distances[bufferIndex - 1], quadrantSegments);
+                        buffered = before.difference(buffered);
                     }
                 }
 

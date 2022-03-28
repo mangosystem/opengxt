@@ -1,4 +1,8 @@
 
+
+## 2022-01-19
+  * Add RasterSurfaceArea process
+  * 
 ## 2021-02-16
   * Update LinearLineOfSight, RadialLineOfSight processes
   

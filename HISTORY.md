@@ -1,4 +1,8 @@
 
+## 2022-03-29
+  * Add MaximumInscribedCircle process
+  * Add MaximumInscribedRectangle process
+  
 ## 2022-03-28
   * Add VariableBuffer process
 

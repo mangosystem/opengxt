@@ -39,9 +39,7 @@ import org.locationtech.jts.geom.Polygon;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
-import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.TransformException;
 
 import si.uom.SI;
 
@@ -78,16 +76,19 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
 
         CoordinateReferenceSystem crs = schema.getCoordinateReferenceSystem();
 
-        // apply distance unit
+        // sort ascending
+        // 250, 500, 750, 1000
         Arrays.sort(distances);
 
-        // reverse distances for inside ring
+        // reverse distances for inside ring(ascending -> descending)
+        // 1000, 750, 500, 250
         int arrLen = distances.length;
         double[] reverseDistances = new double[arrLen];
         for (int i = 0; i < arrLen; i++) {
             reverseDistances[i] = distances[(arrLen - 1) - i];
         }
 
+        // apply distance unit
         if (distanceUnit == DistanceUnit.Default) {
             this.distances = reverseDistances;
         } else {
@@ -132,7 +133,7 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
     @Override
     public ReferencedEnvelope getBounds() {
         ReferencedEnvelope bounds = delegate.getBounds();
-        bounds.expandBy(distances[distances.length - 1]);
+        bounds.expandBy(distances[0]);
         return bounds;
     }
 
@@ -199,23 +200,23 @@ public class MultipleBufferFeatureCollection extends GXTSimpleFeatureCollection 
                 Geometry orig = (Geometry) origFeature.getDefaultGeometry();
 
                 Geometry buffered = orig;
+                boolean isCuttable = outsideOnly && bufferIndex < distances.length - 1;
+
                 if (isGeographicCRS) {
                     try {
                         buffered = geodetic.buffer(orig, distances[bufferIndex]);
-                        if (outsideOnly && bufferIndex > 0) {
-                            Geometry before = geodetic.buffer(orig, distances[bufferIndex - 1]);
-                            buffered = before.difference(buffered);
+                        if (isCuttable) {
+                            Geometry before = geodetic.buffer(orig, distances[bufferIndex + 1]);
+                            buffered = buffered.difference(before);
                         }
-                    } catch (FactoryException e) {
-                        LOGGER.log(Level.FINER, e.getMessage(), e);
-                    } catch (TransformException e) {
+                    } catch (Exception e) {
                         LOGGER.log(Level.FINER, e.getMessage(), e);
                     }
                 } else {
                     buffered = orig.buffer(distances[bufferIndex], quadrantSegments);
-                    if (outsideOnly && bufferIndex > 0) {
-                        Geometry before = orig.buffer(distances[bufferIndex - 1], quadrantSegments);
-                        buffered = before.difference(buffered);
+                    if (isCuttable) {
+                        Geometry before = orig.buffer(distances[bufferIndex + 1], quadrantSegments);
+                        buffered = buffered.difference(before);
                     }
                 }
 

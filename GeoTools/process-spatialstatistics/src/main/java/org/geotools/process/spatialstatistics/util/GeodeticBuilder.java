@@ -267,7 +267,7 @@ public class GeodeticBuilder {
         // Buffer
         Geometry buffered = projected;
         if (bufferParameters == null) {
-            buffered = projected.buffer(distanceInMeters);
+            buffered = projected.buffer(distanceInMeters, quadrantSegments);
         } else {
             buffered = BufferOp.bufferOp(projected, distanceInMeters, bufferParameters);
         }

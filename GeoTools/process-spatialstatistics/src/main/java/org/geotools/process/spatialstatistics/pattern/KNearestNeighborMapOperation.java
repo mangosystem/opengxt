@@ -24,7 +24,6 @@ import java.util.logging.Logger;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
-import org.geotools.process.spatialstatistics.core.KnnSearch;
 import org.geotools.process.spatialstatistics.core.SpatialEvent;
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
@@ -79,7 +78,6 @@ public class KNearestNeighborMapOperation extends GeneralOperation {
         IFeatureInserter featureWriter = getFeatureWriter(schema);
         SimpleFeatureIterator featureIter = features.features();
         try {
-            KnnSearch knnSearch = new KnnSearch(spatialIndex);
             while (featureIter.hasNext()) {
                 SimpleFeature feature = featureIter.next();
                 Geometry geometry = (Geometry) feature.getDefaultGeometry();
@@ -89,7 +87,7 @@ public class KNearestNeighborMapOperation extends GeneralOperation {
                 }
 
                 SpatialEvent start = new SpatialEvent(feature.getID(), coordinate);
-                Object[] knns = knnSearch.kNearestNeighbour(new Envelope(coordinate), start,
+                Object[] knns = spatialIndex.nearestNeighbour(new Envelope(coordinate), start,
                         new ItemDistance() {
                             @Override
                             public double distance(ItemBoundable item1, ItemBoundable item2) {

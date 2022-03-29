@@ -82,6 +82,7 @@ public class RadialLOSOperation extends GeneralOperation {
                 isGeographic = true;
             } else {
                 Unit<?> unit = hor.getCoordinateSystem().getAxis(0).getUnit();
+                @SuppressWarnings("unchecked")
                 UnitConverter converter = SI.METRE.getConverterTo((Unit<Length>) unit);
                 radius = converter.convert(radius).doubleValue();
             }

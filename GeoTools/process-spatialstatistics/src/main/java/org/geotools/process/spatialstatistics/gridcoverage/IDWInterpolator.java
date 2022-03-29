@@ -22,7 +22,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import org.geotools.process.spatialstatistics.core.KnnSearch;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterRadius.SearchRadiusType;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Coordinate;
@@ -42,8 +41,6 @@ public class IDWInterpolator extends AbstractInterpolator {
     protected static final Logger LOGGER = Logging.getLogger(IDWInterpolator.class);
 
     private STRtree spatialIndex = null;
-
-    private KnnSearch knnSearch = null;
 
     private RasterRadius radius = new RasterRadius();
 
@@ -67,7 +64,6 @@ public class IDWInterpolator extends AbstractInterpolator {
         for (Coordinate sample : samples) {
             spatialIndex.insert(new Envelope(sample), sample);
         }
-        knnSearch = new KnnSearch(spatialIndex);
     }
 
     @Override
@@ -122,7 +118,7 @@ public class IDWInterpolator extends AbstractInterpolator {
         searchEnv.expandBy(radius.distance);
 
         if (radius.numberOfPoints > 0) {
-            Object[] knns = knnSearch.kNearestNeighbour(searchEnv, p, new ItemDistance() {
+            Object[] knns = spatialIndex.nearestNeighbour(searchEnv, p, new ItemDistance() {
                 @Override
                 public double distance(ItemBoundable item1, ItemBoundable item2) {
                     Coordinate s1 = (Coordinate) item1.getItem();

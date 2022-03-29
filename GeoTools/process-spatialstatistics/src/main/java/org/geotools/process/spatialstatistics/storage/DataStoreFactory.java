@@ -100,8 +100,7 @@ public class DataStoreFactory {
         return getDataStore(Collections.unmodifiableMap(params));
     }
 
-    @SuppressWarnings({ "rawtypes" })
-    public static DataStore getDataStore(Map connectionParams) {
+    public static DataStore getDataStore(Map<String, ?> connectionParams) {
         try {
             final DataStore dataStore = DataStoreFinder.getDataStore(connectionParams);
             return dataStore;

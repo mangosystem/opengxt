@@ -79,7 +79,6 @@ public class WeightMatrixKNearestNeighbors extends AbstractWeightMatrix {
         if (numberOfNeighbors >= featureCount) {
             insertAll(matrix, features, uniqueField);
         } else {
-            KnnSearch knnSearch = new KnnSearch(spatialIndex);
             SimpleFeatureIterator featureIter = features.features();
             try {
                 while (featureIter.hasNext()) {
@@ -89,7 +88,7 @@ public class WeightMatrixKNearestNeighbors extends AbstractWeightMatrix {
                     Object primaryID = getFeatureID(feature, uniqueField);
 
                     SpatialEvent soruce = new SpatialEvent(primaryID, coordinate);
-                    Object[] knns = knnSearch.kNearestNeighbour(new Envelope(coordinate), soruce,
+                    Object[] knns = spatialIndex.nearestNeighbour(new Envelope(coordinate), soruce,
                             new ItemDistance() {
                                 @Override
                                 public double distance(ItemBoundable item1, ItemBoundable item2) {

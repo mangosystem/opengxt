@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.process.spatialstatistics.core.KnnSearch;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -95,7 +94,6 @@ public class ClusterBesagNewellOperation extends AbstractClusterOperation {
         this.preEvaluate(popFeatures, popField, caseFeatures, caseField);
 
         List<ClusterCircle> circles = new ArrayList<ClusterCircle>();
-        KnnSearch knnSearch = new KnnSearch(this.caseIndex);
 
         SimpleFeatureIterator featureIter = caseFeatures.features();
         try {
@@ -111,7 +109,7 @@ public class ClusterBesagNewellOperation extends AbstractClusterOperation {
 
                 // find K nearest neighbours
                 NearFeature start = new NearFeature(feature.getID(), geometry, value);
-                Object[] knns = knnSearch.kNearestNeighbour(envelope, start, new ItemDistance() {
+                Object[] knns = caseIndex.nearestNeighbour(envelope, start, new ItemDistance() {
                     @Override
                     public double distance(ItemBoundable item1, ItemBoundable item2) {
                         NearFeature s1 = (NearFeature) item1.getItem();

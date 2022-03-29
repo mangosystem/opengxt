@@ -30,7 +30,6 @@ import org.geotools.filter.function.RangedClassifier;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
-import org.geotools.process.spatialstatistics.transformation.CoverageToPointFeatureCollection;
 import org.geotools.styling.ColorMap;
 import org.geotools.styling.ColorMapEntry;
 import org.geotools.styling.FeatureTypeStyle;

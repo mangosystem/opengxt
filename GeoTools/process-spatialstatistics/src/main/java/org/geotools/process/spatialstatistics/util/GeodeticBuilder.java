@@ -435,17 +435,4 @@ public class GeodeticBuilder {
 
         return false;
     }
-
-    private MathTransform findMathTransform(CoordinateReferenceSystem sourceCRS,
-            CoordinateReferenceSystem targetCRS, boolean lenient) {
-        if (targetCRS == null || CRS.equalsIgnoreMetadata(sourceCRS, targetCRS)) {
-            return null;
-        }
-
-        try {
-            return CRS.findMathTransform(sourceCRS, targetCRS, lenient);
-        } catch (FactoryException e) {
-            throw new IllegalArgumentException("Could not create math transform");
-        }
-    }
 }

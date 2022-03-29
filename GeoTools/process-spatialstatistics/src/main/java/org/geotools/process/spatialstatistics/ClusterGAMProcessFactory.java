@@ -29,7 +29,6 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
-import org.geotools.process.spatialstatistics.pattern.AbstractClusterOperation;
 import org.geotools.process.spatialstatistics.pattern.AbstractClusterOperation.FitnessFunctionType;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;

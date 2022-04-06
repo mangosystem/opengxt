@@ -46,25 +46,19 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 public class RasterExportOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterExportOperation.class);
 
-    // http://www.javadocexamples.com/java_source/org/geotools/data/gtopo30/GTopo30DataSource.java.html
-    // http://www.mail-archive.com/geotools-gt2-users@lists.sourceforge.net/msg09158.html
-
-    // CompressionType : CCITT RLE, CCITT T.4, CCITT T.6, LZW, JPEG, ZLib,
-    // PackBits, Deflate, EXIF, JPEG
-
     // GeoServer WCS Default = MODE_EXPLICIT, LZW, 0.75F, 256, 256
 
     private String compressionType = "LZW"; // default //$NON-NLS-1$
 
-    private Float compressionQuality = 1.0f; // default
+    private Float compressionQuality = 0.75f; // default
 
-    private int tileWidth = 128; // default
+    private int tileWidth = 256; // default
 
-    private int tileHeight = 128; // default
+    private int tileHeight = 256; // default
 
     private boolean useTileMode = true; // default
 
-    private boolean useCompressionMode = false; // default
+    private boolean useCompressionMode = true; // default
 
     public boolean isCompressionMode() {
         return useCompressionMode;

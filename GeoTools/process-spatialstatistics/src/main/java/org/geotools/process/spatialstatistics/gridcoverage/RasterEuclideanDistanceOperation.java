@@ -60,7 +60,8 @@ public class RasterEuclideanDistanceOperation extends RasterProcessingOperation 
         final Number gridVal = Short.valueOf((short) 1);
         GridCoverage2D finalGc = null;
 
-        calculateExtentAndCellSize(inputFeatures, RasterPixelType.FLOAT);
+        Object nodataValue = RasterHelper.getDefaultNoDataValue(RasterPixelType.FLOAT);
+        calculateExtentAndCellSize(inputFeatures, nodataValue);
 
         FeaturesToRasterOperation process = new FeaturesToRasterOperation();
         process.setExtentAndCellSize(gridExtent, pixelSizeX, pixelSizeY);

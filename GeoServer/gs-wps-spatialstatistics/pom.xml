@@ -14,7 +14,7 @@
   <version>2.21-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Spatial Statistics Web Processing Service Module</name>
-  <url>https://github.com/MapPlus/spatial_statistics_for_geotools_udig</url>
+  <url>https://github.com/mangosystem/opengxt</url>
   
   <licenses>
     <license>

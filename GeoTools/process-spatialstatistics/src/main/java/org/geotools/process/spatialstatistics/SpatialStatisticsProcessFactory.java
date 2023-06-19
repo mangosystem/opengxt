@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics;
 
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
@@ -50,7 +51,11 @@ public abstract class SpatialStatisticsProcessFactory extends SingleProcessFacto
     }
 
     protected static InternationalString getResource(String key) {
-        return Text.text(bundle.getString(key));
+        try {
+            return Text.text(bundle.getString(key));
+        } catch (MissingResourceException mre) {
+            return Text.text(key);
+        }
     }
 
     public SpatialStatisticsProcessFactory(Name processName) {

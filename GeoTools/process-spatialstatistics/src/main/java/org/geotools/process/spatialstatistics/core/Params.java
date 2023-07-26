@@ -35,6 +35,11 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
  */
 public class Params {
     protected static final Logger LOGGER = Logging.getLogger(Params.class);
+    
+    /**
+     * MetaData for FeatureCollection Parameter
+     */
+    public static final String GEOMETRY = "Geometry";
 
     /**
      * MetaData for FeatureCollection Parameter
@@ -74,7 +79,7 @@ public class Params {
         Object param = input.get(parameter.key);
 
         if (param == null) {
-            return defaultValue; // parameter.sample
+            return defaultValue == null ? parameter.sample : defaultValue; // parameter.sample
         }
 
         // check type

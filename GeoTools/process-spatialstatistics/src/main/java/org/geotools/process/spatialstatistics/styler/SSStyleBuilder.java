@@ -286,6 +286,44 @@ public class SSStyleBuilder {
         return defaultStyle;
     }
 
+    public Style getDefaultGridCoverageStyle(GridCoverage2D coverage, boolean zeroAsNoData) {
+        if (!zeroAsNoData) {
+            return getDefaultGridCoverageStyle(coverage);
+        }
+
+        Style rasterStyle = null;
+        int numBands = coverage.getNumSampleDimensions();
+
+        if (numBands >= 3) {
+            rasterStyle = createRGBStyle(coverage);
+        } else {
+            Color[] colors = new Color[] { new Color(0, 0, 0, 0), new Color(0, 0, 0, 0), Color.BLUE,
+                    Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED };
+
+            StatisticsStrategy strategy = new DoubleStrategy();
+            strategy.setNoData(RasterHelper.getNoDataValue(coverage));
+
+            StatisticsVisitor visitor = new StatisticsVisitor(strategy);
+            visitor.visit(coverage, 0);
+            StatisticsVisitorResult ret = visitor.getResult();
+
+            String[] descs = new String[] { "No Data", "No Data", "LL", "LM", "M", "MH", "HH" };
+
+            double mean = ret.getMean();
+            double minimum = ret.getMinimum() == 0.0d ? ret.getMinimum() + 0.001d
+                    : ret.getMinimum();
+            double nodata = Double.parseDouble(ret.getNoData().toString());
+            double[] values = new double[] { nodata, 0.0, minimum, (ret.getMinimum() + mean) / 2.0,
+                    mean, (ret.getMaximum() + mean) / 2.0, ret.getMaximum() };
+
+            StyleBuilder sb = new StyleBuilder();
+            ColorMap colorMap = sb.createColorMap(descs, values, colors, ColorMap.TYPE_RAMP);
+            rasterStyle = sb.createStyle(sb.createRasterSymbolizer(colorMap, 1.0));
+        }
+
+        return rasterStyle;
+    }
+
     public Style getDefaultGridCoverageStyle(GridCoverage2D coverage) {
         Style rasterStyle = null;
         int numBands = coverage.getNumSampleDimensions();

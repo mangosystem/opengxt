@@ -84,7 +84,7 @@ public class MultipleRingBufferProcessFactory extends SpatialStatisticsProcessFa
             "distanceUnit", DistanceUnit.class,
             getResource("MultipleRingBuffer.distanceUnit.title"),
             getResource("MultipleRingBuffer.distanceUnit.description"), false, 0, 1,
-            DistanceUnit.Default, null);
+            DistanceUnit.Meters, null);
 
     /** outsideOnly */
     public static final Parameter<Boolean> outsideOnly = new Parameter<Boolean>("outsideOnly",

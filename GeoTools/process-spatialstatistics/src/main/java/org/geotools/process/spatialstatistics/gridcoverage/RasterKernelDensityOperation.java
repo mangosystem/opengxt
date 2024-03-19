@@ -17,6 +17,7 @@
 package org.geotools.process.spatialstatistics.gridcoverage;
 
 import java.awt.image.WritableRaster;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.jai.KernelJAI;
@@ -168,27 +169,32 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
                     }
 
                     // get data
-                    float[] samples = raster.getSamples(x, y, xw, yh, 0, new float[xw * yh]);
+                    try {
+                        float[] samples = raster.getSamples(x, y, xw, yh, 0, new float[xw * yh]);
 
-                    int index = 0;
-                    for (int row = startRow; row < endRow; row++) {
-                        for (int col = startCol; col < endCol; col++) {
-                            double kernelValue = kernel.getElement(col, row);
-                            if (kernelValue == 0) {
+                        int index = 0;
+                        for (int row = startRow; row < endRow; row++) {
+                            for (int col = startCol; col < endCol; col++) {
+                                double kernelValue = kernel.getElement(col, row);
+                                if (kernelValue == 0) {
+                                    index++;
+                                    continue;
+                                }
+
+                                double wValue = ((weight * kernelValue) / scaleArea)
+                                        + samples[index];
+
+                                samples[index] = (float) wValue;
+                                this.maxValue = Math.max(maxValue, wValue);
                                 index++;
-                                continue;
                             }
-
-                            double wValue = ((weight * kernelValue) / scaleArea) + samples[index];
-
-                            samples[index] = (float) wValue;
-                            this.maxValue = Math.max(maxValue, wValue);
-                            index++;
                         }
-                    }
 
-                    // set data
-                    raster.setSamples(x, y, xw, yh, 0, samples);
+                        // set data
+                        raster.setSamples(x, y, xw, yh, 0, samples);
+                    } catch (Exception e) {
+                        LOGGER.log(Level.FINEST, e.getMessage());
+                    }
                 }
             }
         } finally {

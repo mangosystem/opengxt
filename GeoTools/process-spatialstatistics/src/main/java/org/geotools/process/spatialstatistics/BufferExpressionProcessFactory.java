@@ -88,13 +88,13 @@ public class BufferExpressionProcessFactory extends SpatialStatisticsProcessFact
     public static final Parameter<DistanceUnit> distanceUnit = new Parameter<DistanceUnit>(
             "distanceUnit", DistanceUnit.class, getResource("BufferFeatures.distanceUnit.title"),
             getResource("BufferFeatures.distanceUnit.description"), false, 0, 1,
-            DistanceUnit.Default, null);
+            DistanceUnit.Meters, null);
 
     /** quadrantSegments */
     public static final Parameter<Integer> quadrantSegments = new Parameter<Integer>(
             "quadrantSegments", Integer.class, getResource("BufferFeatures.quadrantSegments.title"),
             getResource("BufferFeatures.quadrantSegments.description"), false, 0, 1,
-            Integer.valueOf(8), null);
+            Integer.valueOf(24), null);
 
     /** endCapStyle */
     public static final Parameter<BufferEndCapStyle> endCapStyle = new Parameter<BufferEndCapStyle>(

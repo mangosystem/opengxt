@@ -81,7 +81,7 @@ public class RasterProfileProcessFactory extends SpatialStatisticsProcessFactory
     /** interval */
     public static final Parameter<Double> interval = new Parameter<Double>("interval",
             Double.class, getResource("RasterProfile.interval.title"),
-            getResource("RasterProfile.interval.description"), false, 0, 1, Double.valueOf(20d),
+            getResource("RasterProfile.interval.description"), false, 0, 1, Double.valueOf(50d),
             null);
 
     @Override

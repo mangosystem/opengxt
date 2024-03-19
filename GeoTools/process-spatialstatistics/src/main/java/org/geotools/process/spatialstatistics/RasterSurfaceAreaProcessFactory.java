@@ -54,7 +54,7 @@ public class RasterSurfaceAreaProcessFactory extends SpatialStatisticsProcessFac
 
     @Override
     public Process create() {
-        return new RasterCutFillProcess(this);
+        return new RasterSurfaceAreaProcess(this);
     }
 
     @Override

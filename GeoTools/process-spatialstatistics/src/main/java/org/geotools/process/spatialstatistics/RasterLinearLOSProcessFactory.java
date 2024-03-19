@@ -83,7 +83,7 @@ public class RasterLinearLOSProcessFactory extends SpatialStatisticsProcessFacto
     public static final Parameter<Double> observerOffset = new Parameter<Double>("observerOffset",
             Double.class, getResource("LinearLineOfSight.observerOffset.title"),
             getResource("LinearLineOfSight.observerOffset.description"), true, 1, 1,
-            Double.valueOf(0d), null);
+            Double.valueOf(1.7d), null);
 
     /** targetPoint */
     public static final Parameter<Geometry> targetPoint = new Parameter<Geometry>("targetPoint",

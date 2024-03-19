@@ -114,7 +114,7 @@ public class RasterToImageProcess extends AbstractStatisticsProcess {
 
         if (style == null) {
             SSStyleBuilder sb = new SSStyleBuilder(null);
-            style = sb.getDefaultGridCoverageStyle(coverage);
+            style = sb.getDefaultGridCoverageStyle(coverage, true);
         }
 
         ReferencedEnvelope mapExtent = this.getBoundingBox(bbox, crs);

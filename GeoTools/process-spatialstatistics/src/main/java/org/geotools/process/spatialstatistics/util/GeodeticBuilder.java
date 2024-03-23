@@ -79,7 +79,7 @@ public class GeodeticBuilder {
 
     private int numPoints = 100;
 
-    private int quadrantSegments = 12;
+    private int quadrantSegments = 24;
 
     private BufferParameters bufferParameters;
 

@@ -11,7 +11,7 @@
   <!-- =========================================================== -->
   <groupId>org.geoserver</groupId>
   <artifactId>gs-wps-spatialstatistics</artifactId>
-  <version>2.21-SNAPSHOT</version>
+  <version>2.22-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Spatial Statistics Web Processing Service Module</name>
   <url>https://github.com/mangosystem/opengxt</url>
@@ -27,7 +27,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <gt.version>27-SNAPSHOT</gt.version>
+    <gt.version>28-SNAPSHOT</gt.version>
     <wicket.version>7.18.0</wicket.version>
   </properties>
   

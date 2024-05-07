@@ -205,10 +205,10 @@ public class RasterFunctionalSurface {
         }
 
         // Source point always sees itself
-        ros.add(new Coordinate(from.x, from.y, 1));
         from.z = this.getElevation(from);
 
         if (SSUtils.compareDouble(from.z, noData)) {
+            ros.add(new Coordinate(from.x, from.y, INVISIBLE));
             ros.add(new Coordinate(to.x, to.y, INVISIBLE));
             return segment.getFactory().createLineString(CoordinateArrays.toCoordinateArray(ros));
         }
@@ -216,6 +216,7 @@ public class RasterFunctionalSurface {
         // The offset is the vertical distance (in surface units) to be added to the z-value of a
         // location on the surface.
         from.z += observerOffset;
+        ros.add(new Coordinate(from.x, from.y, VISIBLE));
 
         double segAngle = Math.atan2(to.y - from.y, to.x - from.x);
         double cosAngle = Math.cos(segAngle);

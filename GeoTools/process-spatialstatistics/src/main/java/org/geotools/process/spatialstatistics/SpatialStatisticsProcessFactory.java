@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.process.impl.SingleProcessFactory;
 import org.geotools.text.Text;
+import org.geotools.util.SimpleInternationalString;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.FilterFactory2;
@@ -50,7 +51,11 @@ public abstract class SpatialStatisticsProcessFactory extends SingleProcessFacto
     }
 
     protected static InternationalString getResource(String key) {
+        try {
         return Text.text(bundle.getString(key));
+        } catch(java.util.MissingResourceException e) {
+            return new SimpleInternationalString(key);
+        }
     }
 
     public SpatialStatisticsProcessFactory(Name processName) {

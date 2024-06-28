@@ -38,6 +38,7 @@ import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.geom.TopologyException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
@@ -164,8 +165,8 @@ public class ClipWithGeometryFeatureCollection extends GXTSimpleFeatureCollectio
                 // default geometry is clipped out, skip it
                 SimpleFeature feature = delegate.next();
                 GeometryDescriptor gds = feature.getFeatureType().getGeometryDescriptor();
-                Geometry cliped = clipGeometry((Geometry) feature.getDefaultGeometry(), gds.getType()
-                        .getBinding());
+                Geometry cliped = clipGeometry((Geometry) feature.getDefaultGeometry(),
+                        gds.getType().getBinding());
                 if (cliped == null || cliped.isEmpty()) {
                     clippedOut = true;
                 }
@@ -199,12 +200,16 @@ public class ClipWithGeometryFeatureCollection extends GXTSimpleFeatureCollectio
         private Geometry clipGeometry(Geometry geom, Class<?> target) {
             // first off, clip
             Geometry clipped = null;
-            if (clipper != null) {
-                clipped = clipper.clip(geom, true);
-            } else {
-                if (geom.getEnvelopeInternal().intersects(clip.getEnvelopeInternal())) {
-                    clipped = clip.intersection(geom);
+            try {
+                if (clipper != null) {
+                    clipped = clipper.clip(geom, true);
+                } else {
+                    if (geom.getEnvelopeInternal().intersects(clip.getEnvelopeInternal())) {
+                        clipped = clip.intersection(geom);
+                    }
                 }
+            } catch (TopologyException te) {
+
             }
 
             // empty intersection?

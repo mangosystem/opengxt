@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.util.ProgressListener;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -33,7 +34,6 @@ import org.geotools.process.spatialstatistics.gridcoverage.RasterNeighborhood;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterNeighborhood.NeighborUnits;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterPointDensityOperation;
 import org.geotools.util.logging.Logging;
-import org.opengis.util.ProgressListener;
 
 /**
  * Calculates a magnitude per unit area from point features that fall within a neighborhood around each cell.

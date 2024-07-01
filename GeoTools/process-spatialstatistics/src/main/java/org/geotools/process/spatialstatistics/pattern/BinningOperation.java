@@ -19,15 +19,15 @@ package org.geotools.process.spatialstatistics.pattern;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.operation.MathTransform;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
 
 /**
  * Abstract Binning Operation.

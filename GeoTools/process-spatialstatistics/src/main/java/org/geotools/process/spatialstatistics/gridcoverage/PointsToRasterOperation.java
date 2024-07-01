@@ -23,6 +23,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.filter.Filter;
+import org.geotools.api.filter.FilterFactory;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -38,9 +41,6 @@ import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
 
 /**
  * Converts point features to a raster dataset.
@@ -77,7 +77,7 @@ public class PointsToRasterOperation extends RasterProcessingOperation {
 
         int intValue = 0;
 
-        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
+        FilterFactory ff = CommonFactoryFinder.getFilterFactory(GeoTools.getDefaultHints());
         String the_geom = pointFeatures.getSchema().getGeometryDescriptor().getLocalName();
         Filter filter = ff.bbox(ff.property(the_geom), gridExtent);
 

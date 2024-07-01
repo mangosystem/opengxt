@@ -23,6 +23,8 @@ import javax.media.jai.PlanarImage;
 import javax.media.jai.iterator.RectIter;
 import javax.media.jai.iterator.RectIterFactory;
 
+import org.geotools.api.filter.Filter;
+import org.geotools.api.filter.FilterFactory;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
@@ -31,8 +33,6 @@ import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.factory.GeoTools;
 import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
 
 /**
  * Calculates, for each cell, the Euclidean distance to the closest source.
@@ -52,7 +52,7 @@ public class RasterEuclideanDistanceOperation extends RasterProcessingOperation 
 
     private double maximumDistance = Double.MAX_VALUE;
 
-    private FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
+    private FilterFactory ff = CommonFactoryFinder.getFilterFactory(GeoTools.getDefaultHints());
 
     private DiskMemImage outputImage;
 

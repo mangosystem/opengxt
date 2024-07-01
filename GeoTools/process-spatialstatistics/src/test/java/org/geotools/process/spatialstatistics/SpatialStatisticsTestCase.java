@@ -5,13 +5,13 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
-import org.geotools.data.DataStore;
-import org.geotools.data.DataStoreFinder;
+import org.geotools.api.data.DataStore;
+import org.geotools.api.data.DataStoreFinder;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.junit.After;
 import org.junit.Before;
+
+import junit.framework.TestCase;
 
 public abstract class SpatialStatisticsTestCase extends TestCase {
     private static final String DIRECTORY = "test-data";

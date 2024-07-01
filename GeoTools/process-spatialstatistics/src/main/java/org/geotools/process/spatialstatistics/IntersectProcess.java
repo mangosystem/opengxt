@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.util.ProgressListener;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
@@ -29,8 +31,6 @@ import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.transformation.IntersectFeatureCollection;
 import org.geotools.util.logging.Logging;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.util.ProgressListener;
 
 /**
  * Creates a features by overlaying the Input Features with the polygons of the difference features.

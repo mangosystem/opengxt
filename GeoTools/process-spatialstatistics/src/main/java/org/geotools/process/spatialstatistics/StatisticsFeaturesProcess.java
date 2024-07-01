@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.util.ProgressListener;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -29,7 +30,6 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
 import org.geotools.util.logging.Logging;
-import org.opengis.util.ProgressListener;
 
 /**
  * Calculates summary statistics(Sum, Minimum, Maximum, Mean, Standard Deviation etc.) for field(s) in a featurecollection

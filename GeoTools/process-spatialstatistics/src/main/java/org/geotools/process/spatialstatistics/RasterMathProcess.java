@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.filter.expression.Expression;
+import org.geotools.api.util.ProgressListener;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -28,8 +30,6 @@ import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterMathOperation;
 import org.geotools.util.logging.Logging;
-import org.opengis.filter.expression.Expression;
-import org.opengis.util.ProgressListener;
 
 /**
  * Performs mathematical operations on raster using expression.

@@ -25,6 +25,9 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.filter.FilterFactory;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
@@ -37,9 +40,6 @@ import org.geotools.util.Converters;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.operation.union.CascadedPolygonUnion;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.FilterFactory2;
 
 /**
  * Abstract Raster CutFill Operation.
@@ -51,7 +51,7 @@ import org.opengis.filter.FilterFactory2;
 public class AbstractRasterCutFillOperation extends RasterProcessingOperation {
     protected static final Logger LOGGER = Logging.getLogger(AbstractRasterCutFillOperation.class);
 
-    protected final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+    protected final FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 
     protected final String CATEGORY = "category";
 

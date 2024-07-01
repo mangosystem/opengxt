@@ -6,8 +6,8 @@
 package org.geoserver.wps.spatialstatistics.ppio;
 
 import org.geoserver.wps.ppio.LiteralPPIO;
+import org.geotools.api.filter.expression.Expression;
 import org.geotools.filter.text.ecql.ECQL;
-import org.opengis.filter.expression.Expression;
 
 /**
  * A PPIO to generate good looking Filter Expression

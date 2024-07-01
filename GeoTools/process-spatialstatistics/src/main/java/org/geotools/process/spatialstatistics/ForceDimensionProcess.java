@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.filter.expression.Expression;
+import org.geotools.api.util.ProgressListener;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -29,8 +31,6 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.transformation.ForceDimensionFeatureCollection;
 import org.geotools.process.spatialstatistics.util.GeometryDimensions.DimensionType;
 import org.geotools.util.logging.Logging;
-import org.opengis.filter.expression.Expression;
-import org.opengis.util.ProgressListener;
 
 /**
  * Force the coordinate dimension(XY, XYZ, XYM, XYZM) of a geometry

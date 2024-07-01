@@ -25,6 +25,9 @@ import javax.media.jai.PlanarImage;
 import javax.media.jai.iterator.RectIter;
 import javax.media.jai.iterator.RectIterFactory;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.filter.FilterFactory;
+import org.geotools.api.filter.expression.Expression;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
@@ -35,9 +38,6 @@ import org.geotools.process.spatialstatistics.core.StringHelper;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
 import org.geotools.util.factory.GeoTools;
 import org.geotools.util.logging.Logging;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.expression.Expression;
 
 /**
  * Classify objects apply one of several methods to statistically subdivide a set of numeric values into classes.
@@ -120,7 +120,7 @@ public abstract class DataClassify {
             return sortedValueList;
         }
 
-        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
+        FilterFactory ff = CommonFactoryFinder.getFilterFactory(GeoTools.getDefaultHints());
         final Expression attrExpr = ff.property(propertyName);
 
         SimpleFeatureIterator featureIter = null;

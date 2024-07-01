@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.util.ProgressListener;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -29,7 +30,6 @@ import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.distribution.StandardDistanceOperation;
 import org.geotools.util.logging.Logging;
-import org.opengis.util.ProgressListener;
 
 /**
  * Measures the degree to which features are concentrated or dispersed around the geometric mean center.

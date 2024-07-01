@@ -19,13 +19,13 @@ package org.geotools.process.spatialstatistics.core;
 import java.awt.Color;
 import java.util.logging.Logger;
 
+import org.geotools.api.filter.Filter;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.style.Style;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.styling.Style;
 import org.geotools.util.logging.Logging;
-import org.opengis.filter.Filter;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Map To Image Parameters

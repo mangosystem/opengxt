@@ -27,6 +27,10 @@ import javax.media.jai.PlanarImage;
 import javax.media.jai.iterator.RectIter;
 import javax.media.jai.iterator.RectIterFactory;
 
+import org.geotools.api.coverage.SampleDimension;
+import org.geotools.api.coverage.SampleDimensionType;
+import org.geotools.api.geometry.Bounds;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.process.spatialstatistics.core.SSUtils;
@@ -34,10 +38,6 @@ import org.geotools.process.spatialstatistics.core.StatisticsVisitor;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor.DoubleStrategy;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitorResult;
 import org.geotools.util.logging.Logging;
-import org.opengis.coverage.SampleDimension;
-import org.opengis.coverage.SampleDimensionType;
-import org.opengis.geometry.Envelope;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Describes the metadata of gridcoverage.
@@ -347,7 +347,7 @@ public class RasterDescribeOperation {
 
         }
 
-        public Extent(Envelope envelope) {
+        public Extent(Bounds envelope) {
             this.xMin = envelope.getMinimum(0);
             this.yMin = envelope.getMinimum(1);
             this.xMax = envelope.getMaximum(0);

@@ -32,11 +32,15 @@ import java.util.logging.Logger;
 
 import javax.media.jai.PlanarImage;
 
+import org.geotools.api.geometry.Position;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.crs.GeographicCRS;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.coverage.grid.InvalidGridGeometryException;
-import org.geotools.geometry.DirectPosition2D;
+import org.geotools.geometry.Position2D;
 import org.geotools.geometry.jts.JTSFactoryFinder;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.SlopeType;
@@ -53,10 +57,6 @@ import org.locationtech.jts.geom.LineSegment;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.operation.linemerge.LineMerger;
-import org.opengis.geometry.DirectPosition;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.crs.GeographicCRS;
-import org.opengis.referencing.operation.TransformException;
 
 /**
  * Quantify and visualize a terrain landform represented by a digital elevation model.
@@ -312,7 +312,7 @@ public class RasterFunctionalSurface {
         GridGeometry2D gg2D = grid2D.getGridGeometry();
         CoordinateReferenceSystem crs = grid2D.getCoordinateReferenceSystem();
         Coordinate coord = position.getCoordinate();
-        DirectPosition gdPos = new DirectPosition2D(crs, coord.x, coord.y);
+        Position gdPos = new Position2D(crs, coord.x, coord.y);
 
         try {
             GridCoordinates2D pos = gg2D.worldToGrid(gdPos);
@@ -338,7 +338,7 @@ public class RasterFunctionalSurface {
         GridGeometry2D gg2D = grid2D.getGridGeometry();
         CoordinateReferenceSystem crs = grid2D.getCoordinateReferenceSystem();
         Coordinate coord = position.getCoordinate();
-        DirectPosition gdPos = new DirectPosition2D(crs, coord.x, coord.y);
+        Position gdPos = new Position2D(crs, coord.x, coord.y);
 
         try {
             GridCoordinates2D pos = gg2D.worldToGrid(gdPos);
@@ -362,7 +362,7 @@ public class RasterFunctionalSurface {
 
         double[] gridVals = new double[grid2D.getNumSampleDimensions()];
         CoordinateReferenceSystem crs = grid2D.getCoordinateReferenceSystem();
-        DirectPosition gdPos = new DirectPosition2D(crs, coord.x, coord.y);
+        Position gdPos = new Position2D(crs, coord.x, coord.y);
         try {
             grid2D.evaluate(gdPos, gridVals);
             retVal = gridVals[0];
@@ -388,7 +388,7 @@ public class RasterFunctionalSurface {
         // interpolate points
         double[] gridVals = new double[grid2D.getNumSampleDimensions()];
         for (Coordinate coord : coords) {
-            DirectPosition gdPos = new DirectPosition2D(crs, coord.x, coord.y);
+            Position gdPos = new Position2D(crs, coord.x, coord.y);
             try {
                 grid2D.evaluate(gdPos, gridVals);
                 coord.z = gridVals[0];

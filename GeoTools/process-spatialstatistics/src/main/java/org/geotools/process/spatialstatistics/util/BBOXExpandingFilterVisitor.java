@@ -16,12 +16,12 @@
  */
 package org.geotools.process.spatialstatistics.util;
 
+import org.geotools.api.filter.expression.Expression;
+import org.geotools.api.filter.spatial.BBOX;
+import org.geotools.api.geometry.BoundingBox;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.filter.visitor.DuplicatingFilterVisitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.opengis.filter.expression.Expression;
-import org.opengis.filter.spatial.BBOX;
-import org.opengis.geometry.BoundingBox;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * A {@link DuplicatingFilterVisitor} which expands the {@link BBOX} of the filter by given distances for each box edge.

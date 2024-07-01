@@ -19,16 +19,16 @@ package org.geotools.process.spatialstatistics.transformation;
 import java.util.Iterator;
 import java.util.List;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.feature.type.AttributeDescriptor;
+import org.geotools.api.filter.Filter;
+import org.geotools.api.filter.FilterFactory;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.collection.DecoratingSimpleFeatureCollection;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.process.gs.WrappingIterator;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
 
 /**
  * A FeatureCollection which completely delegates to another FeatureCollection.
@@ -39,7 +39,7 @@ import org.opengis.filter.FilterFactory2;
  */
 public class GXTSimpleFeatureCollection extends DecoratingSimpleFeatureCollection {
 
-    protected final static FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+    protected final static FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 
     protected GXTSimpleFeatureCollection(SimpleFeatureCollection delegate) {
         super(delegate);

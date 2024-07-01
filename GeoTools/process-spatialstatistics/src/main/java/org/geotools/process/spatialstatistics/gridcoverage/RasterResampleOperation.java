@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import javax.media.jai.Interpolation;
 
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.GridGeometry2D;
@@ -31,7 +32,6 @@ import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.enumeration.ResampleType;
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.util.logging.Logging;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Change the spatial resolution of raster and set rules for aggregating or interpolating values across the new pixel sizes.

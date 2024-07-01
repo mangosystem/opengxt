@@ -23,15 +23,15 @@ import javax.media.jai.iterator.RectIter;
 import javax.media.jai.iterator.RectIterFactory;
 import javax.media.jai.iterator.WritableRectIter;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.filter.BinaryComparisonOperator;
+import org.geotools.api.filter.Filter;
+import org.geotools.api.filter.expression.Literal;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.filter.BinaryComparisonOperator;
-import org.opengis.filter.Filter;
-import org.opengis.filter.expression.Literal;
 
 /**
  * Performs a conditional if/else evaluation on each of the input cells of an input raster.

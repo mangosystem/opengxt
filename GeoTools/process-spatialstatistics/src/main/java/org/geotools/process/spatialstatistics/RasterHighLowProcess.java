@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.util.ProgressListener;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
@@ -32,7 +33,6 @@ import org.geotools.process.spatialstatistics.gridcoverage.RasterHighLowPointsOp
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHighLowPointsOperation.HighLowType;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.util.ProgressListener;
 
 /**
  * Finds the highest or lowest points for a polygon geometry.

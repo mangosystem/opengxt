@@ -19,10 +19,10 @@ package org.geotools.process.spatialstatistics.storage;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.feature.type.AttributeDescriptor;
+import org.geotools.api.feature.type.GeometryType;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.feature.type.GeometryType;
 
 /**
  * FieldMap class

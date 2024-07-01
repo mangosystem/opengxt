@@ -22,6 +22,10 @@ import java.util.logging.Logger;
 import javax.media.jai.iterator.RectIterFactory;
 import javax.media.jai.iterator.WritableRectIter;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.filter.FilterFactory;
+import org.geotools.api.filter.expression.Expression;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
@@ -42,10 +46,6 @@ import org.locationtech.jts.geom.Triangle;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.triangulate.DelaunayTriangulationBuilder;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.expression.Expression;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Interpolates a raster surface from points using an Triangulated Irregular Network(TIN) technique.
@@ -59,7 +59,7 @@ public class RasterInterpolationTINOperation extends RasterProcessingOperation {
 
     private GeometryFactory gf = JTSFactoryFinder.getGeometryFactory(GeoTools.getDefaultHints());
 
-    private FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+    private FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 
     private double proximalTolerance = 0.0d;
 

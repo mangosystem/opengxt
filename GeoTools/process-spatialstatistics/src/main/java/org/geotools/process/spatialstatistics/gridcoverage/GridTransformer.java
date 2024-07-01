@@ -19,16 +19,16 @@ package org.geotools.process.spatialstatistics.gridcoverage;
 import java.awt.geom.AffineTransform;
 import java.util.logging.Logger;
 
+import org.geotools.api.geometry.Position;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridGeometry2D;
-import org.geotools.geometry.DirectPosition2D;
+import org.geotools.geometry.Position2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Point;
-import org.opengis.geometry.DirectPosition;
 
 /**
  * Grid Transformer
@@ -188,7 +188,7 @@ public class GridTransformer {
      * @param gridPos The point in grid coordinate system.
      * @return world DirectPosition
      */
-    public DirectPosition gridToWorld(DirectPosition gridPos) {
+    public Position gridToWorld(Position gridPos) {
         return gridToWorld((int) gridPos.getOrdinate(0), (int) gridPos.getOrdinate(1));
     }
 
@@ -200,8 +200,8 @@ public class GridTransformer {
      * @param row the index of a grid row
      * @return world DirectPosition
      */
-    public DirectPosition gridToWorld(int column, int row) {
-        return new DirectPosition2D(getX(column), getY(row));
+    public Position gridToWorld(int column, int row) {
+        return new Position2D(getX(column), getY(row));
     }
 
     /**
@@ -223,7 +223,7 @@ public class GridTransformer {
      * @param realPos The point in world coordinate system.
      * @return DirectPosition
      */
-    public GridCoordinates2D worldToGrid(DirectPosition realPos) {
+    public GridCoordinates2D worldToGrid(Position realPos) {
         return worldToGrid(realPos.getOrdinate(0), realPos.getOrdinate(1));
     }
 

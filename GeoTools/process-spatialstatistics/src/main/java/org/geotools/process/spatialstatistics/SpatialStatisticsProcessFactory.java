@@ -21,13 +21,13 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
+import org.geotools.api.feature.type.Name;
+import org.geotools.api.filter.FilterFactory;
+import org.geotools.api.util.InternationalString;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.process.impl.SingleProcessFactory;
 import org.geotools.text.Text;
 import org.geotools.util.logging.Logging;
-import org.opengis.feature.type.Name;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.util.InternationalString;
 
 /**
  * Abstract SpatialStatistics Process Factory
@@ -43,7 +43,7 @@ public abstract class SpatialStatisticsProcessFactory extends SingleProcessFacto
 
     protected static final String VERSION = "1.0.0";
 
-    protected static final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+    protected static final FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 
     static final ResourceBundle bundle;
     static {

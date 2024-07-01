@@ -21,6 +21,10 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.filter.Filter;
+import org.geotools.api.filter.FilterFactory;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.util.ProgressListener;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
@@ -32,10 +36,6 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.transformation.ClipWithGeometryFeatureCollection;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.util.ProgressListener;
 
 /**
  * Extracts input features that overlay the clip geometry.
@@ -47,7 +47,7 @@ import org.opengis.util.ProgressListener;
 public class ClipWithGeometryProcess extends AbstractStatisticsProcess {
     protected static final Logger LOGGER = Logging.getLogger(ClipWithGeometryProcess.class);
 
-    final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+    final FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 
     public ClipWithGeometryProcess(ProcessFactory factory) {
         super(factory);

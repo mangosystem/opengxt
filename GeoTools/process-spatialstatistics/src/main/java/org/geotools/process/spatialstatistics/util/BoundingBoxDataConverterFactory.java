@@ -16,12 +16,12 @@
  */
 package org.geotools.process.spatialstatistics.util;
 
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.util.Converter;
 import org.geotools.util.ConverterFactory;
 import org.geotools.util.factory.Hints;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * ConverterFactory for trading between strings and ReferenceEnvelope

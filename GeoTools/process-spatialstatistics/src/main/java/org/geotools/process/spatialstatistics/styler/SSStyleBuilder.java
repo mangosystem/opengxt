@@ -23,6 +23,26 @@ import java.util.logging.Logger;
 
 import javax.xml.transform.TransformerException;
 
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.filter.Filter;
+import org.geotools.api.filter.FilterFactory;
+import org.geotools.api.filter.expression.PropertyName;
+import org.geotools.api.style.ChannelSelection;
+import org.geotools.api.style.ColorMap;
+import org.geotools.api.style.ContrastEnhancement;
+import org.geotools.api.style.ContrastMethod;
+import org.geotools.api.style.FeatureTypeConstraint;
+import org.geotools.api.style.FeatureTypeStyle;
+import org.geotools.api.style.Fill;
+import org.geotools.api.style.RasterSymbolizer;
+import org.geotools.api.style.Rule;
+import org.geotools.api.style.SelectedChannelType;
+import org.geotools.api.style.Stroke;
+import org.geotools.api.style.Style;
+import org.geotools.api.style.StyleFactory;
+import org.geotools.api.style.StyledLayerDescriptor;
+import org.geotools.api.style.Symbolizer;
+import org.geotools.api.style.UserLayer;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.factory.CommonFactoryFinder;
@@ -31,23 +51,8 @@ import org.geotools.process.spatialstatistics.core.StatisticsVisitor.DoubleStrat
 import org.geotools.process.spatialstatistics.core.StatisticsVisitor.StatisticsStrategy;
 import org.geotools.process.spatialstatistics.core.StatisticsVisitorResult;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterHelper;
-import org.geotools.styling.ChannelSelection;
-import org.geotools.styling.ColorMap;
-import org.geotools.styling.ContrastEnhancement;
-import org.geotools.styling.FeatureTypeConstraint;
-import org.geotools.styling.FeatureTypeStyle;
-import org.geotools.styling.Fill;
-import org.geotools.styling.RasterSymbolizer;
-import org.geotools.styling.Rule;
 import org.geotools.styling.SLD;
-import org.geotools.styling.SelectedChannelType;
-import org.geotools.styling.Stroke;
-import org.geotools.styling.Style;
 import org.geotools.styling.StyleBuilder;
-import org.geotools.styling.StyleFactory;
-import org.geotools.styling.StyledLayerDescriptor;
-import org.geotools.styling.Symbolizer;
-import org.geotools.styling.UserLayer;
 import org.geotools.util.logging.Logging;
 import org.geotools.xml.styling.SLDTransformer;
 import org.locationtech.jts.geom.LineString;
@@ -56,11 +61,6 @@ import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.expression.PropertyName;
-import org.opengis.style.ContrastMethod;
 
 /**
  * Style builder for spatial statistics
@@ -72,7 +72,7 @@ import org.opengis.style.ContrastMethod;
 public class SSStyleBuilder {
     protected static final Logger LOGGER = Logging.getLogger(SSStyleBuilder.class);
 
-    final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+    final FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 
     final StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
 

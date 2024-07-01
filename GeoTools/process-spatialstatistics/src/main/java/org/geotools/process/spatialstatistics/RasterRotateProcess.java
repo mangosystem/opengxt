@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import javax.media.jai.Interpolation;
 
+import org.geotools.api.util.ProgressListener;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -32,7 +33,6 @@ import org.geotools.process.spatialstatistics.enumeration.ResampleType;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterRotateOperation;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Point;
-import org.opengis.util.ProgressListener;
 
 /**
  * The pivot point around which to rotate the raster. The default is the lower left corner of the input raster dataset.

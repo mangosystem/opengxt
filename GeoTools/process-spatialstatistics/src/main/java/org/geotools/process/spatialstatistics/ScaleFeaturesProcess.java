@@ -21,6 +21,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.filter.FilterFactory;
+import org.geotools.api.filter.expression.Expression;
+import org.geotools.api.util.ProgressListener;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
@@ -32,9 +35,6 @@ import org.geotools.process.spatialstatistics.transformation.ScaleFeatureCollect
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.expression.Expression;
-import org.opengis.util.ProgressListener;
 
 /**
  * Rescale features using x, y scale values.
@@ -56,7 +56,7 @@ public class ScaleFeaturesProcess extends AbstractStatisticsProcess {
 
     public static SimpleFeatureCollection process(SimpleFeatureCollection inputFeatures,
             double offsetX, double offsetY, Point anchor, ProgressListener monitor) {
-        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+        FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
         return process(inputFeatures, ff.literal(offsetX), ff.literal(offsetY), anchor, monitor);
     }
 

@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import javax.media.jai.KernelJAI;
 import javax.media.jai.RasterFactory;
 
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -35,7 +36,6 @@ import org.geotools.util.logging.Logging;
 import org.jaitools.media.jai.kernel.KernelFactory;
 import org.jaitools.media.jai.kernel.KernelFactory.ValueType;
 import org.jaitools.media.jai.kernel.KernelUtil;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Circles to Raster Operation

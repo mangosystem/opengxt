@@ -24,6 +24,7 @@ import javax.media.jai.iterator.RectIter;
 import javax.media.jai.iterator.RectIterFactory;
 import javax.media.jai.iterator.WritableRectIter;
 
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -33,7 +34,6 @@ import org.geotools.process.spatialstatistics.enumeration.ResampleType;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * Derives Normalized Difference Vegetation Index (NDVI) from two rasters.

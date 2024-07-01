@@ -22,13 +22,13 @@ import javax.measure.Unit;
 import javax.measure.quantity.Area;
 import javax.measure.quantity.Length;
 
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.crs.GeographicCRS;
 import org.geotools.measure.Measure;
 import org.geotools.process.spatialstatistics.enumeration.AreaUnit;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.crs.GeographicCRS;
 
 import si.uom.SI;
 import systems.uom.common.USCustomary;

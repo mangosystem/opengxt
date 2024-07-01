@@ -23,15 +23,15 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import org.geotools.data.Parameter;
+import org.geotools.api.data.Parameter;
+import org.geotools.api.filter.expression.Expression;
+import org.geotools.api.util.InternationalString;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.NameImpl;
 import org.geotools.process.Process;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.util.KVP;
 import org.geotools.util.logging.Logging;
-import org.opengis.filter.expression.Expression;
-import org.opengis.util.InternationalString;
 
 /**
  * SplitLineByDistanceProcessFactory

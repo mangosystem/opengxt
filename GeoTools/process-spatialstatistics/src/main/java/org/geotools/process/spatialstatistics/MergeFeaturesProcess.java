@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.util.ProgressListener;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -30,8 +31,6 @@ import org.geotools.process.ProcessFactory;
 import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.operations.MergeFeaturesOperation;
 import org.geotools.util.logging.Logging;
-import org.opengis.filter.Filter;
-import org.opengis.util.ProgressListener;
 
 /**
  * Combines multiple input features of the same data type into a single, new output features.
@@ -52,7 +51,7 @@ public class MergeFeaturesProcess extends AbstractStatisticsProcess {
     }
 
     public static SimpleFeatureCollection process(Collection<SimpleFeatureCollection> features,
-            Filter filter, ProgressListener monitor) {
+            ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(MergeFeaturesProcessFactory.features.key, features);
 

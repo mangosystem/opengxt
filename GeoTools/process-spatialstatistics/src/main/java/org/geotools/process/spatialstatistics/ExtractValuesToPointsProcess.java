@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.util.ProgressListener;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
@@ -30,7 +31,6 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterExtractValuesToPointsOperation;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterExtractValuesToPointsOperation.ExtractionType;
 import org.geotools.util.logging.Logging;
-import org.opengis.util.ProgressListener;
 
 /**
  * Extracts the cell values of a raster based on a set of point features and records the values in the attribute table of an output feature class.

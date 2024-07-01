@@ -25,6 +25,11 @@ import javax.media.jai.ParameterBlockJAI;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.registry.RenderedRegistryMode;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.filter.Filter;
+import org.geotools.api.filter.FilterFactory;
+import org.geotools.api.filter.expression.Expression;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
@@ -38,11 +43,6 @@ import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.expression.Expression;
 
 /**
  * Calculate the density of input features within a neighborhood around each output raster cell.
@@ -56,7 +56,7 @@ public class RasterDensityOperation extends RasterProcessingOperation {
 
     protected double scaleArea = 0.0;
 
-    protected FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
+    protected FilterFactory ff = CommonFactoryFinder.getFilterFactory(GeoTools.getDefaultHints());
 
     protected Filter getBBoxFilter(SimpleFeatureType schema, ReferencedEnvelope extent,
             double expandDistance) {

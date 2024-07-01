@@ -7,9 +7,9 @@ package org.geoserver.wps.spatialstatistics.ppio;
 
 import org.geoserver.wps.WPSException;
 import org.geoserver.wps.ppio.LiteralPPIO;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * A PPIO to generate BoundingBoxData: format = minx, miny, maxx, maxy, srid

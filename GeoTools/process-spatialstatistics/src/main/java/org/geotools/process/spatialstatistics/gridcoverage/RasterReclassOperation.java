@@ -28,7 +28,6 @@ import javax.media.jai.iterator.WritableRectIter;
 
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.metadata.i18n.ErrorKeys;
-import org.geotools.metadata.i18n.Errors;
 import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
@@ -51,7 +50,7 @@ public class RasterReclassOperation extends RasterProcessingOperation {
             boolean retainMissingValues) {
         // ranges: "0.00 30.00 1; 30.00 270.00 2; 270.00 365.00 3"
         if (!prepareRanges(ranges)) {
-            throw new ProcessException(Errors.format(ErrorKeys.ILLEGAL_ARGUMENT_$1, "ranges"));
+            throw new ProcessException(ErrorKeys.ILLEGAL_ARGUMENT_$1);
         }
 
         // output will always be of integer type.

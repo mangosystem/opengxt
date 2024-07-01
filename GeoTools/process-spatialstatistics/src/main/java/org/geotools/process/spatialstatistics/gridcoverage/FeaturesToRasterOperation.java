@@ -42,6 +42,10 @@ import java.util.logging.Logger;
 import javax.media.jai.PlanarImage;
 import javax.media.jai.RasterFactory;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.filter.FilterFactory;
+import org.geotools.api.filter.expression.Expression;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
@@ -60,10 +64,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.expression.Expression;
 
 /**
  * Converts features to a raster dataset.
@@ -75,7 +75,7 @@ import org.opengis.filter.expression.Expression;
 public class FeaturesToRasterOperation extends RasterProcessingOperation {
     protected static final Logger LOGGER = Logging.getLogger(FeaturesToRasterOperation.class);
 
-    private FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(GeoTools.getDefaultHints());
+    private FilterFactory ff = CommonFactoryFinder.getFilterFactory(GeoTools.getDefaultHints());
 
     private DiskMemImage dmImage = null;
 

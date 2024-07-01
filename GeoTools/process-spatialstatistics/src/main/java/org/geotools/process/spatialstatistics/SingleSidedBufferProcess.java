@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.filter.expression.Expression;
+import org.geotools.api.util.ProgressListener;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
@@ -30,8 +32,6 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.DistanceUnit;
 import org.geotools.process.spatialstatistics.transformation.SingleSidedBufferFeatureCollection;
 import org.geotools.util.logging.Logging;
-import org.opengis.filter.expression.Expression;
-import org.opengis.util.ProgressListener;
 
 /**
  * Buffers a features using a certain distance expression.

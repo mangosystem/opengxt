@@ -2,9 +2,9 @@ package org.geotools.process.spatialstatistics;
 
 import java.util.Set;
 
+import org.geotools.api.feature.type.Name;
 import org.geotools.feature.NameImpl;
 import org.junit.Test;
-import org.opengis.feature.type.Name;
 
 public class CountFeaturesProcessFactoryTest extends SpatialStatisticsTestCase {
 

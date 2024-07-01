@@ -22,6 +22,8 @@ import java.util.logging.Logger;
 
 import javax.media.jai.PlanarImage;
 
+import org.geotools.api.parameter.InvalidParameterValueException;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -31,8 +33,6 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.metadata.i18n.Vocabulary;
 import org.geotools.metadata.i18n.VocabularyKeys;
 import org.geotools.util.logging.Logging;
-import org.opengis.parameter.InvalidParameterValueException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import it.geosolutions.jaiext.range.NoDataContainer;
 

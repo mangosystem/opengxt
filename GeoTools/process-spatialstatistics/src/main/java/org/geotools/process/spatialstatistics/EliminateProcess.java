@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.filter.Filter;
+import org.geotools.api.util.ProgressListener;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -30,8 +32,6 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.operations.EliminateOperation;
 import org.geotools.process.spatialstatistics.operations.EliminateOperation.EliminateOption;
 import org.geotools.util.logging.Logging;
-import org.opengis.filter.Filter;
-import org.opengis.util.ProgressListener;
 
 /**
  * Eliminates sliver polygons by merging them with neighboring polygons that have the largest or smallest area or the longest shared border.

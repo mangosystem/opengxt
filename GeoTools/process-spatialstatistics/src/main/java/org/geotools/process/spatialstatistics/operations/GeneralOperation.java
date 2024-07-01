@@ -20,12 +20,15 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.geotools.data.DataStore;
+import org.geotools.api.data.DataStore;
+import org.geotools.api.data.SimpleFeatureSource;
+import org.geotools.api.data.SimpleFeatureStore;
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.filter.Filter;
+import org.geotools.api.filter.FilterFactory;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.directory.DirectoryDataStore;
 import org.geotools.data.shapefile.ShapefileDataStore;
-import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.JTSFactoryFinder;
@@ -35,9 +38,6 @@ import org.geotools.process.spatialstatistics.storage.MemoryFeatureInserter;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
 
 /**
  * Abstract General Operation
@@ -51,7 +51,7 @@ public abstract class GeneralOperation {
 
     protected final GeometryFactory gf = JTSFactoryFinder.getGeometryFactory(null);
 
-    protected final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+    protected final FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 
     private DataStore outputDataStore = null;
 

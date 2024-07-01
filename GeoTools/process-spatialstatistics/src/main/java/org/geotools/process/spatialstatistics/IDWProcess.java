@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.util.ProgressListener;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -33,7 +34,6 @@ import org.geotools.process.spatialstatistics.gridcoverage.RasterInterpolationID
 import org.geotools.process.spatialstatistics.gridcoverage.RasterInterpolationOperator.RadiusType;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterRadius;
 import org.geotools.util.logging.Logging;
-import org.opengis.util.ProgressListener;
 
 /**
  * Interpolates a surface from points using an inverse distance weighted (IDW) technique.

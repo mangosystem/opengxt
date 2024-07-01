@@ -18,6 +18,8 @@ package org.geotools.process.spatialstatistics.distribution;
 
 import java.util.logging.Logger;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.filter.expression.Expression;
 import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Coordinate;
@@ -29,8 +31,6 @@ import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.filter.expression.Expression;
 
 /**
  * Abstract Distribution Operator

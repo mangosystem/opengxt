@@ -21,6 +21,11 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.filter.Filter;
+import org.geotools.api.filter.FilterFactory;
+import org.geotools.api.filter.sort.SortBy;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.collection.SpatialIndexFeatureCollection;
 import org.geotools.data.collection.TreeSetFeatureCollection;
@@ -34,11 +39,6 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.index.strtree.STRtree;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.sort.SortBy;
 
 /**
  * Utility class for FeatureCollection
@@ -52,7 +52,7 @@ public class DataUtils {
 
     public static SimpleFeatureCollection toSpatialIndexFeatureCollection(
             SimpleFeatureCollection features, ReferencedEnvelope bounds) {
-        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+        FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 
         String geomName = features.getSchema().getGeometryDescriptor().getLocalName();
         Filter filter = ff.bbox(ff.property(geomName), bounds);

@@ -3,8 +3,8 @@ package org.geotools.process.spatialstatistics;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.geotools.data.Query;
-import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.api.data.Query;
+import org.geotools.api.data.SimpleFeatureSource;
 import org.junit.Test;
 
 public class BufferProcessTest extends SpatialStatisticsTestCase {

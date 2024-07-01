@@ -22,17 +22,17 @@ import javax.media.jai.PlanarImage;
 import javax.media.jai.iterator.RectIter;
 import javax.media.jai.iterator.RectIterFactory;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.feature.type.AttributeDescriptor;
+import org.geotools.api.filter.FilterFactory;
+import org.geotools.api.filter.expression.Expression;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.filter.IllegalFilterException;
 import org.geotools.util.logging.Logging;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.expression.Expression;
 
 /**
  * Statistics Visitor
@@ -46,7 +46,7 @@ public class StatisticsVisitor {
 
     // FIRST, LAST, COUNT, SUM, MEAN, MIN, MAX, RANGE, STD, VAR, CoefficientOfVariance
 
-    private final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+    private final FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 
     private Expression expression;
 

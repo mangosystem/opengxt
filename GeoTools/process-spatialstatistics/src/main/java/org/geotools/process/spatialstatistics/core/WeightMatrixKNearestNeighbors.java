@@ -19,6 +19,7 @@ package org.geotools.process.spatialstatistics.core;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.feature.simple.SimpleFeature;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.util.logging.Logging;
@@ -28,7 +29,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.index.strtree.ItemBoundable;
 import org.locationtech.jts.index.strtree.ItemDistance;
 import org.locationtech.jts.index.strtree.STRtree;
-import org.opengis.feature.simple.SimpleFeature;
 
 /**
  * SpatialWeightMatrix - Distance based weights - k-Nearest Neighbors. <br>

@@ -24,6 +24,7 @@ import org.apache.commons.io.IOUtils;
 import org.geoserver.wcs.responses.GeoTiffWriterHelper;
 import org.geoserver.wps.WPSException;
 import org.geoserver.wps.ppio.BinaryPPIO;
+import org.geotools.api.parameter.ParameterValueGroup;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.grid.io.GridFormatFinder;
@@ -32,7 +33,6 @@ import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.geotools.gce.geotiff.GeoTiffWriteParams;
 import org.geotools.process.ProcessException;
 import org.geotools.util.logging.Logging;
-import org.opengis.parameter.ParameterValueGroup;
 
 /**
  * Decodes/encodes a GeoTIFF file

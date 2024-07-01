@@ -31,6 +31,17 @@ import java.util.logging.Logger;
 
 import javax.media.jai.PlanarImage;
 
+import org.geotools.api.coverage.SampleDimension;
+import org.geotools.api.coverage.SampleDimensionType;
+import org.geotools.api.coverage.grid.GridGeometry;
+import org.geotools.api.data.DataSourceException;
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.feature.type.AttributeDescriptor;
+import org.geotools.api.geometry.Position;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.operation.MathTransform;
+import org.geotools.api.referencing.operation.TransformException;
+import org.geotools.api.util.InternationalString;
 import org.geotools.coverage.Category;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
@@ -40,9 +51,8 @@ import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.grid.io.GridFormatFinder;
-import org.geotools.data.DataSourceException;
 import org.geotools.gce.geotiff.GeoTiffReader;
-import org.geotools.geometry.DirectPosition2D;
+import org.geotools.geometry.Position2D;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.metadata.i18n.Vocabulary;
 import org.geotools.metadata.i18n.VocabularyKeys;
@@ -50,16 +60,6 @@ import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.NumberRange;
 import org.geotools.util.factory.Hints;
 import org.geotools.util.logging.Logging;
-import org.opengis.coverage.SampleDimension;
-import org.opengis.coverage.SampleDimensionType;
-import org.opengis.coverage.grid.GridGeometry;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.geometry.DirectPosition;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
-import org.opengis.util.InternationalString;
 
 import it.geosolutions.jaiext.range.NoDataContainer;
 
@@ -142,13 +142,13 @@ public class RasterHelper {
         return gc2D;
     }
 
-    public static DirectPosition worldToGridPos(GridCoverage2D srcCoverage, DirectPosition realPos)
+    public static Position worldToGridPos(GridCoverage2D srcCoverage, Position realPos)
             throws TransformException {
         GridGeometry gg2D = srcCoverage.getGridGeometry();
         MathTransform gridToCRS = gg2D.getGridToCRS();
         MathTransform crsToGrid = gridToCRS.inverse();
 
-        DirectPosition gridPos = new DirectPosition2D();
+        Position gridPos = new Position2D();
         crsToGrid.transform(realPos, gridPos);
 
         return gridPos;
@@ -161,10 +161,10 @@ public class RasterHelper {
         MathTransform gridToCRS = gg2D.getGridToCRS();
         MathTransform crsToGrid = gridToCRS.inverse();
 
-        DirectPosition lcGrid = new DirectPosition2D();
+        Position lcGrid = new Position2D();
         crsToGrid.transform(envelope.getLowerCorner(), lcGrid);
 
-        DirectPosition ucGrid = new DirectPosition2D();
+        Position ucGrid = new Position2D();
         crsToGrid.transform(envelope.getUpperCorner(), ucGrid);
 
         int x = (int) Math.min(lcGrid.getOrdinate(0), ucGrid.getOrdinate(0));

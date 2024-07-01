@@ -19,17 +19,17 @@ package org.geotools.process.spatialstatistics.styler;
 import java.awt.Color;
 import java.util.logging.Logger;
 
+import org.geotools.api.filter.FilterFactory;
+import org.geotools.api.filter.expression.Divide;
+import org.geotools.api.filter.expression.Function;
+import org.geotools.api.style.StyleFactory;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.filter.function.RangedClassifier;
 import org.geotools.process.spatialstatistics.clsssifier.DataClassify;
 import org.geotools.process.spatialstatistics.core.StringHelper;
-import org.geotools.styling.StyleFactory;
 import org.geotools.util.logging.Logging;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.expression.Divide;
-import org.opengis.filter.expression.Function;
 
 /**
  * AbstractFeatureStyleBuilder
@@ -41,7 +41,7 @@ import org.opengis.filter.expression.Function;
 public abstract class AbstractFeatureStyleBuilder {
     protected static final Logger LOGGER = Logging.getLogger(AbstractFeatureStyleBuilder.class);
 
-    protected final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+    protected final FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 
     protected final StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
 

@@ -23,13 +23,13 @@ import javax.media.jai.iterator.RectIter;
 import javax.media.jai.iterator.RectIterFactory;
 import javax.media.jai.iterator.WritableRectIter;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.filter.Filter;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.logging.Logging;
 import org.jaitools.tiledimage.DiskMemImage;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.filter.Filter;
 
 /**
  * Set Null sets identified cell locations to NoData based on a specified criteria.

@@ -18,12 +18,12 @@ package org.geotools.process.spatialstatistics.core;
 
 import java.util.logging.Logger;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.filter.FilterFactory;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.process.spatialstatistics.enumeration.StandardizationMethod;
 import org.geotools.util.logging.Logging;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.filter.FilterFactory2;
 
 /**
  * SpatialWeightMatrix
@@ -39,7 +39,7 @@ public abstract class AbstractWeightMatrix {
         Distance, Contiguity
     }
 
-    protected final FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+    protected final FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 
     private StandardizationMethod standardizationMethod = StandardizationMethod.None;
 

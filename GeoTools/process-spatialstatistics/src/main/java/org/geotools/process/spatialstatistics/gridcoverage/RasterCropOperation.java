@@ -18,10 +18,17 @@ package org.geotools.process.spatialstatistics.gridcoverage;
 
 import java.util.logging.Logger;
 
+import org.geotools.api.coverage.processing.Operation;
+import org.geotools.api.geometry.MismatchedDimensionException;
+import org.geotools.api.parameter.ParameterValueGroup;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.operation.MathTransform;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.processing.CoverageProcessor;
 import org.geotools.coverage.processing.operation.Crop;
-import org.geotools.geometry.GeneralEnvelope;
+import org.geotools.geometry.GeneralBounds;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.ProcessException;
@@ -33,13 +40,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
-import org.opengis.coverage.processing.Operation;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.parameter.ParameterValueGroup;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
 
 import it.geosolutions.jaiext.JAIExt;
 
@@ -70,7 +70,7 @@ public class RasterCropOperation extends RasterProcessingOperation {
     }
 
     public GridCoverage2D execute(GridCoverage2D inputCoverage, ReferencedEnvelope extent) {
-        GeneralEnvelope bounds = new GeneralEnvelope(extent);
+        GeneralBounds bounds = new GeneralBounds(extent);
 
         // perform the crops
         final CoverageProcessor coverageProcessor = CoverageProcessor.getInstance();
@@ -114,10 +114,10 @@ public class RasterCropOperation extends RasterProcessingOperation {
         }
 
         // check bounds
-        GeneralEnvelope bounds = null;
+        GeneralBounds bounds = null;
         if (extent == null || extent.isEmpty() || extent.isNull()) {
             if (roi != null) {
-                bounds = new GeneralEnvelope(new ReferencedEnvelope(roi.getEnvelopeInternal(), crs));
+                bounds = new GeneralBounds(new ReferencedEnvelope(roi.getEnvelopeInternal(), crs));
             }
         } else {
             CoordinateReferenceSystem extCrs = extent.getCoordinateReferenceSystem();
@@ -125,7 +125,7 @@ public class RasterCropOperation extends RasterProcessingOperation {
                 try {
                     MathTransform transform = CRS.findMathTransform(extCrs, crs, true);
                     Envelope env = JTS.transform(extent, transform);
-                    bounds = new GeneralEnvelope(new ReferencedEnvelope(env, crs));
+                    bounds = new GeneralBounds(new ReferencedEnvelope(env, crs));
                 } catch (FactoryException e) {
                     throw new ProcessException(e);
                 } catch (MismatchedDimensionException e) {
@@ -134,7 +134,7 @@ public class RasterCropOperation extends RasterProcessingOperation {
                     throw new ProcessException(e);
                 }
             } else {
-                bounds = new GeneralEnvelope(extent);
+                bounds = new GeneralBounds(extent);
             }
         }
 

@@ -26,11 +26,16 @@ import javax.media.jai.JAI;
 import javax.media.jai.ParameterBlockJAI;
 import javax.media.jai.PlanarImage;
 
+import org.geotools.api.geometry.MismatchedDimensionException;
+import org.geotools.api.geometry.Position;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.operation.MathTransform;
+import org.geotools.api.referencing.operation.TransformException;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
-import org.geotools.geometry.DirectPosition2D;
+import org.geotools.geometry.Position2D;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.metadata.i18n.Vocabulary;
@@ -41,11 +46,6 @@ import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Point;
-import org.opengis.geometry.DirectPosition;
-import org.opengis.geometry.MismatchedDimensionException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
 
 import it.geosolutions.jaiext.range.NoDataContainer;
 
@@ -75,7 +75,7 @@ public class RasterRotateOperation extends AbstractTransformationOperation {
 
     public GridCoverage2D execute(GridCoverage2D inputCoverage, double angle) {
         // The default is the lower left corner of the input raster dataset.
-        DirectPosition origin = inputCoverage.getEnvelope().getLowerCorner();
+        Position origin = inputCoverage.getEnvelope().getLowerCorner();
         Coordinate anchorPoint = new Coordinate(origin.getOrdinate(0), origin.getOrdinate(1));
 
         return execute(inputCoverage, anchorPoint, angle);
@@ -99,10 +99,10 @@ public class RasterRotateOperation extends AbstractTransformationOperation {
 
         final PlanarImage inputImage = (PlanarImage) inputCoverage.getRenderedImage();
         CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
-        DirectPosition realPos = new DirectPosition2D(crs, anchorPoint.x, anchorPoint.y);
+        Position realPos = new Position2D(crs, anchorPoint.x, anchorPoint.y);
 
         // The default is the lower left corner of the input raster dataset.
-        DirectPosition gridPos = new DirectPosition2D(-0.5, inputImage.getHeight() - 0.5);
+        Position gridPos = new Position2D(-0.5, inputImage.getHeight() - 0.5);
         try {
             gridPos = RasterHelper.worldToGridPos(inputCoverage, realPos);
         } catch (TransformException e) {

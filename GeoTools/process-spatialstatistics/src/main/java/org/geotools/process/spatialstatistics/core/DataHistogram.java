@@ -18,11 +18,11 @@ package org.geotools.process.spatialstatistics.core;
 
 import java.util.logging.Logger;
 
+import org.geotools.api.data.SimpleFeatureSource;
+import org.geotools.api.filter.Filter;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.util.logging.Logging;
-import org.opengis.filter.Filter;
 
 /**
  * Abstract Data Histogram

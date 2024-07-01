@@ -24,6 +24,13 @@ import java.util.logging.Logger;
 import javax.measure.Unit;
 import javax.measure.quantity.Area;
 
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.filter.Filter;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.NoSuchAuthorityCodeException;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.crs.GeographicCRS;
+import org.geotools.api.util.ProgressListener;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.measure.Measure;
@@ -38,13 +45,6 @@ import org.geotools.referencing.CRS;
 import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.filter.Filter;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.crs.GeographicCRS;
-import org.opengis.util.ProgressListener;
 
 import si.uom.SI;
 
@@ -87,7 +87,7 @@ public class AreaProcess extends AbstractStatisticsProcess {
             LOGGER.log(Level.FINER, e.getMessage(), e);
         }
 
-        return new Double(0.0d);
+        return Double.valueOf(0.0d);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class AreaProcess extends AbstractStatisticsProcess {
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        resultMap.put(AreaProcessFactory.RESULT.key, new Double(dArea));
+        resultMap.put(AreaProcessFactory.RESULT.key, Double.valueOf(dArea));
         return resultMap;
     }
 

@@ -16,7 +16,7 @@
  */
 package org.geotools.process.spatialstatistics.pattern;
 
-import org.opengis.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeature;
 
 /**
  * Calculates a nearest neighbor index based on the average distance from each feature to its nearest neighboring feature.

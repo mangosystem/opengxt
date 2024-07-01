@@ -24,7 +24,14 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.geotools.data.Query;
+import org.geotools.api.coverage.grid.GridGeometry;
+import org.geotools.api.data.Query;
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.filter.FilterFactory;
+import org.geotools.api.filter.expression.Expression;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.util.ProgressListener;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
@@ -43,13 +50,6 @@ import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.operation.union.CascadedPolygonUnion;
-import org.opengis.coverage.grid.GridGeometry;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.expression.Expression;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.util.ProgressListener;
 
 /**
  * Creates a new features of buffer features using a set of buffer distances.
@@ -143,7 +143,7 @@ public class MultipleRingBufferProcess extends AbstractStatisticsProcess impleme
             Map<Double, List<Geometry>> map = new TreeMap<Double, List<Geometry>>();
             SimpleFeatureIterator featureIter = resultFc.features();
             try {
-                FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+                FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
                 Expression expression = ff.property(bufferField);
                 while (featureIter.hasNext()) {
                     SimpleFeature feature = featureIter.next();

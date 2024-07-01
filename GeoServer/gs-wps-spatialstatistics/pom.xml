@@ -11,7 +11,7 @@
   <!-- =========================================================== -->
   <groupId>org.geoserver</groupId>
   <artifactId>gs-wps-spatialstatistics</artifactId>
-  <version>2.21-SNAPSHOT</version>
+  <version>2.24-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>Spatial Statistics Web Processing Service Module</name>
   <url>https://github.com/mangosystem/opengxt</url>
@@ -25,9 +25,9 @@
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <gt.version>27-SNAPSHOT</gt.version>
+    <maven.compiler.source>1</maven.compiler.source>
+    <maven.compiler.target>1</maven.compiler.target>
+    <gt.version>30-SNAPSHOT</gt.version>
     <wicket.version>7.18.0</wicket.version>
   </properties>
   
@@ -101,7 +101,7 @@
     
     <dependency>
       <groupId>org.geotools</groupId>
-      <artifactId>gt-opengis</artifactId>
+      <artifactId>gt-api</artifactId>
       <version>${gt.version}</version>
     </dependency>
     <dependency>
@@ -317,8 +317,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.0</version>
         <configuration>
-          <source>1.8</source>  <!-- The -source argument for the Java compiler. -->
-          <target>1.8</target>  <!-- The -target argument for the Java compiler. -->
+          <source>11</source>  <!-- The -source argument for the Java compiler. -->
+          <target>11</target>  <!-- The -target argument for the Java compiler. -->
           <debug>true</debug>   <!-- Whether to include debugging information.   -->
           <encoding>UTF-8</encoding> <!-- The -encoding argument for the Java compiler. -->
           <fork>${fork.javac}</fork>

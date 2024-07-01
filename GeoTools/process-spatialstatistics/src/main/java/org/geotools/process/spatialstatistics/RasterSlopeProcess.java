@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.api.util.ProgressListener;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.process.Process;
 import org.geotools.process.ProcessException;
@@ -29,7 +30,6 @@ import org.geotools.process.spatialstatistics.core.Params;
 import org.geotools.process.spatialstatistics.enumeration.SlopeType;
 import org.geotools.process.spatialstatistics.gridcoverage.RasterSlopeOperation;
 import org.geotools.util.logging.Logging;
-import org.opengis.util.ProgressListener;
 
 /**
  * Identifies the slope (gradient, or rate of maximum change in z-value) from each cell of a raster surface.

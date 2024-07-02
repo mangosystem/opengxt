@@ -241,7 +241,7 @@ public class StatisticsVisitor {
 
         @Override
         public void setNoData(Number noData) {
-            this.noData = new Double(noData.doubleValue());
+            this.noData = Double.valueOf(noData.doubleValue());
         }
     }
 
@@ -327,7 +327,7 @@ public class StatisticsVisitor {
 
         @Override
         public void setNoData(Number noData) {
-            this.noData = new Float(noData.floatValue());
+            this.noData = Float.valueOf(noData.floatValue());
         }
     }
 
@@ -410,7 +410,7 @@ public class StatisticsVisitor {
 
         @Override
         public void setNoData(Number noData) {
-            this.noData = new Long(noData.longValue());
+            this.noData = Long.valueOf(noData.longValue());
         }
     }
 
@@ -493,7 +493,7 @@ public class StatisticsVisitor {
 
         @Override
         public void setNoData(Number noData) {
-            this.noData = new Integer(noData.intValue());
+            this.noData = Integer.valueOf(noData.intValue());
         }
     }
 

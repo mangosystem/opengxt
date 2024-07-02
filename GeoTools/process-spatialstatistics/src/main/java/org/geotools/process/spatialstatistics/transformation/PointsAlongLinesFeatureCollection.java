@@ -137,7 +137,7 @@ public class PointsAlongLinesFeatureCollection extends GXTSimpleFeatureCollectio
                     }
                     builder.add(attribute);
                 }
-                builder.add(new Integer(index));
+                builder.add(Integer.valueOf(index));
                 nextFeature = builder.buildFeature(buildID(typeName, ++featureID));
                 builder.reset();
                 index++;

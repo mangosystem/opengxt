@@ -76,9 +76,9 @@ public class HistogramGridCoverage extends DataHistogram {
                 if (!SSUtils.compareDouble(noData, sampleValue)) {
                     if (valueCountsMap.containsKey(sampleValue)) {
                         int cnt = valueCountsMap.get(sampleValue);
-                        valueCountsMap.put(sampleValue, new Integer(cnt + 1));
+                        valueCountsMap.put(sampleValue, Integer.valueOf(cnt + 1));
                     } else {
-                        valueCountsMap.put(sampleValue, new Integer(1));
+                        valueCountsMap.put(sampleValue, Integer.valueOf(1));
                     }
 
                     count++;

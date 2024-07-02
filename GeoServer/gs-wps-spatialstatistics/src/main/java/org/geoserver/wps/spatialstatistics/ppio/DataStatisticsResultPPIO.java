@@ -14,7 +14,6 @@ import org.geoserver.wps.ppio.XStreamPPIO;
 import org.geotools.process.spatialstatistics.operations.DataStatisticsOperation.DataStatisticsResult;
 import org.xml.sax.ContentHandler;
 
-import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.io.xml.SaxWriter;
 import com.thoughtworks.xstream.io.xml.XmlFriendlyNameCoder;

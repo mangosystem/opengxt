@@ -46,7 +46,7 @@ public class FormatUtils {
         }
 
         BigDecimal bigDecimal = new BigDecimal(val);
-        bigDecimal = bigDecimal.setScale(numberDigit, BigDecimal.ROUND_HALF_UP);
+        bigDecimal = bigDecimal.setScale(numberDigit, RoundingMode.HALF_UP);
         return bigDecimal.doubleValue();
     }
 

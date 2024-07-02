@@ -81,7 +81,7 @@ public class PearsonOperation extends GeneralOperation {
                 PearsonItem item = new PearsonItem(secondField);
                 if (firstIndex != secondIndex) {
                     double value = values[firstIndex][secondIndex];
-                    item.setValue(new Double(value));
+                    item.setValue(Double.valueOf(value));
                 }
                 property.getItems().add(item);
             }

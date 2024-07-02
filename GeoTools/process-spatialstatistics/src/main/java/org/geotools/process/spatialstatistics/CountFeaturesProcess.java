@@ -87,7 +87,7 @@ public class CountFeaturesProcess extends AbstractStatisticsProcess {
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();
-        resultMap.put(CountFeaturesProcessFactory.RESULT.key, new Integer(count));
+        resultMap.put(CountFeaturesProcessFactory.RESULT.key, Integer.valueOf(count));
         return resultMap;
     }
 }

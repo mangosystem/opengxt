@@ -17,7 +17,7 @@
   <packaging>jar</packaging>
   <name>Process Spatialstatistics</name>
   <description>Processes for spatial statistics.</description>
-  <version>31-SNAPSHOT</version>
+  <version>32-SNAPSHOT</version>
   <url>https://github.com/mangosystem/opengxt</url>
   
   <licenses>
@@ -32,12 +32,12 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-    <imageio.ext.version>1.4.12</imageio.ext.version>
-    <jaiext.version>1.1.25</jaiext.version>
+    <imageio.ext.version>1.4.14</imageio.ext.version>
+    <jaiext.version>1.1.27</jaiext.version>
     <jt.version>1.6.0</jt.version>
     <commons.math3.version>3.6</commons.math3.version>
     <ejml.version>0.41</ejml.version>
-    <xstream.version>1.4.20</xstream.version>
+    <xstream.version>1.4.21</xstream.version>
     <allow.test.skip>true</allow.test.skip>
     <allow.test.failure.ignore>true</allow.test.failure.ignore>
   </properties>

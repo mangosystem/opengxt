@@ -208,7 +208,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>   
   </dependencies>
@@ -310,7 +310,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
+        <version>3.11.0</version>
         <configuration>
           <source>11</source>  <!-- The -source argument for the Java compiler. -->
           <target>11</target>  <!-- The -target argument for the Java compiler. -->
@@ -326,7 +326,7 @@
       <!-- ======================================================= -->
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.3.0</version>
         <configuration>
           <archive>
             <index>true</index>
@@ -348,7 +348,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.0.1</version>
+        <version>3.3.0</version>
         <inherited>true</inherited>
         <configuration>
           <attach>true</attach>
@@ -384,17 +384,4 @@
     </extensions>
   </build>
   
-  <distributionManagement>
-    <repository>
-      <id>boundless</id>
-      <name>Boundless Maven Repository</name>
-      <url>http://repo.boundlessgeo.com/main</url>
-    </repository>
-    <snapshotRepository>
-      <id>boundless</id>
-      <name>Boundless Maven Repository</name>
-      <url>http://repo.boundlessgeo.com</url>
-      <uniqueVersion>false</uniqueVersion>
-    </snapshotRepository>
-  </distributionManagement>
 </project>

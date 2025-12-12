@@ -17,7 +17,7 @@
   <packaging>jar</packaging>
   <name>Process Spatialstatistics</name>
   <description>Processes for spatial statistics.</description>
-  <version>32-SNAPSHOT</version>
+  <version>33-SNAPSHOT</version>
   <url>https://github.com/mangosystem/opengxt</url>
   
   <licenses>
@@ -426,7 +426,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
+        <version>3.8.0</version>
         <configuration>
           <source>11</source>  <!-- The -source argument for the Java compiler. -->
           <target>11</target>  <!-- The -target argument for the Java compiler. -->

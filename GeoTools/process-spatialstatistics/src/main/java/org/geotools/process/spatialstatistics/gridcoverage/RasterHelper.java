@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.media.jai.PlanarImage;
-
+import org.eclipse.imagen.PlanarImage;
+import org.eclipse.imagen.media.range.NoDataContainer;
 import org.geotools.api.coverage.SampleDimension;
 import org.geotools.api.coverage.SampleDimensionType;
 import org.geotools.api.coverage.grid.GridGeometry;
@@ -60,8 +60,6 @@ import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.NumberRange;
 import org.geotools.util.factory.Hints;
 import org.geotools.util.logging.Logging;
-
-import it.geosolutions.jaiext.range.NoDataContainer;
 
 /**
  * Help class for GridCoverage2D

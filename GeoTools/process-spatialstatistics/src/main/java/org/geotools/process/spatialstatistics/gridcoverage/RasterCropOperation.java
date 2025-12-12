@@ -41,8 +41,6 @@ import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 
-import it.geosolutions.jaiext.JAIExt;
-
 /**
  * Creates a spatial subset of a raster dataset.
  * 
@@ -54,10 +52,6 @@ public class RasterCropOperation extends RasterProcessingOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterCropOperation.class);
 
     static final double roiTolerance = 0.0;
-
-    static {
-        JAIExt.initJAIEXT();
-    }
 
     public GridCoverage2D execute(GridCoverage2D inputCoverage, Geometry cropShape) {
         // get the bounds

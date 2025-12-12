@@ -40,11 +40,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.media.jai.PixelAccessor;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.RasterFactory;
-import javax.media.jai.UnpackedImageData;
-
+import org.eclipse.imagen.PixelAccessor;
+import org.eclipse.imagen.PlanarImage;
+import org.eclipse.imagen.RasterFactory;
+import org.eclipse.imagen.UnpackedImageData;
+import org.eclipse.imagen.media.range.NoDataContainer;
 import org.geotools.api.data.DataStore;
 import org.geotools.api.data.SimpleFeatureSource;
 import org.geotools.api.data.SimpleFeatureStore;
@@ -73,6 +73,7 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.metadata.i18n.Vocabulary;
 import org.geotools.metadata.i18n.VocabularyKeys;
 import org.geotools.process.ProcessException;
+import org.geotools.process.spatialstatistics.core.DiskMemImage;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
@@ -82,11 +83,8 @@ import org.geotools.process.spatialstatistics.storage.RasterExportOperation;
 import org.geotools.referencing.CRS;
 import org.geotools.util.NumberRange;
 import org.geotools.util.logging.Logging;
-import org.jaitools.tiledimage.DiskMemImage;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
-
-import it.geosolutions.jaiext.range.NoDataContainer;
 
 /**
  * Abstract Raster Processing Operation

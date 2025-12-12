@@ -32,11 +32,10 @@ import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.util.logging.Logger;
 
-import javax.media.jai.KernelJAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.iterator.RectIter;
-import javax.media.jai.iterator.RectIterFactory;
-
+import org.eclipse.imagen.KernelImageN;
+import org.eclipse.imagen.PlanarImage;
+import org.eclipse.imagen.iterator.RectIter;
+import org.eclipse.imagen.iterator.RectIterFactory;
 import org.geotools.api.feature.simple.SimpleFeature;
 import org.geotools.api.filter.Filter;
 import org.geotools.api.filter.expression.Expression;
@@ -44,12 +43,11 @@ import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.process.spatialstatistics.core.DiskMemImage;
 import org.geotools.process.spatialstatistics.core.StringHelper;
 import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.logging.Logging;
-import org.jaitools.media.jai.kernel.KernelFactory;
-import org.jaitools.tiledimage.DiskMemImage;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
@@ -81,7 +79,7 @@ public class RasterLineDensityOperation extends RasterDensityOperation {
         final PlanarImage sourceImage = lineToRaster(lineFeatures, weightField, searchRadius);
 
         // Density = ((L1 * V1) + (L2 * V2)) / (area_of_circle)
-        final KernelJAI kernel = getKernel(searchRadius);
+        final KernelImageN kernel = getKernel(searchRadius);
 
         // if unit is a meter, apply kilometers scale factor
         CoordinateReferenceSystem crs = lineFeatures.getSchema().getCoordinateReferenceSystem();
@@ -291,7 +289,7 @@ public class RasterLineDensityOperation extends RasterDensityOperation {
         }
     }
 
-    private KernelJAI getKernel(double searchRadius) {
+    private KernelImageN getKernel(double searchRadius) {
         scaleArea = 0.0;
 
         // convert map unit to cell unit
@@ -299,18 +297,32 @@ public class RasterLineDensityOperation extends RasterDensityOperation {
         int radius = (int) Math.floor(searchRadius / cellSize);
 
         // Creates a circular kernel with width 2*radius + 1
-        KernelJAI kernel = KernelFactory.createConstantCircle(radius, (float) cellSize);
+        if (radius < 1) {
+            radius = 1;
+        }
 
-        // calculate area
+        final int size = 2 * radius + 1;
+        final float[] data = new float[size * size];
+        final double r2 = radius * radius;
         final double cellArea = pixelSizeX * pixelSizeY;
-        final float[] data = kernel.getKernelData();
         int valid = 0;
-        for (int index = 0; index < data.length; index++) {
-            if (data[index] != 0.0) {
-                scaleArea += cellArea;
-                valid++;
+
+        for (int y = -radius; y <= radius; y++) {
+            final double yy = y * y;
+            for (int x = -radius; x <= radius; x++) {
+                final int idx = (y + radius) * size + (x + radius);
+                final double dist2 = (x * x) + yy;
+                if (dist2 <= r2) {
+                    data[idx] = (float) cellSize;
+                    scaleArea += cellArea;
+                    valid++;
+                } else {
+                    data[idx] = 0.0f;
+                }
             }
         }
+
+        KernelImageN kernel = new KernelImageN(size, size, radius, radius, data);
 
         this.minValue = 0.0;
         this.maxValue = maxValue * valid;

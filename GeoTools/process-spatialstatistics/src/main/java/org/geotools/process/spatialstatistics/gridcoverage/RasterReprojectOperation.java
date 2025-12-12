@@ -20,8 +20,7 @@ import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.util.logging.Logger;
 
-import javax.media.jai.Interpolation;
-
+import org.eclipse.imagen.Interpolation;
 import org.geotools.api.coverage.grid.GridEnvelope;
 import org.geotools.api.referencing.FactoryException;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;

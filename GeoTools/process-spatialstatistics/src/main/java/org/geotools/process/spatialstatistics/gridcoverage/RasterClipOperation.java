@@ -19,13 +19,11 @@ package org.geotools.process.spatialstatistics.gridcoverage;
 import java.awt.geom.AffineTransform;
 import java.util.logging.Logger;
 
-import javax.media.jai.BorderExtenderConstant;
-import javax.media.jai.JAI;
-import javax.media.jai.ParameterBlockJAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.iterator.RectIter;
-import javax.media.jai.iterator.RectIterFactory;
-
+import org.eclipse.imagen.BorderExtenderConstant;
+import org.eclipse.imagen.PlanarImage;
+import org.eclipse.imagen.iterator.RectIter;
+import org.eclipse.imagen.iterator.RectIterFactory;
+import org.eclipse.imagen.media.border.BorderDescriptor;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridGeometry2D;
@@ -91,19 +89,12 @@ public class RasterClipOperation extends RasterProcessingOperation {
 
             final PlanarImage inputImage = (PlanarImage) inputCoverage.getRenderedImage();
 
-            // resize board [leftPad, rightPad, topPad, bottomPad, type]
-            ParameterBlockJAI parameterBlock = new ParameterBlockJAI("border", "rendered");
-            parameterBlock.addSource(inputImage);
-            parameterBlock.setParameter("leftPad", leftPad);
-            parameterBlock.setParameter("rightPad", rightPad);
-            parameterBlock.setParameter("bottomPad", bottomPad);
-            parameterBlock.setParameter("topPad", topPad);
             final double[] fillValue = new double[bandCount];
             for (int index = 0; index < fillValue.length; index++) {
                 fillValue[index] = bandCount == 1 ? noData : -1;
             }
-            parameterBlock.setParameter("type", new BorderExtenderConstant(fillValue));
-            PlanarImage outputImage = JAI.create("border", parameterBlock);
+            PlanarImage outputImage = BorderDescriptor.create(inputImage, leftPad, rightPad,
+                    bottomPad, topPad, new BorderExtenderConstant(fillValue), null);
 
             // resize extent
             if (bandCount > 1) {

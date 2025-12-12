@@ -18,18 +18,17 @@ package org.geotools.process.spatialstatistics.gridcoverage;
 
 import java.util.logging.Logger;
 
-import javax.media.jai.PlanarImage;
-import javax.media.jai.iterator.RectIter;
-import javax.media.jai.iterator.RectIterFactory;
-import javax.media.jai.iterator.WritableRectIter;
-
+import org.eclipse.imagen.PlanarImage;
+import org.eclipse.imagen.iterator.RectIter;
+import org.eclipse.imagen.iterator.RectIterFactory;
+import org.eclipse.imagen.iterator.WritableRectIter;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.process.spatialstatistics.core.DiskMemImage;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.FuzzyDirectionType;
 import org.geotools.process.spatialstatistics.enumeration.FuzzyFunctionType;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.logging.Logging;
-import org.jaitools.tiledimage.DiskMemImage;
 
 /**
  * Performs fuzzy membership function on rasters.

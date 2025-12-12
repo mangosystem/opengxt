@@ -9,7 +9,7 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/commons/commons-collections4/4.4/commons-collections4-4.4.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/wicket/wicket-request/9.21.0/wicket-request-9.21.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/wicket/wicket-extensions/9.21.0/wicket-extensions-9.21.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-api/33-SNAPSHOT/gt-api-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-api/34-SNAPSHOT/gt-api-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/commons-pool/commons-pool/1.5.4/commons-pool-1.5.4.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/systems/uom/systems-common/2.1/systems-common-2.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/si/uom/si-quantity/2.1/si-quantity-2.1.jar" enabled="true" runInBatchMode="false"/>
@@ -21,96 +21,96 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/javax/measure/unit-api/2.2/unit-api-2.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/locationtech/jts/jts-core/1.20.0/jts-core-1.20.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/javax/media/jai_core/1.1.3/jai_core-1.1.3.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-referencing/33-SNAPSHOT/gt-referencing-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/imagen-core/0.9.1/imagen-core-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-referencing/34-SNAPSHOT/gt-referencing-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/ejml/ejml-ddense/0.41/ejml-ddense-0.41.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/ejml/ejml-core/0.41/ejml-core-0.41.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-metadata/33-SNAPSHOT/gt-metadata-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-metadata/34-SNAPSHOT/gt-metadata-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jgridshift/jgridshift-core/1.3/jgridshift-core-1.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/net/sf/geographiclib/GeographicLib-Java/1.49/GeographicLib-Java-1.49.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-main/33-SNAPSHOT/gt-main-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-http/33-SNAPSHOT/gt-http-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-main/34-SNAPSHOT/gt-main-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-http/34-SNAPSHOT/gt-http-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/commons/commons-text/1.13.0/commons-text-1.13.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/core/jackson-core/2.19.0/jackson-core-2.19.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/google/re2j/re2j/1.8/re2j-1.8.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-coverage/33-SNAPSHOT/gt-coverage-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/javax/media/jai_imageio/1.1/jai_imageio-1.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-tiff/1.4.16/imageio-ext-tiff-1.4.16.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-utilities/1.4.16/imageio-ext-utilities-1.4.16.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-geocore/1.4.16/imageio-ext-geocore-1.4.16.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/utilities/0.9.1/utilities-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-coverage/34-SNAPSHOT/gt-coverage-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-tiff/2.0.1/imageio-ext-tiff-2.0.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-utilities/2.0.1/imageio-ext-utilities-2.0.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/rendered-image-browser/0.9.1/rendered-image-browser-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-geocore/2.0.1/imageio-ext-geocore-2.0.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/io/airlift/aircompressor/0.27/aircompressor-0.27.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/jaitools/jt-zonalstats/1.6.0/jt-zonalstats-1.6.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/jaitools/jt-utils/1.6.0/jt-utils-1.6.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/affine/jt-affine/1.1.31/jt-affine-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/algebra/jt-algebra/1.1.31/jt-algebra-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/bandmerge/jt-bandmerge/1.1.31/jt-bandmerge-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/bandselect/jt-bandselect/1.1.31/jt-bandselect-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/bandcombine/jt-bandcombine/1.1.31/jt-bandcombine-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/border/jt-border/1.1.31/jt-border-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/buffer/jt-buffer/1.1.31/jt-buffer-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/crop/jt-crop/1.1.31/jt-crop-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/iterators/jt-iterators/1.1.31/jt-iterators-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/lookup/jt-lookup/1.1.31/jt-lookup-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/mosaic/jt-mosaic/1.1.31/jt-mosaic-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/nullop/jt-nullop/1.1.31/jt-nullop-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/rescale/jt-rescale/1.1.31/jt-rescale-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/scale/jt-scale/1.1.31/jt-scale-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/scale2/jt-scale2/1.1.31/jt-scale2-1.1.31.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/affine/0.9.1/affine-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/algebra/0.9.1/algebra-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/bandmerge/0.9.1/bandmerge-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/bandselect/0.9.1/bandselect-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/bandcombine/0.9.1/bandcombine-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/border/0.9.1/border-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/buffer/0.9.1/buffer-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/crop/0.9.1/crop-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/iterators/0.9.1/iterators-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/lookup/0.9.1/lookup-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/mosaic/0.9.1/mosaic-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/nullop/0.9.1/nullop-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/rescale/0.9.1/rescale-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/scale/0.9.1/scale-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/scale2/0.9.1/scale2-0.9.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/huldra/math/bigint/0.7.1/bigint-0.7.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/stats/jt-stats/1.1.31/jt-stats-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/translate/jt-translate/1.1.31/jt-translate-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/utilities/jt-utilities/1.1.31/jt-utilities-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/warp/jt-warp/1.1.31/jt-warp-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/zonal/jt-zonal/1.1.31/jt-zonal-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/binarize/jt-binarize/1.1.31/jt-binarize-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/format/jt-format/1.1.31/jt-format-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/colorconvert/jt-colorconvert/1.1.31/jt-colorconvert-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/errordiffusion/jt-errordiffusion/1.1.31/jt-errordiffusion-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/orderdither/jt-orderdither/1.1.31/jt-orderdither-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/colorindexer/jt-colorindexer/1.1.31/jt-colorindexer-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/imagefunction/jt-imagefunction/1.1.31/jt-imagefunction-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/piecewise/jt-piecewise/1.1.31/jt-piecewise-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/classifier/jt-classifier/1.1.31/jt-classifier-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/rlookup/jt-rlookup/1.1.31/jt-rlookup-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/vectorbin/jt-vectorbin/1.1.31/jt-vectorbin-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/shadedrelief/jt-shadedrelief/1.1.31/jt-shadedrelief-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-epsg-hsql/33-SNAPSHOT/gt-epsg-hsql-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/stats/0.9.1/stats-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/translate/0.9.1/translate-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/warp/0.9.1/warp-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/zonal/0.9.1/zonal-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/binarize/0.9.1/binarize-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/format/0.9.1/format-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/colorconvert/0.9.1/colorconvert-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/errordiffusion/0.9.1/errordiffusion-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/orderdither/0.9.1/orderdither-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/colorindexer/0.9.1/colorindexer-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/imagefunction/0.9.1/imagefunction-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/piecewise/0.9.1/piecewise-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/classifier/0.9.1/classifier-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/rlookup/0.9.1/rlookup-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/vectorbin/0.9.1/vectorbin-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/shadedrelief/0.9.1/shadedrelief-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/imageread/0.9.1/imageread-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/convolve/0.9.1/convolve-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-epsg-hsql/34-SNAPSHOT/gt-epsg-hsql-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/hsqldb/hsqldb/2.7.2/hsqldb-2.7.2.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-process/33-SNAPSHOT/gt-process-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-grid/33-SNAPSHOT/gt-grid-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-image/33-SNAPSHOT/gt-image-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-brewer/33-SNAPSHOT/gt-brewer-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-cql/33-SNAPSHOT/gt-cql-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-xml/33-SNAPSHOT/gt-xml-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-process/34-SNAPSHOT/gt-process-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-grid/34-SNAPSHOT/gt-grid-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-image/34-SNAPSHOT/gt-image-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-brewer/34-SNAPSHOT/gt-brewer-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-cql/34-SNAPSHOT/gt-cql-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-xml/34-SNAPSHOT/gt-xml-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/xml/xml-commons-resolver/1.2/xml-commons-resolver-1.2.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-geotiff/33-SNAPSHOT/gt-geotiff-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-cog-reader/1.4.16/imageio-ext-cog-reader-1.4.16.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-cog-commons/1.4.16/imageio-ext-cog-commons-1.4.16.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-cog-streams/1.4.16/imageio-ext-cog-streams-1.4.16.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-geotiff/34-SNAPSHOT/gt-geotiff-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-cog-reader/2.0.1/imageio-ext-cog-reader-2.0.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-cog-commons/2.0.1/imageio-ext-cog-commons-2.0.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-cog-streams/2.0.1/imageio-ext-cog-streams-2.0.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/ehcache/ehcache/3.4.0/ehcache-3.4.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-shapefile/33-SNAPSHOT/gt-shapefile-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-geojson/33-SNAPSHOT/gt-geojson-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-shapefile/34-SNAPSHOT/gt-shapefile-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-geojson/34-SNAPSHOT/gt-geojson-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-gml2/33-SNAPSHOT/gt-xsd-gml2-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-core/33-SNAPSHOT/gt-xsd-core-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/commons/commons-lang3/3.18.0/commons-lang3-3.18.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-gml2/34-SNAPSHOT/gt-xsd-gml2-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-core/34-SNAPSHOT/gt-xsd-core-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/picocontainer/picocontainer/1.2/picocontainer-1.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/commons-jxpath/commons-jxpath/1.3/commons-jxpath-1.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/emf/org.eclipse.emf.common/2.15.0/org.eclipse.emf.common-2.15.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/emf/org.eclipse.emf.ecore/2.15.0/org.eclipse.emf.ecore-2.15.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/xsd/org.eclipse.xsd/2.12.0/org.eclipse.xsd-2.12.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/emf/org.eclipse.emf.ecore.xmi/2.15.0/org.eclipse.emf.ecore.xmi-2.15.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-gml3/33-SNAPSHOT/gt-xsd-gml3-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-sld/33-SNAPSHOT/gt-xsd-sld-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-filter/33-SNAPSHOT/gt-xsd-filter-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-ows/2.27-SNAPSHOT/gs-ows-2.27-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-gml3/34-SNAPSHOT/gt-xsd-gml3-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-sld/34-SNAPSHOT/gt-xsd-sld-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-filter/34-SNAPSHOT/gt-xsd-filter-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-ows/2.28-SNAPSHOT/gs-ows-2.28-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/spring-webmvc/5.3.39/spring-webmvc-5.3.39.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/spring-expression/5.3.39/spring-expression-5.3.39.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/security/spring-security-core/5.8.16/spring-security-core-5.8.16.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/security/spring-security-crypto/5.8.16/spring-security-crypto-5.8.16.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/net.opengis.ows/33-SNAPSHOT/net.opengis.ows-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/org.w3.xlink/33-SNAPSHOT/org.w3.xlink-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-ows/33-SNAPSHOT/gt-xsd-ows-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/net.opengis.ows/34-SNAPSHOT/net.opengis.ows-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/org.w3.xlink/34-SNAPSHOT/org.w3.xlink-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-ows/34-SNAPSHOT/gt-xsd-ows-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/dataformat/jackson-dataformat-xml/2.19.0/jackson-dataformat-xml-2.19.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/core/jackson-annotations/2.19.0/jackson-annotations-2.19.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/fasterxml/jackson/core/jackson-databind/2.19.0/jackson-databind-2.19.0.jar" enabled="true" runInBatchMode="false"/>
@@ -122,7 +122,7 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/google/errorprone/error_prone_annotations/2.36.0/error_prone_annotations-2.36.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/google/j2objc/j2objc-annotations/3.0.0/j2objc-annotations-3.0.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-main/2.27-SNAPSHOT/gs-main-2.27-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-main/2.28-SNAPSHOT/gs-main-2.28-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/net/sf/json-lib/json-lib/2.4.2-geoserver/json-lib-2.4.2-geoserver.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/commons-lang/commons-lang/2.5/commons-lang-2.5.jar" enabled="true" runInBatchMode="false"/>
@@ -130,26 +130,26 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/net/sf/ezmorph/ezmorph/1.0.6/ezmorph-1.0.6.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/commons-beanutils/commons-beanutils/1.11.0/commons-beanutils-1.11.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/freemarker/freemarker/2.3.34/freemarker-2.3.34.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-jdbc/33-SNAPSHOT/gt-jdbc-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-jdbc/34-SNAPSHOT/gt-jdbc-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/commons-dbcp/commons-dbcp/1.4/commons-dbcp-1.4.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-wfs-ng/33-SNAPSHOT/gt-wfs-ng-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-complex/33-SNAPSHOT/gt-complex-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-app-schema-resolver/33-SNAPSHOT/gt-app-schema-resolver-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-gml-geometry-streaming/33-SNAPSHOT/gt-gml-geometry-streaming-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-http-commons/33-SNAPSHOT/gt-http-commons-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-wfs-ng/34-SNAPSHOT/gt-wfs-ng-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-complex/34-SNAPSHOT/gt-complex-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-app-schema-resolver/34-SNAPSHOT/gt-app-schema-resolver-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-gml-geometry-streaming/34-SNAPSHOT/gt-gml-geometry-streaming-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-http-commons/34-SNAPSHOT/gt-http-commons-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/httpcomponents/httpclient/4.5.14/httpclient-4.5.14.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-wfs/33-SNAPSHOT/gt-xsd-wfs-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/net.opengis.wfs/33-SNAPSHOT/net.opengis.wfs-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/net.opengis.fes/33-SNAPSHOT/net.opengis.fes-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-property/33-SNAPSHOT/gt-property-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-wms/33-SNAPSHOT/gt-wms-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-render/33-SNAPSHOT/gt-render-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-wfs/34-SNAPSHOT/gt-xsd-wfs-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/net.opengis.wfs/34-SNAPSHOT/net.opengis.wfs-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/net.opengis.fes/34-SNAPSHOT/net.opengis.fes-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-property/34-SNAPSHOT/gt-property-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-wms/34-SNAPSHOT/gt-wms-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-render/34-SNAPSHOT/gt-render-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/conversantmedia/disruptor/1.2.15/disruptor-1.2.15.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-wmts/33-SNAPSHOT/gt-wmts-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-tile-client/33-SNAPSHOT/gt-tile-client-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-wmts/33-SNAPSHOT/gt-xsd-wmts-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/net.opengis.wmts/33-SNAPSHOT/net.opengis.wmts-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-wmts/34-SNAPSHOT/gt-wmts-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-tile-client/34-SNAPSHOT/gt-tile-client-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-wmts/34-SNAPSHOT/gt-xsd-wmts-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/net.opengis.wmts/34-SNAPSHOT/net.opengis.wmts-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/spring-aop/5.3.39/spring-aop-5.3.39.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/spring-jdbc/5.3.39/spring-jdbc-5.3.39.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/spring-tx/5.3.39/spring-tx-5.3.39.jar" enabled="true" runInBatchMode="false"/>
@@ -157,20 +157,19 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/io/github/x-stream/mxparser/1.2.2/mxparser-1.2.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/xmlpull/xmlpull/1.1.3.1/xmlpull-1.1.3.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/concurrent-tile-cache/jt-concurrent-tile-cache/1.1.31/jt-concurrent-tile-cache-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/jiffle/jt-jiffle-op/1.1.31/jt-jiffle-op-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/jiffle/jt-jiffle-language/1.1.31/jt-jiffle-language-1.1.31.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/concurrent-tile-cache/0.9.1/concurrent-tile-cache-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/jiffle-op/0.9.1/jiffle-op-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/jiffle-language/0.9.1/jiffle-language-0.9.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/antlr/antlr4-runtime/4.7.1/antlr4-runtime-4.7.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/codehaus/janino/janino/3.1.12/janino-3.1.12.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/codehaus/janino/commons-compiler/3.1.12/commons-compiler-3.1.12.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/codehaus/janino/janino/3.0.8/janino-3.0.8.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/codehaus/janino/commons-compiler/3.0.8/commons-compiler-3.0.8.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sun/activation/jakarta.activation/1.2.2/jakarta.activation-1.2.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/github/oshi/oshi-core/6.8.2/oshi-core-6.8.2.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/net/java/dev/jna/jna/5.17.0/jna-5.17.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/net/java/dev/jna/jna-platform/5.17.0/jna-platform-5.17.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-transform/33-SNAPSHOT/gt-transform-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-imagemosaic/33-SNAPSHOT/gt-imagemosaic-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-streams/1.4.16/imageio-ext-streams-1.4.16.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/jaitools/jt-vectorbinarize/1.6.0/jt-vectorbinarize-1.6.0.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-transform/34-SNAPSHOT/gt-transform-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-imagemosaic/34-SNAPSHOT/gt-imagemosaic-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-streams/2.0.1/imageio-ext-streams-2.0.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/javax/xml/bind/jaxb-api/2.4.0-b180830.0359/jaxb-api-2.4.0-b180830.0359.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/glassfish/jaxb/jaxb-runtime/2.4.0-b180830.0438/jaxb-runtime-2.4.0-b180830.0438.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/glassfish/jaxb/txw2/2.4.0-b180830.0438/txw2-2.4.0-b180830.0438.jar" enabled="true" runInBatchMode="false"/>
@@ -185,7 +184,7 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/org/jasypt/jasypt-springsecurity3/1.9.3/jasypt-springsecurity3-1.9.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/bouncycastle/bcprov-jdk18on/1.79/bcprov-jdk18on-1.79.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/codehaus/jettison/jettison/1.5.4/jettison-1.5.4.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-platform/2.27-SNAPSHOT/gs-platform-2.27-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-platform/2.28-SNAPSHOT/gs-platform-2.28-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/spring-beans/5.3.39/spring-beans-5.3.39.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/spring-context/5.3.39/spring-context-5.3.39.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/spring-web/5.3.39/spring-web-5.3.39.jar" enabled="true" runInBatchMode="false"/>
@@ -196,43 +195,40 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/logging/log4j/log4j-jul/2.24.3/log4j-jul-2.24.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/logging/log4j/log4j-slf4j2-impl/2.24.3/log4j-slf4j2-impl-2.24.3.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/logging/log4j/log4j-1.2-api/2.24.3/log4j-1.2-api-2.24.3.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/javax/media/jai_codec/1.1.3/jai_codec-1.1.3.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/web/gs-web-core/2.27-SNAPSHOT/gs-web-core-2.27-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/web/gs-web-core/2.28-SNAPSHOT/gs-web-core-2.28-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/wicketstuff/wicketstuff-select2/9.21.0/wicketstuff-select2-9.21.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/de/agilecoders/wicket/webjars/wicket-webjars/3.0.0/wicket-webjars-3.0.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/jdbc/gt-jdbc-postgis/33-SNAPSHOT/gt-jdbc-postgis-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/postgresql/postgresql/42.7.7/postgresql-42.7.7.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/checkerframework/checker-qual/3.49.3/checker-qual-3.49.3.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-arcgrid/33-SNAPSHOT/gt-arcgrid-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-arcgrid/1.4.16/imageio-ext-arcgrid-1.4.16.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/jdbc/gt-jdbc-postgis/34-SNAPSHOT/gt-jdbc-postgis-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/postgresql/postgresql/42.7.8/postgresql-42.7.8.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/checkerframework/checker-qual/3.49.5/checker-qual-3.49.5.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-arcgrid/34-SNAPSHOT/gt-arcgrid-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/imageio-ext/imageio-ext-arcgrid/2.0.1/imageio-ext-arcgrid-2.0.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/github/svenmeier/wicket-dnd/wicket-dnd/0.7.3/wicket-dnd-0.7.3.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-geopkg/33-SNAPSHOT/gt-geopkg-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-geopkg/34-SNAPSHOT/gt-geopkg-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/xerial/sqlite-jdbc/3.41.2.2/sqlite-jdbc-3.41.2.2.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-fes/33-SNAPSHOT/gt-xsd-fes-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-fes/34-SNAPSHOT/gt-xsd-fes-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/joda-time/joda-time/2.8.1/joda-time-2.8.1.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/web/gs-web-sec-core/2.27-SNAPSHOT/gs-web-sec-core-2.27-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/extension/gs-wps-core/2.27-SNAPSHOT/gs-wps-core-2.27-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-wfs/2.27-SNAPSHOT/gs-wfs-2.27-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-wcs2_0/2.27-SNAPSHOT/gs-wcs2_0-2.27-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-wcs/2.27-SNAPSHOT/gs-wcs-2.27-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/net.opengis.wcs/33-SNAPSHOT/net.opengis.wcs-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-wcs/33-SNAPSHOT/gt-xsd-wcs-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-wcs1_1/2.27-SNAPSHOT/gs-wcs1_1-2.27-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/web/gs-web-sec-core/2.28-SNAPSHOT/gs-web-sec-core-2.28-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/extension/gs-wps-core/2.28-SNAPSHOT/gs-wps-core-2.28-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-wfs/2.28-SNAPSHOT/gs-wfs-2.28-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-wcs2_0/2.28-SNAPSHOT/gs-wcs2_0-2.28-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-wcs/2.28-SNAPSHOT/gs-wcs-2.28-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/net.opengis.wcs/34-SNAPSHOT/net.opengis.wcs-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-wcs/34-SNAPSHOT/gt-xsd-wcs-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-wcs1_1/2.28-SNAPSHOT/gs-wcs1_1-2.28-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/sun/mail/jakarta.mail/1.6.7/jakarta.mail-1.6.7.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-wcs1_0/2.27-SNAPSHOT/gs-wcs1_0-2.27-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/net.opengis.wps/33-SNAPSHOT/net.opengis.wps-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-wps/33-SNAPSHOT/gt-xsd-wps-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-process-raster/33-SNAPSHOT/gt-process-raster-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/jaitools/jt-rangelookup/1.6.0/jt-rangelookup-1.6.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/jaitools/jt-contour/1.6.0/jt-contour-1.6.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/jaitools/jt-attributeop/1.6.0/jt-attributeop-1.6.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/jaitools/jt-vectorize/1.6.0/jt-vectorize-1.6.0.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/it/geosolutions/jaiext/classbreaks/jt-classbreaks/1.1.31/jt-classbreaks-1.1.31.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-process-geometry/33-SNAPSHOT/gt-process-geometry-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-graph/33-SNAPSHOT/gt-graph-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-process-feature/33-SNAPSHOT/gt-process-feature-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-geojson-core/33-SNAPSHOT/gt-geojson-core-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-csv/33-SNAPSHOT/gt-csv-33-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geoserver/gs-wcs1_0/2.28-SNAPSHOT/gs-wcs1_0-2.28-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/ogc/net.opengis.wps/34-SNAPSHOT/net.opengis.wps-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/xsd/gt-xsd-wps/34-SNAPSHOT/gt-xsd-wps-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-process-raster/34-SNAPSHOT/gt-process-raster-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/contour/0.9.1/contour-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/vectorize/0.9.1/vectorize-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/eclipse/imagen/classbreaks/0.9.1/classbreaks-0.9.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-process-geometry/34-SNAPSHOT/gt-process-geometry-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-graph/34-SNAPSHOT/gt-graph-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-process-feature/34-SNAPSHOT/gt-process-feature-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-geojson-core/34-SNAPSHOT/gt-geojson-core-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/org/geotools/gt-csv/34-SNAPSHOT/gt-csv-34-SNAPSHOT.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/com/opencsv/opencsv/5.0/opencsv-5.0.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="PLUGIN" id="org.eclipse.jst.ws.annotations.core" enabled="false" runInBatchMode="false"/>
 </factorypath>

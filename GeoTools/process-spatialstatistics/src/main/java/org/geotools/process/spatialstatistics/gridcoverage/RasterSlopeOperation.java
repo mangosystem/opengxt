@@ -18,16 +18,15 @@ package org.geotools.process.spatialstatistics.gridcoverage;
 
 import java.util.logging.Logger;
 
-import javax.media.jai.iterator.RectIterFactory;
-import javax.media.jai.iterator.WritableRectIter;
-
+import org.eclipse.imagen.iterator.WritableRectIter;
+import org.eclipse.imagen.iterator.RectIterFactory;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.process.spatialstatistics.core.DiskMemImage;
 import org.geotools.process.spatialstatistics.core.SSUtils;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.process.spatialstatistics.enumeration.SlopeType;
 import org.geotools.util.logging.Logging;
-import org.jaitools.tiledimage.DiskMemImage;
 
 /**
  * Identifies the slope (gradient, or rate of maximum change in z-value) from each cell of a raster surface.

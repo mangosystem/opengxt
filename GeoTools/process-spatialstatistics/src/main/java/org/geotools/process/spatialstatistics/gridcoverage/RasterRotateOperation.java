@@ -21,11 +21,10 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.media.jai.Interpolation;
-import javax.media.jai.JAI;
-import javax.media.jai.ParameterBlockJAI;
-import javax.media.jai.PlanarImage;
-
+import org.eclipse.imagen.Interpolation;
+import org.eclipse.imagen.PlanarImage;
+import org.eclipse.imagen.media.affine.AffineDescriptor;
+import org.eclipse.imagen.media.range.NoDataContainer;
 import org.geotools.api.geometry.MismatchedDimensionException;
 import org.geotools.api.geometry.Position;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
@@ -46,8 +45,6 @@ import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Point;
-
-import it.geosolutions.jaiext.range.NoDataContainer;
 
 /**
  * Turns a raster dataset around the specified pivot point by the angle specified angle in degrees. <br>
@@ -113,25 +110,19 @@ public class RasterRotateOperation extends AbstractTransformationOperation {
         // http://resources.arcgis.com/en/help/main/10.1/#/Rotate/00170000007s000000/
         // http://java.sun.com/products/java-media/jai/forDevelopers/jai1_0_1guide-unc/Geom-image-manip.doc.html#51140
 
-        // rotate = [xOrigin, yOrigin, angle, interpolation, backgroundValues]
-        ParameterBlockJAI parameterBlock = new ParameterBlockJAI("rotate", "rendered");
-        parameterBlock.addSource(inputImage);
-
-        parameterBlock.setParameter("xOrigin", (float) gridPos.getOrdinate(0) + 0.5f);
-        parameterBlock.setParameter("yOrigin", (float) gridPos.getOrdinate(1) + 0.5f);
-
-        float rotZRadians = (float) SSUtils.convert2Radians(angle);
-        parameterBlock.setParameter("angle", rotZRadians);
-
-        parameterBlock.setParameter("interpolation", interpolation);
+        double xOrigin = gridPos.getOrdinate(0) + 0.5;
+        double yOrigin = gridPos.getOrdinate(1) + 0.5;
+        double rotZRadians = SSUtils.convert2Radians(angle);
 
         final double[] backgroundValues = new double[inputImage.getSampleModel().getNumBands()];
         for (int index = 0; index < backgroundValues.length; index++) {
             backgroundValues[index] = noData;
         }
-        parameterBlock.setParameter("backgroundValues", backgroundValues);
 
-        PlanarImage outputImage = JAI.create("rotate", parameterBlock);
+        AffineTransform rotateTransform = AffineTransform.getRotateInstance(rotZRadians, xOrigin,
+                yOrigin);
+        PlanarImage outputImage = AffineDescriptor.create(inputImage, rotateTransform,
+                interpolation, backgroundValues, null);
 
         // rotate envelope
         Envelope newExt = new ReferencedEnvelope(inputCoverage.getEnvelope());

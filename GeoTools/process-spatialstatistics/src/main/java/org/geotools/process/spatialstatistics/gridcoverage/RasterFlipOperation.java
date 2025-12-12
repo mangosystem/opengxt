@@ -19,10 +19,15 @@ package org.geotools.process.spatialstatistics.gridcoverage;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.media.jai.JAI;
-import javax.media.jai.ParameterBlockJAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.operator.TransposeDescriptor;
+// JAI -> ImageN
+// import javax.media.jai.JAI;
+// import javax.media.jai.ParameterBlockJAI;
+
+import org.eclipse.imagen.ImageN;
+import org.eclipse.imagen.ParameterBlockImageN;
+import org.eclipse.imagen.PlanarImage;
+import org.eclipse.imagen.media.range.NoDataContainer;
+import org.eclipse.imagen.operator.TransposeDescriptor;
 
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
@@ -32,10 +37,9 @@ import org.geotools.metadata.i18n.Vocabulary;
 import org.geotools.metadata.i18n.VocabularyKeys;
 import org.geotools.util.logging.Logging;
 
-import it.geosolutions.jaiext.range.NoDataContainer;
-
 /**
- * Reorients the raster by turning it over, from top to bottom, along the horizontal axis through the center of the raster.
+ * Reorients the raster by turning it over, from top to bottom, along the
+ * horizontal axis through the center of the raster.
  * 
  * @author Minpa Lee, MangoSystem
  * 
@@ -48,15 +52,19 @@ public class RasterFlipOperation extends AbstractTransformationOperation {
     public GridCoverage2D execute(GridCoverage2D inputCoverage) {
         this.initilizeVariables(inputCoverage);
 
-        // transpose parameters: type
-        // http://download.java.net/media/jai/javadoc/1.1.3/jai-apidocs/javax/media/jai/operator/TransposeDescriptor.html
-        // http://java.sun.com/products/java-media/jai/forDevelopers/jai1_0_1guide-unc/Geom-image-manip.doc.html#51140
+        // input coverage -> ImageN PlanarImage
         final PlanarImage inputImage = (PlanarImage) inputCoverage.getRenderedImage();
-        ParameterBlockJAI parameterBlock = new ParameterBlockJAI("transpose", "rendered");
-        parameterBlock.addSource(inputImage);
 
+        // JAI ParameterBlockJAI -> ImageN ParameterBlockImageN
+        //   new ParameterBlockJAI("transpose", "rendered");
+        ParameterBlockImageN parameterBlock = new ParameterBlockImageN("transpose", "rendered");
+        parameterBlock.addSource(inputImage);
         parameterBlock.setParameter("type", TransposeDescriptor.FLIP_VERTICAL);
-        PlanarImage outputImage = JAI.create("transpose", parameterBlock);
+
+        // JAI.create(...) -> ImageN.create(...)
+        //  - ImageN는 JAI와 동일한 패턴의 create / createNS 를 제공
+        //  - RenderedOp 는 PlanarImage 를 상속하므로 PlanarImage 로 바로 받을 수 있음
+        PlanarImage outputImage = (PlanarImage) ImageN.create("transpose", parameterBlock);
 
         final int numBands = inputCoverage.getNumSampleDimensions();
 
@@ -73,7 +81,12 @@ public class RasterFlipOperation extends AbstractTransformationOperation {
             properties.put(NoDataContainer.GC_NODATA, noData);
 
             GridCoverageFactory factory = CoverageFactoryFinder.getGridCoverageFactory(null);
-            return factory.create(inputCoverage.getName(), outputImage, gridExtent, bands, null,
+            return factory.create(
+                    inputCoverage.getName(),
+                    outputImage,
+                    gridExtent,
+                    bands,
+                    null,
                     properties);
         }
     }

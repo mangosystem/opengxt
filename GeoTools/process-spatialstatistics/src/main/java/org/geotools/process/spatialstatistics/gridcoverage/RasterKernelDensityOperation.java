@@ -20,8 +20,7 @@ import java.awt.image.WritableRaster;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.media.jai.KernelJAI;
-
+import org.eclipse.imagen.KernelImageN;
 import org.geotools.api.feature.simple.SimpleFeature;
 import org.geotools.api.filter.Filter;
 import org.geotools.api.filter.expression.Expression;
@@ -31,14 +30,12 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.spatialstatistics.core.DiskMemImage;
 import org.geotools.process.spatialstatistics.core.StringHelper;
 import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.enumeration.KernelType;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.logging.Logging;
-import org.jaitools.media.jai.kernel.KernelFactory;
-import org.jaitools.media.jai.kernel.KernelFactory.ValueType;
-import org.jaitools.tiledimage.DiskMemImage;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 
@@ -82,7 +79,7 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
         DiskMemImage outputImage = this.createDiskMemImage(gridExtent, RasterPixelType.FLOAT);
         WritableRaster raster = (WritableRaster) outputImage.getData();
 
-        KernelJAI kernel = getKernel(searchRadius);
+        KernelImageN kernel = getKernel(searchRadius);
 
         // if unit is a meter, apply kilometers scale factor
         CoordinateReferenceSystem crs = pointFeatures.getSchema().getCoordinateReferenceSystem();
@@ -207,7 +204,7 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
         return createGridCoverage("KernelDensity", outputImage);
     }
 
-    private KernelJAI getKernel(double searchRadius) {
+    private KernelImageN getKernel(double searchRadius) {
         scaleArea = 0.0;
 
         // http://en.wikipedia.org/wiki/Kernel_(statistics)
@@ -219,92 +216,76 @@ public class RasterKernelDensityOperation extends RasterDensityOperation {
         // calculate area
         final double cellArea = pixelSizeX * pixelSizeY;
 
-        // build kernel
-        final KernelJAI binKernel = KernelFactory.createCircle(radius, ValueType.BINARY);
-
-        // use cell's area
-        final float[] data = binKernel.getKernelData();
+        float[] weights = new float[width * width];
         int valid = 0;
-        for (int index = 0; index < data.length; index++) {
-            if (data[index] != 0.0) {
-                scaleArea += cellArea;
-                valid++;
+
+        for (int dY = -radius; dY <= radius; dY++) {
+            final double dy2 = dY * dY;
+            for (int dX = -radius; dX <= radius; dX++) {
+                final int index = ((dY + radius) * width) + (dX + radius);
+                final double dist2 = (dX * dX) + dy2;
+                if (dist2 > r2) {
+                    weights[index] = 0.0f;
+                    continue;
+                }
+
+                double dist = Math.sqrt(dist2);
+                double u = radius == 0 ? 0 : dist / radius;
+                double value = 0.0;
+
+                switch (this.kernelType) {
+                case Binary:
+                    value = 1.0;
+                    break;
+                case Cosine:
+                    value = (Math.PI / 4.0) * Math.cos((Math.PI * u) / 2.0);
+                    break;
+                case Distance:
+                    value = dist;
+                    break;
+                case Epanechnikov:
+                    value = 3.0 * (1.0 - (u * u)) / 4.0;
+                    break;
+                case Gaussian:
+                    value = (1.0 / Math.sqrt(2.0 * Math.PI)) * Math.exp(-0.5 * u * u);
+                    break;
+                case InverseDistance:
+                    value = dist == 0 ? 0.0 : 1.0 / dist;
+                    break;
+                case Quadratic:
+                    // Silverman(1986, p. 76, equation 4.5).
+                    double termq = 1.0 - (dist2 / r2);
+                    value = 3.0 * termq * termq;
+                    break;
+                case Quartic:
+                    value = (15.0 / 16.0) * Math.pow(1.0 - u * u, 2.0);
+                    break;
+                case Triangular:
+                    value = 1.0 - u;
+                    break;
+                case Triweight:
+                    value = (35.0 / 32.0) * Math.pow(1.0 - u * u, 3.0);
+                    break;
+                case Tricube:
+                    final double cTricube = 70.0 / 81.0;
+                    double term = 1.0 - Math.pow(Math.abs(u), 3.0);
+                    value = cTricube * term * term * term;
+                    break;
+                }
+
+                if (value < 0) {
+                    value = 0;
+                }
+
+                weights[index] = (float) value;
+                if (value != 0.0) {
+                    scaleArea += cellArea;
+                    valid++;
+                }
             }
         }
 
-        KernelJAI kernel = null;
-        switch (this.kernelType) {
-        case Binary:
-            kernel = KernelFactory.createCircle(radius, ValueType.BINARY);
-            break;
-        case Cosine:
-            kernel = KernelFactory.createCircle(radius, ValueType.COSINE);
-            break;
-        case Distance:
-            kernel = KernelFactory.createCircle(radius, ValueType.DISTANCE);
-            break;
-        case Epanechnikov:
-            kernel = KernelFactory.createCircle(radius, ValueType.EPANECHNIKOV);
-            break;
-        case Gaussian:
-            kernel = KernelFactory.createCircle(radius, ValueType.GAUSSIAN);
-            break;
-        case InverseDistance:
-            kernel = KernelFactory.createCircle(radius, ValueType.INVERSE_DISTANCE);
-            break;
-        case Quadratic:
-            float[] weights = new float[width * width];
-            for (int dY = -radius; dY <= radius; dY++) {
-                final double dy2 = dY * dY;
-                for (int dX = -radius; dX <= radius; dX++) {
-                    final int index = ((dY + radius) * width) + (dX + radius);
-                    if (data[index] == 0.0) {
-                        weights[index] = 0;
-                    } else {
-                        // Silverman(1986, p. 76, equation 4.5).
-                        final double dxdy = (dX * dX) + dy2;
-                        final double termq = 1.0 - (dxdy / r2);
-                        final double kde = 3.0 * termq * termq;
-
-                        weights[index] = (float) kde;
-                    }
-                }
-            }
-            kernel = new KernelJAI(width, width, weights);
-            break;
-        case Quartic:
-            kernel = KernelFactory.createCircle(radius, ValueType.QUARTIC);
-            break;
-        case Triangular:
-            kernel = KernelFactory.createCircle(radius, ValueType.TRIANGULAR);
-            break;
-        case Triweight:
-            kernel = KernelFactory.createCircle(radius, ValueType.TRIWEIGHT);
-            break;
-        case Tricube:
-            // http://en.wikipedia.org/wiki/Kernel_(statistics)
-            final double C_TRICUBE = 70.0 / 81.0;
-            float[] tcWeights = new float[width * width];
-            for (int dY = -radius; dY <= radius; dY++) {
-                final double dy2 = dY * dY;
-                for (int dX = -radius; dX <= radius; dX++) {
-                    final int index = ((dY + radius) * width) + (dX + radius);
-                    if (data[index] == 0.0) {
-                        tcWeights[index] = 0;
-                    } else {
-                        final double dxdy = (dX * dX) + dy2;
-                        final double u = Math.abs(Math.sqrt(dxdy) / radius);
-
-                        final double termq = 1.0 - (u * u * u);
-                        final double kde = C_TRICUBE * termq * termq * termq;
-
-                        tcWeights[index] = (float) kde;
-                    }
-                }
-            }
-            kernel = new KernelJAI(width, width, tcWeights);
-            break;
-        }
+        KernelImageN kernel = new KernelImageN(width, width, radius, radius, weights);
 
         this.minValue = 0.0;
         this.maxValue = maxValue * valid;

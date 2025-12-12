@@ -20,8 +20,8 @@ import java.awt.geom.AffineTransform;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.media.jai.PlanarImage;
-
+import org.eclipse.imagen.PlanarImage;
+import org.eclipse.imagen.media.range.NoDataContainer;
 import org.geotools.api.parameter.InvalidParameterValueException;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.coverage.CoverageFactoryFinder;
@@ -33,8 +33,6 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.metadata.i18n.Vocabulary;
 import org.geotools.metadata.i18n.VocabularyKeys;
 import org.geotools.util.logging.Logging;
-
-import it.geosolutions.jaiext.range.NoDataContainer;
 
 /**
  * Resizes a raster by the specified x and y scale factors.

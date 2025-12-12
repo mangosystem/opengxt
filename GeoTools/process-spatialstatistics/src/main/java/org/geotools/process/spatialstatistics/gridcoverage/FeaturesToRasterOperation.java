@@ -39,9 +39,8 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import javax.media.jai.PlanarImage;
-import javax.media.jai.RasterFactory;
-
+import org.eclipse.imagen.PlanarImage;
+import org.eclipse.imagen.RasterFactory;
 import org.geotools.api.feature.simple.SimpleFeature;
 import org.geotools.api.feature.simple.SimpleFeatureType;
 import org.geotools.api.filter.FilterFactory;
@@ -51,6 +50,7 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.spatialstatistics.core.DiskMemImage;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.FeatureTypes.SimpleShapeType;
 import org.geotools.process.spatialstatistics.core.StringHelper;
@@ -58,7 +58,6 @@ import org.geotools.process.spatialstatistics.enumeration.PointAssignmentType;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.factory.GeoTools;
 import org.geotools.util.logging.Logging;
-import org.jaitools.tiledimage.DiskMemImage;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;

@@ -19,11 +19,9 @@ package org.geotools.process.spatialstatistics.gridcoverage;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import javax.media.jai.JAI;
-import javax.media.jai.ParameterBlockJAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.operator.TransposeDescriptor;
-
+import org.eclipse.imagen.PlanarImage;
+import org.eclipse.imagen.media.range.NoDataContainer;
+import org.eclipse.imagen.operator.TransposeDescriptor;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
@@ -31,8 +29,6 @@ import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.metadata.i18n.Vocabulary;
 import org.geotools.metadata.i18n.VocabularyKeys;
 import org.geotools.util.logging.Logging;
-
-import it.geosolutions.jaiext.range.NoDataContainer;
 
 /**
  * Reorients the raster by flipping it, from left to right, along the vertical axis through the center of the raster.
@@ -52,11 +48,8 @@ public class RasterMirrorOperation extends AbstractTransformationOperation {
         // http://download.java.net/media/jai/javadoc/1.1.3/jai-apidocs/javax/media/jai/operator/TransposeDescriptor.html
         // http://java.sun.com/products/java-media/jai/forDevelopers/jai1_0_1guide-unc/Geom-image-manip.doc.html#51140
         final PlanarImage inputImage = (PlanarImage) inputCoverage.getRenderedImage();
-        ParameterBlockJAI parameterBlock = new ParameterBlockJAI("transpose", "rendered");
-        parameterBlock.addSource(inputImage);
-
-        parameterBlock.setParameter("type", TransposeDescriptor.FLIP_HORIZONTAL);
-        PlanarImage outputImage = JAI.create("transpose", parameterBlock);
+        PlanarImage outputImage = TransposeDescriptor.create(inputImage, TransposeDescriptor.FLIP_HORIZONTAL,
+                null);
 
         final int numBands = inputCoverage.getNumSampleDimensions();
 

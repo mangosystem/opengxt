@@ -21,8 +21,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.Raster;
 import java.util.logging.Logger;
 
-import javax.media.jai.PlanarImage;
-
+import org.eclipse.imagen.PlanarImage;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridGeometry2D;

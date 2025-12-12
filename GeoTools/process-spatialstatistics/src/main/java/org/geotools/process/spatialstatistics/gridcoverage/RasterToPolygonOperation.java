@@ -23,10 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.media.jai.JAI;
-import javax.media.jai.ParameterBlockJAI;
-import javax.media.jai.RenderedOp;
-
 import org.geotools.api.feature.simple.SimpleFeature;
 import org.geotools.api.feature.simple.SimpleFeatureType;
 import org.geotools.api.metadata.spatial.PixelOrientation;
@@ -34,7 +30,6 @@ import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.image.jai.Registry;
 import org.geotools.process.ProcessException;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
@@ -42,7 +37,7 @@ import org.geotools.process.spatialstatistics.operations.GeneralOperation;
 import org.geotools.process.spatialstatistics.storage.IFeatureInserter;
 import org.geotools.util.logging.Logging;
 import org.jaitools.media.jai.vectorize.VectorizeDescriptor;
-import org.jaitools.media.jai.vectorize.VectorizeRIF;
+import org.jaitools.media.jai.vectorize.VectorizeOpImage;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.util.AffineTransformation;
 import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
@@ -58,11 +53,6 @@ import org.locationtech.jts.simplify.DouglasPeuckerSimplifier;
  */
 public class RasterToPolygonOperation extends GeneralOperation {
     protected static final Logger LOGGER = Logging.getLogger(RasterToPolygonOperation.class);
-
-    static {
-        Registry.registerRIF(JAI.getDefaultInstance(), new VectorizeDescriptor(),
-                new VectorizeRIF(), Registry.JAI_TOOLS_PRODUCT);
-    }
 
     public SimpleFeatureCollection execute(GridCoverage2D inputGc, Integer bandIndex,
             boolean weeding, String valueField) throws ProcessException, IOException {
@@ -118,17 +108,23 @@ public class RasterToPolygonOperation extends GeneralOperation {
                     mt.getShearX(), mt.getTranslateX(), mt.getShearY(), mt.getScaleY(),
                     mt.getTranslateY());
 
-            // perform jai operation
-            final ParameterBlockJAI pb = new ParameterBlockJAI("Vectorize");
-            pb.setSource("source0", inputGc.getRenderedImage());
-            pb.setParameter("band", Integer.valueOf(bandIndex));
-            pb.setParameter("outsideValues", outsideValues);
-            pb.setParameter("insideEdges", Boolean.valueOf(insideEdges));
+            // run vectorize operation via ImageN OpImage directly
+            List<Double> outsideVals = new ArrayList<Double>();
+            for (Number val : outsideValues) {
+                outsideVals.add(val.doubleValue());
+            }
 
-            final RenderedOp dest = JAI.create("Vectorize", pb);
+            VectorizeOpImage vecOpImage = new VectorizeOpImage(inputGc.getRenderedImage(), null,
+                    bandIndex.intValue(), outsideVals, insideEdges, false, 0d,
+                    VectorizeDescriptor.FILTER_MERGE_LARGEST);
+
+            Object vectorsAttr = vecOpImage.getAttribute(VectorizeDescriptor.VECTOR_PROPERTY_NAME);
+            if (!(vectorsAttr instanceof Collection<?>)) {
+                return featureWriter.getFeatureCollection();
+            }
+
             @SuppressWarnings("unchecked")
-            final Collection<Polygon> property = (Collection<Polygon>) dest
-                    .getProperty(VectorizeDescriptor.VECTOR_PROPERTY_NAME);
+            final Collection<Polygon> property = (Collection<Polygon>) vectorsAttr;
 
             for (Polygon polygon : property) {
                 if (polygon == null || polygon.isEmpty()) {

@@ -7,8 +7,14 @@
                                                                                 
         Version: $Id$              
      ======================================================================= -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0                                  http://maven.apache.org/maven-v4_0_0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                      http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
+
   <!-- =========================================================== -->
   <!--     Module Description                                      -->
   <!-- =========================================================== -->
@@ -17,9 +23,8 @@
   <packaging>jar</packaging>
   <name>Process Spatialstatistics</name>
   <description>Processes for spatial statistics.</description>
-  <version>33-SNAPSHOT</version>
+  <version>34-SNAPSHOT</version>
   <url>https://github.com/mangosystem/opengxt</url>
-  
   <licenses>
     <license>
       <name>Lesser General Public License (LGPL)</name>
@@ -27,47 +32,56 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-  
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
-    <imageio.ext.version>1.4.16</imageio.ext.version>
-    <jaiext.version>1.1.31</jaiext.version>
-    <jt.version>1.6.0</jt.version>
+    <geotools.version>34.0</geotools.version>
     <commons.math3.version>3.6</commons.math3.version>
     <ejml.version>0.41</ejml.version>
     <xstream.version>1.4.21</xstream.version>
+    <maven.compiler.release>17</maven.compiler.release>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
     <allow.test.skip>true</allow.test.skip>
     <allow.test.failure.ignore>true</allow.test.failure.ignore>
   </properties>
-  
+
   <repositories>
     <repository>
       <id>osgeo-releases</id>
       <name>OSGeo Nexus Release Repository</name>
       <url>https://repo.osgeo.org/repository/release/</url>
-      <snapshots><enabled>false</enabled></snapshots>
-      <releases><enabled>true</enabled></releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
     </repository>
-
     <repository>
       <id>osgeo-snapshot</id>
       <name>OSGeo Nexus Snapshot Repository</name>
       <url>https://repo.osgeo.org/repository/snapshot/</url>
-      <snapshots><enabled>true</enabled></snapshots>
-      <releases><enabled>false</enabled></releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
     </repository>
-    
     <repository>
       <id>geosolutions</id>
       <name>geosolutions repository</name>
       <url>http://maven.geo-solutions.it/</url>
-       <snapshots><enabled>true</enabled></snapshots>
-      <releases><enabled>true</enabled></releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
     </repository>
   </repositories>
-  
+
   <!-- =========================================================== -->
   <!--     Developers and Contributors                             -->
   <!-- =========================================================== -->
@@ -84,331 +98,319 @@
       </roles>
     </developer>
   </developers>
-  
+
   <!-- =========================================================== -->
-  <!--     Dependency Management                                   -->
+  <!--     BOM / Dependency Management (GeoTools 34.x )            -->
+  <!-- =========================================================== -->
+  <dependencyManagement>
+    <dependencies>
+      <!-- GeoTools BOM -->
+      <dependency>
+        <groupId>org.geotools</groupId>
+        <artifactId>gt-bom</artifactId>
+        <version>${geotools.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- GeoTools Third Party Libraries -->
+      <dependency>
+        <groupId>org.geotools</groupId>
+        <artifactId>gt-platform-dependencies</artifactId>
+        <version>${geotools.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <!-- =========================================================== -->
+  <!--     Dependencies                                            -->
   <!-- =========================================================== -->
   <dependencies>
+    <!-- GeoTools modules -->
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-api</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-referencing</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-main</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-coverage</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-process</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-grid</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-image</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-jdbc</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-brewer</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-geotiff</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-shapefile</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools.xsd</groupId>
       <artifactId>gt-xsd-gml2</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools.xsd</groupId>
       <artifactId>gt-xsd-gml3</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools.xsd</groupId>
       <artifactId>gt-xsd-sld</artifactId>
-      <version>${project.version}</version>
     </dependency>
-    
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-math3</artifactId>
-      <version>${commons.math3.version}</version>
-    </dependency>
-    
-    <!-- EJML -->
-    <dependency>
-        <groupId>org.ejml</groupId>
-        <artifactId>ejml-simple</artifactId>
-        <version>${ejml.version}</version>
-    </dependency>
-    
-    <!-- Java Advanced Imaging (JAI) -->
-    <dependency>
-      <groupId>javax.media</groupId>
-      <artifactId>jai_core</artifactId>
-      <version>1.1.3</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.media</groupId>
-      <artifactId>jai_codec</artifactId>
-      <version>1.1.3</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.media</groupId>
-      <artifactId>jai_imageio</artifactId>
-      <version>1.1</version>
-    </dependency>
-  
+
     <!-- ImageIO-Ext -->
     <dependency>
       <groupId>it.geosolutions.imageio-ext</groupId>
       <artifactId>imageio-ext-tiff</artifactId>
-      <version>${imageio.ext.version}</version>
     </dependency>
     <dependency>
       <groupId>it.geosolutions.imageio-ext</groupId>
       <artifactId>imageio-ext-arcgrid</artifactId>
-      <version>${imageio.ext.version}</version>
     </dependency>
     <dependency>
       <groupId>it.geosolutions.imageio-ext</groupId>
       <artifactId>imageio-ext-utilities</artifactId>
-      <version>${imageio.ext.version}</version>
     </dependency>
     <dependency>
       <groupId>it.geosolutions.imageio-ext</groupId>
       <artifactId>imageio-ext-streams</artifactId>
-      <version>${imageio.ext.version}</version>
     </dependency>
     <dependency>
       <groupId>it.geosolutions.imageio-ext</groupId>
       <artifactId>imageio-ext-geocore</artifactId>
-      <version>${imageio.ext.version}</version>
     </dependency>
     <dependency>
       <groupId>it.geosolutions.imageio-ext</groupId>
       <artifactId>imageio-ext-png</artifactId>
-      <version>${imageio.ext.version}</version>
-    </dependency> 
-    
-    <!-- JAITools -->
+    </dependency>
+
+    <!-- ImageN: gt-platform-dependencies BOM -->
     <dependency>
-      <groupId>org.jaitools</groupId>
-      <artifactId>jt-utils</artifactId>
-      <version>${jt.version}</version>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>imagen-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jaitools</groupId>
-      <artifactId>jt-zonalstats</artifactId>
-      <version>${jt.version}</version>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>jiffle-op</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jaitools</groupId>
-      <artifactId>jt-rangelookup</artifactId>
-      <version>${jt.version}</version>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>classbreaks</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jaitools</groupId>
-      <artifactId>jt-contour</artifactId>
-      <version>${jt.version}</version>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>affine</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jaitools</groupId>
-      <artifactId>jt-vectorize</artifactId>
-      <version>${jt.version}</version>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>algebra</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jaitools</groupId>
-      <artifactId>jt-vectorbinarize</artifactId>
-      <version>${jt.version}</version>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>bandmerge</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>bandselect</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>bandcombine</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>border</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>buffer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>crop</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>iterators</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>lookup</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>mosaic</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>nullop</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>rescale</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>scale</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>scale2</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>stats</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>translate</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>utilities</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>warp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>zonal</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>binarize</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>format</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>colorconvert</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>errordiffusion</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>orderdither</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>colorindexer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>imagefunction</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>piecewise</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>classifier</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>rlookup</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>vectorbin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>shadedrelief</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>concurrent-tile-cache</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>rendered-image-browser</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>imageread</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>convolve</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>contour</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.imagen</groupId>
+      <artifactId>vectorize</artifactId>
+    </dependency>
+
+    <!-- xstream -->
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
       <version>${xstream.version}</version>
     </dependency>
-    
-    <!-- JAIExt -->
+
+    <!-- etc -->
     <dependency>
-      <groupId>it.geosolutions.jaiext.affine</groupId>
-      <artifactId>jt-affine</artifactId>
-      <version>${jaiext.version}</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+      <version>${commons.math3.version}</version>
     </dependency>
     <dependency>
-      <groupId>it.geosolutions.jaiext.algebra</groupId>
-      <artifactId>jt-algebra</artifactId>
-      <version>${jaiext.version}</version>
+      <groupId>org.ejml</groupId>
+      <artifactId>ejml-simple</artifactId>
+      <version>${ejml.version}</version>
     </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.bandmerge</groupId>
-      <artifactId>jt-bandmerge</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.bandselect</groupId>
-      <artifactId>jt-bandselect</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.bandcombine</groupId>
-      <artifactId>jt-bandcombine</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.border</groupId>
-      <artifactId>jt-border</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.buffer</groupId>
-      <artifactId>jt-buffer</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.crop</groupId>
-      <artifactId>jt-crop</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.lookup</groupId>
-      <artifactId>jt-lookup</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.mosaic</groupId>
-      <artifactId>jt-mosaic</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.nullop</groupId>
-      <artifactId>jt-nullop</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.rescale</groupId>
-      <artifactId>jt-rescale</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.stats</groupId>
-      <artifactId>jt-stats</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.warp</groupId>
-      <artifactId>jt-warp</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.zonal</groupId>
-      <artifactId>jt-zonal</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.binarize</groupId>
-      <artifactId>jt-binarize</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.format</groupId>
-      <artifactId>jt-format</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.colorconvert</groupId>
-      <artifactId>jt-colorconvert</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.errordiffusion</groupId>
-      <artifactId>jt-errordiffusion</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.orderdither</groupId>
-      <artifactId>jt-orderdither</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.colorindexer</groupId>
-      <artifactId>jt-colorindexer</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.imagefunction</groupId>
-      <artifactId>jt-imagefunction</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.piecewise</groupId>
-      <artifactId>jt-piecewise</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.classifier</groupId>
-      <artifactId>jt-classifier</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>it.geosolutions.jaiext.rlookup</groupId>
-      <artifactId>jt-rlookup</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency> 
-    <dependency>
-      <groupId>it.geosolutions.jaiext.vectorbin</groupId>
-      <artifactId>jt-vectorbin</artifactId>
-      <version>${jaiext.version}</version>
-    </dependency> 
-    
+
     <!-- Test dependencies -->
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-sample-data</artifactId>
-      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-property</artifactId>
-      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-epsg-hsql</artifactId>
-      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -418,31 +420,28 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <!-- ======================================================= -->
-      <!--     Compilation.                                        -->
+      <!--     Compilation (Java 17: release)                      -->
       <!-- ======================================================= -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
+        <version>3.14.0</version>
         <configuration>
-          <source>11</source>  <!-- The -source argument for the Java compiler. -->
-          <target>11</target>  <!-- The -target argument for the Java compiler. -->
-          <debug>true</debug>   <!-- Whether to include debugging information.   -->
-          <encoding>UTF-8</encoding> <!-- The -encoding argument for the Java compiler. -->
-          <fork>${fork.javac}</fork>
-          <maxmem>${javac.maxHeapSize}</maxmem>
+          <release>${maven.compiler.release}</release>
+          <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
-    
+
       <!-- ======================================================= -->
       <!--     JAR packaging.                                      -->
       <!-- ======================================================= -->
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.3.0</version>
+        <version>3.4.2</version>
         <configuration>
           <archive>
             <index>true</index>
@@ -457,14 +456,14 @@
           </archive>
         </configuration>
       </plugin>
-      
+
       <!-- ======================================================= -->
-      <!--     Source packaging.                                      -->
+      <!--     Source packaging.                                   -->
       <!-- ======================================================= -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>3.3.0</version>
+        <version>3.3.1</version>
         <inherited>true</inherited>
         <configuration>
           <attach>true</attach>
@@ -478,12 +477,11 @@
           </execution>
         </executions>
       </plugin>
-      
     </plugins>
-    
+
     <pluginManagement>
       <plugins>
-        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <!-- Eclipse m2e -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
@@ -501,7 +499,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>

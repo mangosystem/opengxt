@@ -21,9 +21,11 @@ import java.awt.image.WritableRaster;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.media.jai.KernelJAI;
-import javax.media.jai.RasterFactory;
-
+import org.eclipse.imagen.KernelImageN;
+import org.eclipse.imagen.RasterFactory;
+import org.eclipse.imagen.media.kernel.KernelFactory;
+import org.eclipse.imagen.media.kernel.KernelFactory.ValueType;
+import org.eclipse.imagen.media.kernel.KernelUtil;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.coverage.CoverageFactoryFinder;
 import org.geotools.coverage.grid.GridCoordinates2D;
@@ -33,9 +35,6 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.process.spatialstatistics.core.UnitConverter;
 import org.geotools.process.spatialstatistics.gridcoverage.GridTransformer;
 import org.geotools.util.logging.Logging;
-import org.jaitools.media.jai.kernel.KernelFactory;
-import org.jaitools.media.jai.kernel.KernelFactory.ValueType;
-import org.jaitools.media.jai.kernel.KernelUtil;
 
 /**
  * Circles to Raster Operation
@@ -131,7 +130,7 @@ public class CirclesToDensityRaster {
         int radius = (int) (Math.floor(((circle.getRadius() + cellSize))) / cellSize);
 
         // Setup kernel
-        KernelJAI kernel = KernelFactory.createCircle(radius, ValueType.EPANECHNIKOV);
+        KernelImageN kernel = KernelFactory.createCircle(radius, ValueType.EPANECHNIKOV);
 
         int w = kernel.getWidth();
         int h = kernel.getHeight();
@@ -139,7 +138,7 @@ public class CirclesToDensityRaster {
         float[] data = kernel.getKernelData();
         data[radius * w + radius] = centreValue;
 
-        kernel = new KernelJAI(w, h, kernel.getXOrigin(), kernel.getYOrigin(), data);
+        kernel = new KernelImageN(w, h, kernel.getXOrigin(), kernel.getYOrigin(), data);
 
         if (standardize) {
             // kernel with element values standardized to sum to 1.0

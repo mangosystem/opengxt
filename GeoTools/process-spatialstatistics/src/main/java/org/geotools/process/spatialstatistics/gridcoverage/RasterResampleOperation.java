@@ -19,8 +19,7 @@ package org.geotools.process.spatialstatistics.gridcoverage;
 import java.awt.Dimension;
 import java.util.logging.Logger;
 
-import javax.media.jai.Interpolation;
-
+import org.eclipse.imagen.Interpolation;
 import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridEnvelope2D;

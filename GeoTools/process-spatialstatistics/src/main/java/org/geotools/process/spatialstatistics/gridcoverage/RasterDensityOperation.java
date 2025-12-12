@@ -16,15 +16,13 @@
  */
 package org.geotools.process.spatialstatistics.gridcoverage;
 
-import java.awt.RenderingHints;
 import java.util.logging.Logger;
+import java.awt.image.ColorModel;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 
-import javax.media.jai.BorderExtender;
-import javax.media.jai.JAI;
-import javax.media.jai.ParameterBlockJAI;
-import javax.media.jai.PlanarImage;
-import javax.media.jai.registry.RenderedRegistryMode;
-
+import org.eclipse.imagen.PlanarImage;
+import org.eclipse.imagen.RasterFactory;
 import org.geotools.api.feature.simple.SimpleFeature;
 import org.geotools.api.feature.simple.SimpleFeatureType;
 import org.geotools.api.filter.Filter;
@@ -35,12 +33,12 @@ import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.process.spatialstatistics.core.DiskMemImage;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
 import org.geotools.process.spatialstatistics.core.StringHelper;
 import org.geotools.process.spatialstatistics.enumeration.RasterPixelType;
 import org.geotools.util.factory.GeoTools;
 import org.geotools.util.logging.Logging;
-import org.jaitools.tiledimage.DiskMemImage;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 
@@ -71,16 +69,41 @@ public class RasterDensityOperation extends RasterProcessingOperation {
     }
 
     protected PlanarImage scaleUnit(PlanarImage image) {
-        final RenderingHints hints = new RenderingHints(JAI.KEY_BORDER_EXTENDER,
-                BorderExtender.createInstance(BorderExtender.BORDER_ZERO));
+        if (scaleArea == 0.0) {
+            return image;
+        }
 
-        final ParameterBlockJAI pb = new ParameterBlockJAI("DivideByConst",
-                RenderedRegistryMode.MODE_NAME);
+        // Copy data and divide each sample by the scale factor
+        WritableRaster raster = image.getData().createCompatibleWritableRaster();
+        image.copyData(raster);
 
-        pb.setSource("source0", image);
-        pb.setParameter("constants", new double[] { scaleArea });
+        final int width = raster.getWidth();
+        final int height = raster.getHeight();
+        final int numBands = raster.getNumBands();
 
-        return JAI.create("DivideByConst", pb, hints);
+        double[] pixel = new double[numBands];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                raster.getPixel(x, y, pixel);
+                for (int b = 0; b < numBands; b++) {
+                    pixel[b] = pixel[b] / scaleArea;
+                }
+                raster.setPixel(x, y, pixel);
+            }
+        }
+
+        // Rebuild a DiskMemImage with the divided data
+        ColorModel cm = image.getColorModel();
+        if (cm == null) {
+            cm = PlanarImage.createColorModel(image.getSampleModel());
+        }
+
+        SampleModel sm = RasterFactory.createBandedSampleModel(raster.getDataBuffer().getDataType(),
+                image.getTileWidth(), image.getTileHeight(), numBands);
+
+        DiskMemImage out = new DiskMemImage(0, 0, width, height, 0, 0, sm, cm);
+        out.setData(raster);
+        return out;
     }
 
     protected PlanarImage pointToRaster(SimpleFeatureCollection pointFeatures,

@@ -7,31 +7,6 @@
 
 ## OpenGXT - Spatial Analysis
 
-### Build (GeoServer 2.28.6 / GeoTools 34.6)
-
-Use JDK 17 and Maven. From the repository root, build and test both modules with:
-
-```powershell
-$env:JAVA_HOME = 'C:\Programs-20200206\java\jdk-17.0.10+7'
-$env:Path = "$env:JAVA_HOME\bin;$env:Path"
-mvn clean verify
-```
-
-Versions follow the [GeoServer 2.28.6 release POM](https://github.com/geoserver/geoserver/blob/2.28.6/src/pom.xml).
-The `2.28.x` branch declares SNAPSHOT versions; release builds use GeoServer 2.28.6 and GeoTools 34.6.
-GeoServer dependency management aligns Wicket 9.23.0 and Spring dependencies.
-The GeoTools platform BOM manages ImageN 0.9.1 and ImageIO-Ext 2.0.6.
-GeoJSON PPIOs use the Jackson 2 API, matching GeoServer 2.28.6.
-Existing JUnit 3/4 tests run with JUnit 4.13.2.
-
-The resulting JARs are `GeoTools/process-spatialstatistics/target/gt-process-spatialstatistics-34.6.jar`
-and `GeoServer/gs-wps-spatialstatistics/target/gs-wps-spatialstatistics-2.28.6.jar`.
-Install the matching WPS extension in GeoServer 2.28.6, then copy both JARs into `WEB-INF/lib`.
-
-On 2026-10-20, `mvn verify` passed on JDK 17.0.10+7, including all 7 GeoTools tests
-and 5 GeoServer tests covering raster analysis and GeoJSON input/output.
-Deployment in GeoServer 2.28.6 has not yet been verified.
-
 ### Overview
 The goal of this project is to provide a spatial statistics tools for Geotools, Geoserver WPS, uDig Statistics Toolbox
 

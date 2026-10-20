@@ -7,6 +7,31 @@
 
 ## OpenGXT - Spatial Analysis
 
+### 빌드 (GeoServer 3.0.2 / GeoTools 35.2)
+
+JDK 17과 Maven을 사용합니다. 저장소 루트에서 다음 PowerShell 명령으로 두 모듈을 함께 빌드하고 테스트할 수 있습니다.
+
+```powershell
+$env:JAVA_HOME = 'C:\Programs-20200206\java\jdk-17.0.10+7'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+mvn clean verify
+```
+
+GeoServer 버전은 [3.0.2 릴리스 POM](https://github.com/geoserver/geoserver/blob/3.0.2/src/pom.xml)을 기준으로 고정했습니다.
+`3.0.2.x` 브랜치는 SNAPSHOT 버전을 선언하므로 릴리스 배포본과 구분해야 합니다.
+GeoServer의 의존성 관리 설정으로 Wicket 10.11.0 및 Spring 버전을 맞추며,
+GeoTools 35.2의 플랫폼 BOM으로 ImageN 0.9.3과 ImageIO-Ext 2.1.4 버전을 관리합니다.
+GeoJSON PPIO는 GeoServer 3.0.2와 동일한 Jackson 3 API를 사용합니다.
+기존 JUnit 3/4 테스트는 JUnit 4.13.2로 실행합니다.
+
+결과 파일은 `GeoTools/process-spatialstatistics/target/gt-process-spatialstatistics-35.2.jar`와
+`GeoServer/gs-wps-spatialstatistics/target/gs-wps-spatialstatistics-3.0.2.jar`입니다.
+GeoServer 3.0.2에 같은 버전의 WPS 확장을 설치한 후 두 JAR를 `WEB-INF/lib`에 복사합니다.
+
+2026-10-20에 GeoServer 3.0.2의 WPS 확장 설치 후 OpenGXT가 정상 실행되는 것을 확인했습니다.
+WPS 요청 빌더에서 `statistics:CollectEvents` 프로세스가 등록되고 입력 파라미터와 한국어 설명이 정상 표시되었습니다.
+JDK 17.0.10+7에서 `mvn clean verify`도 성공했으며, GeoTools 테스트 7개와 GeoServer 테스트 5개가 모두 통과했습니다.
+
 ### 개요
 OGC 국제표준과 Open Source GIS에 기반하여 개발한 공간(통계)분석 엔진으로 3개의 프로젝트로 구성되어 있습니다.
   * GeoTools 기반의 공간(통계)분석 Library

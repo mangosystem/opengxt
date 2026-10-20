@@ -23,7 +23,7 @@
   <packaging>jar</packaging>
   <name>Process Spatialstatistics</name>
   <description>Processes for spatial statistics.</description>
-  <version>34-SNAPSHOT</version>
+  <version>35.2</version>
   <url>https://github.com/mangosystem/opengxt</url>
   <licenses>
     <license>
@@ -35,15 +35,13 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <geotools.version>34.0</geotools.version>
-    <commons.math3.version>3.6</commons.math3.version>
+    <geotools.version>35.2</geotools.version>
+    <commons.math3.version>3.6.1</commons.math3.version>
     <ejml.version>0.41</ejml.version>
     <xstream.version>1.4.21</xstream.version>
     <maven.compiler.release>17</maven.compiler.release>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
-    <allow.test.skip>true</allow.test.skip>
-    <allow.test.failure.ignore>true</allow.test.failure.ignore>
   </properties>
 
   <repositories>
@@ -69,17 +67,6 @@
         <enabled>false</enabled>
       </releases>
     </repository>
-    <repository>
-      <id>geosolutions</id>
-      <name>geosolutions repository</name>
-      <url>http://maven.geo-solutions.it/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
   </repositories>
 
   <!-- =========================================================== -->
@@ -100,7 +87,7 @@
   </developers>
 
   <!-- =========================================================== -->
-  <!--     BOM / Dependency Management (GeoTools 34.x )            -->
+  <!--     BOM / Dependency Management (GeoTools 35.2 )            -->
   <!-- =========================================================== -->
   <dependencyManagement>
     <dependencies>
@@ -219,163 +206,163 @@
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>jiffle-op</artifactId>
+      <artifactId>imagen-jiffle-op</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>classbreaks</artifactId>
+      <artifactId>imagen-classbreaks</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>affine</artifactId>
+      <artifactId>imagen-affine</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>algebra</artifactId>
+      <artifactId>imagen-algebra</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>bandmerge</artifactId>
+      <artifactId>imagen-bandmerge</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>bandselect</artifactId>
+      <artifactId>imagen-bandselect</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>bandcombine</artifactId>
+      <artifactId>imagen-bandcombine</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>border</artifactId>
+      <artifactId>imagen-border</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>buffer</artifactId>
+      <artifactId>imagen-buffer</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>crop</artifactId>
+      <artifactId>imagen-crop</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>iterators</artifactId>
+      <artifactId>imagen-iterators</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>lookup</artifactId>
+      <artifactId>imagen-lookup</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>mosaic</artifactId>
+      <artifactId>imagen-mosaic</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>nullop</artifactId>
+      <artifactId>imagen-nullop</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>rescale</artifactId>
+      <artifactId>imagen-rescale</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>scale</artifactId>
+      <artifactId>imagen-scale</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>scale2</artifactId>
+      <artifactId>imagen-scale2</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>stats</artifactId>
+      <artifactId>imagen-stats</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>translate</artifactId>
+      <artifactId>imagen-translate</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>utilities</artifactId>
+      <artifactId>imagen-utilities</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>warp</artifactId>
+      <artifactId>imagen-warp</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>zonal</artifactId>
+      <artifactId>imagen-zonal</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>binarize</artifactId>
+      <artifactId>imagen-binarize</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>format</artifactId>
+      <artifactId>imagen-format</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>colorconvert</artifactId>
+      <artifactId>imagen-colorconvert</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>errordiffusion</artifactId>
+      <artifactId>imagen-errordiffusion</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>orderdither</artifactId>
+      <artifactId>imagen-orderdither</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>colorindexer</artifactId>
+      <artifactId>imagen-colorindexer</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>imagefunction</artifactId>
+      <artifactId>imagen-imagefunction</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>piecewise</artifactId>
+      <artifactId>imagen-piecewise</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>classifier</artifactId>
+      <artifactId>imagen-classifier</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>rlookup</artifactId>
+      <artifactId>imagen-rlookup</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>vectorbin</artifactId>
+      <artifactId>imagen-vectorbin</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>shadedrelief</artifactId>
+      <artifactId>imagen-shadedrelief</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>concurrent-tile-cache</artifactId>
+      <artifactId>imagen-concurrent-tile-cache</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>rendered-image-browser</artifactId>
+      <artifactId>imagen-rendered-image-browser</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>imageread</artifactId>
+      <artifactId>imagen-imageread</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>convolve</artifactId>
+      <artifactId>imagen-convolve</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>contour</artifactId>
+      <artifactId>imagen-contour</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.imagen</groupId>
-      <artifactId>vectorize</artifactId>
+      <artifactId>imagen-vectorize</artifactId>
     </dependency>
 
     <!-- xstream -->
@@ -423,13 +410,18 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.4</version>
+      </plugin>
       <!-- ======================================================= -->
       <!--     Compilation (Java 17: release)                      -->
       <!-- ======================================================= -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.14.0</version>
+        <version>3.14.1</version>
         <configuration>
           <release>${maven.compiler.release}</release>
           <encoding>UTF-8</encoding>

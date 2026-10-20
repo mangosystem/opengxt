@@ -19,9 +19,8 @@ import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Geometry;
 
 import com.bedatadriven.jackson.datatype.jts.JtsModule;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Inputs and outputs feature collections in GeoJSON format using gt-geojson
@@ -36,14 +35,10 @@ public abstract class ApplicationGeoJSONPPIO extends CDataPPIO {
 
     static final int DECIMALS = 10; // for EPSG:4326
 
-    private static JsonFactory JSON_FACTORY = new JsonFactory();;
-
     static final ObjectMapper MAPPER;
 
     static {
-        MAPPER = new ObjectMapper();
-        JtsModule module = new JtsModule(DECIMALS);
-        MAPPER.registerModule(module);
+        MAPPER = JsonMapper.builder().addModule(new JtsModule(DECIMALS)).build();
     }
 
     @SuppressWarnings("rawtypes")
@@ -110,24 +105,17 @@ public abstract class ApplicationGeoJSONPPIO extends CDataPPIO {
             if (decimals == DECIMALS) {
                 return MAPPER;
             }
-            ObjectMapper mapper = new ObjectMapper();
-            JtsModule module = new JtsModule(decimals);
-            mapper.registerModule(module);
-            return mapper;
+            return JsonMapper.builder().addModule(new JtsModule(decimals)).build();
         }
 
         @Override
         public Object decode(InputStream input) throws Exception {
-            try (JsonParser parser = JSON_FACTORY.createParser(input)) {
-                return MAPPER.readValue(parser, Geometry.class);
-            }
+            return MAPPER.readValue(input, Geometry.class);
         }
 
         @Override
         public Object decode(String input) throws Exception {
-            try (JsonParser parser = JSON_FACTORY.createParser(input)) {
-                return MAPPER.readValue(parser, Geometry.class);
-            }
+            return MAPPER.readValue(input, Geometry.class);
         }
     }
 }

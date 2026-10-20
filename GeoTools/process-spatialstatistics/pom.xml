@@ -23,7 +23,7 @@
   <packaging>jar</packaging>
   <name>Process Spatialstatistics</name>
   <description>Processes for spatial statistics.</description>
-  <version>34-SNAPSHOT</version>
+  <version>34.6</version>
   <url>https://github.com/mangosystem/opengxt</url>
   <licenses>
     <license>
@@ -35,15 +35,13 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <geotools.version>34.0</geotools.version>
-    <commons.math3.version>3.6</commons.math3.version>
+    <geotools.version>34.6</geotools.version>
+    <commons.math3.version>3.6.1</commons.math3.version>
     <ejml.version>0.41</ejml.version>
     <xstream.version>1.4.21</xstream.version>
     <maven.compiler.release>17</maven.compiler.release>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
-    <allow.test.skip>true</allow.test.skip>
-    <allow.test.failure.ignore>true</allow.test.failure.ignore>
   </properties>
 
   <repositories>
@@ -69,17 +67,6 @@
         <enabled>false</enabled>
       </releases>
     </repository>
-    <repository>
-      <id>geosolutions</id>
-      <name>geosolutions repository</name>
-      <url>http://maven.geo-solutions.it/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
   </repositories>
 
   <!-- =========================================================== -->
@@ -100,7 +87,7 @@
   </developers>
 
   <!-- =========================================================== -->
-  <!--     BOM / Dependency Management (GeoTools 34.x )            -->
+  <!--     BOM / Dependency Management (GeoTools 34.6 )            -->
   <!-- =========================================================== -->
   <dependencyManagement>
     <dependencies>
@@ -423,6 +410,11 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.3</version>
+      </plugin>
       <!-- ======================================================= -->
       <!--     Compilation (Java 17: release)                      -->
       <!-- ======================================================= -->

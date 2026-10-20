@@ -13,7 +13,7 @@
   <!-- =========================================================== -->
   <groupId>org.geoserver</groupId>
   <artifactId>gs-wps-spatialstatistics</artifactId>
-  <version>2.28-SNAPSHOT</version>
+  <version>2.28.6</version>
   <packaging>jar</packaging>
   <name>Spatial Statistics Web Processing Service Module</name>
   <url>https://github.com/mangosystem/opengxt</url>
@@ -28,8 +28,8 @@
     <maven.compiler.release>17</maven.compiler.release>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
-    <geotools.version>34-SNAPSHOT</geotools.version>
-    <wicket.version>9.21.0</wicket.version>
+    <geotools.version>34.6</geotools.version>
+    <geoserver.version>2.28.6</geoserver.version>
   </properties>
   <repositories>
     <repository>
@@ -54,17 +54,6 @@
         <enabled>false</enabled>
       </releases>
     </repository>
-    <repository>
-      <id>geosolutions</id>
-      <name>geosolutions repository</name>
-      <url>http://maven.geo-solutions.it/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
   </repositories>
   
   <!-- =========================================================== -->
@@ -85,24 +74,15 @@
   </developers>
 
   <!-- =========================================================== -->
-  <!--     BOM / Dependency Management (GeoTools 34.x)             -->
+  <!--     BOM / Dependency Management (GeoServer 2.28.6)             -->
   <!-- =========================================================== -->
   <dependencyManagement>
     <dependencies>
-      <!-- GeoTools BOM -->
+      <!-- Includes GeoTools 34.6 and platform BOMs, Spring, Wicket and JUnit. -->
       <dependency>
-        <groupId>org.geotools</groupId>
-        <artifactId>gt-bom</artifactId>
-        <version>${geotools.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
-      <!-- GeoTools Third Party Libraries -->
-      <dependency>
-        <groupId>org.geotools</groupId>
-        <artifactId>gt-platform-dependencies</artifactId>
-        <version>${geotools.version}</version>
+        <groupId>org.geoserver</groupId>
+        <artifactId>geoserver</artifactId>
+        <version>${geoserver.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -114,24 +94,25 @@
   <!-- =========================================================== -->
   <dependencies>
     <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-process-spatialstatistics</artifactId>
+      <version>${geotools.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.wicket</groupId>
       <artifactId>wicket-core</artifactId>
-      <version>${wicket.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.wicket</groupId>
       <artifactId>wicket-util</artifactId>
-      <version>${wicket.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.wicket</groupId>
       <artifactId>wicket-request</artifactId>
-      <version>${wicket.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.wicket</groupId>
       <artifactId>wicket-extensions</artifactId>
-      <version>${wicket.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
@@ -180,7 +161,7 @@
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
-      <artifactId>gt-geojson</artifactId>      
+      <artifactId>gt-geojson-core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.geotools.xsd</groupId>
@@ -197,32 +178,32 @@
     <dependency>
       <groupId>org.geoserver</groupId>
       <artifactId>gs-ows</artifactId>
-      <version>${project.version}</version>
+      <version>${geoserver.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geoserver</groupId>
       <artifactId>gs-main</artifactId>
-      <version>${project.version}</version>
+      <version>${geoserver.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geoserver</groupId>
       <artifactId>gs-platform</artifactId>
-      <version>${project.version}</version>
+      <version>${geoserver.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geoserver.web</groupId>
       <artifactId>gs-web-core</artifactId>
-      <version>${project.version}</version>
+      <version>${geoserver.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geoserver.web</groupId>
       <artifactId>gs-web-sec-core</artifactId>
-      <version>${project.version}</version>
+      <version>${geoserver.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geoserver.extension</groupId>
       <artifactId>gs-wps-core</artifactId>
-      <version>${project.version}</version>
+      <version>${geoserver.version}</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -233,17 +214,6 @@
   </dependencies>
   
   <build>
-    <!-- Forces some plugin versions since latest and greatest are not working properly -->
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>cobertura-maven-plugin</artifactId>
-          <version>2.4</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-    
     <!-- TODO: the resources stuff hardcodes paths to source + test directories,
       we should be able to use some properties here -->
     <resources>
@@ -323,6 +293,11 @@
       </testResource>
     </testResources>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.3</version>
+      </plugin>
       <!-- ======================================================= -->
       <!--     Compilation.                                        -->
       <!-- ======================================================= -->
@@ -331,16 +306,11 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.14.0</version>
         <configuration>
-          <source>17</source>
-          <!-- The -source argument for the Java compiler. -->
-          <target>17</target>
-          <!-- The -target argument for the Java compiler. -->
+          <release>${maven.compiler.release}</release>
           <debug>true</debug>
           <!-- Whether to include debugging information.   -->
           <encoding>UTF-8</encoding>
           <!-- The -encoding argument for the Java compiler. -->
-          <fork>${fork.javac}</fork>
-          <maxmem>${javac.maxHeapSize}</maxmem>
         </configuration>
       </plugin>
       
@@ -386,22 +356,5 @@
         </executions>
       </plugin>
     </plugins>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-webdav</artifactId>
-        <version>1.0-beta-2</version>
-      </extension>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ssh</artifactId>
-        <version>2.10</version>
-      </extension>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-http</artifactId>
-        <version>2.10</version>
-      </extension>
-    </extensions>
   </build>
 </project>

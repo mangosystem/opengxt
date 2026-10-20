@@ -15,16 +15,12 @@ import org.geotools.util.logging.Logging;
 import org.locationtech.jts.geom.Geometry;
 
 import com.bedatadriven.jackson.datatype.jts.JtsModule;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GeometryGeoJSONPPIO extends CDataPPIO {
     protected static final Logger LOGGER = Logging.getLogger(GeometryGeoJSONPPIO.class);
 
     static final int DECIMALS = 10; // for EPSG:4326
-
-    private static JsonFactory JSON_FACTORY = new JsonFactory();;
 
     static final ObjectMapper MAPPER;
 
@@ -61,15 +57,11 @@ public class GeometryGeoJSONPPIO extends CDataPPIO {
 
     @Override
     public Object decode(InputStream input) throws Exception {
-        try (JsonParser parser = JSON_FACTORY.createParser(input)) {
-            return MAPPER.readValue(parser, Geometry.class);
-        }
+        return MAPPER.readValue(input, Geometry.class);
     }
 
     @Override
     public Object decode(String input) throws Exception {
-        try (JsonParser parser = JSON_FACTORY.createParser(input)) {
-            return MAPPER.readValue(parser, Geometry.class);
-        }
+        return MAPPER.readValue(input, Geometry.class);
     }
 }

@@ -7,31 +7,6 @@
 
 ## OpenGXT - Spatial Analysis
 
-### Build (GeoServer 3.0.2 / GeoTools 35.2)
-
-Use JDK 17 and Maven. From the repository root, build and test both modules with:
-
-```powershell
-$env:JAVA_HOME = 'C:\Programs-20200206\java\jdk-17.0.10+7'
-$env:Path = "$env:JAVA_HOME\bin;$env:Path"
-mvn clean verify
-```
-
-Versions follow the [GeoServer 3.0.2 release POM](https://github.com/geoserver/geoserver/blob/3.0.2/src/pom.xml).
-The `3.0.2.x` branch declares SNAPSHOT versions; release builds use GeoServer 3.0.2 and GeoTools 35.2.
-GeoServer dependency management aligns Wicket 10.11.0 and Spring dependencies.
-The GeoTools platform BOM manages ImageN 0.9.3 and ImageIO-Ext 2.1.4.
-GeoJSON PPIOs use the Jackson 3 API, matching GeoServer 3.0.2.
-Existing JUnit 3/4 tests run with JUnit 4.13.2.
-
-The resulting JARs are `GeoTools/process-spatialstatistics/target/gt-process-spatialstatistics-35.2.jar`
-and `GeoServer/gs-wps-spatialstatistics/target/gs-wps-spatialstatistics-3.0.2.jar`.
-Install the matching WPS extension in GeoServer 3.0.2, then copy both JARs into `WEB-INF/lib`.
-
-On 2026-10-20, OpenGXT was confirmed to run successfully after installing the WPS extension in GeoServer 3.0.2.
-The WPS request builder listed `statistics:CollectEvents` with its input parameters and Korean descriptions displayed correctly.
-The `mvn clean verify` build also passed on JDK 17.0.10+7, including all 7 GeoTools tests and 5 GeoServer tests.
-
 ### Overview
 The goal of this project is to provide a spatial statistics tools for Geotools, Geoserver WPS, uDig Statistics Toolbox
 

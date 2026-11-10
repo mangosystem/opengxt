@@ -110,6 +110,13 @@ public class RasterLinearLOSProcessFactory extends SpatialStatisticsProcessFacto
             getResource("LinearLineOfSight.refractionFactor.description"), false, 0, 1,
             Double.valueOf(0.13d), null);
 
+    /** Whether visibility remains blocked after the first invisible sample. */
+    public static final Parameter<Boolean> stopAtFirstInvisible = new Parameter<Boolean>(
+            "stopAtFirstInvisible", Boolean.class,
+            getResource("LinearLineOfSight.stopAtFirstInvisible.title"),
+            getResource("LinearLineOfSight.stopAtFirstInvisible.description"), false, 0, 1,
+            Boolean.FALSE, null);
+
     @Override
     protected Map<String, Parameter<?>> getParameterInfo() {
         HashMap<String, Parameter<?>> parameterInfo = new LinkedHashMap<String, Parameter<?>>();
@@ -120,6 +127,7 @@ public class RasterLinearLOSProcessFactory extends SpatialStatisticsProcessFacto
         parameterInfo.put(useCurvature.key, useCurvature);
         parameterInfo.put(useRefraction.key, useRefraction);
         parameterInfo.put(refractionFactor.key, refractionFactor);
+        parameterInfo.put(stopAtFirstInvisible.key, stopAtFirstInvisible);
         return parameterInfo;
     }
 

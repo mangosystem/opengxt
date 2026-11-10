@@ -287,6 +287,33 @@ public class RasterFunctionalSurface {
         return result;
     }
 
+    /** Keep the complete ray, but never restore visibility after its first hidden sample. */
+    public LineString getLineOfSight(LineString segment, double observerOffset,
+            boolean useCurvature, boolean useRefraction, double refractionFactor,
+            boolean stopAtFirstInvisible) {
+        LineString result = getLineOfSight(segment, observerOffset, useCurvature, useRefraction,
+                refractionFactor);
+        if (!stopAtFirstInvisible) {
+            return result;
+        }
+        Coordinate[] coordinates = result.getCoordinates();
+        boolean blocked = false;
+        for (Coordinate coordinate : coordinates) {
+            blocked |= coordinate.z == INVISIBLE;
+            if (blocked) {
+                coordinate.z = INVISIBLE;
+            }
+        }
+        return result.getFactory().createLineString(coordinates);
+    }
+
+    public LineString getLineOfSight(Coordinate observer, Coordinate target, double observerOffset,
+            boolean useCurvature, boolean useRefraction, double refractionFactor,
+            boolean stopAtFirstInvisible) {
+        return getLineOfSight(gf.createLineString(new Coordinate[] { observer, target }),
+                observerOffset, useCurvature, useRefraction, refractionFactor, stopAtFirstInvisible);
+    }
+
     public double getSlope(Point position, SlopeType slopeType) {
         double retVal = noData;
 

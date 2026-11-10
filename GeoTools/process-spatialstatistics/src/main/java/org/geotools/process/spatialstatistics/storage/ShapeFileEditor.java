@@ -43,7 +43,7 @@ import org.geotools.data.shapefile.dbf.DbaseFileHeader;
 import org.geotools.data.shapefile.dbf.DbaseFileReader;
 import org.geotools.data.shapefile.dbf.DbaseFileWriter;
 import org.geotools.process.spatialstatistics.core.FeatureTypes;
-import org.geotools.util.URLs;
+import org.geotools.data.DataUtilities;
 import org.geotools.util.logging.Logging;
 import org.opengis.feature.simple.SimpleFeatureType;
 
@@ -208,9 +208,9 @@ public class ShapeFileEditor extends AbstractEditor {
 
         try {
             if (dataStore instanceof DirectoryDataStore) {
-                folder = URLs.urlToFile(uri.toURL()).getPath();
+                folder = DataUtilities.urlToFile(uri.toURL()).getPath();
             } else if (dataStore instanceof ShapefileDataStore) {
-                folder = URLs.urlToFile(uri.toURL()).getParent();
+                folder = DataUtilities.urlToFile(uri.toURL()).getParent();
             }
         } catch (MalformedURLException e) {
             LOGGER.log(Level.FINER, e.getMessage(), e);

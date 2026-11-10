@@ -1,0 +1,23 @@
+[
+  {
+    "radius_m": 1000,
+    "rays": "180",
+    "ordered_samples": "5488",
+    "mismatches": "0",
+    "geometry_length_preserved": "true"
+  },
+  {
+    "radius_m": 5000,
+    "rays": "180",
+    "ordered_samples": "27108",
+    "mismatches": "0",
+    "geometry_length_preserved": "true"
+  },
+  {
+    "radius_m": 10000,
+    "rays": "180",
+    "ordered_samples": "52535",
+    "mismatches": "0",
+    "geometry_length_preserved": "true"
+  }
+]

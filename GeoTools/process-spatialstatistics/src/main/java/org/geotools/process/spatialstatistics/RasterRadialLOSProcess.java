@@ -56,6 +56,14 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
             Geometry observerPoint, Double observerOffset, Double radius, Integer sides,
             Boolean useCurvature, Boolean useRefraction, Double refractionFactor,
             ProgressListener monitor) {
+        return process(inputCoverage, observerPoint, observerOffset, radius, sides, useCurvature,
+                useRefraction, refractionFactor, false, monitor);
+    }
+
+    public static SimpleFeatureCollection process(GridCoverage2D inputCoverage,
+            Geometry observerPoint, Double observerOffset, Double radius, Integer sides,
+            Boolean useCurvature, Boolean useRefraction, Double refractionFactor,
+            Boolean stopAtFirstInvisible, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(RasterRadialLOSProcessFactory.inputCoverage.key, inputCoverage);
         map.put(RasterRadialLOSProcessFactory.observerPoint.key, observerPoint);
@@ -65,6 +73,7 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
         map.put(RasterRadialLOSProcessFactory.useCurvature.key, useCurvature);
         map.put(RasterRadialLOSProcessFactory.useRefraction.key, useRefraction);
         map.put(RasterRadialLOSProcessFactory.refractionFactor.key, refractionFactor);
+        map.put(RasterRadialLOSProcessFactory.stopAtFirstInvisible.key, stopAtFirstInvisible);
 
         Process process = new RasterRadialLOSProcess(null);
         Map<String, Object> resultMap;
@@ -104,6 +113,9 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
                 RasterRadialLOSProcessFactory.refractionFactor,
                 RasterRadialLOSProcessFactory.refractionFactor.sample);
 
+        Boolean stopAtFirstInvisible = (Boolean) Params.getValue(input,
+                RasterRadialLOSProcessFactory.stopAtFirstInvisible, Boolean.FALSE);
+
         if (inputCoverage == null || observerPoint == null || radius == null) {
             throw new NullPointerException(
                     "inputCoverage, observerPoint, radius parameters required");
@@ -120,7 +132,8 @@ public class RasterRadialLOSProcess extends AbstractStatisticsProcess {
 
         RadialLOSOperation process = new RadialLOSOperation();
         SimpleFeatureCollection resultSfc = process.execute(inputCoverage, observerPoint,
-                observerOffset, radius, sides, useCurvature, useRefraction, refractionFactor);
+                observerOffset, radius, sides, useCurvature, useRefraction, refractionFactor,
+                stopAtFirstInvisible);
         // end process
 
         Map<String, Object> resultMap = new HashMap<String, Object>();

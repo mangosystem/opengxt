@@ -1,0 +1,23 @@
+java=1.8.0_202
+vm=Java HotSpot(TM) 64-Bit Server VM
+max_heap_bytes=954728448
+processors=8
+implementation=file:/E:/GitHub/opengxt/bin/viewshed-optimization/comparison/baseline-build/classes/
+observer=197626.8424993126,451398.77749999944
+crs=PROJCS["PCS Name = Bessel_1841_Transverse_Mercator",
+  GEOGCS["GCS Name = GCS_Bessel",
+    DATUM["Datum = Bessel",
+      SPHEROID["Ellipsoid = Bessel_1841", 6377397.155, 299.1528128]],
+    PRIMEM["Greenwich", 0.0],
+    UNIT["degree", 0.017453292519943295],
+    AXIS["Geodetic longitude", EAST],
+    AXIS["Geodetic latitude", NORTH]],
+  PROJECTION["Transverse_Mercator"],
+  PARAMETER["central_meridian", 127.00289027777781],
+  PARAMETER["latitude_of_origin", 38.0],
+  PARAMETER["scale_factor", 1.0],
+  PARAMETER["false_easting", 200000.0],
+  PARAMETER["false_northing", 500000.0],
+  UNIT["m", 1.0],
+  AXIS["Easting", EAST],
+  AXIS["Northing", NORTH]]

@@ -1,0 +1,25 @@
+{
+  "dem": "C:\\dataset\\dataset\\seoul_raster\\dem30.tif",
+  "dem_sha256": "24dd80186ef55680756d2d90ae33565cef1cbdfe2b53d4e62f011c4b58d1e749",
+  "baseline_source_sha256": "7095552d5117701ba674410128e660930a1cab718a709051bac3ac9b01339240",
+  "optimized_jar_sha256": "0dbec9ad2aedc628ecc5e8ff7f3714c871aa01864b20fab6292932bbd381ca6e",
+  "java_home": "C:\\Program Files\\Java\\jdk1.8.0_202",
+  "jvm_arguments": [
+    "-Xms256m",
+    "-Xmx1024m",
+    "-Djava.awt.headless=true"
+  ],
+  "started_at": "2026-11-10T14:39:13.9050222+09:00",
+  "order": [
+    "baseline/1000",
+    "optimized/1000",
+    "optimized/5000",
+    "baseline/5000",
+    "baseline/10000",
+    "optimized/10000",
+    "optimized/0",
+    "baseline/0"
+  ],
+  "finished_at": "2026-11-10T14:40:24.3610413+09:00",
+  "optimized_jar_snapshot": "E:\\GitHub\\opengxt\\bin\\viewshed-optimization\\comparison\\optimized-artifact\\gt-process-spatialstatistics-17.5.jar"
+}

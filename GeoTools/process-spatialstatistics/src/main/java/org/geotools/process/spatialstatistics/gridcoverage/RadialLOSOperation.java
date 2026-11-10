@@ -70,6 +70,13 @@ public class RadialLOSOperation extends GeneralOperation {
     public SimpleFeatureCollection execute(GridCoverage2D inputCoverage, Geometry observerPoint,
             Double observerOffset, Double radius, Integer sides, Boolean useCurvature,
             Boolean useRefraction, Double refractionFactor) {
+        return execute(inputCoverage, observerPoint, observerOffset, radius, sides, useCurvature,
+                useRefraction, refractionFactor, false);
+    }
+
+    public SimpleFeatureCollection execute(GridCoverage2D inputCoverage, Geometry observerPoint,
+            Double observerOffset, Double radius, Integer sides, Boolean useCurvature,
+            Boolean useRefraction, Double refractionFactor, Boolean stopAtFirstInvisible) {
         CoordinateReferenceSystem crs = inputCoverage.getCoordinateReferenceSystem();
         SimpleFeatureType featureType = createTemplateFeatures(crs);
 
@@ -116,7 +123,7 @@ public class RadialLOSOperation extends GeneralOperation {
             }
 
             LineString los = process.getLineOfSight(center, to, observerOffset, useCurvature,
-                    useRefraction, refractionFactor);
+                    useRefraction, refractionFactor, Boolean.TRUE.equals(stopAtFirstInvisible));
             if (los == null) {
                 continue;
             }

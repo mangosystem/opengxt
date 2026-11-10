@@ -1,0 +1,139 @@
+{
+  "manifest": {
+    "dem": "C:\\dataset\\dataset\\seoul_raster\\dem30.tif",
+    "dem_sha256": "24dd80186ef55680756d2d90ae33565cef1cbdfe2b53d4e62f011c4b58d1e749",
+    "baseline_source_sha256": "7095552d5117701ba674410128e660930a1cab718a709051bac3ac9b01339240",
+    "optimized_jar_sha256": "0dbec9ad2aedc628ecc5e8ff7f3714c871aa01864b20fab6292932bbd381ca6e",
+    "java_home": "C:\\Program Files\\Java\\jdk1.8.0_202",
+    "jvm_arguments": [
+      "-Xms256m",
+      "-Xmx1024m",
+      "-Djava.awt.headless=true"
+    ],
+    "started_at": "2026-11-10T14:39:13.9050222+09:00",
+    "order": [
+      "baseline/1000",
+      "optimized/1000",
+      "optimized/5000",
+      "baseline/5000",
+      "baseline/10000",
+      "optimized/10000",
+      "optimized/0",
+      "baseline/0"
+    ],
+    "finished_at": "2026-11-10T14:40:24.3610413+09:00",
+    "optimized_jar_snapshot": "E:\\GitHub\\opengxt\\bin\\viewshed-optimization\\comparison\\optimized-artifact\\gt-process-spatialstatistics-17.5.jar"
+  },
+  "total_pixels_compared": 1807617,
+  "mismatch_count": 0,
+  "cases": [
+    {
+      "radius_m": 1000,
+      "shape": [
+        67,
+        67
+      ],
+      "metadata_equal": true,
+      "baseline": {
+        "first_ms": 974.429,
+        "median_ms": 1255.096,
+        "minimum_ms": 794.065,
+        "maximum_ms": 1345.316,
+        "peak_heap_bytes": 45189336,
+        "peak_heap_delta_bytes": 32124320
+      },
+      "optimized": {
+        "first_ms": 127.678,
+        "median_ms": 9.98,
+        "minimum_ms": 8.323,
+        "maximum_ms": 15.138,
+        "peak_heap_bytes": 19325792,
+        "peak_heap_delta_bytes": 7106840
+      },
+      "pixels_compared": 4489,
+      "pixel_mismatches": 0,
+      "sha256": "4582a16ecff58a9aa2acfdf4b0be6b15171bb0facd19ea5a681b038110a351f5"
+    },
+    {
+      "radius_m": 5000,
+      "shape": [
+        333,
+        333
+      ],
+      "metadata_equal": true,
+      "baseline": {
+        "first_ms": 1215.266,
+        "median_ms": 1197.536,
+        "minimum_ms": 1135.024,
+        "maximum_ms": 1305.485,
+        "peak_heap_bytes": 80414128,
+        "peak_heap_delta_bytes": 67709464
+      },
+      "optimized": {
+        "first_ms": 311.166,
+        "median_ms": 214.459,
+        "minimum_ms": 195.878,
+        "maximum_ms": 258.993,
+        "peak_heap_bytes": 22772976,
+        "peak_heap_delta_bytes": 10219760
+      },
+      "pixels_compared": 110889,
+      "pixel_mismatches": 0,
+      "sha256": "966918633bc64cb57f8612206c1933df788795d0b54e717942d0ab4bed71c828"
+    },
+    {
+      "radius_m": 10000,
+      "shape": [
+        667,
+        667
+      ],
+      "metadata_equal": true,
+      "baseline": {
+        "first_ms": 2169.913,
+        "median_ms": 1927.286,
+        "minimum_ms": 1914.013,
+        "maximum_ms": 1991.894,
+        "peak_heap_bytes": 208199840,
+        "peak_heap_delta_bytes": 194686920
+      },
+      "optimized": {
+        "first_ms": 1165.413,
+        "median_ms": 888.872,
+        "minimum_ms": 878.619,
+        "maximum_ms": 1026.933,
+        "peak_heap_bytes": 27712904,
+        "peak_heap_delta_bytes": 15951992
+      },
+      "pixels_compared": 444889,
+      "pixel_mismatches": 0,
+      "sha256": "81dc261f2bf66c5751f08689c25c0e92a72f48a3c1a5e7aed32b796dc0f0657d"
+    },
+    {
+      "radius_m": 0,
+      "shape": [
+        1010,
+        1235
+      ],
+      "metadata_equal": true,
+      "baseline": {
+        "first_ms": 3745.419,
+        "median_ms": 3869.163,
+        "minimum_ms": 3162.073,
+        "maximum_ms": 5102.72,
+        "peak_heap_bytes": 286341976,
+        "peak_heap_delta_bytes": 272426528
+      },
+      "optimized": {
+        "first_ms": 1630.545,
+        "median_ms": 1690.865,
+        "minimum_ms": 1502.903,
+        "maximum_ms": 2205.557,
+        "peak_heap_bytes": 41930840,
+        "peak_heap_delta_bytes": 30215656
+      },
+      "pixels_compared": 1247350,
+      "pixel_mismatches": 0,
+      "sha256": "949cc656280278005fdb5005a72c697017ac6f024a80472c5a33c8530615b222"
+    }
+  ]
+}

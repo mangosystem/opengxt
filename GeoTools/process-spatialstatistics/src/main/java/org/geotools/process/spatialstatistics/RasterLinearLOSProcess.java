@@ -66,6 +66,14 @@ public class RasterLinearLOSProcess extends AbstractStatisticsProcess {
             Geometry observerPoint, Double observerOffset, Geometry targetPoint,
             Boolean useCurvature, Boolean useRefraction, Double refractionFactor,
             ProgressListener monitor) {
+        return process(inputCoverage, observerPoint, observerOffset, targetPoint, useCurvature,
+                useRefraction, refractionFactor, false, monitor);
+    }
+
+    public static SimpleFeatureCollection process(GridCoverage2D inputCoverage,
+            Geometry observerPoint, Double observerOffset, Geometry targetPoint,
+            Boolean useCurvature, Boolean useRefraction, Double refractionFactor,
+            Boolean stopAtFirstInvisible, ProgressListener monitor) {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(RasterLinearLOSProcessFactory.inputCoverage.key, inputCoverage);
         map.put(RasterLinearLOSProcessFactory.observerPoint.key, observerPoint);
@@ -74,6 +82,7 @@ public class RasterLinearLOSProcess extends AbstractStatisticsProcess {
         map.put(RasterLinearLOSProcessFactory.useCurvature.key, useCurvature);
         map.put(RasterLinearLOSProcessFactory.useRefraction.key, useRefraction);
         map.put(RasterLinearLOSProcessFactory.refractionFactor.key, refractionFactor);
+        map.put(RasterLinearLOSProcessFactory.stopAtFirstInvisible.key, stopAtFirstInvisible);
 
         Process process = new RasterLinearLOSProcess(null);
         Map<String, Object> resultMap;
@@ -111,6 +120,9 @@ public class RasterLinearLOSProcess extends AbstractStatisticsProcess {
                 RasterLinearLOSProcessFactory.refractionFactor,
                 RasterLinearLOSProcessFactory.refractionFactor.sample);
 
+        Boolean stopAtFirstInvisible = (Boolean) Params.getValue(input,
+                RasterLinearLOSProcessFactory.stopAtFirstInvisible, Boolean.FALSE);
+
         if (inputCoverage == null || observerPoint == null || targetPoint == null) {
             throw new NullPointerException(
                     "inputCoverage, observerPoint, targetPoint parameters required");
@@ -131,7 +143,7 @@ public class RasterLinearLOSProcess extends AbstractStatisticsProcess {
 
         RasterFunctionalSurface process = new RasterFunctionalSurface(inputCoverage);
         LineString los = process.getLineOfSight(userLine, observerOffset, useCurvature,
-                useRefraction, refractionFactor);
+                useRefraction, refractionFactor, Boolean.TRUE.equals(stopAtFirstInvisible));
 
         // prepare feature type
         SimpleFeatureType featureType = FeatureTypes.getDefaultType("LinearLineOfSight",

@@ -32,7 +32,7 @@ import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.jdbc.JDBCDataStoreFactory;
-import org.geotools.util.URLs;
+import org.geotools.data.DataUtilities;
 import org.geotools.util.logging.Logging;
 
 /**
@@ -81,7 +81,7 @@ public class DataStoreFactory {
         Map<String, Object> params = new HashMap<String, Object>();
 
         final File file = new File(folder);
-        params.put(ShapefileDataStoreFactory.URLP.key, URLs.fileToUrl(file));
+        params.put(ShapefileDataStoreFactory.URLP.key, DataUtilities.fileToURL(file));
         params.put(ShapefileDataStoreFactory.CREATE_SPATIAL_INDEX.key, createSpatialIndex);
         params.put(ShapefileDataStoreFactory.DBFCHARSET.key, DEFAULT_CHARSET);
         params.put(ShapefileDataStoreFactory.MEMORY_MAPPED.key, Boolean.TRUE);
@@ -93,7 +93,7 @@ public class DataStoreFactory {
         Map<String, Object> params = new HashMap<String, Object>();
 
         final File file = new File(dxfFile);
-        params.put("url", URLs.fileToUrl(file));
+        params.put("url", DataUtilities.fileToURL(file));
         params.put("srs", epsgCode);
         params.put("charset", Charset.forName(DEFAULT_CHARSET));
 

@@ -158,6 +158,7 @@ org.geotools.process.spatialstatistics.RasterProfileProcessFactory
 org.geotools.process.spatialstatistics.RasterRadialLOSProcessFactory
 org.geotools.process.spatialstatistics.RasterLinearLOSProcessFactory
 org.geotools.process.spatialstatistics.RasterViewshedProcessFactory
+org.geotools.process.spatialstatistics.RasterViewshedAsPolygonProcessFactory
 org.geotools.process.spatialstatistics.RasterHighLowProcessFactory
 org.geotools.process.spatialstatistics.RasterSlopeProcessFactory
 org.geotools.process.spatialstatistics.RasterAspectProcessFactory
